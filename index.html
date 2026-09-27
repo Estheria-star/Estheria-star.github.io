@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>星恬的小站 · startian.top</title>
+<meta name="description" content="星恬的小站 —— 一些下棋和折腾的小项目，欢迎来逛逛。">
+<meta name="theme-color" content="#f9f3e8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>">
+<style>
+:root{
+  --bg1:#f9f3e8; --bg2:#efe2cc; --card:#fffdf8; --line:#e6d7bd;
+  --ink:#3d2f1e; --ink2:#7a6647; --accent:#8a6b3f;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  min-height:100vh;
+  background:radial-gradient(1200px 600px at 50% -100px, #fff8ec 0%, var(--bg1) 45%, var(--bg2) 100%);
+  color:var(--ink); font-family:'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+  display:flex; justify-content:center; padding:48px 20px 64px;
+}
+.wrap{width:100%; max-width:680px}
+header{display:flex; align-items:center; gap:18px; margin-bottom:28px}
+.avatar{
+  width:84px;height:84px;border-radius:50%;flex:0 0 auto;
+  background:linear-gradient(145deg,#fff7e6,#f0ddbb);
+  display:flex;align-items:center;justify-content:center;font-size:42px;
+  box-shadow:0 10px 26px rgba(140,105,55,.22), inset 0 0 0 2px #fffdf5, 0 0 0 1px var(--line);
+}
+h1{font-size:30px;letter-spacing:1px}
+.sub{color:var(--ink2);font-size:14px;margin-top:6px;letter-spacing:.5px}
+.card{
+  background:var(--card); border:1px solid var(--line); border-radius:20px;
+  padding:22px 24px; box-shadow:0 14px 34px rgba(150,115,60,.10);
+}
+.intro{line-height:1.9; font-size:15px}
+.intro p+p{margin-top:6px}
+.section-title{margin:34px 0 14px; font-size:16px; font-weight:800; letter-spacing:2px; display:flex; align-items:center; gap:10px}
+.section-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.projects{display:grid; grid-template-columns:1fr; gap:14px}
+.proj{
+  display:flex; align-items:center; gap:16px;
+  background:var(--card); border:1px solid var(--line); border-radius:20px;
+  padding:18px 20px; box-shadow:0 14px 34px rgba(150,115,60,.10);
+  transition:transform .18s ease, box-shadow .18s ease;
+  text-decoration:none; color:inherit;
+}
+.proj:hover{transform:translateY(-3px); box-shadow:0 20px 40px rgba(150,115,60,.16)}
+.proj .ico{width:56px;height:56px;border-radius:16px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:28px;background:linear-gradient(145deg,#fdf3df,#f1dfc0); box-shadow:inset 0 0 0 1px var(--line)}
+.proj .info{flex:1; min-width:0}
+.proj .name{font-weight:800;font-size:16px}
+.proj .desc{color:var(--ink2);font-size:13px;margin-top:5px;line-height:1.7}
+.pbtn{
+  flex:0 0 auto; display:inline-block; font-weight:700; font-size:14px;
+  color:#fff8ea; background:linear-gradient(180deg,#9a7746,#7c5c2e);
+  padding:11px 20px; border-radius:999px; box-shadow:0 6px 0 #5f4520, 0 12px 22px rgba(120,90,40,.28);
+  transition:transform .12s ease, box-shadow .12s ease;
+}
+.proj:hover .pbtn{transform:translateY(1px); box-shadow:0 5px 0 #5f4520, 0 10px 18px rgba(120,90,40,.26)}
+.placeholder{
+  border-style:dashed; border-color:#dcc9a5; background:transparent; box-shadow:none;
+  color:var(--ink2); justify-content:center; font-size:13.5px; letter-spacing:1px; cursor:default;
+}
+.placeholder:hover{transform:none; box-shadow:none}
+footer{margin-top:44px; text-align:center; color:#a08a62; font-size:12.5px; letter-spacing:.5px; line-height:2}
+footer a{color:var(--accent);text-decoration:none}
+footer a:hover{text-decoration:underline}
+@media (max-width:480px){
+  header{flex-direction:column; text-align:center}
+  h1{font-size:26px}
+  .proj{flex-direction:column; align-items:flex-start}
+  .pbtn{width:100%; text-align:center}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="avatar">🌙</div>
+    <div>
+      <h1>星恬</h1>
+      <div class="sub">STARTIAN.TOP · 我的小站</div>
+    </div>
+  </header>
+
+  <div class="card intro">
+    <p>你好呀，欢迎来到我的小站 ✨</p>
+    <p>我是星恬，喜欢下棋、写点小东西、捣鼓各种有趣的玩意。这里会陆续放我自己折腾出来的小项目，随手逛逛，玩得开心～</p>
+  </div>
+
+  <div class="section-title">🧩 我的项目</div>
+  <div class="projects">
+
+    <!-- ============================================================
+         【新项目模板】以后加项目：把下面整段注释取消（去掉首尾箭头行），
+         改图标 / 名称 / 描述 / 链接即可
+         
+    <a class="proj" href="https://新项目地址/">
+      <div class="ico">🎮</div>
+      <div class="info">
+        <div class="name">项目名</div>
+        <div class="desc">一句话介绍～</div>
+      </div>
+      <span class="pbtn">马上体验</span>
+    </a>
+    ============================================================ -->
+
+    <a class="proj" href="https://wuziqi.startian.top/">
+      <div class="ico">⚫</div>
+      <div class="info">
+        <div class="name">五子棋 · 学习反制版</div>
+        <div class="desc">内嵌 Rapfi 引擎的单文件五子棋：会学习你棋风的 AI，还有会陪你说话的「灵拙」</div>
+      </div>
+      <span class="pbtn">来一局 →</span>
+    </a>
+
+    <div class="proj placeholder">🧪 更多项目折腾中，敬请期待…</div>
+  </div>
+
+  <footer>
+    © 2026 星恬 · startian.top<br>
+    也来 <a href="https://github.com/Estheria-star" target="_blank" rel="noopener">GitHub</a> 看看吧
+  </footer>
+
+</div>
+</body>
+</html>
