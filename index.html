@@ -5,65 +5,66 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>星恬的小站 · startian.top</title>
 <meta name="description" content="星恬的小站 —— 一些下棋和折腾的小项目，欢迎来逛逛。">
-<meta name="theme-color" content="#f9f3e8">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>">
+<meta name="theme-color" content="#E6F7FF">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="avatar.png">
+<link rel="apple-touch-icon" href="avatar.png">
 <style>
 :root{
-  --bg1:#f9f3e8; --bg2:#efe2cc; --card:#fffdf8; --line:#e6d7bd;
-  --ink:#3d2f1e; --ink2:#7a6647; --accent:#8a6b3f;
+  --bg1:#edf8ff; --bg2:#daeeff; --card:#ffffff; --line:#cfe7fb;
+  --ink:#25405c; --ink2:#5e7e9f; --accent:#89c2ff; --accent-deep:#4f93d8;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   min-height:100vh;
-  background:radial-gradient(1200px 600px at 50% -100px, #fff8ec 0%, var(--bg1) 45%, var(--bg2) 100%);
+  background:radial-gradient(1200px 600px at 50% -100px, #fbfdff 0%, var(--bg1) 45%, var(--bg2) 100%);
   color:var(--ink); font-family:'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
   display:flex; justify-content:center; padding:48px 20px 64px;
 }
 .wrap{width:100%; max-width:680px}
 header{display:flex; align-items:center; gap:18px; margin-bottom:28px}
 .avatar{
-  width:84px;height:84px;border-radius:50%;flex:0 0 auto;
-  background:linear-gradient(145deg,#fff7e6,#f0ddbb);
-  display:flex;align-items:center;justify-content:center;font-size:42px;
-  box-shadow:0 10px 26px rgba(140,105,55,.22), inset 0 0 0 2px #fffdf5, 0 0 0 1px var(--line);
+  width:84px;height:84px;border-radius:50%;flex:0 0 auto;overflow:hidden;
+  box-shadow:0 10px 26px rgba(105,150,200,.28), 0 0 0 3px #ffffff, 0 0 0 5px #cfe7fb;
 }
-h1{font-size:30px;letter-spacing:1px}
-.sub{color:var(--ink2);font-size:14px;margin-top:6px;letter-spacing:.5px}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+h1{font-size:30px;letter-spacing:1px;color:var(--ink)}
+.sub{color:#6f93b4;font-size:14px;margin-top:6px;letter-spacing:.5px}
 .card{
   background:var(--card); border:1px solid var(--line); border-radius:20px;
-  padding:22px 24px; box-shadow:0 14px 34px rgba(150,115,60,.10);
+  padding:22px 24px; box-shadow:0 14px 34px rgba(120,160,210,.12);
 }
 .intro{line-height:1.9; font-size:15px}
 .intro p+p{margin-top:6px}
-.section-title{margin:34px 0 14px; font-size:16px; font-weight:800; letter-spacing:2px; display:flex; align-items:center; gap:10px}
+.section-title{margin:34px 0 14px; font-size:16px; font-weight:800; letter-spacing:2px; display:flex; align-items:center; gap:10px; color:var(--ink)}
 .section-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
 .projects{display:grid; grid-template-columns:1fr; gap:14px}
 .proj{
   display:flex; align-items:center; gap:16px;
   background:var(--card); border:1px solid var(--line); border-radius:20px;
-  padding:18px 20px; box-shadow:0 14px 34px rgba(150,115,60,.10);
+  padding:18px 20px; box-shadow:0 14px 34px rgba(120,160,210,.12);
   transition:transform .18s ease, box-shadow .18s ease;
   text-decoration:none; color:inherit;
 }
-.proj:hover{transform:translateY(-3px); box-shadow:0 20px 40px rgba(150,115,60,.16)}
-.proj .ico{width:56px;height:56px;border-radius:16px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:28px;background:linear-gradient(145deg,#fdf3df,#f1dfc0); box-shadow:inset 0 0 0 1px var(--line)}
+.proj:hover{transform:translateY(-3px); box-shadow:0 20px 40px rgba(120,160,210,.22)}
+.proj .ico{width:56px;height:56px;border-radius:16px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:28px;background:linear-gradient(145deg,#f2f9ff,#dcefff); box-shadow:inset 0 0 0 1px var(--line)}
 .proj .info{flex:1; min-width:0}
 .proj .name{font-weight:800;font-size:16px}
 .proj .desc{color:var(--ink2);font-size:13px;margin-top:5px;line-height:1.7}
 .pbtn{
   flex:0 0 auto; display:inline-block; font-weight:700; font-size:14px;
-  color:#fff8ea; background:linear-gradient(180deg,#9a7746,#7c5c2e);
-  padding:11px 20px; border-radius:999px; box-shadow:0 6px 0 #5f4520, 0 12px 22px rgba(120,90,40,.28);
+  color:#ffffff; background:linear-gradient(180deg,#9ecbff,#6aabf2);
+  padding:11px 20px; border-radius:999px; box-shadow:0 6px 0 #4a86c9, 0 12px 22px rgba(110,150,200,.30);
   transition:transform .12s ease, box-shadow .12s ease;
 }
-.proj:hover .pbtn{transform:translateY(1px); box-shadow:0 5px 0 #5f4520, 0 10px 18px rgba(120,90,40,.26)}
+.proj:hover .pbtn{transform:translateY(1px); box-shadow:0 5px 0 #4a86c9, 0 10px 18px rgba(110,150,200,.28)}
 .placeholder{
-  border-style:dashed; border-color:#dcc9a5; background:transparent; box-shadow:none;
-  color:var(--ink2); justify-content:center; font-size:13.5px; letter-spacing:1px; cursor:default;
+  border-style:dashed; border-color:#bfdcf8; background:transparent; box-shadow:none;
+  color:#6f93b4; justify-content:center; font-size:13.5px; letter-spacing:1px; cursor:default;
 }
 .placeholder:hover{transform:none; box-shadow:none}
-footer{margin-top:44px; text-align:center; color:#a08a62; font-size:12.5px; letter-spacing:.5px; line-height:2}
-footer a{color:var(--accent);text-decoration:none}
+footer{margin-top:44px; text-align:center; color:#8fb2d4; font-size:12.5px; letter-spacing:.5px; line-height:2}
+footer a{color:var(--accent-deep);text-decoration:none}
 footer a:hover{text-decoration:underline}
 @media (max-width:480px){
   header{flex-direction:column; text-align:center}
@@ -77,7 +78,7 @@ footer a:hover{text-decoration:underline}
 <div class="wrap">
 
   <header>
-    <div class="avatar">🌙</div>
+    <div class="avatar"><img src="avatar.png" alt="星恬"></div>
     <div>
       <h1>星恬</h1>
       <div class="sub">STARTIAN.TOP · 我的小站</div>
