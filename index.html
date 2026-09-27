@@ -17,39 +17,52 @@
 <link rel="apple-touch-icon" href="avatar.png">
 <style>
 :root{
-  --bg1:#edf8ff; --bg2:#daeeff; --card:#ffffff; --line:#cfe7fb;
-  --ink:#25405c; --ink2:#5e7e9f; --accent:#89c2ff; --accent-deep:#4f93d8;
+  --bg1:#eef8ff; --bg2:#d9edff;
+  --card:#ffffff;
+  --tint:#f4faff;
+  --line:#d5e9fb;
+  --ink:#223d59;
+  --ink2:#5d7fa3;
+  --ink3:#93b4d4;
+  --accent:#89c2ff;
+  --accent-deep:#3f86d1;
+  --sh-sm:0 1px 2px rgba(76,116,164,.06), 0 10px 28px rgba(120,160,210,.12);
+  --sh-lg:0 2px 4px rgba(76,116,164,.08), 0 22px 46px rgba(110,155,210,.22);
   --ease:cubic-bezier(.22,.9,.28,1);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
+::selection{background:#cfe7fb}
 body{
   min-height:100vh;
   background:radial-gradient(1200px 600px at 50% -100px, #fbfdff 0%, var(--bg1) 45%, var(--bg2) 100%);
-  color:var(--ink); font-family:'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
-  display:flex; justify-content:center; padding:48px 20px 64px;
+  color:var(--ink);
+  font-family:'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+  display:flex; justify-content:center;
+  padding:56px 20px 72px;
   animation:pageIn .75s ease .04s both;
+  -webkit-font-smoothing:antialiased;
 }
 @keyframes pageIn{from{opacity:0}to{opacity:1}}
 
 /* —— 顶部加载条 —— */
 .loadbar{
   position:fixed; top:0; left:0; height:3px; width:100%; border-radius:0 3px 3px 0;
-  background:linear-gradient(90deg,#89c2ff,#6aabf2,#9ecbff);
+  background:linear-gradient(90deg,#89c2ff,#5aa3ee,#9ecbff);
   transform-origin:0 50%; z-index:99;
   animation:loadbar .95s var(--ease) .08s both;
 }
 @keyframes loadbar{from{transform:scaleX(0);opacity:1}to{transform:scaleX(1);opacity:0}}
 
 /* —— 背景光斑 —— */
-.blob{position:fixed;border-radius:50%;filter:blur(70px);z-index:-1;pointer-events:none;opacity:.55}
+.blob{position:fixed;border-radius:50%;filter:blur(72px);z-index:-1;pointer-events:none;opacity:.5}
 .blob.b1{width:420px;height:420px;left:-130px;top:-150px;background:radial-gradient(circle,#bfe0ff,transparent 70%);animation:drift1 22s ease-in-out infinite alternate}
 .blob.b2{width:520px;height:520px;right:-170px;top:32%;background:radial-gradient(circle,#d8efff,transparent 70%);animation:drift2 26s ease-in-out infinite alternate}
 @keyframes drift1{to{transform:translate(60px,44px) scale(1.07)}}
 @keyframes drift2{to{transform:translate(-52px,-40px) scale(1.05)}}
 
 /* —— 入场动效 —— */
-.js .reveal{opacity:0;transform:translateY(18px)}
+.js .reveal{opacity:0;transform:translateY(16px)}
 .js .reveal.in{
   opacity:1;transform:none;
   transition:opacity .7s var(--ease),transform .7s var(--ease);
@@ -57,131 +70,176 @@ body{
 }
 
 .wrap{width:100%; max-width:680px}
-header{display:flex; align-items:center; gap:18px; margin-bottom:28px}
+
+/* —— 顶部名片 —— */
+header{display:flex; align-items:center; gap:20px; margin-bottom:34px}
 .avatar{
-  width:84px;height:84px;border-radius:50%;flex:0 0 auto;overflow:hidden;
-  box-shadow:0 10px 26px rgba(105,150,200,.28), 0 0 0 3px #ffffff, 0 0 0 5px #cfe7fb;
+  width:88px;height:88px;border-radius:50%;flex:0 0 auto;overflow:hidden;
+  box-shadow:0 12px 30px rgba(105,150,200,.26), 0 0 0 3px #ffffff, 0 0 0 5px #d3e7fb;
   animation:bob 6s ease-in-out infinite;
   transition:transform .3s var(--ease), box-shadow .3s var(--ease);
 }
-.avatar:hover{transform:scale(1.05) rotate(-2deg);box-shadow:0 14px 32px rgba(105,150,200,.38), 0 0 0 3px #ffffff, 0 0 0 6px #bcdcfb}
+.avatar:hover{transform:scale(1.05) rotate(-2deg);box-shadow:0 16px 36px rgba(105,150,200,.36), 0 0 0 3px #ffffff, 0 0 0 6px #bfdcfa}
 .avatar img{width:100%;height:100%;object-fit:cover;display:block}
 @keyframes bob{50%{transform:translateY(-5px)}}
 h1{
-  font-size:30px;letter-spacing:1px;
-  background:linear-gradient(120deg,#2c4a6b 10%,#4f93d8 55%,#2c4a6b 90%);
+  font-size:33px;letter-spacing:1.5px;line-height:1.15;
+  background:linear-gradient(120deg,#26476b 10%,#4f93d8 55%,#26476b 90%);
   -webkit-background-clip:text;background-clip:text;
-  -webkit-text-fill-color:transparent;color:#2c4a6b;
+  -webkit-text-fill-color:transparent;color:#26476b;
 }
-.sub{color:#6f93b4;font-size:14px;margin-top:6px;letter-spacing:.5px}
+.sub{color:#6f93b4;font-size:13.5px;margin-top:8px;letter-spacing:1.5px;font-weight:600}
+
+/* —— 卡片基础 —— */
 .card{
-  background:var(--card); border:1px solid var(--line); border-radius:20px;
-  padding:22px 24px; box-shadow:0 14px 34px rgba(120,160,210,.12);
+  background:var(--card); border:1px solid var(--line); border-radius:22px;
+  box-shadow:var(--sh-sm);
 }
-.intro{line-height:1.9; font-size:15px}
+.intro{
+  background:linear-gradient(160deg,#ffffff 0%, var(--tint) 100%);
+  padding:22px 26px; box-shadow:0 1px 2px rgba(76,116,164,.05);
+  line-height:2; font-size:14.5px; color:#33536f;
+}
 .intro p+p{margin-top:6px}
-.section-title{margin:34px 0 14px; font-size:16px; font-weight:800; letter-spacing:2px; display:flex; align-items:center; gap:10px; color:var(--ink)}
-.section-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
-.projects{display:grid; grid-template-columns:1fr; gap:14px}
+
+/* —— 分区标题 —— */
+.section{margin:44px 0 16px}
+.sec-eyebrow{font-size:11px;font-weight:800;letter-spacing:3.5px;color:#7fb0e2}
+.sec-title{font-size:19px;font-weight:800;letter-spacing:1px;margin-top:5px;display:flex;align-items:center;gap:12px;color:var(--ink)}
+.sec-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+
+/* —— 项目卡片 —— */
+.projects{display:grid;grid-template-columns:1fr;gap:14px}
 .proj{
-  display:flex; align-items:center; gap:16px;
-  background:var(--card); border:1px solid var(--line); border-radius:20px;
-  padding:18px 20px; box-shadow:0 14px 34px rgba(120,160,210,.12);
-  transition:transform .22s var(--ease), box-shadow .22s var(--ease), border-color .22s var(--ease);
+  display:flex; align-items:center; gap:18px;
+  background:var(--card); border:1px solid var(--line); border-radius:22px;
+  padding:19px 22px; box-shadow:var(--sh-sm);
+  transition:transform .24s var(--ease), box-shadow .24s var(--ease), border-color .24s var(--ease);
   text-decoration:none; color:inherit;
 }
-.proj:hover{transform:translateY(-3px); box-shadow:0 22px 42px rgba(120,160,210,.22); border-color:#9fcdf7}
-.proj .ico{width:56px;height:56px;border-radius:16px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:28px;background:linear-gradient(145deg,#f2f9ff,#dcefff); box-shadow:inset 0 0 0 1px var(--line); transition:transform .32s cubic-bezier(.34,1.56,.64,1)}
-.proj:hover .ico{transform:scale(1.09) rotate(-5deg)}
+.proj:hover{transform:translateY(-3px); box-shadow:var(--sh-lg); border-color:#a6d1f8}
+.proj .ico{
+  width:58px;height:58px;border-radius:17px;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;font-size:28px;
+  background:linear-gradient(150deg,#f7fbff,#e2f1ff);
+  box-shadow:inset 0 0 0 1px #d9ebfc, 0 6px 14px rgba(120,160,210,.10);
+  transition:transform .32s cubic-bezier(.34,1.56,.64,1);
+}
+.proj:hover .ico{transform:scale(1.08) rotate(-5deg)}
 .proj .info{flex:1; min-width:0}
-.proj .name{font-weight:800;font-size:16px}
-.proj .desc{color:var(--ink2);font-size:13px;margin-top:5px;line-height:1.7}
+.nameline{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.proj .name{font-weight:800;font-size:16px;letter-spacing:.3px}
+.ptag{
+  font-size:11px;font-weight:700;color:#4f93d8;background:#ecf6ff;
+  border:1px solid #dbeeff;border-radius:999px;padding:2.5px 10px;letter-spacing:1px;
+}
+.proj .desc{color:var(--ink2);font-size:13px;margin-top:6px;line-height:1.75}
 .pbtn{
-  flex:0 0 auto; display:inline-block; font-weight:700; font-size:14px;
-  color:#ffffff; background:linear-gradient(180deg,#9ecbff,#6aabf2);
-  padding:11px 20px; border-radius:999px; box-shadow:0 6px 0 #4a86c9, 0 12px 22px rgba(110,150,200,.30);
+  flex:0 0 auto; display:inline-block; font-weight:700; font-size:13.5px;
+  color:#ffffff; background:linear-gradient(180deg,#9ccafd,#66a9f0);
+  padding:10px 19px; border-radius:999px;
+  box-shadow:0 5px 0 #4683c4, 0 12px 22px rgba(110,150,200,.28);
   transition:transform .12s ease, box-shadow .12s ease;
-  position:relative; overflow:hidden;
+  position:relative; overflow:hidden; letter-spacing:.5px;
 }
 .pbtn::after{
   content:''; position:absolute; top:0; bottom:0; left:-65%; width:45%;
   background:linear-gradient(105deg,transparent,rgba(255,255,255,.6),transparent);
   transform:skewX(-18deg); transition:left .5s ease;
 }
-.proj:hover .pbtn{transform:translateY(1px); box-shadow:0 5px 0 #4a86c9, 0 10px 18px rgba(110,150,200,.28)}
+.proj:hover .pbtn{transform:translateY(1px); box-shadow:0 4px 0 #4683c4, 0 10px 18px rgba(110,150,200,.26)}
 .proj:hover .pbtn::after{left:115%}
-.proj:active .pbtn{transform:translateY(3px); box-shadow:0 2px 0 #4a86c9}
+.proj:active .pbtn{transform:translateY(3px); box-shadow:0 2px 0 #4683c4}
 .placeholder{
-  border-style:dashed; border-color:#bfdcf8; background:transparent; box-shadow:none;
-  color:#6f93b4; justify-content:center; font-size:13.5px; letter-spacing:1px; cursor:default;
+  border-style:dashed; border-color:#c5e0f8; background:transparent; box-shadow:none;
+  color:#88a9c9; justify-content:center; font-size:13px; letter-spacing:1.5px; cursor:default;
 }
-.placeholder:hover{transform:none; box-shadow:none; border-color:#bfdcf8}
+.placeholder:hover{transform:none; box-shadow:none; border-color:#c5e0f8}
 
 /* —— 联系区 —— */
-.contacts{display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:12px}
+.contacts{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .ct{
-  display:flex; flex-direction:column; gap:7px; position:relative;
-  padding:16px 18px 14px; border-radius:18px; cursor:pointer;
+  display:flex; align-items:center; gap:13px;
+  padding:15px 17px; border-radius:18px; cursor:pointer;
   background:var(--card); border:1px solid var(--line);
-  box-shadow:0 12px 28px rgba(120,160,210,.12);
-  text-decoration:none; color:inherit;
+  box-shadow:var(--sh-sm); text-decoration:none; color:inherit;
   transition:transform .22s var(--ease), box-shadow .22s var(--ease), border-color .22s var(--ease);
+  outline-offset:3px;
 }
-.ct:hover{transform:translateY(-3px); border-color:#9fcdf7; box-shadow:0 18px 36px rgba(120,160,210,.22)}
+.ct:hover{transform:translateY(-2px); border-color:#a6d1f8; box-shadow:var(--sh-lg)}
 .ct:active{transform:translateY(0) scale(.985)}
-.ct .ci{font-size:22px;line-height:1;transition:transform .32s cubic-bezier(.34,1.56,.64,1)}
-.ct:hover .ci{transform:scale(1.18) rotate(-6deg)}
-.ct .cl{font-size:12px; color:#8fb2d4; letter-spacing:1px; font-weight:700}
-.ct .cv{font-size:14.5px; font-weight:800; word-break:break-all; line-height:1.4}
-.ct .hint{font-size:11.5px; color:#9dbedd}
-.ct .ci{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:11px;background:linear-gradient(145deg,#f6fbff,#e8f4ff);box-shadow:inset 0 0 0 1px var(--line)}
-.ct .ci svg{display:block}
-
-/* —— 悬停演示浮层 —— */
-.dock{
-  position:fixed; left:50%; bottom:18px; z-index:60;
-  transform:translate(-50%, 26px) scale(.985);
-  width:min(640px, calc(100vw - 32px));
-  background:var(--card); border:1px solid #bfdffa; border-radius:22px;
-  box-shadow:0 26px 64px rgba(70,110,160,.35);
-  padding:16px; display:flex; gap:16px; align-items:stretch;
-  opacity:0; pointer-events:none;
-  transition:opacity .38s var(--ease), transform .38s var(--ease);
+.ct:focus-visible{outline:2px solid #66a9f0}
+.ct-ico{
+  width:42px;height:42px;border-radius:13px;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(150deg,#f7fbff,#e6f3ff);
+  box-shadow:inset 0 0 0 1px #d9ebfc;
+  transition:transform .32s cubic-bezier(.34,1.56,.64,1);
 }
-.dock.show{opacity:1; transform:translate(-50%,0) scale(1)}
-.dock img{width:238px; height:152px; object-fit:cover; border-radius:14px; flex:0 0 auto; background:#eaf4ff; box-shadow:inset 0 0 0 1px var(--line)}
-.dock .dbody{flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; padding:2px 0}
-.dock .dtitle{font-weight:800; font-size:16px; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
-.dock .tag{font-size:11px; font-weight:700; color:#4f93d8; background:#e8f4ff; border-radius:999px; padding:3px 10px; letter-spacing:1px}
-.dock .ddesc{font-size:13px; color:var(--ink2); line-height:1.8}
-.dock .dhint{margin-top:auto; font-size:11.5px; color:#9dbedd}
-@media (max-width:560px){
-  .dock{flex-direction:column}
-  .dock img{width:100%; height:150px}
-}
+.ct-ico svg{display:block}
+.ct:hover .ct-ico{transform:scale(1.12) rotate(-5deg)}
+.ct-body{min-width:0; flex:1}
+.ct .cl{font-size:11px; color:#8fb2d4; letter-spacing:1.2px; font-weight:800}
+.ct .cv{font-size:14px; font-weight:800; word-break:break-all; line-height:1.45; margin-top:3px}
 
-footer{margin-top:44px; text-align:center; color:#8fb2d4; font-size:12.5px; letter-spacing:.5px; line-height:2}
-footer a{color:var(--accent-deep);text-decoration:none}
+/* —— 页脚 —— */
+footer{
+  margin-top:52px; padding-top:24px; border-top:1px solid #dceefc;
+  text-align:center; color:#8fb2d4; font-size:12.5px; letter-spacing:.6px; line-height:2.1;
+}
+footer a{color:var(--accent-deep);text-decoration:none;font-weight:600}
 footer a:hover{text-decoration:underline}
 
 /* —— 复制提示 —— */
 .toast{
-  position:fixed; left:50%; bottom:34px; z-index:50;
+  position:fixed; left:50%; bottom:34px; z-index:70;
   transform:translateX(-50%) translateY(16px);
-  background:rgba(37,64,92,.94); color:#fff; padding:10px 20px; border-radius:999px;
+  background:rgba(34,61,89,.95); color:#fff; padding:10px 20px; border-radius:999px;
   font-size:13.5px; letter-spacing:.5px; opacity:0; pointer-events:none;
   transition:opacity .35s var(--ease), transform .35s var(--ease);
-  box-shadow:0 12px 30px rgba(37,64,92,.35);
+  box-shadow:0 12px 30px rgba(34,61,89,.35);
 }
 .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
 
+/* —— 悬停演示浮层（纯展示层，不抢指针）—— */
+.dock{
+  position:fixed; left:50%; bottom:18px; z-index:60;
+  transform:translate(-50%, 26px) scale(.985);
+  width:min(640px, calc(100vw - 32px));
+  background:linear-gradient(165deg,#ffffff 0%, #f7fcff 100%);
+  border:1px solid #c5e0f8; border-radius:22px;
+  box-shadow:0 3px 6px rgba(70,110,160,.10), 0 28px 64px rgba(70,110,160,.34);
+  padding:16px; display:flex; gap:18px; align-items:stretch;
+  opacity:0; pointer-events:none;
+  transition:opacity .38s var(--ease), transform .38s var(--ease);
+}
+.dock.show{opacity:1; transform:translate(-50%,0) scale(1)}
+.dock img{width:240px; height:154px; object-fit:cover; border-radius:15px; flex:0 0 auto; background:#eaf4ff; box-shadow:inset 0 0 0 1px var(--line)}
+.dock .dbody{flex:1; min-width:0; display:flex; flex-direction:column; gap:7px; padding:3px 0}
+.dock .dtitle{font-weight:800; font-size:16px; display:flex; align-items:center; gap:9px; flex-wrap:wrap; letter-spacing:.3px}
+.dock .tag{font-size:11px; font-weight:700; color:#4f93d8; background:#ecf6ff; border:1px solid #dbeeff; border-radius:999px; padding:2.5px 10px; letter-spacing:1px}
+.dock .ddesc{font-size:13px; color:var(--ink2); line-height:1.85}
+.dock .dhint{margin-top:auto; font-size:11.5px; color:#9dbedd; letter-spacing:.5px}
+
+/* —— 响应式 —— */
+@media (max-width:560px){
+  body{padding:32px 16px 56px}
+  header{gap:15px;margin-bottom:26px}
+  .avatar{width:72px;height:72px}
+  h1{font-size:27px}
+  .intro{padding:18px 20px;font-size:14px}
+  .section{margin:36px 0 14px}
+  .proj{padding:16px;gap:14px}
+  .proj .ico{width:50px;height:50px;font-size:24px;border-radius:15px}
+  .pbtn{width:100%;text-align:center}
+  .contacts{grid-template-columns:1fr}
+  .dock{flex-direction:column;gap:12px}
+  .dock img{width:100%;height:150px}
+}
 @media (max-width:480px){
-  body{padding:34px 16px 54px}
-  header{flex-direction:column; text-align:center}
-  h1{font-size:26px}
-  .proj{flex-direction:column; align-items:flex-start}
-  .pbtn{width:100%; text-align:center}
-  .contacts{grid-template-columns:repeat(2,1fr)}
+  header{flex-direction:column;text-align:center}
+  .proj{flex-direction:column;align-items:flex-start}
+  .info{width:100%}
 }
 @media (prefers-reduced-motion: reduce){
   html{scroll-behavior:auto}
@@ -212,27 +270,30 @@ footer a:hover{text-decoration:underline}
     <p>我是星恬，喜欢下棋、写点小东西、捣鼓各种有趣的玩意。这里会陆续放我自己折腾出来的小项目，随手逛逛，玩得开心～</p>
   </div>
 
-  <div class="section-title reveal" style="--d:.18s">🧩 我的项目</div>
+  <div class="section reveal" style="--d:.18s">
+    <div class="sec-eyebrow">PROJECTS</div>
+    <div class="sec-title">我的项目</div>
+  </div>
   <div class="projects">
 
     <!-- ============================================================
          【新项目模板】以后加项目：把下面整段注释取消（去掉首尾箭头行），
-         改图标 / 名称 / 描述 / 链接即可
+         改图标 / 名称 / 标签 / 描述 / 链接即可
          
-    <a class="proj" href="https://新项目地址/">
+    <a class="proj reveal" style="--d:.05s" data-demo="新项目ID" href="https://新项目地址/">
       <div class="ico">🎮</div>
       <div class="info">
-        <div class="name">项目名</div>
+        <div class="nameline"><span class="name">项目名</span><span class="ptag">标签</span></div>
         <div class="desc">一句话介绍～</div>
       </div>
-      <span class="pbtn">马上体验</span>
+      <span class="pbtn">马上体验 →</span>
     </a>
     ============================================================ -->
 
     <a class="proj reveal" style="--d:.05s" data-demo="wuziqi" href="https://wuziqi.startian.top/">
       <div class="ico">⚫</div>
       <div class="info">
-        <div class="name">五子棋 · 学习反制版</div>
+        <div class="nameline"><span class="name">五子棋 · 学习反制版</span><span class="ptag">游戏 · AI</span></div>
         <div class="desc">内嵌 Rapfi 引擎的单文件五子棋：会学习你棋风的 AI，还有会陪你说话的「灵拙」</div>
       </div>
       <span class="pbtn">来一局 →</span>
@@ -241,7 +302,7 @@ footer a:hover{text-decoration:underline}
     <a class="proj reveal" style="--d:.1s" data-demo="zhenghuo" href="https://startian.top/zhenghuo/">
       <div class="ico">😏</div>
       <div class="info">
-        <div class="name">整活 · 隐私协议</div>
+        <div class="nameline"><span class="name">整活 · 隐私协议</span><span class="ptag">趣味</span></div>
         <div class="desc">一份「正经」的隐私协议——点「同意并继续」之前，请做好心理准备</div>
       </div>
       <span class="pbtn">点一下 →</span>
@@ -250,7 +311,7 @@ footer a:hover{text-decoration:underline}
     <a class="proj reveal" style="--d:.15s" data-demo="tujie" href="https://startian.top/tujie/">
       <div class="ico">⬡</div>
       <div class="info">
-        <div class="name">六边形维度展示器</div>
+        <div class="nameline"><span class="name">六边形维度展示器</span><span class="ptag">可视化</span></div>
         <div class="desc">无上限展开的六边形几何展示器，转一转挺上头</div>
       </div>
       <span class="pbtn">玩一下 →</span>
@@ -259,7 +320,7 @@ footer a:hover{text-decoration:underline}
     <a class="proj reveal" style="--d:.2s" data-demo="geometry" href="https://geometry.startian.top/">
       <div class="ico">📐</div>
       <div class="info">
-        <div class="name">几何工坊 · 数学工作台</div>
+        <div class="nameline"><span class="name">几何工坊 · 数学工作台</span><span class="ptag">教学 · 工具</span></div>
         <div class="desc">平面几何 × 立体几何的一体化教学工作台：函数实时绘制、向量关系自动判定、面积体积二面角一键求解</div>
       </div>
       <span class="pbtn">去作图 →</span>
@@ -268,35 +329,30 @@ footer a:hover{text-decoration:underline}
     <div class="proj placeholder reveal" style="--d:.25s">🧪 更多项目折腾中，敬请期待…</div>
   </div>
 
-  <div class="section-title reveal" style="--d:.05s">📮 联系我</div>
+  <div class="section reveal" style="--d:.05s">
+    <div class="sec-eyebrow">CONTACT</div>
+    <div class="sec-title">联系我</div>
+  </div>
   <div class="contacts">
 
     <div class="ct reveal" style="--d:.05s" id="ctQQ" role="button" tabindex="0" title="点击复制 QQ 号">
-      <div class="ci"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="#12B7F5" d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"/></svg></div>
-      <div class="cl">QQ</div>
-      <div class="cv">2433165914</div>
-      <div class="hint">点击复制</div>
+      <span class="ct-ico"><svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"><path fill="#12B7F5" d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"/></svg></span>
+      <span class="ct-body"><span class="cl">QQ · 点击复制</span><span class="cv">2433165914</span></span>
     </div>
 
     <a class="ct reveal" style="--d:.1s" href="mailto:2433165914@qq.com">
-      <div class="ci"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#6aabf2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="3"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></div>
-      <div class="cl">邮箱</div>
-      <div class="cv">2433165914@qq.com</div>
-      <div class="hint">写封邮件 →</div>
+      <span class="ct-ico"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="#66a9f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="3"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
+      <span class="ct-body"><span class="cl">邮箱 · 写封邮件 →</span><span class="cv">2433165914@qq.com</span></span>
     </a>
 
     <a class="ct reveal" style="--d:.15s" href="https://space.bilibili.com/3494370703575552" target="_blank" rel="noopener">
-      <div class="ci"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="#00A1D6" d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.511.556-2.765 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.658.373-.907l.027-.027c.267-.249.573-.373.92-.373.347 0 .653.124.92.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .16-.213l2.853-2.747c.267-.249.573-.373.92-.373.347 0 .662.151.929.4.267.249.391.551.391.907 0 .355-.124.657-.373.906zM5.333 7.24c-.746.018-1.373.276-1.88.773-.506.498-.769 1.13-.786 1.894v7.52c.017.764.28 1.395.786 1.893.507.498 1.134.756 1.88.773h13.334c.746-.017 1.373-.275 1.88-.773.506-.498.769-1.129.786-1.893v-7.52c-.017-.765-.28-1.396-.786-1.894-.507-.497-1.134-.755-1.88-.773zM8 11.107c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c0-.373.129-.689.386-.947.258-.257.574-.386.947-.386zm8 0c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c.017-.391.15-.711.4-.96.249-.249.56-.373.933-.373Z"/></svg></div>
-      <div class="cl">B 站</div>
-      <div class="cv">个人空间</div>
-      <div class="hint">点我跳转 ↗</div>
+      <span class="ct-ico"><svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"><path fill="#00A1D6" d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.511.556-2.765 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.658.373-.907l.027-.027c.267-.249.573-.373.92-.373.347 0 .653.124.92.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .16-.213l2.853-2.747c.267-.249.573-.373.92-.373.347 0 .662.151.929.4.267.249.391.551.391.907 0 .355-.124.657-.373.906zM5.333 7.24c-.746.018-1.373.276-1.88.773-.506.498-.769 1.13-.786 1.894v7.52c.017.764.28 1.395.786 1.893.507.498 1.134.756 1.88.773h13.334c.746-.017 1.373-.275 1.88-.773.506-.498.769-1.129.786-1.893v-7.52c-.017-.765-.28-1.396-.786-1.894-.507-.497-1.134-.755-1.88-.773zM8 11.107c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c0-.373.129-.689.386-.947.258-.257.574-.386.947-.386zm8 0c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c.017-.391.15-.711.4-.96.249-.249.56-.373.933-.373Z"/></svg></span>
+      <span class="ct-body"><span class="cl">B 站 · 点我跳转 ↗</span><span class="cv">个人空间</span></span>
     </a>
 
     <a class="ct reveal" style="--d:.2s" href="https://github.com/Estheria-star" target="_blank" rel="noopener">
-      <div class="ci"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="#181717" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></div>
-      <div class="cl">GitHub</div>
-      <div class="cv">@Estheria-star</div>
-      <div class="hint">点我跳转 ↗</div>
+      <span class="ct-ico"><svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"><path fill="#181717" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></span>
+      <span class="ct-body"><span class="cl">GitHub · 点我跳转 ↗</span><span class="cv">@Estheria-star</span></span>
     </a>
 
   </div>
@@ -313,7 +369,7 @@ footer a:hover{text-decoration:underline}
   <div class="dbody">
     <div class="dtitle"><span id="dockTitle"></span><span class="tag">演示</span></div>
     <div class="ddesc" id="dockDesc"></div>
-    <div class="dhint">鼠标移开自动收起 · 直接点卡片开玩 →</div>
+    <div class="dhint">悬停 2 秒自动浮现 · 鼠标移开收起 · 直接点卡片开玩 →</div>
   </div>
 </div>
 
@@ -366,7 +422,7 @@ footer a:hover{text-decoration:underline}
     qq.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); doCopy(); } });
   }
 
-  /* —— 悬停满 3 秒：弹出项目演示（图片 + 详细介绍）—— */
+  /* —— 悬停满 2 秒：弹出项目演示（图片 + 详细介绍）—— */
   var DEMOS = {
     wuziqi: {
       img: 'demos/wuziqi.jpg',
@@ -414,7 +470,7 @@ footer a:hover{text-decoration:underline}
     card.addEventListener('mouseenter', function(){
       clearTimeout(hoverTimer);
       var id = card.getAttribute('data-demo');
-      hoverTimer = setTimeout(function(){ showDock(id); }, 3000);
+      hoverTimer = setTimeout(function(){ showDock(id); }, 2000);
     });
     card.addEventListener('mouseleave', function(){
       clearTimeout(hoverTimer);
