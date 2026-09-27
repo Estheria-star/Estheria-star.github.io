@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>六边形维度展示器 · 无上限</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, sans-serif;
+            background: radial-gradient(ellipse at 30% 40%, #14142a 0%, #0a0a14 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            color: #ececf4;
+        }
+        .app {
+            max-width: 1480px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 48px;
+            padding: 28px 32px 32px 32px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px 20px;
+            margin-bottom: 22px;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-icon {
+            font-size: 28px;
+            width: 46px;
+            height: 46px;
+            background: linear-gradient(135deg, #7c5cfc, #4a8cfc);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(92, 140, 252, 0.25);
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff, #b4beff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.3px;
+        }
+        .header-sub {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.35);
+            -webkit-text-fill-color: rgba(255, 255, 255, 0.35);
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .color-picker-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 2px 12px 2px 8px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .color-picker-wrap label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.45);
+            cursor: pointer;
+        }
+        .color-picker-wrap input[type="color"] {
+            width: 28px;
+            height: 28px;
+            border: none;
+            padding: 0;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        .color-picker-wrap input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .color-picker-wrap input[type="color"]::-webkit-color-swatch {
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+        }
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.25s;
+            border: 1px solid transparent;
+            background: rgba(255, 255, 255, 0.05);
+            color: #c8c8e0;
+            border-color: rgba(255, 255, 255, 0.07);
+        }
+        .btn:hover {
+            background: rgba(124, 92, 252, 0.15);
+            border-color: rgba(124, 92, 252, 0.25);
+            transform: translateY(-1px);
+            color: #fff;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+        .btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+        .btn-recording {
+            background: rgba(255, 70, 70, 0.2) !important;
+            border-color: rgba(255, 70, 70, 0.4) !important;
+            color: #ff6b6b !important;
+            animation: pulse 1.2s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 70, 70, 0.25);
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(255, 70, 70, 0);
+            }
+        }
+        .legend-tag {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.03);
+            padding: 3px 14px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        .legend-tag .bar {
+            display: flex;
+            gap: 2px;
+        }
+        .legend-tag .bar span {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.10);
+        }
+        .legend-tag .bar .on {
+            background: currentColor;
+            opacity: 0.3;
+        }
+        .legend-tag .bar .on-s {
+            background: currentColor;
+            opacity: 0.6;
+        }
+        .legend-tag .bar .on-ss {
+            background: currentColor;
+            opacity: 0.8;
+        }
+        .legend-tag .bar .on-sss {
+            background: currentColor;
+            opacity: 1;
+        }
+        .legend-tag .bar .on-ex {
+            background: currentColor;
+            opacity: 1;
+        }
+        .legend-tag .bar .on-max {
+            background: currentColor;
+            opacity: 1;
+        }
+
+        .main {
+            display: grid;
+            grid-template-columns: 270px 1fr;
+            gap: 28px;
+            align-items: start;
+        }
+        .panel {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 24px;
+            padding: 18px 14px 16px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(4px);
+        }
+        .panel-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.35);
+            text-transform: uppercase;
+            letter-spacing: 1.6px;
+            margin-bottom: 14px;
+            padding-left: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .panel-title .dim-count {
+            font-size: 11px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.2);
+            letter-spacing: 0.4px;
+        }
+        .dim-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 10px;
+            max-height: 420px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+        .dim-item {
+            display: grid;
+            grid-template-columns: 1fr 70px 26px;
+            gap: 6px;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 4px 6px 4px 6px;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .dim-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+        .dim-name {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 13px;
+            color: #ececf4;
+            font-weight: 500;
+            outline: none;
+            font-family: inherit;
+            transition: all 0.2s;
+            width: 100%;
+            min-width: 0;
+        }
+        .dim-name:focus {
+            border-color: #7c5cfc;
+            background: rgba(124, 92, 252, 0.08);
+            box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.10);
+        }
+        .dim-name::placeholder {
+            color: rgba(255, 255, 255, 0.18);
+            font-weight: 400;
+        }
+        .dim-level {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 4px 6px 4px 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #ececf4;
+            outline: none;
+            cursor: pointer;
+            font-family: inherit;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='rgba(255,255,255,0.3)'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 6px center;
+            padding-right: 20px;
+            width: 100%;
+            transition: all 0.2s;
+        }
+        .dim-level:focus {
+            border-color: #7c5cfc;
+            background-color: rgba(124, 92, 252, 0.08);
+            box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.10);
+        }
+        .dim-level option {
+            background: #1a1a2e;
+            color: #ececf4;
+        }
+
+        .dim-delete {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 2px;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-family: inherit;
+            line-height: 1;
+        }
+        .dim-delete:hover:not(:disabled) {
+            color: #ff6b6b;
+            background: rgba(255, 70, 70, 0.12);
+        }
+        .dim-delete:disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+        }
+
+        .btn-add-dim {
+            width: 100%;
+            padding: 7px 0;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.25s;
+            border: 1px dashed rgba(255, 255, 255, 0.10);
+            background: rgba(255, 255, 255, 0.02);
+            color: rgba(255, 255, 255, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 2px;
+        }
+        .btn-add-dim:hover {
+            background: rgba(124, 92, 252, 0.10);
+            border-color: rgba(124, 92, 252, 0.25);
+            color: #fff;
+        }
+        .btn-add-dim svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .btn-play {
+            width: 100%;
+            padding: 10px 0;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #7c5cfc, #5c7cfc);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(124, 92, 252, 0.25);
+        }
+        .btn-play:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(124, 92, 252, 0.35);
+        }
+        .btn-play:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+        .btn-play:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-play svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        .btn-reset {
+            width: 100%;
+            padding: 8px 0;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-reset:hover {
+            background: rgba(124, 92, 252, 0.10);
+            border-color: rgba(124, 92, 252, 0.15);
+            color: #fff;
+        }
+        .btn-reset:active {
+            transform: scale(0.97);
+        }
+        .btn-reset svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        .chart-wrap {
+            background: rgba(255, 255, 255, 0.015);
+            border-radius: 24px;
+            padding: 16px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 520px;
+            position: relative;
+        }
+        .chart-wrap canvas {
+            width: 100%;
+            height: auto;
+            max-width: 820px;
+            aspect-ratio: 1 / 1;
+            display: block;
+            border-radius: 18px;
+            background: radial-gradient(ellipse at center, rgba(25, 25, 50, 0.4) 0%, rgba(10, 10, 20, 0.6) 100%);
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ---- 滚动条 ---- */
+        .dim-list::-webkit-scrollbar {
+            width: 3px;
+        }
+        .dim-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .dim-list::-webkit-scrollbar-thumb {
+            background: rgba(124, 92, 252, 0.25);
+            border-radius: 10px;
+        }
+        .dim-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(124, 92, 252, 0.4);
+        }
+
+        /* ---- 响应式 ---- */
+        @media (max-width: 1100px) {
+            .main {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            .panel {
+                padding: 16px 14px 14px;
+            }
+            .chart-wrap {
+                min-height: 400px;
+                padding: 12px 16px;
+            }
+            .chart-wrap canvas {
+                max-width: 620px;
+            }
+            .header-actions .btn span {
+                display: none;
+            }
+            .dim-list {
+                max-height: 300px;
+            }
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 8px;
+            }
+            .app {
+                padding: 12px 10px 16px;
+                border-radius: 28px;
+            }
+            .header h1 {
+                font-size: 18px;
+            }
+            .header-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 20px;
+            }
+            .header-sub {
+                font-size: 11px;
+            }
+            .header-actions {
+                gap: 6px;
+            }
+            .btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            .btn svg {
+                width: 14px;
+                height: 14px;
+            }
+            .color-picker-wrap {
+                padding: 2px 8px 2px 6px;
+            }
+            .color-picker-wrap label {
+                font-size: 10px;
+            }
+            .color-picker-wrap input[type="color"] {
+                width: 22px;
+                height: 22px;
+            }
+            .legend-tag {
+                font-size: 9px;
+                padding: 2px 10px;
+                gap: 4px;
+            }
+            .legend-tag .bar span {
+                width: 5px;
+                height: 5px;
+            }
+            .dim-item {
+                grid-template-columns: 1fr 58px 22px;
+                gap: 4px;
+                padding: 3px 4px;
+                border-radius: 10px;
+            }
+            .dim-name {
+                font-size: 12px;
+                padding: 3px 6px;
+            }
+            .dim-level {
+                font-size: 11px;
+                padding: 3px 14px 3px 6px;
+                background-position: right 4px center;
+                background-size: 6px 4px;
+            }
+            .dim-delete {
+                font-size: 12px;
+                width: 20px;
+                height: 20px;
+            }
+            .panel-title {
+                font-size: 11px;
+                margin-bottom: 10px;
+            }
+            .dim-list {
+                gap: 6px;
+                margin-bottom: 8px;
+                max-height: 240px;
+            }
+            .btn-add-dim {
+                font-size: 12px;
+                padding: 6px 0;
+                border-radius: 10px;
+            }
+            .btn-play {
+                font-size: 13px;
+                padding: 8px 0;
+                border-radius: 12px;
+            }
+            .btn-reset {
+                font-size: 12px;
+                padding: 6px 0;
+                border-radius: 10px;
+            }
+            .chart-wrap {
+                padding: 8px 10px;
+                min-height: 260px;
+            }
+            .chart-wrap canvas {
+                max-width: 360px;
+            }
+            .btn-group {
+                gap: 6px;
+            }
+        }
+        @media (max-width: 400px) {
+            .chart-wrap canvas {
+                max-width: 260px;
+            }
+            .dim-item {
+                grid-template-columns: 1fr 48px 20px;
+                gap: 3px;
+            }
+            .dim-name {
+                font-size: 11px;
+                padding: 2px 5px;
+            }
+            .dim-level {
+                font-size: 10px;
+                padding: 2px 12px 2px 4px;
+                background-size: 5px 3px;
+            }
+            .dim-delete {
+                font-size: 10px;
+                width: 18px;
+                height: 18px;
+            }
+            .app {
+                padding: 8px 6px 12px;
+                border-radius: 20px;
+            }
+            .header h1 {
+                font-size: 16px;
+            }
+            .chart-wrap {
+                padding: 4px 6px;
+                min-height: 200px;
+            }
+            .dim-list {
+                max-height: 180px;
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app">
+        <header class="header">
+            <div class="header-left">
+                <div class="header-icon">⬡</div>
+                <div>
+                    <h1>六边形维度展示器</h1>
+                    <span class="header-sub">F < E < D < C < B < A < S ...</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="color-picker-wrap">
+                    <label for="colorPicker">颜色</label>
+                    <input type="color" id="colorPicker" value="#7c5cfc" />
+                </div>
+                <button class="btn" id="saveBtn" type="button">
+                    <svg viewBox="0 0 24 24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"/></svg>
+                    <span>截图</span>
+                </button>
+                <button class="btn" id="recordBtn" type="button">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="currentColor"/></svg>
+                    <span>录制</span>
+                </button>
+                <div class="legend-tag">
+                    <span class="bar">
+                        <span class="on"></span><span class="on"></span><span class="on"></span>
+                        <span class="on"></span><span class="on"></span><span class="on"></span>
+                        <span class="on-s"></span><span class="on-ss"></span>
+                        <span class="on-sss"></span><span class="on-ex"></span><span class="on-max"></span>
+                    </span>
+                    F → E → S → MAX
+                </div>
+            </div>
+        </header>
+
+        <div class="main">
+            <aside class="panel" role="form">
+                <div class="panel-title">
+                    <span>⚙ 维度配置</span>
+                    <span class="dim-count" id="dimCount">6 个</span>
+                </div>
+                <div class="dim-list" id="dimList"></div>
+                <button class="btn-add-dim" id="addDimBtn" type="button">
+                    <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                    新增维度（无上限）
+                </button>
+                <div class="btn-group">
+                    <button class="btn-play" id="playBtn" type="button">
+                        <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" /></svg>
+                        播放动画
+                    </button>
+                    <button class="btn-reset" id="resetBtn" type="button">
+                        <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+                        重置默认
+                    </button>
+                </div>
+            </aside>
+
+            <section class="chart-wrap" aria-label="雷达图">
+                <canvas id="radar" width="800" height="800"></canvas>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        //  配置
+        // ================================================================
+
+        // ★ 调整等级顺序：F 最低，E 次之，符合 "F < E"
+        const LEVELS = ['F', 'E', 'D', 'C', 'B', 'A', 'S', 'SS', 'SSS', 'EX', 'MAX'];
+
+        // ★ 对应因子：F=0.20, E=0.30，其余依次递增
+        const LEVEL_FACTOR = {
+            F: 0.20,
+            E: 0.30,
+            D: 0.42,
+            C: 0.55,
+            B: 0.68,
+            A: 0.82,
+            S: 1.00,
+            SS: 1.20,
+            SSS: 1.42,
+            EX: 1.68,
+            MAX: 1.95,
+        };
+
+        const DEFAULT_DIMS = [
+            { name: '力量', level: 'C' },
+            { name: '速度', level: 'C' },
+            { name: '技巧', level: 'C' },
+            { name: '耐力', level: 'C' },
+            { name: '智力', level: 'C' },
+            { name: '魅力', level: 'C' },
+        ];
+
+        const MIN_DIMS = 3; // 最少保留3个维度，保证图形为多边形
+        // 无上限
+
+        // ================================================================
+        //  状态
+        // ================================================================
+
+        let dims = [];
+        let mainColor = '#7c5cfc';
+        let animId = null;
+        let isAnimating = false;
+        let animProgress = 1;
+        let isRecording = false;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let stream = null;
+
+        const canvas = document.getElementById('radar');
+        const ctx = canvas.getContext('2d');
+        const dimListEl = document.getElementById('dimList');
+        const colorPicker = document.getElementById('colorPicker');
+        const recordBtn = document.getElementById('recordBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const playBtn = document.getElementById('playBtn');
+        const addDimBtn = document.getElementById('addDimBtn');
+        const dimCountEl = document.getElementById('dimCount');
+
+        // ================================================================
+        //  工具
+        // ================================================================
+
+        function lerp(a, b, t) { return a + (b - a) * t; }
+
+        function easeInCubic(t) { return t * t * t; }
+
+        function getFactor(level) { return LEVEL_FACTOR[level] || 1.0; }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : { r: 124,
+                    g: 92, b: 252 };
+        }
+
+        function rgbToStr(r, g, b, a) { return `rgba(${r},${g},${b},${a})`; }
+
+        function mapFactorToRadius(factor) {
+            const sRadius = 0.35;
+            const maxRadius = 0.85;
+            const maxFactor = 1.95;
+            if (factor <= 1.0) {
+                return factor * sRadius;
+            } else {
+                const t = (factor - 1.0) / (maxFactor - 1.0);
+                return sRadius + t * (maxRadius - sRadius);
+            }
+        }
+
+        function getNextDimName() {
+            const names = dims.map(d => d.name);
+            let i = 1;
+            while (true) {
+                const candidate = `维度${i}`;
+                if (!names.includes(candidate)) return candidate;
+                i++;
+            }
+        }
+
+        // ================================================================
+        //  DOM 构建
+        // ================================================================
+
+        function buildControls() {
+            dimListEl.innerHTML = '';
+            dims.forEach((dim, i) => {
+                const item = document.createElement('div');
+                item.className = 'dim-item';
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'dim-name';
+                input.value = dim.name;
+                input.placeholder = `维度 ${i + 1}`;
+                input.maxLength = 14;
+                input.dataset.index = i;
+                input.addEventListener('input', () => {
+                    dims[i].name = input.value.trim() || `维度 ${i + 1}`;
+                    if (!isAnimating) drawRadar();
+                });
+                item.appendChild(input);
+
+                const select = document.createElement('select');
+                select.className = 'dim-level';
+                select.dataset.index = i;
+                LEVELS.forEach(lv => {
+                    const opt = document.createElement('option');
+                    opt.value = lv;
+                    opt.textContent = lv;
+                    if (lv === dim.level) opt.selected = true;
+                    select.appendChild(opt);
+                });
+                select.addEventListener('change', () => {
+                    const newLevel = select.value;
+                    if (dims[i].level === newLevel) return;
+                    dims[i].level = newLevel;
+                    dims[i].targetFactor = getFactor(newLevel);
+                    if (Math.abs(dims[i].currentFactor - dims[i].targetFactor) > 0.005) {
+                        if (isAnimating) {
+                            if (animId) { cancelAnimationFrame(animId);
+                                animId = null; }
+                            isAnimating = false;
+                        }
+                        dims.forEach(d => { d._startFactor = d.currentFactor; });
+                        startAnimation();
+                    } else {
+                        dims[i].currentFactor = dims[i].targetFactor;
+                        drawRadar();
+                    }
+                });
+                item.appendChild(select);
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'dim-delete';
+                delBtn.innerHTML = '×';
+                delBtn.disabled = dims.length <= MIN_DIMS;
+                delBtn.title = '删除此维度';
+                delBtn.addEventListener('click', () => {
+                    if (dims.length <= MIN_DIMS) return;
+                    if (isRecording) toggleRecording();
+                    removeDimension(i);
+                });
+                item.appendChild(delBtn);
+
+                dimListEl.appendChild(item);
+            });
+
+            // 更新计数
+            dimCountEl.textContent = `${dims.length} 个`;
+            addDimBtn.disabled = false;
+        }
+
+        // ================================================================
+        //  维度增删
+        // ================================================================
+
+        function addDimension() {
+            if (isRecording) toggleRecording();
+            if (isAnimating) {
+                if (animId) { cancelAnimationFrame(animId);
+                    animId = null; }
+                isAnimating = false;
+            }
+
+            const newName = getNextDimName();
+            dims.push({
+                name: newName,
+                level: 'C',
+                currentFactor: 0,
+                targetFactor: getFactor('C'),
+                _startFactor: 0,
+            });
+
+            // 所有维度归零，从中心展开
+            dims.forEach(d => {
+                d.currentFactor = 0;
+                d._startFactor = 0;
+            });
+
+            buildControls();
+            drawRadar();
+            startAnimation();
+
+            // 聚焦到新维度的名称输入框
+            const inputs = dimListEl.querySelectorAll('.dim-name');
+            if (inputs.length > 0) {
+                setTimeout(() => inputs[inputs.length - 1].focus(), 100);
+            }
+        }
+
+        function removeDimension(index) {
+            if (dims.length <= MIN_DIMS) return;
+            if (isRecording) toggleRecording();
+            if (isAnimating) {
+                if (animId) { cancelAnimationFrame(animId);
+                    animId = null; }
+                isAnimating = false;
+            }
+
+            dims.splice(index, 1);
+
+            // 所有维度归零，从中心展开
+            dims.forEach(d => {
+                d.currentFactor = 0;
+                d._startFactor = 0;
+            });
+
+            buildControls();
+            drawRadar();
+            startAnimation();
+        }
+
+        // ================================================================
+        //  动画系统
+        // ================================================================
+
+        function startAnimation() {
+            if (isAnimating) {
+                animProgress = 0;
+                dims.forEach(d => { if (d._startFactor === undefined) d._startFactor = d.currentFactor; });
+                return;
+            }
+            isAnimating = true;
+            animProgress = 0;
+            dims.forEach(d => { if (d._startFactor === undefined) d._startFactor = d.currentFactor; });
+            updatePlayButton(true);
+            cancelAnimationFrame(animId);
+            animateStep();
+        }
+
+        function animateStep() {
+            const speed = 0.032;
+            animProgress = Math.min(animProgress + speed, 1);
+            const t = easeInCubic(animProgress);
+
+            dims.forEach((d) => {
+                const start = d._startFactor !== undefined ? d._startFactor : 0;
+                d.currentFactor = lerp(start, d.targetFactor, t);
+            });
+
+            drawRadar();
+
+            if (animProgress < 1) {
+                animId = requestAnimationFrame(animateStep);
+            } else {
+                dims.forEach(d => { d.currentFactor = d.targetFactor; });
+                drawRadar();
+                isAnimating = false;
+                animId = null;
+                updatePlayButton(false);
+            }
+        }
+
+        function finishAnimation() {
+            if (animId) { cancelAnimationFrame(animId);
+                animId = null; }
+            isAnimating = false;
+            dims.forEach(d => { d.currentFactor = d.targetFactor; });
+            drawRadar();
+            updatePlayButton(false);
+        }
+
+        function playFromCenter() {
+            if (animId) { cancelAnimationFrame(animId);
+                animId = null; }
+            isAnimating = false;
+            dims.forEach(d => { d.currentFactor = 0;
+                d._startFactor = 0; });
+            startAnimation();
+        }
+
+        function updatePlayButton(playing) {
+            if (playing) {
+                playBtn.disabled = true;
+                playBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="30 30"/></svg>
+                    播放中...
+                `;
+            } else {
+                playBtn.disabled = false;
+                playBtn.innerHTML = `<svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" /></svg>播放动画`;
+            }
+        }
+
+        // ================================================================
+        //  绘图核心 (自适应字体大小)
+        // ================================================================
+
+        function drawRadar() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const size = Math.min(rect.width - 30, rect.height - 30, 820);
+            const logicalSize = Math.max(size, 280);
+            const dpr = window.devicePixelRatio || 1;
+
+            canvas.width = logicalSize * dpr;
+            canvas.height = logicalSize * dpr;
+            canvas.style.width = logicalSize + 'px';
+            canvas.style.height = logicalSize + 'px';
+            ctx.scale(dpr, dpr);
+
+            const W = logicalSize;
+            const H = logicalSize;
+            const cx = W / 2;
+            const cy = H / 2;
+            const maxRadius = Math.min(W, H) / 2 * 0.85;
+            const n = dims.length; // ★ 动态维度数量
+
+            const rgb = hexToRgb(mainColor);
+            const mainR = rgb.r,
+                mainG = rgb.g,
+                mainB = rgb.b;
+
+            ctx.clearRect(0, 0, W, H);
+
+            function getVertex(index, radiusRatio) {
+                const angle = -Math.PI / 2 + (index / n) * 2 * Math.PI;
+                const r = radiusRatio * maxRadius;
+                return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle), angle };
+            }
+
+            // ---- 映射表 ----
+            const gridLevelMap = {};
+            LEVELS.forEach(lv => {
+                const factor = LEVEL_FACTOR[lv];
+                gridLevelMap[lv] = mapFactorToRadius(factor);
+            });
+
+            // ---- 绘制网格 (仅 E ~ S) ----
+            // 注意现在最低是F，所以E和S等仍然绘制
+            LEVELS.forEach(lv => {
+                const rRatio = gridLevelMap[lv];
+                const isS = (lv === 'S');
+                const isOuter = (lv === 'SS' || lv === 'SSS' || lv === 'EX' || lv === 'MAX');
+
+                if (!isOuter) {
+                    ctx.beginPath();
+                    for (let i = 0; i < n; i++) {
+                        const p = getVertex(i, rRatio);
+                        i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
+                    }
+                    ctx.closePath();
+                    if (isS) {
+                        ctx.strokeStyle = rgbToStr(mainR, mainG, mainB, 0.6);
+                        ctx.lineWidth = 2.5;
+                        ctx.setLineDash([]);
+                    } else {
+                        ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([4, 6]);
+                    }
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+
+                // ---- 等级标签 ----
+                if (lv === 'F' || lv === 'E' || lv === 'S' || isOuter) {
+                    const labelR = rRatio + (isOuter ? 0.04 : (lv === 'S' ? -0.03 : -0.04));
+                    const angle = -Math.PI / 2 + (0 / n) * 2 * Math.PI;
+                    const lx = cx + labelR * maxRadius * Math.cos(angle);
+                    const ly = cy + labelR * maxRadius * Math.sin(angle);
+                    ctx.fillStyle = (lv === 'S') ? rgbToStr(mainR, mainG, mainB, 0.7) :
+                        isOuter ? rgbToStr(mainR, mainG, mainB, 0.45) :
+                        'rgba(255,255,255,0.15)';
+                    ctx.font = `${(lv === 'S') ? 14 : (isOuter ? 11 : 10)}px "Segoe UI", sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(lv, lx, ly - 4);
+                }
+            });
+
+            // ---- 辐射线 ----
+            for (let i = 0; i < n; i++) {
+                const p = getVertex(i, 1.0);
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(p.x, p.y);
+                ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+
+            // ---- 数据多边形 ----
+            const factors = dims.map(d => d.currentFactor);
+            const mappedRatios = factors.map(f => mapFactorToRadius(f));
+            const pts = mappedRatios.map((rRatio, i) => getVertex(i, rRatio));
+
+            // 填充
+            ctx.beginPath();
+            pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+            ctx.closePath();
+            const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxRadius);
+            grad.addColorStop(0, rgbToStr(mainR, mainG, mainB, 0.22));
+            grad.addColorStop(0.5, rgbToStr(mainR, mainG, mainB, 0.08));
+            grad.addColorStop(1, rgbToStr(mainR, mainG, mainB, 0.01));
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            // 描边
+            ctx.beginPath();
+            pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+            ctx.closePath();
+            ctx.strokeStyle = rgbToStr(mainR, mainG, mainB, 0.8);
+            ctx.lineWidth = 3;
+            ctx.shadowColor = rgbToStr(mainR, mainG, mainB, 0.4);
+            ctx.shadowBlur = 16;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            // ---- 数据点 ----
+            pts.forEach((p, i) => {
+                const dim = dims[i];
+                const level = dim.level;
+                const isBeyond = LEVELS.indexOf(level) > LEVELS.indexOf('S');
+
+                // 光晕
+                const glowR = isBeyond ? 16 : 10;
+                const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowR);
+                glow.addColorStop(0, rgbToStr(mainR, mainG, mainB, 0.3));
+                glow.addColorStop(1, rgbToStr(mainR, mainG, mainB, 0));
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, glowR, 0, 2 * Math.PI);
+                ctx.fillStyle = glow;
+                ctx.fill();
+
+                // 主点
+                const dotR = isBeyond ? 8 : 6;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, dotR, 0, 2 * Math.PI);
+                ctx.fillStyle = rgbToStr(mainR, mainG, mainB, 1);
+                ctx.shadowColor = rgbToStr(mainR, mainG, mainB, 0.6);
+                ctx.shadowBlur = 14;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                ctx.lineWidth = 1.2;
+                ctx.stroke();
+
+                if (isBeyond) {
+                    drawStar(ctx, p.x, p.y, 12, 5, 5, mainColor);
+                }
+
+                // 等级标签
+                const lvText = level;
+                const fontSize = isBeyond ? 13 : 11;
+                ctx.font = `700 ${fontSize}px "Segoe UI", sans-serif`;
+                const metrics = ctx.measureText(lvText);
+                const tw = metrics.width;
+                const th = fontSize * 1.2;
+                const padX = 6;
+                const padY = 3;
+                const dirX = p.x - cx;
+                const dirY = p.y - cy;
+                const len = Math.sqrt(dirX * dirX + dirY * dirY);
+                if (len > 0) {
+                    const offset = dotR + 3;
+                    const lx = p.x - (dirX / len) * offset;
+                    const ly = p.y - (dirY / len) * offset;
+                    const bx = lx - tw / 2 - padX;
+                    const by = ly - th / 2 - padY;
+                    const bw = tw + padX * 2;
+                    const bh = th + padY * 2;
+                    let finalX = lx,
+                        finalY = ly;
+                    if (bx < 0) finalX = cx + (tw / 2 + padX);
+                    if (bx + bw > W) finalX = cx - (tw / 2 + padX);
+                    if (by < 0) finalY = cy + (th / 2 + padY);
+                    if (by + bh > H) finalY = cy - (th / 2 + padY);
+
+                    const rRect = 5;
+                    const bx2 = finalX - tw / 2 - padX;
+                    const by2 = finalY - th / 2 - padY;
+                    ctx.shadowBlur = 0;
+                    ctx.beginPath();
+                    ctx.moveTo(bx2 + rRect, by2);
+                    ctx.lineTo(bx2 + bw - rRect, by2);
+                    ctx.quadraticCurveTo(bx2 + bw, by2, bx2 + bw, by2 + rRect);
+                    ctx.lineTo(bx2 + bw, by2 + bh - rRect);
+                    ctx.quadraticCurveTo(bx2 + bw, by2 + bh, bx2 + bw - rRect, by2 + bh);
+                    ctx.lineTo(bx2 + rRect, by2 + bh);
+                    ctx.quadraticCurveTo(bx2, by2 + bh, bx2, by2 + bh - rRect);
+                    ctx.lineTo(bx2, by2 + rRect);
+                    ctx.quadraticCurveTo(bx2, by2, bx2 + rRect, by2);
+                    ctx.closePath();
+                    ctx.fillStyle = isBeyond ? 'rgba(0,0,0,0.8)' : 'rgba(10,10,25,0.7)';
+                    ctx.fill();
+                    ctx.strokeStyle = rgbToStr(mainR, mainG, mainB, 0.4);
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+
+                    ctx.fillStyle = rgbToStr(mainR, mainG, mainB, 1);
+                    ctx.font = `700 ${fontSize}px "Segoe UI", sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                    ctx.shadowBlur = 4;
+                    ctx.fillText(lvText, finalX, finalY + 1);
+                    ctx.shadowBlur = 0;
+                }
+            });
+
+            // ---- 维度名称（自适应字号） ----
+            const nameFontSize = Math.max(10, 18 - Math.floor(n / 3));
+            ctx.font = `600 ${nameFontSize}px "Segoe UI", "PingFang SC", sans-serif`;
+            const nameRadiusRatio = 0.92;
+
+            pts.forEach((p, i) => {
+                const dim = dims[i];
+                const angle = getVertex(i, 0).angle;
+                const nx = cx + nameRadiusRatio * maxRadius * Math.cos(angle);
+                const ny = cy + nameRadiusRatio * maxRadius * Math.sin(angle);
+
+                let fontSize = nameFontSize;
+                let text = dim.name || `维度${i+1}`;
+                let metrics = ctx.measureText(text);
+                const maxTextWidth = maxRadius * 0.35;
+                while (metrics.width > maxTextWidth && fontSize > 8) {
+                    fontSize -= 1;
+                    ctx.font = `600 ${fontSize}px "Segoe UI", "PingFang SC", sans-serif`;
+                    metrics = ctx.measureText(text);
+                }
+
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(255,255,255,0.92)';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'rgba(0,0,0,0.7)';
+                ctx.shadowBlur = 12;
+                ctx.fillText(text, nx, ny);
+                ctx.shadowBlur = 0;
+                // 恢复
+                ctx.font = `600 ${nameFontSize}px "Segoe UI", "PingFang SC", sans-serif`;
+            });
+
+            // ---- 中心装饰 ----
+            ctx.beginPath();
+            ctx.arc(cx, cy, 3, 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(255,255,255,0.08)';
+            ctx.fill();
+        }
+
+        function drawStar(ctx, cx, cy, outerR, innerR, points, color) {
+            const rgb = hexToRgb(color);
+            ctx.beginPath();
+            for (let i = 0; i < points * 2; i++) {
+                const r = i % 2 === 0 ? outerR : innerR;
+                const angle = -Math.PI / 2 + (i / (points * 2)) * 2 * Math.PI;
+                const x = cx + r * Math.cos(angle);
+                const y = cy + r * Math.sin(angle);
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fillStyle = rgbToStr(rgb.r, rgb.g, rgb.b, 0.5);
+            ctx.shadowColor = rgbToStr(rgb.r, rgb.g, rgb.b, 0.3);
+            ctx.shadowBlur = 14;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        // ================================================================
+        //  截图
+        // ================================================================
+
+        function saveAsPNG() {
+            finishAnimation();
+            const link = document.createElement('a');
+            link.download = `维度雷达_${new Date().toISOString().slice(0,10)}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // ================================================================
+        //  录制
+        // ================================================================
+
+        async function toggleRecording() {
+            if (isRecording) {
+                mediaRecorder.stop();
+                recordBtn.classList.remove('btn-recording');
+                recordBtn.innerHTML =
+                    `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="currentColor"/></svg><span>录制</span>`;
+                isRecording = false;
+                if (stream) { stream.getTracks().forEach(track => track.stop());
+                    stream = null; }
+                return;
+            }
+
+            try {
+                finishAnimation();
+                stream = canvas.captureStream(60);
+                let mimeType = 'video/webm;codecs=vp9';
+                if (!MediaRecorder.isTypeSupported(mimeType)) {
+                    mimeType = 'video/webm;codecs=vp8';
+                    if (!MediaRecorder.isTypeSupported(mimeType)) {
+                        mimeType = 'video/webm';
+                        if (!MediaRecorder.isTypeSupported(mimeType)) {
+                            alert('您的浏览器不支持录制 WebM 视频，请使用 Chrome 或 Edge。');
+                            return;
+                        }
+                    }
+                }
+
+                recordedChunks = [];
+                mediaRecorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 5000000 });
+                mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: mimeType });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.download = `维度雷达_${new Date().toISOString().slice(0,10)}.webm`;
+                    link.href = url;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    recordedChunks = [];
+                };
+
+                mediaRecorder.start(1000 / 60);
+                isRecording = true;
+                recordBtn.classList.add('btn-recording');
+                recordBtn.innerHTML =
+                    `<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" fill="currentColor"/></svg><span>停止</span>`;
+                setTimeout(() => { if (isRecording) toggleRecording(); }, 60000);
+            } catch (err) {
+                alert('录制启动失败: ' + err.message);
+                console.error(err);
+            }
+        }
+
+        // ================================================================
+        //  重置
+        // ================================================================
+
+        function resetToDefault() {
+            if (isRecording) toggleRecording();
+            finishAnimation();
+            dims = DEFAULT_DIMS.map(d => ({
+                name: d.name,
+                level: d.level,
+                currentFactor: 0,
+                targetFactor: getFactor(d.level),
+                _startFactor: 0,
+            }));
+            buildControls();
+            dims.forEach(d => { d._startFactor = 0; });
+            drawRadar();
+            startAnimation();
+        }
+
+        // ================================================================
+        //  颜色变化
+        // ================================================================
+
+        function onColorChange() {
+            mainColor = colorPicker.value;
+            if (!isAnimating) drawRadar();
+            document.querySelector('.legend-tag').style.color = mainColor;
+            document.querySelectorAll(
+                    '.legend-tag .bar .on, .legend-tag .bar .on-s, .legend-tag .bar .on-ss, .legend-tag .bar .on-sss, .legend-tag .bar .on-ex, .legend-tag .bar .on-max'
+                    )
+                .forEach(el => { el.style.color = mainColor; });
+        }
+
+        // ================================================================
+        //  窗口自适应
+        // ================================================================
+
+        let resizeTimer = null;
+
+        function handleResize() {
+            if (resizeTimer) cancelAnimationFrame(resizeTimer);
+            resizeTimer = requestAnimationFrame(() => {
+                drawRadar();
+                resizeTimer = null;
+            });
+        }
+
+        // ================================================================
+        //  初始化
+        // ================================================================
+
+        function init() {
+            dims = DEFAULT_DIMS.map(d => ({
+                name: d.name,
+                level: d.level,
+                currentFactor: 0,
+                targetFactor: getFactor(d.level),
+                _startFactor: 0,
+            }));
+            buildControls();
+            drawRadar();
+
+            dims.forEach(d => { d._startFactor = 0; });
+            startAnimation();
+
+            colorPicker.addEventListener('input', onColorChange);
+            onColorChange();
+
+            saveBtn.addEventListener('click', saveAsPNG);
+            recordBtn.addEventListener('click', toggleRecording);
+            resetBtn.addEventListener('click', resetToDefault);
+            playBtn.addEventListener('click', playFromCenter);
+            addDimBtn.addEventListener('click', addDimension);
+
+            window.addEventListener('resize', handleResize);
+            if (window.ResizeObserver) {
+                const ro = new ResizeObserver(() => handleResize());
+                ro.observe(canvas.parentElement);
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+
+</body>
+</html>
