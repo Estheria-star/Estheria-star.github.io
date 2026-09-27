@@ -134,6 +134,31 @@ h1{
 .ct .cl{font-size:12px; color:#8fb2d4; letter-spacing:1px; font-weight:700}
 .ct .cv{font-size:14.5px; font-weight:800; word-break:break-all; line-height:1.4}
 .ct .hint{font-size:11.5px; color:#9dbedd}
+.ct .ci{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:11px;background:linear-gradient(145deg,#f6fbff,#e8f4ff);box-shadow:inset 0 0 0 1px var(--line)}
+.ct .ci svg{display:block}
+
+/* —— 悬停演示浮层 —— */
+.dock{
+  position:fixed; left:50%; bottom:18px; z-index:60;
+  transform:translate(-50%, 26px) scale(.985);
+  width:min(640px, calc(100vw - 32px));
+  background:var(--card); border:1px solid #bfdffa; border-radius:22px;
+  box-shadow:0 26px 64px rgba(70,110,160,.35);
+  padding:16px; display:flex; gap:16px; align-items:stretch;
+  opacity:0; pointer-events:none;
+  transition:opacity .38s var(--ease), transform .38s var(--ease);
+}
+.dock.show{opacity:1; transform:translate(-50%,0) scale(1)}
+.dock img{width:238px; height:152px; object-fit:cover; border-radius:14px; flex:0 0 auto; background:#eaf4ff; box-shadow:inset 0 0 0 1px var(--line)}
+.dock .dbody{flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; padding:2px 0}
+.dock .dtitle{font-weight:800; font-size:16px; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.dock .tag{font-size:11px; font-weight:700; color:#4f93d8; background:#e8f4ff; border-radius:999px; padding:3px 10px; letter-spacing:1px}
+.dock .ddesc{font-size:13px; color:var(--ink2); line-height:1.8}
+.dock .dhint{margin-top:auto; font-size:11.5px; color:#9dbedd}
+@media (max-width:560px){
+  .dock{flex-direction:column}
+  .dock img{width:100%; height:150px}
+}
 
 footer{margin-top:44px; text-align:center; color:#8fb2d4; font-size:12.5px; letter-spacing:.5px; line-height:2}
 footer a{color:var(--accent-deep);text-decoration:none}
@@ -204,7 +229,7 @@ footer a:hover{text-decoration:underline}
     </a>
     ============================================================ -->
 
-    <a class="proj reveal" style="--d:.05s" href="https://wuziqi.startian.top/">
+    <a class="proj reveal" style="--d:.05s" data-demo="wuziqi" href="https://wuziqi.startian.top/">
       <div class="ico">⚫</div>
       <div class="info">
         <div class="name">五子棋 · 学习反制版</div>
@@ -213,7 +238,7 @@ footer a:hover{text-decoration:underline}
       <span class="pbtn">来一局 →</span>
     </a>
 
-    <a class="proj reveal" style="--d:.1s" href="https://startian.top/zhenghuo/">
+    <a class="proj reveal" style="--d:.1s" data-demo="zhenghuo" href="https://startian.top/zhenghuo/">
       <div class="ico">😏</div>
       <div class="info">
         <div class="name">整活 · 隐私协议</div>
@@ -222,7 +247,7 @@ footer a:hover{text-decoration:underline}
       <span class="pbtn">点一下 →</span>
     </a>
 
-    <a class="proj reveal" style="--d:.15s" href="https://startian.top/tujie/">
+    <a class="proj reveal" style="--d:.15s" data-demo="tujie" href="https://startian.top/tujie/">
       <div class="ico">⬡</div>
       <div class="info">
         <div class="name">六边形维度展示器</div>
@@ -231,7 +256,7 @@ footer a:hover{text-decoration:underline}
       <span class="pbtn">玩一下 →</span>
     </a>
 
-    <a class="proj reveal" style="--d:.2s" href="https://geometry.startian.top/">
+    <a class="proj reveal" style="--d:.2s" data-demo="geometry" href="https://geometry.startian.top/">
       <div class="ico">📐</div>
       <div class="info">
         <div class="name">几何工坊 · 数学工作台</div>
@@ -247,28 +272,28 @@ footer a:hover{text-decoration:underline}
   <div class="contacts">
 
     <div class="ct reveal" style="--d:.05s" id="ctQQ" role="button" tabindex="0" title="点击复制 QQ 号">
-      <div class="ci">💬</div>
+      <div class="ci"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="#12B7F5" d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"/></svg></div>
       <div class="cl">QQ</div>
       <div class="cv">2433165914</div>
       <div class="hint">点击复制</div>
     </div>
 
     <a class="ct reveal" style="--d:.1s" href="mailto:2433165914@qq.com">
-      <div class="ci">📧</div>
+      <div class="ci"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#6aabf2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="3"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></div>
       <div class="cl">邮箱</div>
       <div class="cv">2433165914@qq.com</div>
       <div class="hint">写封邮件 →</div>
     </a>
 
     <a class="ct reveal" style="--d:.15s" href="https://space.bilibili.com/3494370703575552" target="_blank" rel="noopener">
-      <div class="ci">📺</div>
+      <div class="ci"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="#00A1D6" d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.511.556-2.765 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.658.373-.907l.027-.027c.267-.249.573-.373.92-.373.347 0 .653.124.92.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .16-.213l2.853-2.747c.267-.249.573-.373.92-.373.347 0 .662.151.929.4.267.249.391.551.391.907 0 .355-.124.657-.373.906zM5.333 7.24c-.746.018-1.373.276-1.88.773-.506.498-.769 1.13-.786 1.894v7.52c.017.764.28 1.395.786 1.893.507.498 1.134.756 1.88.773h13.334c.746-.017 1.373-.275 1.88-.773.506-.498.769-1.129.786-1.893v-7.52c-.017-.765-.28-1.396-.786-1.894-.507-.497-1.134-.755-1.88-.773zM8 11.107c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c0-.373.129-.689.386-.947.258-.257.574-.386.947-.386zm8 0c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c.017-.391.15-.711.4-.96.249-.249.56-.373.933-.373Z"/></svg></div>
       <div class="cl">B 站</div>
       <div class="cv">个人空间</div>
       <div class="hint">点我跳转 ↗</div>
     </a>
 
     <a class="ct reveal" style="--d:.2s" href="https://github.com/Estheria-star" target="_blank" rel="noopener">
-      <div class="ci">🐙</div>
+      <div class="ci"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="#181717" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></div>
       <div class="cl">GitHub</div>
       <div class="cv">@Estheria-star</div>
       <div class="hint">点我跳转 ↗</div>
@@ -281,6 +306,15 @@ footer a:hover{text-decoration:underline}
     也欢迎来 <a href="https://space.bilibili.com/3494370703575552" target="_blank" rel="noopener">B 站</a> 和 <a href="https://github.com/Estheria-star" target="_blank" rel="noopener">GitHub</a> 找我玩
   </footer>
 
+</div>
+
+<div class="dock" id="demoDock" aria-hidden="true">
+  <img id="dockImg" alt="">
+  <div class="dbody">
+    <div class="dtitle"><span id="dockTitle"></span><span class="tag">演示</span></div>
+    <div class="ddesc" id="dockDesc"></div>
+    <div class="dhint">鼠标移开自动收起 · 直接点卡片开玩 →</div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -331,6 +365,62 @@ footer a:hover{text-decoration:underline}
     qq.addEventListener('click', doCopy);
     qq.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); doCopy(); } });
   }
+
+  /* —— 悬停满 3 秒：弹出项目演示（图片 + 详细介绍）—— */
+  var DEMOS = {
+    wuziqi: {
+      img: 'demos/wuziqi.jpg',
+      title: '五子棋 · 学习反制版',
+      desc: '内嵌 Rapfi 引擎的浏览器五子棋：经典算力与「灵拙」mix9 神经网络双引擎可选，AI 会学习你的棋风并在下一局反制；支持悔棋、对局日志导出与「灵拙」配音陪伴。首次打开会后台下载引擎资源，之后就秒开。'
+    },
+    zhenghuo: {
+      img: 'demos/zhenghuo.jpg',
+      title: '整活 · 隐私协议',
+      desc: '伪装成「服务协议与隐私政策」的整活小页面：郑重其事地读一读、点下「同意并继续」，就会收获一点小小的惊喜（笑）。纯前端实现，点开即玩。'
+    },
+    tujie: {
+      img: 'demos/tujie.jpg',
+      title: '六边形维度展示器',
+      desc: '无上限展开的六边形几何展示器：多层级嵌套、旋转与配色实验，随手转一转就挺上头，适合发呆时玩玩。'
+    },
+    geometry: {
+      img: 'demos/geometry.jpg',
+      title: '几何工坊 · 数学工作台',
+      desc: '面向高中数学的几何教学工作台：平面 / 立体双模式，函数与方程实时绘制、交点与向量关系自动判定、面积体积距离二面角一键求解，支持参数滑块联动与 PNG 导出。'
+    }
+  };
+  var dock = document.getElementById('demoDock');
+  var dockImg = document.getElementById('dockImg');
+  var dockTitle = document.getElementById('dockTitle');
+  var dockDesc = document.getElementById('dockDesc');
+  var hoverTimer = null;
+  var dockLoaded = {};
+  function showDock(id){
+    var d = DEMOS[id];
+    if (!d || !dock) return;
+    if (!dockLoaded[id]) { dockImg.src = d.img; dockImg.alt = d.title; dockLoaded[id] = true; }
+    dockTitle.textContent = d.title;
+    dockDesc.textContent = d.desc;
+    dock.classList.add('show');
+    dock.setAttribute('aria-hidden', 'false');
+  }
+  function hideDock(){
+    if (!dock || !dock.classList.contains('show')) return;
+    dock.classList.remove('show');
+    dock.setAttribute('aria-hidden', 'true');
+  }
+  var demoCards = document.querySelectorAll('.proj[data-demo]');
+  [].forEach.call(demoCards, function(card){
+    card.addEventListener('mouseenter', function(){
+      clearTimeout(hoverTimer);
+      var id = card.getAttribute('data-demo');
+      hoverTimer = setTimeout(function(){ showDock(id); }, 3000);
+    });
+    card.addEventListener('mouseleave', function(){
+      clearTimeout(hoverTimer);
+      hideDock();
+    });
+  });
 })();
 </script>
 </body>
