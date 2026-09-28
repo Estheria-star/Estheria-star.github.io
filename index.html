@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<script>document.documentElement.classList.add('js');</script>
+<script>document.documentElement.classList.add('js');(function(){try{var p=JSON.parse(localStorage.getItem('startian_theme_v1')||'{}');var m=p.mode||'auto',t=m;if(m==='auto'){var n=new Date(),x=n.getHours()*60+n.getMinutes();var l=((p.lightAt||'07:00')+'').split(':'),d=((p.darkAt||'19:00')+'').split(':');var lm=(+l[0])*60+(+l[1]||0),dm=(+d[0])*60+(+d[1]||0);t=(lm<dm)?((x>=lm&&x<dm)?'light':'dark'):((x>=lm||x<dm)?'light':'dark');}document.documentElement.setAttribute('data-theme',t);if(t==='dark'){var ln=document.createElement('link');ln.rel='preload';ln.as='image';ln.href='avatar-dark.jpg';document.head.appendChild(ln);}}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>星恬的小站 · startian.top</title>
 <meta name="description" content="星恬的小站 —— 下棋、画几何、捣鼓 AI 小玩意。五子棋、几何工坊与更多作品在此。">
@@ -277,6 +277,160 @@ footer a:hover{text-decoration:underline}
 .dock .ddesc{font-size:13px; color:var(--ink2); line-height:1.85}
 .dock .dhint{margin-top:auto; font-size:11.5px; color:#9dbedd; letter-spacing:.5px}
 
+/* ================= 🎨 THEMEKIT：主题样式（可复用模块）================= */
+.brand-sub{color:#9dbedd;font-weight:700}
+.tk-btn{
+  border:1px solid var(--line);background:#fff;border-radius:999px;width:34px;height:34px;
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;
+  margin-left:6px;transition:transform .2s var(--ease),border-color .2s ease,background .2s ease;
+  font-family:inherit;padding:0;
+}
+.tk-btn:hover{transform:translateY(-1px);border-color:#a6d1f8}
+.tk-panel{
+  position:absolute;right:24px;top:64px;width:330px;z-index:85;
+  background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border:1px solid var(--line);border-radius:20px;padding:16px 16px 14px;
+  box-shadow:var(--sh-lg);
+  opacity:0;transform:translateY(-8px) scale(.98);pointer-events:none;
+  transition:opacity .25s var(--ease),transform .25s var(--ease);
+}
+.tk-panel.show{opacity:1;transform:none;pointer-events:auto}
+.tk-p-title{font-size:13.5px;font-weight:800;letter-spacing:.5px;color:var(--ink)}
+.tk-seg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:12px}
+.tk-seg button{
+  padding:9px 4px;border-radius:12px;border:1.5px solid var(--line);background:#f7fbff;
+  font-size:12px;font-weight:700;color:var(--ink2);cursor:pointer;font-family:inherit;
+  transition:all .18s ease;white-space:nowrap;
+}
+.tk-seg button:hover{border-color:#a6d1f8}
+.tk-seg button.on{border-color:var(--accent-deep);background:#e8f4ff;color:var(--accent-deep)}
+.tk-p-sub{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--ink3);margin:14px 0 8px}
+.tk-times{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tk-times label{font-size:11.5px;color:var(--ink2);font-weight:700;display:flex;flex-direction:column;gap:5px}
+.tk-times input{
+  border:1.5px solid var(--line);border-radius:10px;padding:7px 9px;font-family:inherit;
+  font-size:13px;font-weight:700;color:var(--ink);background:#fbfdff;outline:none;
+}
+.tk-times input:focus{border-color:#8fc0ec}
+.tk-p-hint{font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.7}
+
+/* —— 暗黑 + 酒红/玫瑰红 —— */
+[data-theme="dark"]{
+  --bg1:#1c0c12; --bg2:#2a1019;
+  --card:#261119; --tint:#2b131c;
+  --line:#4b2030; --line2:#3a1826;
+  --ink:#f6e7ec; --ink2:#d2a5b4; --ink3:#a2748a;
+  --accent:#c14b64; --accent-deep:#e0566d;
+  --sh-sm:0 1px 2px rgba(0,0,0,.4), 0 10px 28px rgba(0,0,0,.45);
+  --sh-lg:0 2px 4px rgba(0,0,0,.5), 0 24px 50px rgba(0,0,0,.55);
+}
+[data-theme="dark"] body{
+  background:radial-gradient(1400px 700px at 50% -120px, #3a1622 0%, #1c0c12 45%, #12060a 100%);
+}
+[data-theme="dark"] ::selection{background:#5a2436}
+[data-theme="dark"] .loadbar{background:linear-gradient(90deg,#e0566d,#a83850,#e692a4)}
+[data-theme="dark"] .nav{background:rgba(24,10,16,.72);border-bottom-color:rgba(90,36,54,.7)}
+[data-theme="dark"] .nav.scrolled{background:rgba(24,10,16,.88)}
+[data-theme="dark"] .brand-sub{color:#a2748a}
+[data-theme="dark"] .brand img{box-shadow:0 0 0 1.5px #261119,0 0 0 2.5px #5a2436}
+[data-theme="dark"] .nav-links a{color:#d2a5b4}
+[data-theme="dark"] .nav-links a:hover{color:#e692a4;background:#33202b}
+[data-theme="dark"] .tk-btn{background:#261119}
+[data-theme="dark"] .tk-btn:hover{border-color:#7d3149}
+[data-theme="dark"] .tk-panel{background:rgba(33,14,21,.95);border-color:#4b2030}
+[data-theme="dark"] .tk-seg button{background:#2b131c;border-color:#4b2030;color:#d2a5b4}
+[data-theme="dark"] .tk-seg button:hover{border-color:#7d3149}
+[data-theme="dark"] .tk-seg button.on{border-color:#e0566d;background:#3a1522;color:#e692a4}
+[data-theme="dark"] .tk-times input{background:#2b131c;border-color:#4b2030;color:#f6e7ec}
+[data-theme="dark"] .blob{opacity:.4}
+[data-theme="dark"] .blob.b1{background:radial-gradient(circle,#6d2033,transparent 70%)}
+[data-theme="dark"] .blob.b2{background:radial-gradient(circle,#7d2842,transparent 70%)}
+[data-theme="dark"] .blob.b3{background:radial-gradient(circle,#5a1c2e,transparent 70%)}
+[data-theme="dark"] .hero h1{
+  background:linear-gradient(110deg,#f6e7ec 20%,#e0566d 42%,#f0a7b5 52%,#f6e7ec 72%);
+  background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+[data-theme="dark"] .hero-eyebrow{color:#b06a80}
+[data-theme="dark"] .hero .avatar{box-shadow:0 16px 36px rgba(0,0,0,.5),0 0 0 4px #261119,0 0 0 6px #5a2436}
+[data-theme="dark"] .hero .avatar:hover{box-shadow:0 20px 42px rgba(0,0,0,.6),0 0 0 4px #261119,0 0 0 7px #7d3149}
+[data-theme="dark"] .btn-p{background:linear-gradient(180deg,#d95c72,#a83850);box-shadow:0 5px 0 #6d2334,0 14px 26px rgba(120,30,55,.45)}
+[data-theme="dark"] .btn-p:hover{box-shadow:0 6px 0 #6d2334,0 16px 30px rgba(120,30,55,.5)}
+[data-theme="dark"] .btn-p:active{box-shadow:0 2px 0 #6d2334}
+[data-theme="dark"] .btn-g{background:#261119;border-color:#5a2436;color:#e692a4}
+[data-theme="dark"] .btn-g:hover{background:#2e141d;border-color:#7d3149}
+[data-theme="dark"] .marquee-track span{color:#b58398}
+[data-theme="dark"] .marquee-track span em{color:#7a4a5e}
+[data-theme="dark"] .sec-eyebrow{color:#b06a80}
+[data-theme="dark"] .tile:hover{border-color:#7d3149}
+[data-theme="dark"] .tile-media{box-shadow:0 10px 26px rgba(0,0,0,.45)}
+[data-theme="dark"] .ptag{color:#e692a4;background:#3a1522;border-color:#552237}
+[data-theme="dark"] .about,[data-theme="dark"] .intro{background:linear-gradient(160deg,#241017,#2b131c)}
+[data-theme="dark"] .chip{background:#2b131c;border-color:#4b2030;color:#d2a5b4}
+[data-theme="dark"] .chip:hover{border-color:#7d3149}
+[data-theme="dark"] .ach-app{background:linear-gradient(165deg,#2a1610,#241017);border-color:#553722}
+[data-theme="dark"] .ach-app:hover{border-color:#7a5230}
+[data-theme="dark"] .aa-count{background:#3a2410;border-color:#5f3d1c;color:#e2b34d}
+[data-theme="dark"] .aa-chips span{background:#2b1a12;border-color:#553722;color:#d8b88a}
+[data-theme="dark"] .ct:hover{border-color:#7d3149}
+[data-theme="dark"] .ct-ico{background:linear-gradient(150deg,#2b131c,#33161f);box-shadow:inset 0 0 0 1px #4b2030}
+[data-theme="dark"] .ct:focus-visible{outline-color:#e0566d}
+[data-theme="dark"] .placeholder{border-color:#55233a;color:#a2748a}
+[data-theme="dark"] footer{color:#a2748a;border-top-color:#3a1826}
+[data-theme="dark"] .dock{background:linear-gradient(165deg,#261119,#2b131c);border-color:#5a2436}
+[data-theme="dark"] .dock .tag{color:#e692a4;background:#3a1522;border-color:#552237}
+[data-theme="dark"] .dock .dhint{color:#a2748a}
+[data-theme="dark"] .toast{background:rgba(60,20,34,.96)}
+[data-theme="dark"] .ach-banner{background:linear-gradient(135deg,#2b1a12,#3a2410);border-color:#5f3d1c}
+[data-theme="dark"] .ach-banner .t2{color:#f0d9a8}
+[data-theme="dark"] .ach-banner .t3{color:#c9a86a}
+[data-theme="dark"] .ach-item{background:#2b1a12;border-color:#553722}
+[data-theme="dark"] .ach-item .an{color:#f0d9a8}
+[data-theme="dark"] .ach-item .ad{color:#c9a86a}
+
+/* —— 转场舞台（蓝↔红）—— */
+.tk-stage{position:fixed;inset:0;z-index:200;pointer-events:none;overflow:hidden}
+.tk-black{position:absolute;inset:0;background:#0a0507;opacity:0;transition:opacity .55s ease;pointer-events:none}
+.tk-black.tk-on{opacity:1;pointer-events:auto}
+.tk-burst{
+  position:absolute;left:50%;top:50%;width:130px;height:130px;margin:-65px 0 0 -65px;border-radius:50%;
+  background:radial-gradient(circle, rgba(255,218,226,.95) 0%, rgba(224,86,109,.78) 30%, rgba(150,40,70,.35) 55%, transparent 72%);
+  opacity:0;transform:scale(.15);pointer-events:none;filter:blur(1px);
+}
+.tk-burst.tk-on{opacity:1;transition:opacity .18s ease}
+.tk-burst.tk-go{transform:scale(var(--tk-scale,24));opacity:0;transition:transform 1.05s cubic-bezier(.17,.67,.35,1),opacity 1.05s ease-out}
+.tk-shards{position:absolute;inset:0}
+.tk-shard{
+  position:absolute;display:block;
+  background:linear-gradient(135deg,#1b0c11,#150a0e 60%,#200e14);
+  box-shadow:inset 0 0 0 .5px rgba(224,86,109,.13), inset -18px -26px 36px rgba(0,0,0,.35);
+}
+.tk-shards.tk-go .tk-shard{animation:tkFall .62s cubic-bezier(.45,.06,.55,.95) both;animation-delay:var(--d,0ms)}
+@keyframes tkFall{
+  from{transform:none;opacity:1}
+  to{transform:translate(var(--j,0px),var(--ty,8vh)) rotate(var(--r,4deg)) scale(.95);opacity:0}
+}
+.tk-splint{
+  position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:2.5px;
+  background:linear-gradient(135deg,#f6dede,#e0566d);opacity:0;
+  animation:tkSplint .9s ease-out both;
+}
+@keyframes tkSplint{
+  0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}
+  100%{opacity:0;transform:translate(var(--tx,40px),var(--ty,40px)) rotate(210deg) scale(.4)}
+}
+.tk-avatar-crack{animation:tkCrack .95s cubic-bezier(.34,1.56,.64,1)}
+@keyframes tkCrack{
+  0%{transform:scale(1.12);box-shadow:0 0 0 0 rgba(255,255,255,.9),0 0 0 10px rgba(224,86,109,.45)}
+  55%{transform:scale(.97)}
+  100%{transform:scale(1);box-shadow:0 0 0 26px rgba(224,86,109,0),0 0 0 34px rgba(224,86,109,0)}
+}
+html.tk-switching *{transition:none !important}
+
+@media (max-width:640px){
+  .tk-panel{right:12px;left:12px;width:auto;top:60px}
+}
+/* ================= /THEMEKIT ================= */
+
 /* —— 响应式 —— */
 @media (max-width:800px){
   .contacts{grid-template-columns:repeat(2,1fr)}
@@ -317,20 +471,35 @@ footer a:hover{text-decoration:underline}
 
 <nav class="nav" id="nav">
   <div class="nav-in">
-    <a class="brand" href="#top"><img src="avatar.png" alt="">星恬<span style="color:#9dbedd;font-weight:700"> · startian.top</span></a>
+    <a class="brand" href="#top"><img src="avatar.png" alt="" data-avatar>星恬<span class="brand-sub"> · startian.top</span></a>
     <div class="nav-links">
       <a href="#projects">项目</a>
       <a href="#achievements">成就</a>
       <a href="#about">关于</a>
       <a href="#contact">联系</a>
+      <button class="tk-btn" id="tkBtn" type="button" title="配色切换" aria-haspopup="dialog" aria-expanded="false">🕖</button>
     </div>
+  </div>
+  <div class="tk-panel" id="tkPanel" role="dialog" aria-label="配色设置">
+    <div class="tk-p-title">🎨 配色方案</div>
+    <div class="tk-seg" id="tkSeg">
+      <button type="button" data-mode="auto">🕖 跟随时间</button>
+      <button type="button" data-mode="light">☀️ 蓝白</button>
+      <button type="button" data-mode="dark">🌙 暗红</button>
+    </div>
+    <div class="tk-p-sub">自定义切换时刻（跟随时间模式生效）</div>
+    <div class="tk-times">
+      <label>☀️ 蓝白开始 <input type="time" id="tkLightAt" value="07:00"></label>
+      <label>🌙 暗红开始 <input type="time" id="tkDarkAt" value="19:00"></label>
+    </div>
+    <div class="tk-p-hint" id="tkHint"></div>
   </div>
 </nav>
 
 <div class="wrap" id="top">
 
   <section class="hero">
-    <div class="avatar reveal" style="--d:.02s"><img src="avatar.png" alt="星恬"></div>
+    <div class="avatar reveal" style="--d:.02s"><img src="avatar.png" alt="星恬" data-avatar></div>
     <div class="hero-eyebrow reveal" style="--d:.1s">STARTIAN.TOP</div>
     <h1 class="reveal" style="--d:.16s">星恬的小站</h1>
     <div class="hero-tag reveal" style="--d:.24s">下棋 · 画几何 · 捣鼓 AI 小玩意 —— 欢迎来逛逛</div>
@@ -641,6 +810,261 @@ footer a:hover{text-decoration:underline}
       hideDock();
     });
   });
+
+  /* ================= 🎨 THEMEKIT：主题引擎（可复用模块）================= */
+  var ThemeKit = (function () {
+    var $ = function (id) { return document.getElementById(id); };
+    var CFG = {
+      storageKey: 'startian_theme_v1',
+      defaultLightAt: '07:00',
+      defaultDarkAt: '19:00',
+      lightAvatar: 'avatar.png',
+      darkAvatar: 'avatar-dark.jpg',
+      themeColorLight: '#E6F7FF',
+      themeColorDark: '#1c0c12'
+    };
+    var state = { mode: 'auto', lightAt: CFG.defaultLightAt, darkAt: CFG.defaultDarkAt };
+    var current = 'light';
+    var busy = false;
+    var timers = [];
+    var stage = null, black = null, burst = null, shards = null;
+
+    function load() {
+      try {
+        var raw = localStorage.getItem(CFG.storageKey);
+        if (raw) {
+          var p = JSON.parse(raw);
+          if (p && typeof p === 'object') {
+            if (p.mode === 'auto' || p.mode === 'light' || p.mode === 'dark') state.mode = p.mode;
+            if (p.lightAt) state.lightAt = p.lightAt;
+            if (p.darkAt) state.darkAt = p.darkAt;
+          }
+        }
+      } catch (e) {}
+    }
+    function save() { try { localStorage.setItem(CFG.storageKey, JSON.stringify(state)); } catch (e) {} }
+    function toMin(hhmm) {
+      var p = String(hhmm || '').split(':');
+      var h = parseInt(p[0], 10), m = parseInt(p[1], 10);
+      if (isNaN(h) || isNaN(m)) return null;
+      return h * 60 + m;
+    }
+    function expectedByTime() {
+      var n = new Date(), t = n.getHours() * 60 + n.getMinutes();
+      var l = toMin(state.lightAt), d = toMin(state.darkAt);
+      if (l === null || d === null || l === d) return 'light';
+      var inLight = (l < d) ? (t >= l && t < d) : (t >= l || t < d);
+      return inLight ? 'light' : 'dark';
+    }
+    function expected() { return state.mode === 'auto' ? expectedByTime() : state.mode; }
+    function reduced() { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+    function spin(ms, fn) { var id = setTimeout(fn, ms); timers.push(id); return id; }
+
+    function ensureStage() {
+      if (stage) return;
+      stage = document.createElement('div'); stage.className = 'tk-stage';
+      black = document.createElement('div'); black.className = 'tk-black';
+      burst = document.createElement('div'); burst.className = 'tk-burst';
+      shards = document.createElement('div'); shards.className = 'tk-shards';
+      stage.appendChild(black); stage.appendChild(burst); stage.appendChild(shards);
+      document.body.appendChild(stage);
+    }
+    function setAvatar(theme) {
+      var src = theme === 'dark' ? CFG.darkAvatar : CFG.lightAvatar;
+      var imgs = document.querySelectorAll('img[data-avatar]');
+      for (var i = 0; i < imgs.length; i++) imgs[i].setAttribute('src', src);
+    }
+    function setThemeInstant(theme) {
+      current = theme;
+      document.documentElement.setAttribute('data-theme', theme);
+      setAvatar(theme);
+      var m = document.querySelector('meta[name="theme-color"]');
+      if (m) m.setAttribute('content', theme === 'dark' ? CFG.themeColorDark : CFG.themeColorLight);
+      syncUI();
+    }
+    function resetStage() {
+      document.documentElement.classList.remove('tk-switching');
+      if (stage) {
+        black.className = 'tk-black';
+        burst.className = 'tk-burst';
+        burst.style.left = ''; burst.style.top = ''; burst.style.removeProperty('--tk-scale');
+        shards.className = 'tk-shards';
+        shards.innerHTML = '';
+      }
+      busy = false;
+    }
+
+    /* —— 蓝白 → 暗红：黑幕 → 头像点亮 → 光晕扩散 —— */
+    function toDark() {
+      if (busy || current === 'dark') return;
+      busy = true;
+      ensureStage();
+      if (reduced()) { setThemeInstant('dark'); busy = false; return; }
+      document.documentElement.classList.add('tk-switching');
+      black.className = 'tk-black tk-on';                   // 1. 全黑
+      spin(600, function () {
+        setThemeInstant('dark');                            // 2. 黑幕下：换主题 + 换头像（新图）
+        var av = document.querySelector('.hero .avatar') || document.querySelector('img[data-avatar]');
+        var r = av ? av.getBoundingClientRect() : { left: window.innerWidth / 2, top: 120, width: 0, height: 0 };
+        var cx = Math.min(Math.max(r.left + r.width / 2, 40), window.innerWidth - 40);
+        var cy = Math.min(Math.max(r.top + r.height / 2, 60), window.innerHeight - 60);
+        var diag = Math.sqrt(window.innerWidth * window.innerWidth + window.innerHeight * window.innerHeight);
+        burst.style.left = cx + 'px'; burst.style.top = cy + 'px';
+        burst.style.setProperty('--tk-scale', (diag / 130 * 1.15).toFixed(2));
+        burst.className = 'tk-burst tk-on';                 // 3. 头像位置就绪
+        spin(90, function () {
+          black.className = 'tk-black';                     // 4. 黑幕退场
+          burst.classList.add('tk-go');                     //    光晕从头像扩散点亮
+        });
+      });
+      spin(600 + 90 + 1250, resetStage);
+    }
+
+    /* —— 暗红 → 蓝白：右上角起，逐块碎裂剥落 —— */
+    function toLight() {
+      if (busy || current === 'light') return;
+      busy = true;
+      ensureStage();
+      if (reduced()) { setThemeInstant('light'); busy = false; return; }
+      document.documentElement.classList.add('tk-switching');
+      var vw = window.innerWidth, vh = window.innerHeight;
+      var cols = Math.max(6, Math.round(vw / 150));
+      var rows = Math.max(4, Math.round(vh / 130));
+      var w = vw / cols, h = vh / rows;
+      var html = '';
+      for (var y = 0; y < rows; y++) {
+        for (var x = 0; x < cols; x++) {
+          var dx = (cols - 1 - x), dy = y;                  // 右上角为 0 → 最先剥落
+          var delay = Math.round((dx / Math.max(1, cols - 1)) * 260 + (dy / Math.max(1, rows - 1)) * 460 + Math.random() * 60);
+          var rot = (Math.random() * 14 - 7).toFixed(1);
+          var ty = (4 + Math.random() * 8).toFixed(1);
+          var jx = (Math.random() * 14 - 7).toFixed(1);
+          html += '<i class="tk-shard" style="left:' + (x * w).toFixed(1) + 'px;top:' + (y * h).toFixed(1) +
+            'px;width:' + (w + 0.6).toFixed(1) + 'px;height:' + (h + 0.6).toFixed(1) +
+            'px;--d:' + delay + 'ms;--r:' + rot + 'deg;--ty:' + ty + 'vh;--j:' + jx + 'px"></i>';
+        }
+      }
+      shards.innerHTML = html;                              // 1. 碎块瞬间铺满（此刻仍是暗色，无缝）
+      setThemeInstant('light');                             // 2. 底下换成蓝白
+      crackAvatar(document.querySelector('.hero .avatar')); // 3. 头像破碎特效
+      spin(60, function () { shards.className = 'tk-shards tk-go'; });  // 4. 逐块剥落
+      spin(60 + 460 + 700 + 550, resetStage);
+    }
+    function crackAvatar(av) {
+      if (!av) return;
+      av.classList.add('tk-avatar-crack');
+      var r = av.getBoundingClientRect();
+      for (var i = 0; i < 7; i++) {
+        (function (i) {
+          var sp = document.createElement('i');
+          sp.className = 'tk-splint';
+          var a = (i / 7) * Math.PI * 2 + Math.random() * 0.6;
+          sp.style.left = (r.left + r.width / 2) + 'px';
+          sp.style.top = (r.top + r.height / 2) + 'px';
+          sp.style.setProperty('--tx', (Math.cos(a) * (55 + Math.random() * 60)).toFixed(0) + 'px');
+          sp.style.setProperty('--ty', (Math.sin(a) * (55 + Math.random() * 60)).toFixed(0) + 'px');
+          sp.style.animationDelay = (80 + i * 26) + 'ms';
+          stage.appendChild(sp);
+          setTimeout(function () { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 1400);
+        })(i);
+      }
+      setTimeout(function () { av.classList.remove('tk-avatar-crack'); }, 1150);
+    }
+
+    function apply(theme, animate) {
+      if (busy) { spin(2300, function () { apply(expected(), true); }); return; }   // 动画中 → 排队，按最新期望重试
+      if (theme === current) { setThemeInstant(theme); return; }
+      if (animate && !reduced()) { (theme === 'dark' ? toDark : toLight)(); }
+      else setThemeInstant(theme);
+    }
+    function set(mode) {
+      state.mode = mode; save(); syncUI();
+      apply(state.mode === 'auto' ? expectedByTime() : mode, true);
+    }
+    function setTimes(l, d) {
+      if (toMin(l) !== null) state.lightAt = l;
+      if (toMin(d) !== null) state.darkAt = d;
+      save(); syncUI();
+      if (state.mode === 'auto') { var e = expectedByTime(); if (e !== current) apply(e, true); }
+    }
+    function checkAuto() {
+      if (state.mode !== 'auto' || busy) return;
+      var e = expectedByTime();
+      if (e !== current) apply(e, true);
+    }
+    function syncUI() {
+      var b = $('tkBtn');
+      if (b) b.textContent = state.mode === 'auto' ? '🕖' : (state.mode === 'dark' ? '🌙' : '☀️');
+      var seg = $('tkSeg');
+      if (seg) {
+        [].forEach.call(seg.querySelectorAll('button'), function (x) {
+          x.classList.toggle('on', x.getAttribute('data-mode') === state.mode);
+        });
+      }
+      var li = $('tkLightAt'), di = $('tkDarkAt');
+      if (li && document.activeElement !== li) li.value = state.lightAt;
+      if (di && document.activeElement !== di) di.value = state.darkAt;
+      var hint = $('tkHint');
+      if (hint) {
+        if (state.mode === 'auto') {
+          hint.textContent = '当前跟随时间：现在应为' + (expectedByTime() === 'dark' ? '暗红 🌙' : '蓝白 ☀️') +
+            ' · 蓝白 ' + state.lightAt + ' 起，暗红 ' + state.darkAt + ' 起';
+        } else {
+          hint.textContent = '已手动锁定为' + (state.mode === 'dark' ? '暗红 🌙' : '蓝白 ☀️') + '，不受时间影响';
+        }
+      }
+    }
+    function bindUI() {
+      var btn = $('tkBtn'), panel = $('tkPanel');
+      if (!btn || !panel) return;
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var open = panel.classList.toggle('show');
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      document.addEventListener('click', function (e) {
+        if (panel.classList.contains('show') && !panel.contains(e.target) && e.target !== btn) {
+          panel.classList.remove('show');
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && panel.classList.contains('show')) {
+          panel.classList.remove('show');
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+      var seg = $('tkSeg');
+      if (seg) {
+        [].forEach.call(seg.querySelectorAll('button'), function (x) {
+          x.addEventListener('click', function () { set(x.getAttribute('data-mode')); });
+        });
+      }
+      var li = $('tkLightAt'), di = $('tkDarkAt');
+      if (li) li.addEventListener('change', function () { setTimes(li.value, di.value); });
+      if (di) di.addEventListener('change', function () { setTimes(li.value, di.value); });
+    }
+
+    load();
+    setThemeInstant(expected());
+    bindUI();
+    setInterval(checkAuto, 30000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) checkAuto(); });
+
+    return {
+      state: state,
+      getCurrent: function () { return current; },
+      set: set,
+      setTimes: setTimes,
+      apply: apply,
+      checkAuto: checkAuto,
+      expectedByTime: expectedByTime,
+      _toDark: toDark,
+      _toLight: toLight
+    };
+  })();
+  window.ThemeKit = ThemeKit;   // 对外暴露：其他项目可按同款方式接入
+  /* ================= /THEMEKIT ================= */
 })();
 </script>
 </body>
