@@ -391,6 +391,7 @@ footer a:hover{text-decoration:underline}
 .tk-stage{position:fixed;inset:0;z-index:200;pointer-events:none;overflow:hidden}
 .tk-black{position:absolute;inset:0;background:#0a0507;opacity:0;transition:opacity .7s ease;pointer-events:none}
 .tk-black.tk-on{opacity:1;pointer-events:auto}
+.tk-black.tk-light{background:linear-gradient(165deg,#ffffff 0%,#f3faff 45%,#dbf0fe 100%)}
 .tk-ring{
   position:absolute;border-radius:50%;box-sizing:border-box;
   border:3px solid rgba(255,206,216,.95);
@@ -401,6 +402,21 @@ footer a:hover{text-decoration:underline}
 .tk-ring.tk-on{opacity:1}
 .tk-ring.tk-pulse{transform:scale(1.16)}
 .tk-ring.tk-out{opacity:0;transform:scale(1.3)}
+.tk-ring.tk-light{
+  border-color:rgba(255,255,255,.95);
+  box-shadow:0 0 0 1px rgba(137,194,255,.5) inset, 0 0 30px 6px rgba(180,220,255,.65), 0 0 70px 18px rgba(180,220,255,.35);
+}
+.tk-halo{
+  position:absolute;border-radius:50%;box-sizing:border-box;pointer-events:none;opacity:0;
+  border:2px solid rgba(255,206,216,.9);
+  box-shadow:0 0 22px 5px rgba(224,86,109,.55), 0 0 60px 16px rgba(224,86,109,.28), inset 0 0 22px rgba(224,86,109,.4);
+  transition:opacity .25s ease;
+}
+.tk-halo.tk-on{opacity:1}
+.tk-halo.tk-light{
+  border-color:rgba(255,255,255,.95);
+  box-shadow:0 0 22px 5px rgba(255,255,255,.7), 0 0 60px 16px rgba(180,220,255,.4), inset 0 0 22px rgba(255,255,255,.5);
+}
 .tk-shards{position:absolute;inset:0}
 .tk-shard{
   position:absolute;display:block;
@@ -431,6 +447,7 @@ footer a:hover{text-decoration:underline}
 html.tk-switching *{transition:none !important}
 html.tk-switching .tk-black{transition:opacity .7s ease !important}
 html.tk-switching .tk-ring{transition:opacity .22s ease,transform .4s cubic-bezier(.22,.9,.28,1) !important}
+html.tk-switching .tk-halo{transition:opacity .25s ease !important}
 
 @media (max-width:640px){
   .tk-panel{right:12px;left:12px;width:auto;top:60px}
@@ -833,7 +850,7 @@ html.tk-switching .tk-ring{transition:opacity .22s ease,transform .4s cubic-bezi
     var current = 'light';
     var busy = false;
     var timers = [];
-    var stage = null, black = null, ring = null, shards = null;
+    var stage = null, black = null, ring = null, halo = null, shards = null;
 
     function load() {
       try {
@@ -871,8 +888,9 @@ html.tk-switching .tk-ring{transition:opacity .22s ease,transform .4s cubic-bezi
       stage = document.createElement('div'); stage.className = 'tk-stage';
       black = document.createElement('div'); black.className = 'tk-black';
       ring = document.createElement('div'); ring.className = 'tk-ring';
+      halo = document.createElement('div'); halo.className = 'tk-halo';
       shards = document.createElement('div'); shards.className = 'tk-shards';
-      stage.appendChild(black); stage.appendChild(ring); stage.appendChild(shards);
+      stage.appendChild(black); stage.appendChild(ring); stage.appendChild(halo); stage.appendChild(shards);
       document.body.appendChild(stage);
     }
     function setAvatar(theme) {
@@ -900,6 +918,7 @@ html.tk-switching .tk-ring{transition:opacity .22s ease,transform .4s cubic-bezi
           }, 780);
         }
         ring.className = 'tk-ring'; ring.style.cssText = '';
+        halo.className = 'tk-halo'; halo.style.cssText = '';
         shards.className = 'tk-shards';
         shards.innerHTML = '';
       }
@@ -920,26 +939,30 @@ html.tk-switching .tk-ring{transition:opacity .22s ease,transform .4s cubic-bezi
       requestAnimationFrame(frame);
     }
     function setHole(x, y, r) {
+      var f = Math.min(64, Math.max(12, r * 0.38));   // 羽化带宽：边缘渐变过渡更柔和
       var m = 'radial-gradient(circle at ' + x.toFixed(1) + 'px ' + y.toFixed(1) + 'px, transparent ' +
-        Math.max(0, r - 1.5).toFixed(1) + 'px, #000 ' + (r + 1.5).toFixed(1) + 'px)';
+        Math.max(0, r - f).toFixed(1) + 'px, #000 ' + (r + f).toFixed(1) + 'px)';
       black.style.webkitMaskImage = m;
       black.style.maskImage = m;
     }
+    function setHalo(x, y, r) {
+      halo.style.left = (x - r) + 'px'; halo.style.top = (y - r) + 'px';
+      halo.style.width = (r * 2) + 'px'; halo.style.height = (r * 2) + 'px';
+    }
 
-    /* —— 蓝白 → 暗红：界面渐隐 → 头像点亮 → 沿头像边缘扩散 —— */
-    function toDark() {
-      if (busy || current === 'dark') return;
-      busy = true;
-      ensureStage();
-      if (reduced()) { setThemeInstant('dark'); busy = false; return; }
+    /* —— 双向共用：幕布渐隐 → 头像点亮 → 沿头像边缘扩散（含晕线）——
+         dark = 黑幕·玫瑰光晕；light = 白幕（匹配蓝白主题）·雪蓝光晕 —— */
+    function runCurtain(theme) {
+      var dark = (theme === 'dark');
       document.documentElement.classList.add('tk-switching');
-      // 清掉可能残留的 mask（快速连切时上一轮的延迟清理可能还没执行）
+      black.className = 'tk-black' + (dark ? '' : ' tk-light');
       black.style.webkitMaskImage = '';
       black.style.maskImage = '';
-      // rAF 后再挂 tk-on：保证黑幕走渐隐过渡（新元素同帧改类不会触发过渡；舞台已预创建则更稳）
-      requestAnimationFrame(function () { black.className = 'tk-black tk-on'; });   // ① 当前界面渐隐消失（0.7s）
+      ring.className = 'tk-ring' + (dark ? '' : ' tk-light');
+      // rAF 后再挂 tk-on：保证幕布走渐隐过渡（舞台已预创建，首切也平滑）
+      requestAnimationFrame(function () { black.classList.add('tk-on'); });   // ① 当前界面渐隐进幕布（0.7s）
       spin(780, function () {
-        setThemeInstant('dark');                              // ② 黑幕下：换主题 + 换上新头像
+        setThemeInstant(theme);                              // ② 幕布下：换主题 + 换上新头像
         var av = document.querySelector('.hero .avatar') || document.querySelector('img[data-avatar]');
         var r = av ? av.getBoundingClientRect() : { left: window.innerWidth / 2 - 44, top: 110, width: 88, height: 88 };
         var cx = Math.min(Math.max(r.left + r.width / 2, 60), window.innerWidth - 60);
@@ -947,21 +970,33 @@ html.tk-switching .tk-ring{transition:opacity .22s ease,transform .4s cubic-bezi
         var avR = Math.max(40, (r.width || 88) / 2);
         ring.style.left = (cx - avR) + 'px'; ring.style.top = (cy - avR) + 'px';
         ring.style.width = (avR * 2) + 'px'; ring.style.height = (avR * 2) + 'px';
-        ring.className = 'tk-ring tk-on tk-pulse';            // ③ 头像点亮（光环围绕头像边缘脉冲）
+        ring.className = 'tk-ring' + (dark ? '' : ' tk-light') + ' tk-on tk-pulse';   // ③ 头像点亮（光环脉冲）
         anim(540, easeOutCubic, function (p) { setHole(cx, cy, (avR + 26) * p); });
         spin(540 + 170, function () {
-          ring.className = 'tk-ring tk-on tk-out';
+          ring.classList.add('tk-out');
           var maxR = Math.hypot(Math.max(cx, window.innerWidth - cx), Math.max(cy, window.innerHeight - cy)) + 100;
           var from = avR + 26;
-          // ④ 黑暗沿着头像边缘向外扩散溶解
-          anim(900, easeInOutCubic, function (p) { setHole(cx, cy, from + (maxR - from) * p); }, resetStage);
+          halo.className = 'tk-halo' + (dark ? '' : ' tk-light') + ' tk-on';          // ④ 扩散晕线随行
+          setHalo(cx, cy, from);
+          anim(900, easeInOutCubic, function (p) {
+            var rr = from + (maxR - from) * p;
+            setHole(cx, cy, rr);                             //    幕布沿头像边缘扩散溶解
+            setHalo(cx, cy, rr);                             //    晕线跟随扩散边缘
+          }, function () { halo.classList.remove('tk-on'); resetStage(); });
         });
       });
       spin(780 + 540 + 170 + 920 + 250, resetStage);
     }
+    function toDark() {
+      if (busy || current === 'dark') return;
+      busy = true;
+      ensureStage();
+      if (reduced()) { setThemeInstant('dark'); busy = false; return; }
+      runCurtain('dark');
+    }
 
-    /* —— 暗红 → 蓝白：界面由上至下逐排碎裂剥落 —— */
-    function toLight() {
+    /* —— 备选：碎裂剥落版（v3 自上而下）——当前未启用；想恢复：把 toLight 里的 runCurtain('light') 换回 shatterToLight() —— */
+    function shatterToLight() {
       if (busy || current === 'light') return;
       busy = true;
       ensureStage();
@@ -1010,6 +1045,14 @@ html.tk-switching .tk-ring{transition:opacity .22s ease,transform .4s cubic-bezi
       spin(crackAt, function () { crackAvatar(avEl); });
       spin(80, function () { shards.className = 'tk-shards tk-go'; });   // ④ 由上至下逐排错落剥落
       spin(80 + 1000 + 200 + 70 + 920 + 550, resetStage);
+    }
+    /* —— 暗红 → 蓝白：与暗红方向同款机制 —— 白色幕布 → 头像点亮 → 沿头像边缘扩散（晕线）—— */
+    function toLight() {
+      if (busy || current === 'light') return;
+      busy = true;
+      ensureStage();
+      if (reduced()) { setThemeInstant('light'); busy = false; return; }
+      runCurtain('light');
     }
     function crackAvatar(av) {
       if (!av) return;
