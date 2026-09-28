@@ -951,7 +951,20 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     }
 
     /* —— 双向共用：幕布渐隐 → 头像点亮 → 沿头像边缘扩散（含晕线）——
-         dark = 黑幕·玫瑰光晕；light = 白幕（匹配蓝白主题）·雪蓝光晕 —— */
+         dark = 黑幕·玫瑰光晕；light = 白幕（匹配蓝白主题）·雪蓝光晕
+         头像位置每帧实时跟随（头像有浮动动画/页面偏移也不会对不齐）；
+         头像不在视口时不做「空洞+停留」，直接从屏幕边沿平滑扩散 —— */
+    function avatarInfo() {
+      var av = document.querySelector('.hero .avatar') || document.querySelector('img[data-avatar]');
+      if (!av) return null;
+      var r = av.getBoundingClientRect();
+      var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      return {
+        cx: cx, cy: cy,
+        R: Math.max(40, (r.width || 88) / 2),
+        vis: (r.width > 0 && cx > 8 && cx < window.innerWidth - 8 && cy > -8 && cy < window.innerHeight + 8)
+      };
+    }
     function runCurtain(theme) {
       var dark = (theme === 'dark');
       document.documentElement.classList.add('tk-switching');
@@ -961,29 +974,52 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       ring.className = 'tk-ring' + (dark ? '' : ' tk-light');
       // rAF 后再挂 tk-on：保证幕布走渐隐过渡（舞台已预创建，首切也平滑）
       requestAnimationFrame(function () { black.classList.add('tk-on'); });   // ① 当前界面渐隐进幕布（0.7s）
+      var lightCls = (dark ? '' : ' tk-light');
+      function anchor() {
+        var a = avatarInfo();
+        if (!a) return { cx: window.innerWidth / 2, cy: window.innerHeight / 2, R: 44, vis: false };
+        if (!a.vis) {   // 不在视口 → 锚点钳到屏幕边沿（波浪从边上自然涌入）
+          a.cx = Math.min(Math.max(a.cx, 0), window.innerWidth);
+          a.cy = Math.min(Math.max(a.cy, 0), window.innerHeight);
+        }
+        return a;
+      }
       spin(780, function () {
         setThemeInstant(theme);                              // ② 幕布下：换主题 + 换上新头像
-        var av = document.querySelector('.hero .avatar') || document.querySelector('img[data-avatar]');
-        var r = av ? av.getBoundingClientRect() : { left: window.innerWidth / 2 - 44, top: 110, width: 88, height: 88 };
-        var cx = Math.min(Math.max(r.left + r.width / 2, 60), window.innerWidth - 60);
-        var cy = Math.min(Math.max(r.top + r.height / 2, 70), window.innerHeight - 70);
-        var avR = Math.max(40, (r.width || 88) / 2);
-        ring.style.left = (cx - avR) + 'px'; ring.style.top = (cy - avR) + 'px';
-        ring.style.width = (avR * 2) + 'px'; ring.style.height = (avR * 2) + 'px';
-        ring.className = 'tk-ring' + (dark ? '' : ' tk-light') + ' tk-on tk-pulse';   // ③ 头像点亮（光环脉冲）
-        anim(540, easeOutCubic, function (p) { setHole(cx, cy, (avR + 26) * p); });
-        spin(540 + 170, function () {
-          ring.classList.add('tk-out');
-          var maxR = Math.hypot(Math.max(cx, window.innerWidth - cx), Math.max(cy, window.innerHeight - cy)) + 100;
-          var from = avR + 26;
-          halo.className = 'tk-halo' + (dark ? '' : ' tk-light') + ' tk-on';          // ④ 扩散晕线随行
-          setHalo(cx, cy, from);
-          anim(900, easeInOutCubic, function (p) {
-            var rr = from + (maxR - from) * p;
-            setHole(cx, cy, rr);                             //    幕布沿头像边缘扩散溶解
-            setHalo(cx, cy, rr);                             //    晕线跟随扩散边缘
+        var a0 = anchor();
+        if (a0.vis) {
+          // —— 头像可见：光环点亮 → 停留看清 → 沿头像边缘扩散 ——
+          ring.className = 'tk-ring' + lightCls + ' tk-on tk-pulse';   // ③ 头像点亮（光环脉冲）
+          anim(540, easeOutCubic, function (p) {
+            var a = anchor();                                 // 每帧跟随头像（含浮动偏移）
+            ring.style.left = (a.cx - a.R - 4) + 'px'; ring.style.top = (a.cy - a.R - 4) + 'px';
+            ring.style.width = (a.R * 2 + 8) + 'px'; ring.style.height = (a.R * 2 + 8) + 'px';
+            setHole(a.cx, a.cy, (a.R + 26) * p);
+          });
+          spin(540 + 170, function () {
+            ring.classList.add('tk-out');
+            var a = anchor();
+            var maxR = Math.hypot(Math.max(a.cx, window.innerWidth - a.cx), Math.max(a.cy, window.innerHeight - a.cy)) + 100;
+            var from = a.R + 26;
+            halo.className = 'tk-halo' + lightCls + ' tk-on';          // ④ 扩散晕线随行
+            anim(900, easeInOutCubic, function (p) {
+              var a2 = anchor();
+              var rr = from + (maxR - from) * p;
+              setHole(a2.cx, a2.cy, rr);                     //    幕布沿头像边缘扩散溶解
+              setHalo(a2.cx, a2.cy, rr);                     //    晕线跟随扩散边缘
+            }, function () { halo.classList.remove('tk-on'); resetStage(); });
+          });
+        } else {
+          // —— 头像不在视口：无光环、不停留，从屏幕边沿直接扩散溶解 ——
+          var maxR = Math.hypot(Math.max(a0.cx, window.innerWidth - a0.cx), Math.max(a0.cy, window.innerHeight - a0.cy)) + 100;
+          halo.className = 'tk-halo' + lightCls + ' tk-on';
+          setHalo(a0.cx, a0.cy, 40);
+          anim(1100, easeInOutCubic, function (p) {
+            var rr = 40 + (maxR - 40) * p;
+            setHole(a0.cx, a0.cy, rr);
+            setHalo(a0.cx, a0.cy, rr);
           }, function () { halo.classList.remove('tk-on'); resetStage(); });
-        });
+        }
       });
       spin(780 + 540 + 170 + 920 + 250, resetStage);
     }
