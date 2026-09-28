@@ -407,9 +407,10 @@ footer a:hover{text-decoration:underline}
   background:#170a0e;
   filter:brightness(1);
 }
-.tk-shards.tk-go .tk-shard{animation:tkFall .8s cubic-bezier(.45,.06,.55,.95) both;animation-delay:var(--d,0ms)}
+.tk-shards.tk-go .tk-shard{animation:tkFall .92s cubic-bezier(.32,.08,.5,.95) both;animation-delay:var(--d,0ms)}
 @keyframes tkFall{
   from{transform:none;opacity:1}
+  60%{opacity:.92}
   to{transform:translate(var(--j,0px),var(--ty,8vh)) rotate(var(--r,4deg)) scale(var(--s,1));opacity:0}
 }
 .tk-splint{
@@ -428,6 +429,8 @@ footer a:hover{text-decoration:underline}
   100%{transform:scale(1);box-shadow:0 0 0 26px rgba(224,86,109,0),0 0 0 34px rgba(224,86,109,0)}
 }
 html.tk-switching *{transition:none !important}
+html.tk-switching .tk-black{transition:opacity .7s ease !important}
+html.tk-switching .tk-ring{transition:opacity .22s ease,transform .4s cubic-bezier(.22,.9,.28,1) !important}
 
 @media (max-width:640px){
   .tk-panel{right:12px;left:12px;width:auto;top:60px}
@@ -889,7 +892,13 @@ html.tk-switching *{transition:none !important}
       document.documentElement.classList.remove('tk-switching');
       if (stage) {
         black.className = 'tk-black';
-        black.style.webkitMaskImage = ''; black.style.maskImage = '';
+        if (black.style.webkitMaskImage || black.style.maskImage) {
+          // 等淡出走完再清 mask，避免「揭幕刚完又被黑幕重新盖住」的片尾闪帧
+          setTimeout(function () {
+            black.style.webkitMaskImage = '';
+            black.style.maskImage = '';
+          }, 780);
+        }
         ring.className = 'tk-ring'; ring.style.cssText = '';
         shards.className = 'tk-shards';
         shards.innerHTML = '';
@@ -924,7 +933,11 @@ html.tk-switching *{transition:none !important}
       ensureStage();
       if (reduced()) { setThemeInstant('dark'); busy = false; return; }
       document.documentElement.classList.add('tk-switching');
-      black.className = 'tk-black tk-on';                     // ① 当前界面渐隐消失（渐入全黑 0.7s）
+      // 清掉可能残留的 mask（快速连切时上一轮的延迟清理可能还没执行）
+      black.style.webkitMaskImage = '';
+      black.style.maskImage = '';
+      // rAF 后再挂 tk-on：保证黑幕走渐隐过渡（新元素同帧改类不会触发过渡；舞台已预创建则更稳）
+      requestAnimationFrame(function () { black.className = 'tk-black tk-on'; });   // ① 当前界面渐隐消失（0.7s）
       spin(780, function () {
         setThemeInstant('dark');                              // ② 黑幕下：换主题 + 换上新头像
         var av = document.querySelector('.hero .avatar') || document.querySelector('img[data-avatar]');
@@ -947,7 +960,7 @@ html.tk-switching *{transition:none !important}
       spin(780 + 540 + 170 + 920 + 250, resetStage);
     }
 
-    /* —— 暗红 → 蓝白：界面从右上角起碎裂剥落 —— */
+    /* —— 暗红 → 蓝白：界面由上至下逐排碎裂剥落 —— */
     function toLight() {
       if (busy || current === 'light') return;
       busy = true;
@@ -964,8 +977,10 @@ html.tk-switching *{transition:none !important}
       var html = '';
       for (var y = 0; y < rows; y++) {
         for (var x = 0; x < cols; x++) {
-          var dxN = (cols - 1 - x) / Math.max(1, cols - 1), dyN = y / Math.max(1, rows - 1);
-          var base = Math.round(dxN * 380 + dyN * 620 + Math.random() * 90);   // 右上角最先落
+          // 由上至下逐排触发；行内左→右小错落（隔行砖式错位）；随机抖动让节奏更自然
+          var rowDelay = (y / Math.max(1, rows - 1)) * 1000;
+          var colDelay = (((x + (y % 2)) % cols) / Math.max(1, cols - 1)) * 200;
+          var base = Math.round(rowDelay + colDelay + Math.random() * 70);
           var px = (x * w).toFixed(1), py = (y * h).toFixed(1);
           var bw = (w + 1.4).toFixed(1), bh = (h + 1.4).toFixed(1);
           var bg = 'background-image:' + SHEET + ';background-size:100vw 100vh;background-position:-' + px + 'px -' + py + 'px;';
@@ -989,9 +1004,12 @@ html.tk-switching *{transition:none !important}
       }
       shards.innerHTML = html;                                // ① 暗红界面碎裂成片（碎片纹理 = 界面本身）
       setThemeInstant('light');                               // ② 碎片之下换成蓝白
-      crackAvatar(document.querySelector('.hero .avatar'));   // ③ 头像破碎显现
-      spin(80, function () { shards.className = 'tk-shards tk-go'; });   // ④ 从右上角开始逐片剥落
-      spin(80 + 380 + 620 + 90 + 800 + 550, resetStage);
+      var avEl = document.querySelector('.hero .avatar');     // ③ 头像与它所在那一排同步破碎显现
+      var avTop = avEl ? avEl.getBoundingClientRect().top : 0;
+      var crackAt = Math.round(Math.max(0, Math.min(1, avTop / vh)) * 1000);
+      spin(crackAt, function () { crackAvatar(avEl); });
+      spin(80, function () { shards.className = 'tk-shards tk-go'; });   // ④ 由上至下逐排错落剥落
+      spin(80 + 1000 + 200 + 70 + 920 + 550, resetStage);
     }
     function crackAvatar(av) {
       if (!av) return;
@@ -1089,6 +1107,7 @@ html.tk-switching *{transition:none !important}
     }
 
     load();
+    ensureStage();                // 舞台预创建：让黑幕/光环从第一次起就带过渡动画（避免首切瞬跳）
     setThemeInstant(expected());
     bindUI();
     setInterval(checkAuto, 30000);
