@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<script>document.documentElement.classList.add('js');(function(){try{var p=JSON.parse(localStorage.getItem('startian_theme_v1')||'{}');var m=p.mode||'auto',t=m;if(m==='auto'){var n=new Date(),x=n.getHours()*60+n.getMinutes();var l=((p.lightAt||'07:00')+'').split(':'),d=((p.darkAt||'19:00')+'').split(':');var lm=(+l[0])*60+(+l[1]||0),dm=(+d[0])*60+(+d[1]||0);t=(lm<dm)?((x>=lm&&x<dm)?'light':'dark'):((x>=lm||x<dm)?'light':'dark');}document.documentElement.setAttribute('data-theme',t);if(t==='dark'){var ln=document.createElement('link');ln.rel='preload';ln.as='image';ln.href='avatar-dark.jpg';document.head.appendChild(ln);}}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
+<script>document.documentElement.classList.add('js');(function(){try{var p=JSON.parse(localStorage.getItem('startian_theme_v1')||'{}');var m=p.mode||'auto',t=m;if(m==='auto'){var n=new Date(),x=n.getHours()*60+n.getMinutes();var l=((p.lightAt||'07:00')+'').split(':'),d=((p.darkAt||'19:00')+'').split(':');var lm=(+l[0])*60+(+l[1]||0),dm=(+d[0])*60+(+d[1]||0);t=(lm<dm)?((x>=lm&&x<dm)?'light':'dark'):((x>=lm||x<dm)?'light':'dark');}document.documentElement.setAttribute('data-theme',t);var avp=t==='dark'?'avatar-dark.jpg':(t==='purple'?'avatar-purple.jpg':'');if(avp){var ln=document.createElement('link');ln.rel='preload';ln.as='image';ln.href=avp;document.head.appendChild(ln);}}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>星恬的小站 · startian.top</title>
 <meta name="description" content="星恬的小站 —— 下棋、画几何、捣鼓 AI 小玩意。五子棋、几何工坊与更多作品在此。">
@@ -296,10 +296,10 @@ footer a:hover{text-decoration:underline}
 }
 .tk-panel.show{opacity:1;transform:none;pointer-events:auto}
 .tk-p-title{font-size:13.5px;font-weight:800;letter-spacing:.5px;color:var(--ink)}
-.tk-seg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:12px}
+.tk-seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
 .tk-seg button{
-  padding:9px 4px;border-radius:12px;border:1.5px solid var(--line);background:#f7fbff;
-  font-size:12px;font-weight:700;color:var(--ink2);cursor:pointer;font-family:inherit;
+  padding:9px 2px;border-radius:12px;border:1.5px solid var(--line);background:#f7fbff;
+  font-size:11.5px;font-weight:700;color:var(--ink2);cursor:pointer;font-family:inherit;
   transition:all .18s ease;white-space:nowrap;
 }
 .tk-seg button:hover{border-color:#a6d1f8}
@@ -387,6 +387,79 @@ footer a:hover{text-decoration:underline}
 [data-theme="dark"] .ach-item .an{color:#f0d9a8}
 [data-theme="dark"] .ach-item .ad{color:#c9a86a}
 
+/* —— 梦幻紫 —— */
+[data-theme="purple"]{
+  --bg1:#130d20; --bg2:#1d1332;
+  --card:#1e1533; --tint:#251a3e;
+  --line:#3d2b5e; --line2:#2f2150;
+  --ink:#f2ecff; --ink2:#cbb9ec; --ink3:#9d88c4;
+  --accent:#8b5cf6; --accent-deep:#a78bfa;
+  --sh-sm:0 1px 2px rgba(0,0,0,.45), 0 10px 28px rgba(20,8,45,.5);
+  --sh-lg:0 2px 4px rgba(0,0,0,.55), 0 24px 50px rgba(20,8,45,.6);
+}
+[data-theme="purple"] body{
+  background:radial-gradient(1400px 700px at 50% -120px, #2e1f52 0%, #16102a 45%, #0b0716 100%);
+}
+[data-theme="purple"] ::selection{background:#3d2b5e}
+[data-theme="purple"] .loadbar{background:linear-gradient(90deg,#8b5cf6,#a78bfa,#d8b4fe)}
+[data-theme="purple"] .nav{background:rgba(19,13,32,.72);border-bottom-color:rgba(61,43,94,.7)}
+[data-theme="purple"] .nav.scrolled{background:rgba(19,13,32,.88)}
+[data-theme="purple"] .brand-sub{color:#9d88c4}
+[data-theme="purple"] .brand img{box-shadow:0 0 0 1.5px #1e1533,0 0 0 2.5px #3d2b5e}
+[data-theme="purple"] .nav-links a{color:#cbb9ec}
+[data-theme="purple"] .nav-links a:hover{color:#d8b4fe;background:#251a3e}
+[data-theme="purple"] .tk-btn{background:#1e1533}
+[data-theme="purple"] .tk-btn:hover{border-color:#6d4db3}
+[data-theme="purple"] .tk-panel{background:rgba(24,16,42,.95);border-color:#3d2b5e}
+[data-theme="purple"] .tk-seg button{background:#251a3e;border-color:#3d2b5e;color:#cbb9ec}
+[data-theme="purple"] .tk-seg button:hover{border-color:#6d4db3}
+[data-theme="purple"] .tk-seg button.on{border-color:#a78bfa;background:#2d1f4f;color:#d8b4fe}
+[data-theme="purple"] .tk-times input{background:#251a3e;border-color:#3d2b5e;color:#f2ecff}
+[data-theme="purple"] .blob{opacity:.42}
+[data-theme="purple"] .blob.b1{background:radial-gradient(circle,#5b3fa0,transparent 70%)}
+[data-theme="purple"] .blob.b2{background:radial-gradient(circle,#7c5cd6,transparent 70%)}
+[data-theme="purple"] .blob.b3{background:radial-gradient(circle,#462d85,transparent 70%)}
+[data-theme="purple"] .hero h1{
+  background:linear-gradient(110deg,#f2ecff 20%,#a78bfa 42%,#d8b4fe 52%,#f2ecff 72%);
+  background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+[data-theme="purple"] .hero-eyebrow{color:#9d88c4}
+[data-theme="purple"] .hero .avatar{box-shadow:0 16px 36px rgba(0,0,0,.55),0 0 0 4px #1e1533,0 0 0 6px #3d2b5e}
+[data-theme="purple"] .hero .avatar:hover{box-shadow:0 20px 42px rgba(0,0,0,.65),0 0 0 4px #1e1533,0 0 0 7px #6d4db3}
+[data-theme="purple"] .btn-p{background:linear-gradient(180deg,#9d6ef8,#7440d6);box-shadow:0 5px 0 #4b2e8c,0 14px 26px rgba(80,45,150,.5)}
+[data-theme="purple"] .btn-p:hover{box-shadow:0 6px 0 #4b2e8c,0 16px 30px rgba(80,45,150,.55)}
+[data-theme="purple"] .btn-p:active{box-shadow:0 2px 0 #4b2e8c}
+[data-theme="purple"] .btn-g{background:#1e1533;border-color:#3d2b5e;color:#d8b4fe}
+[data-theme="purple"] .btn-g:hover{background:#251a3e;border-color:#6d4db3}
+[data-theme="purple"] .marquee-track span{color:#b39ddb}
+[data-theme="purple"] .marquee-track span em{color:#7867a8}
+[data-theme="purple"] .sec-eyebrow{color:#9d88c4}
+[data-theme="purple"] .tile:hover{border-color:#6d4db3}
+[data-theme="purple"] .tile-media{box-shadow:0 10px 26px rgba(0,0,0,.5)}
+[data-theme="purple"] .ptag{color:#d8b4fe;background:#2d1f4f;border-color:#463382}
+[data-theme="purple"] .about,[data-theme="purple"] .intro{background:linear-gradient(160deg,#191129,#1e1533)}
+[data-theme="purple"] .chip{background:#251a3e;border-color:#3d2b5e;color:#cbb9ec}
+[data-theme="purple"] .chip:hover{border-color:#6d4db3}
+[data-theme="purple"] .ach-app{background:linear-gradient(165deg,#20162e,#1b1228);border-color:#4a3560}
+[data-theme="purple"] .ach-app:hover{border-color:#6d4db3}
+[data-theme="purple"] .aa-count{background:#2b2010;border-color:#5f3d1c;color:#e2b34d}
+[data-theme="purple"] .aa-chips span{background:#241a2e;border-color:#4a3560;color:#c9b8e8}
+[data-theme="purple"] .ct:hover{border-color:#6d4db3}
+[data-theme="purple"] .ct-ico{background:linear-gradient(150deg,#251a3e,#2b1f4a);box-shadow:inset 0 0 0 1px #3d2b5e}
+[data-theme="purple"] .ct:focus-visible{outline-color:#a78bfa}
+[data-theme="purple"] .placeholder{border-color:#3d2b5e;color:#9d88c4}
+[data-theme="purple"] footer{color:#9d88c4;border-top-color:#2f2150}
+[data-theme="purple"] .dock{background:linear-gradient(165deg,#1e1533,#251a3e);border-color:#3d2b5e}
+[data-theme="purple"] .dock .tag{color:#d8b4fe;background:#2d1f4f;border-color:#463382}
+[data-theme="purple"] .dock .dhint{color:#9d88c4}
+[data-theme="purple"] .toast{background:rgba(45,28,80,.96)}
+[data-theme="purple"] .ach-banner{background:linear-gradient(135deg,#2b2010,#3a2410);border-color:#5f3d1c}
+[data-theme="purple"] .ach-banner .t2{color:#f0d9a8}
+[data-theme="purple"] .ach-banner .t3{color:#c9a86a}
+[data-theme="purple"] .ach-item{background:#241a2e;border-color:#4a3560}
+[data-theme="purple"] .ach-item .an{color:#e8d9ff}
+[data-theme="purple"] .ach-item .ad{color:#b39ddb}
+
 /* —— 转场舞台（蓝↔红）—— */
 .tk-stage{position:fixed;inset:0;z-index:200;pointer-events:none;overflow:hidden}
 .tk-black{position:absolute;inset:0;background:#0a0507;opacity:0;transition:opacity .7s ease;pointer-events:none}
@@ -416,6 +489,15 @@ footer a:hover{text-decoration:underline}
 .tk-halo.tk-light{
   border-color:rgba(255,255,255,.95);
   box-shadow:0 0 22px 5px rgba(255,255,255,.7), 0 0 60px 16px rgba(180,220,255,.4), inset 0 0 22px rgba(255,255,255,.5);
+}
+/* 梦幻紫转场光晕 */
+.tk-ring.tk-purple{
+  border-color:rgba(233,213,255,.95);
+  box-shadow:0 0 0 1px rgba(167,139,250,.6) inset, 0 0 30px 6px rgba(167,139,250,.6), 0 0 70px 18px rgba(139,92,246,.35);
+}
+.tk-halo.tk-purple{
+  border-color:rgba(233,213,255,.92);
+  box-shadow:0 0 22px 5px rgba(167,139,250,.6), 0 0 60px 16px rgba(139,92,246,.32), inset 0 0 22px rgba(167,139,250,.45);
 }
 .tk-shards{position:absolute;inset:0}
 .tk-shard{
@@ -506,9 +588,10 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
   <div class="tk-panel" id="tkPanel" role="dialog" aria-label="配色设置">
     <div class="tk-p-title">🎨 配色方案</div>
     <div class="tk-seg" id="tkSeg">
-      <button type="button" data-mode="auto">🕖 跟随时间</button>
+      <button type="button" data-mode="auto">🕖 自动</button>
       <button type="button" data-mode="light">☀️ 蓝白</button>
       <button type="button" data-mode="dark">🌙 暗红</button>
+      <button type="button" data-mode="purple">🔮 梦幻紫</button>
     </div>
     <div class="tk-p-sub">自定义切换时刻（跟随时间模式生效）</div>
     <div class="tk-times">
@@ -846,8 +929,10 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       defaultDarkAt: '19:00',
       lightAvatar: 'avatar.png',
       darkAvatar: 'avatar-dark.jpg',
+      purpleAvatar: 'avatar-purple.jpg',
       themeColorLight: '#E6F7FF',
-      themeColorDark: '#1c0c12'
+      themeColorDark: '#1c0c12',
+      themeColorPurple: '#130d20'
     };
     var state = { mode: 'auto', lightAt: CFG.defaultLightAt, darkAt: CFG.defaultDarkAt };
     var current = 'light';
@@ -861,7 +946,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
         if (raw) {
           var p = JSON.parse(raw);
           if (p && typeof p === 'object') {
-            if (p.mode === 'auto' || p.mode === 'light' || p.mode === 'dark') state.mode = p.mode;
+            if (p.mode === 'auto' || p.mode === 'light' || p.mode === 'dark' || p.mode === 'purple') state.mode = p.mode;
             if (p.lightAt) state.lightAt = p.lightAt;
             if (p.darkAt) state.darkAt = p.darkAt;
           }
@@ -897,7 +982,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       document.body.appendChild(stage);
     }
     function setAvatar(theme) {
-      var src = theme === 'dark' ? CFG.darkAvatar : CFG.lightAvatar;
+      var src = theme === 'dark' ? CFG.darkAvatar : (theme === 'purple' ? CFG.purpleAvatar : CFG.lightAvatar);
       var imgs = document.querySelectorAll('img[data-avatar]');
       for (var i = 0; i < imgs.length; i++) imgs[i].setAttribute('src', src);
     }
@@ -906,7 +991,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       document.documentElement.setAttribute('data-theme', theme);
       setAvatar(theme);
       var m = document.querySelector('meta[name="theme-color"]');
-      if (m) m.setAttribute('content', theme === 'dark' ? CFG.themeColorDark : CFG.themeColorLight);
+      if (m) m.setAttribute('content', theme === 'dark' ? CFG.themeColorDark : (theme === 'purple' ? CFG.themeColorPurple : CFG.themeColorLight));
       syncUI();
     }
     function resetStage() {
@@ -969,15 +1054,15 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       };
     }
     function runCurtain(theme) {
-      var dark = (theme === 'dark');
+      var isLight = (theme === 'light');   /* 蓝白 = 白幕；暗红 / 梦幻紫 = 黑幕 */
+      var glowCls = isLight ? ' tk-light' : (theme === 'purple' ? ' tk-purple' : '');
       document.documentElement.classList.add('tk-switching');
-      black.className = 'tk-black' + (dark ? '' : ' tk-light');
+      black.className = 'tk-black' + (isLight ? ' tk-light' : '');
       black.style.webkitMaskImage = '';
       black.style.maskImage = '';
-      ring.className = 'tk-ring' + (dark ? '' : ' tk-light');
+      ring.className = 'tk-ring' + (isLight ? ' tk-light' : '');
       // rAF 后再挂 tk-on：保证幕布走渐隐过渡（舞台已预创建，首切也平滑）
       requestAnimationFrame(function () { black.classList.add('tk-on'); });   // ① 当前界面渐隐进幕布（0.7s）
-      var lightCls = (dark ? '' : ' tk-light');
       function anchor() {
         var a = avatarInfo();
         if (!a) return { cx: window.innerWidth / 2, cy: window.innerHeight / 2, R: 44, vis: false };
@@ -992,7 +1077,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
         var a0 = anchor();
         if (a0.vis) {
           // —— 头像可见：光环点亮 → 停留看清 → 沿头像边缘扩散 ——
-          ring.className = 'tk-ring' + lightCls + ' tk-on tk-pulse';   // ③ 头像点亮（光环脉冲）
+          ring.className = 'tk-ring' + glowCls + ' tk-on tk-pulse';   // ③ 头像点亮（光环脉冲）
           anim(540, easeOutCubic, function (p) {
             var a = anchor();                                 // 每帧跟随头像（含浮动偏移）
             ring.style.left = (a.cx - a.R - 4) + 'px'; ring.style.top = (a.cy - a.R - 4) + 'px';
@@ -1004,7 +1089,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
             var a = anchor();
             var maxR = Math.hypot(Math.max(a.cx, window.innerWidth - a.cx), Math.max(a.cy, window.innerHeight - a.cy)) + 100;
             var from = a.R + 26;
-            halo.className = 'tk-halo' + lightCls + ' tk-on';          // ④ 扩散晕线随行
+            halo.className = 'tk-halo' + glowCls + ' tk-on';          // ④ 扩散晕线随行
             anim(900, easeInOutCubic, function (p) {
               var a2 = anchor();
               var rr = from + (maxR - from) * p;
@@ -1015,7 +1100,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
         } else {
           // —— 头像不在视口：无光环、不停留，从屏幕边沿直接扩散溶解 ——
           var maxR = Math.hypot(Math.max(a0.cx, window.innerWidth - a0.cx), Math.max(a0.cy, window.innerHeight - a0.cy)) + 100;
-          halo.className = 'tk-halo' + lightCls + ' tk-on';
+          halo.className = 'tk-halo' + glowCls + ' tk-on';
           setHalo(a0.cx, a0.cy, 40);
           anim(1100, easeInOutCubic, function (p) {
             var rr = 40 + (maxR - 40) * p;
@@ -1026,12 +1111,12 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       });
       spin(780 + 540 + 170 + 920 + 250, resetStage);
     }
-    function toDark() {
-      if (busy || current === 'dark') return;
+    function toTheme(theme) {
+      if (busy || current === theme) return;
       busy = true;
       ensureStage();
-      if (reduced()) { setThemeInstant('dark'); busy = false; return; }
-      runCurtain('dark');
+      if (reduced()) { setThemeInstant(theme); busy = false; return; }
+      runCurtain(theme);
     }
 
     /* —— 备选：碎裂剥落版（v3 自上而下）——当前未启用；想恢复：把 toLight 里的 runCurtain('light') 换回 shatterToLight() —— */
@@ -1086,13 +1171,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       spin(80 + 1000 + 200 + 70 + 920 + 550, resetStage);
     }
     /* —— 暗红 → 蓝白：与暗红方向同款机制 —— 白色幕布 → 头像点亮 → 沿头像边缘扩散（晕线）—— */
-    function toLight() {
-      if (busy || current === 'light') return;
-      busy = true;
-      ensureStage();
-      if (reduced()) { setThemeInstant('light'); busy = false; return; }
-      runCurtain('light');
-    }
+    function toLight() { toTheme('light'); }
     function crackAvatar(av) {
       if (!av) return;
       av.classList.add('tk-avatar-crack');
@@ -1117,7 +1196,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     function apply(theme, animate) {
       if (busy) { spin(2300, function () { apply(expected(), true); }); return; }   // 动画中 → 排队，按最新期望重试
       if (theme === current) { setThemeInstant(theme); return; }
-      if (animate && !reduced()) { (theme === 'dark' ? toDark : toLight)(); }
+      if (animate && !reduced()) { toTheme(theme); }
       else setThemeInstant(theme);
     }
     function set(mode) {
@@ -1137,7 +1216,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     }
     function syncUI() {
       var b = $('tkBtn');
-      if (b) b.textContent = state.mode === 'auto' ? '🕖' : (state.mode === 'dark' ? '🌙' : '☀️');
+      if (b) b.textContent = state.mode === 'auto' ? '🕖' : (state.mode === 'dark' ? '🌙' : (state.mode === 'purple' ? '🔮' : '☀️'));
       var seg = $('tkSeg');
       if (seg) {
         [].forEach.call(seg.querySelectorAll('button'), function (x) {
@@ -1153,7 +1232,8 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
           hint.textContent = '当前跟随时间：现在应为' + (expectedByTime() === 'dark' ? '暗红 🌙' : '蓝白 ☀️') +
             ' · 蓝白 ' + state.lightAt + ' 起，暗红 ' + state.darkAt + ' 起';
         } else {
-          hint.textContent = '已手动锁定为' + (state.mode === 'dark' ? '暗红 🌙' : '蓝白 ☀️') + '，不受时间影响';
+          var tkn = { dark: '暗红 🌙', light: '蓝白 ☀️', purple: '梦幻紫 🔮' }[state.mode] || '蓝白 ☀️';
+          hint.textContent = '已手动锁定为' + tkn + '，不受时间影响';
         }
       }
     }
@@ -1203,8 +1283,9 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       apply: apply,
       checkAuto: checkAuto,
       expectedByTime: expectedByTime,
-      _toDark: toDark,
-      _toLight: toLight
+      _toDark: function () { toTheme('dark'); },
+      _toLight: function () { toTheme('light'); },
+      _toTheme: toTheme
     };
   })();
   window.ThemeKit = ThemeKit;   // 对外暴露：其他项目可按同款方式接入
