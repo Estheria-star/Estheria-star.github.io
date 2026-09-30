@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="像素星空生成器：点一下生成一片独一无二的星空，可下载做壁纸，种子编号可分享。startian.top 出品">
+<meta name="description" content="像素星空生成器：点一下生成一片独一无二的星空，可拖动缩放探索，可下载做壁纸，种子编号可分享。startian.top 出品">
 <meta name="theme-color" content="#070b18">
 <title>像素星空生成器 · startian.top</title>
 <style>
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;overflow:hidden;background:#070b18}
-  canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+  canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+  canvas.dragging{cursor:grabbing}
   .bar{
     position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:5;
     display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;
@@ -46,6 +47,10 @@
     position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:4;
     font-size:11.5px;color:rgba(180,196,240,.6);white-space:nowrap;pointer-events:none;
   }
+  .zoom{
+    position:fixed;right:16px;bottom:16px;z-index:5;display:flex;flex-direction:column;gap:8px;
+  }
+  .zoom button{width:42px;height:42px;padding:0;font-size:17px;border-radius:14px;display:grid;place-items:center}
   .toast{
     position:fixed;left:50%;top:78px;transform:translateX(-50%) translateY(-8px);opacity:0;z-index:6;
     background:rgba(14,22,46,.9);border:1px solid rgba(130,160,255,.35);border-radius:999px;
@@ -53,7 +58,7 @@
     transition:opacity .3s ease,transform .3s ease;pointer-events:none;
   }
   .toast.show{opacity:1;transform:translateX(-50%)}
-  @media (max-width:620px){
+  @media (max-width:680px){
     .bar{top:12px;left:12px;right:12px;transform:none;border-radius:20px;padding:10px}
     .hint{display:none}
   }
@@ -67,64 +72,68 @@
   <button id="btnWall" type="button">⬇ 下载壁纸</button>
   <button id="btnShare" type="button">🔗 分享这颗</button>
 </div>
+<div class="zoom">
+  <button id="btnIn" type="button" title="放大">＋</button>
+  <button id="btnOut" type="button" title="缩小">－</button>
+  <button id="btnHome" type="button" title="回到原点">⌖</button>
+</div>
 <a class="home" href="https://startian.top/">← 返回主页</a>
-<div class="hint">同一串编号永远是同一片星空 · 点「分享这颗」把编号发给朋友</div>
+<div class="hint">拖动探索星空 · 滚轮缩放 · 双指缩放 · 「分享这颗」连视角一起发给朋友</div>
 <div class="toast" id="toast"></div>
 
 <script>
 (function () {
   'use strict';
-/* ============================================================
-   🏆 跨站成就 SDK（startian.top 全站共享；cookie + localStorage 兜底）
-   ============================================================ */
-var STAch = (function () {
-  var KEY = 'st_ach';
-  function readCookie() {
-    var m = document.cookie.match(/(?:^|;\s*)st_ach=([^;]*)/);
-    if (!m) return null;
-    try { return JSON.parse(decodeURIComponent(m[1])) || []; } catch (e) { return null; }
-  }
-  function writeCookie(list) {
-    try {
-      var v = encodeURIComponent(JSON.stringify(list));
-      if (v.length < 3800) document.cookie = 'st_ach=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
-    } catch (e) {}
-  }
-  var list = readCookie();
-  if (!list) { try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { list = []; } }
-  if (!Array.isArray(list)) list = [];
-  function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
-    writeCookie(list);
-  }
-  function unlock(id, name, ico) {
-    if (list.indexOf(id) >= 0) return false;
-    list.push(id);
-    save();
-    try {
-      var el = document.createElement('div');
-      el.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9999;background:rgba(22,26,48,.94);color:#fff;border:1px solid rgba(140,170,255,.42);border-radius:999px;padding:12px 22px;font:700 13.5px/1.4 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:86vw';
-      el.textContent = '🏆 成就解锁：' + (ico ? ico + ' ' : '') + (name || id);
-      document.body.appendChild(el);
-      requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
-      setTimeout(function () {
-        el.style.opacity = '0';
-        el.style.transform = 'translateX(-50%) translateY(16px)';
-        setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
-      }, 3200);
-    } catch (e) {}
-    return true;
-  }
-  return { list: function () { return list.slice(); }, has: function (id) { return list.indexOf(id) >= 0; }, unlock: unlock };
-})();
-window.STAch = STAch;
-setTimeout(function () { STAch.unlock('site.star', '摘星人', '✨'); }, 600);
+  /* ============================================================
+     🏆 跨站成就 SDK（startian.top 全站共享；cookie + localStorage 兜底）
+     ============================================================ */
+  var STAch = (function () {
+    var KEY = 'st_ach';
+    function readCookie() {
+      var m = document.cookie.match(/(?:^|;\s*)st_ach=([^;]*)/);
+      if (!m) return null;
+      try { return JSON.parse(decodeURIComponent(m[1])) || []; } catch (e) { return null; }
+    }
+    function writeCookie(list) {
+      try {
+        var v = encodeURIComponent(JSON.stringify(list));
+        if (v.length < 3800) document.cookie = 'st_ach=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+      } catch (e) {}
+    }
+    var list = readCookie();
+    if (!list) { try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { list = []; } }
+    if (!Array.isArray(list)) list = [];
+    function save() {
+      try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+      writeCookie(list);
+    }
+    function unlock(id, name, ico) {
+      if (list.indexOf(id) >= 0) return false;
+      list.push(id);
+      save();
+      try {
+        var el = document.createElement('div');
+        el.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9999;background:rgba(22,26,48,.94);color:#fff;border:1px solid rgba(140,170,255,.42);border-radius:999px;padding:12px 22px;font:700 13.5px/1.4 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:86vw';
+        el.textContent = '🏆 成就解锁：' + (ico ? ico + ' ' : '') + (name || id);
+        document.body.appendChild(el);
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        setTimeout(function () {
+          el.style.opacity = '0';
+          el.style.transform = 'translateX(-50%) translateY(16px)';
+          setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+        }, 3200);
+      } catch (e) {}
+      return true;
+    }
+    return { list: function () { return list.slice(); }, has: function (id) { return list.indexOf(id) >= 0; }, unlock: unlock };
+  })();
+  window.STAch = STAch;
+  setTimeout(function () { STAch.unlock('site.star', '摘星人', '✨'); }, 600);
 
   var cv = document.getElementById('sky');
   var ctx = cv.getContext('2d');
   var dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
 
-  /* —— 种子 PRNG（mulberry32）—— */
   function mulberry32(a) {
     return function () {
       a |= 0; a = a + 0x6D2B79F5 | 0;
@@ -134,25 +143,35 @@ setTimeout(function () { STAch.unlock('site.star', '摘星人', '✨'); }, 600);
     };
   }
 
-  /* —— 绘制一片星空（可任意尺寸重绘：屏幕小图 / 壁纸大图共用）—— */
-  function render(g, W, H, seed) {
-    var rnd = mulberry32(seed);
-    var area = W * H / (1280 * 800);
+  /* —— 视角：平移（CSS 像素）+ 缩放 —— */
+  var view = { x: 0, y: 0, s: 1 };
+  var curSeed = 1;
+  var W = 0, H = 0;
 
-    /* 底色：深空渐变 */
-    var bgGrad = g.createLinearGradient(0, 0, 0, H);
+  /* —— 绘制：世界范围 3×3 视口，供拖动探索 —— */
+  function render(g, W2, H2, seed, v) {
+    var rnd = mulberry32(seed);
+    var SPANX = W2 * 3, SPANY = H2 * 3;
+    var area = SPANX * SPANY / (1280 * 800);
+
+    var bgGrad = g.createLinearGradient(0, 0, 0, H2);
     bgGrad.addColorStop(0, '#05070f');
     bgGrad.addColorStop(0.55, '#080d1e');
     bgGrad.addColorStop(1, '#0a0f26');
     g.fillStyle = bgGrad;
-    g.fillRect(0, 0, W, H);
+    g.fillRect(0, 0, W2, H2);
 
-    /* 星云：3-5 团柔光（色相在蓝紫-青-粉之间轮换） */
-    var nebulaN = 3 + Math.floor(rnd() * 3);
+    g.save();
+    g.translate(W2 / 2 + v.x, H2 / 2 + v.y);
+    g.scale(v.s, v.s);
+    g.translate(-W2 / 2, -H2 / 2);
+    var wx0 = W2 / 2 - SPANX / 2, wy0 = H2 / 2 - SPANY / 2;
+
+    var nebulaN = 5 + Math.floor(rnd() * 4);
     var hues = [[120, 130, 255], [90, 200, 255], [210, 130, 240], [80, 220, 200], [150, 120, 255]];
     for (var i = 0; i < nebulaN; i++) {
-      var nx = rnd() * W, ny = rnd() * H * 0.85;
-      var nr = (Math.min(W, H) * (0.25 + rnd() * 0.4));
+      var nx = wx0 + rnd() * SPANX, ny = wy0 + rnd() * SPANY;
+      var nr = (Math.min(W2, H2) * (0.25 + rnd() * 0.4));
       var col = hues[Math.floor(rnd() * hues.length)];
       var ng = g.createRadialGradient(nx, ny, 0, nx, ny, nr);
       ng.addColorStop(0, 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',' + (0.10 + rnd() * 0.1).toFixed(2) + ')');
@@ -162,16 +181,15 @@ setTimeout(function () { STAch.unlock('site.star', '摘星人', '✨'); }, 600);
       g.beginPath(); g.arc(nx, ny, nr, 0, Math.PI * 2); g.fill();
     }
 
-    /* 星星三层：远景（密、小、暗）/ 中景 / 近景（亮、带光晕与十字芒） */
     var layers = [
-      { n: Math.round(420 * area), rMin: 0.4, rMax: 0.9, aMin: 0.25, aMax: 0.55, halo: 0 },
-      { n: Math.round(160 * area), rMin: 0.8, rMax: 1.6, aMin: 0.5, aMax: 0.85, halo: 0.3 },
-      { n: Math.round(42 * area), rMin: 1.5, rMax: 2.6, aMin: 0.85, aMax: 1, halo: 0.75 }
+      { n: Math.round(1250 * area), rMin: 0.4, rMax: 0.9, aMin: 0.25, aMax: 0.55, halo: 0 },
+      { n: Math.round(480 * area), rMin: 0.8, rMax: 1.6, aMin: 0.5, aMax: 0.85, halo: 0.3 },
+      { n: Math.round(126 * area), rMin: 1.5, rMax: 2.6, aMin: 0.85, aMax: 1, halo: 0.75 }
     ];
     var starCols = ['255,255,255', '210,225,255', '255,240,220', '200,220,255', '255,225,240'];
     layers.forEach(function (L) {
       for (var i2 = 0; i2 < L.n; i2++) {
-        var x = rnd() * W, y = rnd() * H;
+        var x = wx0 + rnd() * SPANX, y = wy0 + rnd() * SPANY;
         var r = L.rMin + rnd() * (L.rMax - L.rMin);
         var a = L.aMin + rnd() * (L.aMax - L.aMin);
         var c = starCols[Math.floor(rnd() * starCols.length)];
@@ -186,7 +204,6 @@ setTimeout(function () { STAch.unlock('site.star', '摘星人', '✨'); }, 600);
         g.fillStyle = 'rgba(' + c + ',' + a.toFixed(2) + ')';
         g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
         g.globalCompositeOperation = 'lighter';
-        /* 近景亮星：十字星芒 */
         if (L.halo > 0.5 && rnd() < 0.4) {
           var sp = r * 7;
           var lg = g.createLinearGradient(x - sp, y, x + sp, y);
@@ -205,37 +222,131 @@ setTimeout(function () { STAch.unlock('site.star', '摘星人', '✨'); }, 600);
       }
     });
 
-    /* 流星：偶尔来一颗 */
-    if (rnd() < 0.45) {
-      var mx = rnd() * W * 0.7 + W * 0.2, my = rnd() * H * 0.4;
-      var ml = Math.min(W, H) * (0.18 + rnd() * 0.2);
-      var ang = Math.PI * 0.75 + (rnd() - 0.5) * 0.3;
-      var ex = mx + Math.cos(ang) * ml, ey = my - Math.sin(ang) * ml;
-      var mg = g.createLinearGradient(mx, my, ex, ey);
-      mg.addColorStop(0, 'rgba(220,235,255,0.85)');
-      mg.addColorStop(1, 'rgba(220,235,255,0)');
-      g.strokeStyle = mg;
-      g.lineWidth = 1.6;
-      g.beginPath(); g.moveTo(mx, my); g.lineTo(ex, ey); g.stroke();
+    var meteorN = 1 + Math.floor(rnd() * 2);
+    for (var mi = 0; mi < meteorN; mi++) {
+      if (rnd() < 0.55) {
+        var mx = wx0 + rnd() * SPANX, my = wy0 + rnd() * SPANY * 0.6;
+        var ml = Math.min(W2, H2) * (0.18 + rnd() * 0.2);
+        var ang = Math.PI * 0.75 + (rnd() - 0.5) * 0.3;
+        var ex = mx + Math.cos(ang) * ml, ey = my - Math.sin(ang) * ml;
+        var mg = g.createLinearGradient(mx, my, ex, ey);
+        mg.addColorStop(0, 'rgba(220,235,255,0.85)');
+        mg.addColorStop(1, 'rgba(220,235,255,0)');
+        g.strokeStyle = mg;
+        g.lineWidth = 1.6;
+        g.beginPath(); g.moveTo(mx, my); g.lineTo(ex, ey); g.stroke();
+      }
     }
     g.globalCompositeOperation = 'source-over';
+    g.restore();
   }
 
-  var curSeed = 1;
   function displaySeed() { document.getElementById('seedNo').textContent = '#' + String(curSeed).padStart(4, '0'); }
 
+  var rafPending = false;
+  function draw() {
+    if (rafPending) return;
+    rafPending = true;
+    requestAnimationFrame(function () {
+      rafPending = false;
+      render(ctx, cv.width, cv.height, curSeed, { x: view.x * dpr, y: view.y * dpr, s: view.s });
+    });
+  }
+
   function fit() {
-    cv.width = Math.round(window.innerWidth * dpr);
-    cv.height = Math.round(window.innerHeight * dpr);
-    render(ctx, cv.width, cv.height, curSeed);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.round(W * dpr);
+    cv.height = Math.round(H * dpr);
+    draw();
+  }
+
+  function saveUrl() {
+    try {
+      var need = (view.s !== 1 || view.x || view.y);
+      history.replaceState(null, '', '?seed=' + curSeed +
+        (need ? '&v=' + Math.round(view.x) + ',' + Math.round(view.y) + ',' + view.s.toFixed(3) : ''));
+    } catch (e) {}
   }
 
   function newSky(seed) {
     curSeed = seed || (Math.floor(Math.random() * 9999) + 1);
+    view.x = 0; view.y = 0; view.s = 1;
     displaySeed();
     fit();
-    try { history.replaceState(null, '', '?seed=' + curSeed); } catch (e) {}
+    saveUrl();
   }
+
+  /* —— 缩放：以画布内锚点为中心 —— */
+  function zoomAt(px, py, factor) {
+    var before = view.s;
+    var next = Math.max(0.3, Math.min(5, before * factor));
+    if (next === before) return;
+    var cx = W / 2, cy = H / 2;
+    view.x += (before - next) * (px - cx);
+    view.y += (before - next) * (py - cy);
+    view.s = next;
+    draw();
+  }
+
+  /* —— 指针：单指拖动平移 / 双指捏合缩放 + 平移 —— */
+  var ptrs = new Map();
+  var pinchBase = null;
+  cv.addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    try { cv.setPointerCapture(e.pointerId); } catch (er) {}
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (ptrs.size === 2) {
+      var arr = Array.from(ptrs.values());
+      pinchBase = {
+        d: Math.max(1, Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y)),
+        cx: (arr[0].x + arr[1].x) / 2, cy: (arr[0].y + arr[1].y) / 2,
+        s: view.s, vx: view.x, vy: view.y
+      };
+    }
+    cv.classList.add('dragging');
+  });
+  cv.addEventListener('pointermove', function (e) {
+    if (!ptrs.has(e.pointerId)) return;
+    var prev = ptrs.get(e.pointerId);
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (ptrs.size === 1) {
+      view.x += e.clientX - prev.x;
+      view.y += e.clientY - prev.y;
+      draw();
+    } else if (ptrs.size === 2 && pinchBase) {
+      var arr = Array.from(ptrs.values());
+      var d = Math.max(1, Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y));
+      var cx = (arr[0].x + arr[1].x) / 2, cy = (arr[0].y + arr[1].y) / 2;
+      var k = (Math.max(0.3, Math.min(5, pinchBase.s * d / pinchBase.d))) / pinchBase.s;
+      var Cx = W / 2, Cy = H / 2;
+      view.s = pinchBase.s * k;
+      view.x = pinchBase.vx + (cx - pinchBase.cx) + (pinchBase.cx - Cx) * (1 - k);
+      view.y = pinchBase.vy + (cy - pinchBase.cy) + (pinchBase.cy - Cy) * (1 - k);
+      draw();
+    }
+  });
+  function ptrUp(e) {
+    ptrs.delete(e.pointerId);
+    if (ptrs.size < 2) pinchBase = null;
+    if (ptrs.size === 0) { cv.classList.remove('dragging'); saveUrl(); }
+  }
+  cv.addEventListener('pointerup', ptrUp);
+  cv.addEventListener('pointercancel', ptrUp);
+
+  cv.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.0016));
+    clearTimeout(cv._wt);
+    cv._wt = setTimeout(saveUrl, 400);
+  }, { passive: false });
+
+  document.getElementById('btnIn').addEventListener('click', function () { zoomAt(W / 2, H / 2, 1.25); saveUrl(); });
+  document.getElementById('btnOut').addEventListener('click', function () { zoomAt(W / 2, H / 2, 0.8); saveUrl(); });
+  document.getElementById('btnHome').addEventListener('click', function () {
+    view.x = 0; view.y = 0; view.s = 1;
+    draw(); saveUrl();
+    toast('⌖ 回到原点');
+  });
 
   var toastEl = document.getElementById('toast'), toastTimer = null;
   function toast(msg) {
@@ -254,22 +365,26 @@ setTimeout(function () { STAch.unlock('site.star', '摘星人', '✨'); }, 600);
     var w = 1920, h = 1080;
     var off = document.createElement('canvas');
     off.width = w; off.height = h;
-    render(off.getContext('2d'), w, h, curSeed);
+    /* 壁纸按当前视角等比映射（含平移与缩放） */
+    var sx = w / W, sy = h / H;
+    render(off.getContext('2d'), w, h, curSeed, { x: view.x * sx, y: view.y * sy, s: view.s * sx });
     off.toBlob(function (blob) {
       var a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = 'starfield-' + String(curSeed).padStart(4, '0') + '-1920x1080.png';
       a.click();
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
-      toast('⬇️ 壁纸已下载（1920×1080）');
+      toast('⬇️ 壁纸已下载（1920×1080，含当前视角）');
       try { STAch.unlock('star.wall', '把星空带回家', '🖼️'); } catch (e) {}
     }, 'image/png');
   });
 
   document.getElementById('btnShare').addEventListener('click', function () {
-    var url = location.origin + location.pathname + '?seed=' + curSeed;
+    var need = (view.s !== 1 || view.x || view.y);
+    var url = location.origin + location.pathname + '?seed=' + curSeed +
+      (need ? '&v=' + Math.round(view.x) + ',' + Math.round(view.y) + ',' + view.s.toFixed(3) : '');
     if (location.protocol === 'file:') url = '（部署后可用）' + url;
-    function done() { toast('🔗 链接已复制：我的星空 #' + String(curSeed).padStart(4, '0')); }
+    function done() { toast('🔗 链接已复制：我的星空 #' + String(curSeed).padStart(4, '0') + '（含视角）'); }
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(url).then(done, fallback);
     } else fallback();
@@ -284,9 +399,16 @@ setTimeout(function () { STAch.unlock('site.star', '摘星人', '✨'); }, 600);
 
   window.addEventListener('resize', fit);
 
+  /* 初始化：URL（seed + 视角） */
   var q = new URLSearchParams(location.search);
   var s = parseInt(q.get('seed') || '', 10);
-  newSky(isFinite(s) && s > 0 ? (s % 100000) : undefined);
+  curSeed = isFinite(s) && s > 0 ? (s % 100000) : (Math.floor(Math.random() * 9999) + 1);
+  var vq = (q.get('v') || '').split(',').map(parseFloat);
+  if (vq.length === 3 && vq.every(isFinite)) {
+    view.x = vq[0]; view.y = vq[1]; view.s = Math.max(0.3, Math.min(5, vq[2]));
+  }
+  displaySeed();
+  fit();
   if (isFinite(s) && s > 0) toast('复活了星空 #' + String(curSeed).padStart(4, '0'));
 })();
 </script>
