@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="星恬的宇宙地图：13 颗作品星串起整个小站，去过的会亮起来，点一颗星即可前往。startian.top 全站导航">
+<meta name="description" content="星恬的宇宙地图：13 颗作品星串起整个小站，去过的会亮起来；点击星星可展开「星图关系视图」。startian.top 全站导航">
 <meta name="theme-color" content="#05070f">
 <title>宇宙地图 · startian.top</title>
 <style>
@@ -26,8 +26,7 @@
       radial-gradient(1.3px 1.3px at 300px 100px, rgba(255,255,255,.28), transparent);
     background-size:340px 260px;
   }
-  /* —— 大光斑 —— */
-  .neb{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0}
+  .neb{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;transition:opacity .8s ease}
   .neb.a{width:430px;height:430px;left:-130px;top:-90px;background:radial-gradient(circle,#6d28d9,transparent 70%);opacity:.3}
   .neb.b{width:470px;height:470px;right:-150px;top:110px;background:radial-gradient(circle,#0e7490,transparent 70%);opacity:.26}
   .neb.c{width:400px;height:400px;left:32%;bottom:-180px;background:radial-gradient(circle,#b45309,transparent 70%);opacity:.16}
@@ -61,54 +60,107 @@
     box-shadow:0 30px 80px rgba(0,0,0,.5), inset 0 0 60px rgba(60,80,160,.12)}
   #mapSvg{display:block;width:100%;height:auto}
 
-  /* —— SVG 节点样式 —— */
+  /* ============================================================
+     ✦ 星星（重设计）：光晕 / 星芒 / 呼吸光环 / 渐变核心
+     ============================================================ */
   .node{cursor:pointer;text-decoration:none}
-  .node .core{transition:transform .25s cubic-bezier(.3,1.4,.5,1),filter .3s ease;transform-box:fill-box;transform-origin:center}
-  .node:hover .core{transform:scale(1.12)}
-  .node .halo{transform-box:fill-box;transform-origin:center}
-  .node .label{font-size:15px;font-weight:800;fill:#7a86a8;letter-spacing:1px;text-anchor:middle;transition:fill .25s ease;pointer-events:none}
-  .node .ico{font-size:23px;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+  .node .pos{transition:transform .9s cubic-bezier(.22,.95,.3,1)}
+  #mapSvg.no-trans .pos{transition:none !important}
+  .node .fx{transition:transform .3s cubic-bezier(.3,1.35,.5,1);transform-box:fill-box;transform-origin:center}
+  .node:hover .fx{transform:scale(1.14)}
+  .node .core{transition:filter .3s ease}
+  .node .halo,.node .spike,.node .glow{transform-box:fill-box;transform-origin:center}
+  .node .label{font-size:15px;font-weight:800;fill:#7a86a8;letter-spacing:1px;text-anchor:middle;transition:fill .25s ease,font-size .4s ease;pointer-events:none}
+  .node .ico{font-size:16px;text-anchor:middle;dominant-baseline:central;pointer-events:none;transition:opacity .3s ease}
   .node .hit{fill:transparent}
-  .node .zline{pointer-events:none}
+  .node{transition:opacity .55s ease}
 
-  /* 未点亮：暗星 */
-  .node:not(.lit) .core{fill:#141a30;stroke:rgba(120,140,200,.38);stroke-width:1.4}
-  .node:not(.lit) .ring{fill:none;stroke:rgba(110,130,190,.3);stroke-width:1;stroke-dasharray:4 6}
-  .node:not(.lit) .ico{opacity:.32;filter:grayscale(1) brightness(.9)}
-  .node:not(.lit):hover .core{stroke:rgba(170,190,255,.75)}
+  /* —— 未点亮：哑光暗星（不发光）—— */
+  .node:not(.lit) .core{fill:#151b33;stroke:rgba(122,140,200,.4);stroke-width:1.3}
+  .node:not(.lit) .ring{fill:none;stroke:rgba(110,130,190,.32);stroke-width:1;stroke-dasharray:4 6}
+  .node:not(.lit) .ico{opacity:.34;filter:grayscale(1) brightness(.9)}
+  .node:not(.lit):hover .core{stroke:rgba(170,190,255,.8);fill:#1b2240}
   .node:not(.lit):hover .label{fill:#c6d2f0}
 
-  /* 点亮：明灯 */
-  .node.lit .core{fill:url(#coreGrad);stroke:none;filter:drop-shadow(0 0 9px var(--c))}
-  .node.lit .halo{fill:none;stroke:var(--c);stroke-width:1.6;opacity:.85;animation:breathe 3.2s ease-in-out infinite}
+  /* —— 点亮：发光星球 —— */
+  .node.lit .glow{opacity:.9;animation:glowPulse 3.4s ease-in-out infinite;animation-delay:var(--dl,0s)}
+  .node.lit .core{fill:url(#coreGrad);stroke:none}
+  .node.lit .halo{fill:none;stroke:var(--c);stroke-width:1.5;opacity:.8;animation:breathe 3.2s ease-in-out infinite;animation-delay:var(--dl,0s)}
+  .node.lit .spike{fill:var(--c);opacity:.75;animation:spikePulse 3.2s ease-in-out infinite;animation-delay:var(--dl,0s)}
   .node.lit .label{fill:#eef4ff;text-shadow:0 0 12px rgba(140,170,255,.6)}
-  .node.lit:hover .halo{stroke-width:2.4}
-  @keyframes breathe{0%,100%{opacity:.4;transform:scale(.94)}50%{opacity:1;transform:scale(1.05)}}
+  .node.lit:hover .halo{stroke-width:2.3}
+  @keyframes breathe{0%,100%{opacity:.38;transform:scale(.93)}50%{opacity:1;transform:scale(1.06)}}
+  @keyframes glowPulse{0%,100%{opacity:.55}50%{opacity:1}}
+  @keyframes spikePulse{0%,100%{opacity:.5;transform:scale(.88) rotate(0deg)}50%{opacity:.95;transform:scale(1.08) rotate(0deg)}}
 
-  /* 跃迁 / 闪烁 */
-  .node.jump .core,.node.jump .fx{animation:jumpFlash .55s ease}
-  .node.jump .fx{transform-box:fill-box;transform-origin:center}
-  @keyframes jumpFlash{0%{transform:scale(1)}42%{transform:scale(1.4);filter:brightness(2.2) drop-shadow(0 0 18px var(--c))}100%{transform:scale(1)}}
+  /* —— 悬停暂停：所有循环动画冻结 —— */
+  #mapSvg.freeze *{animation-play-state:paused !important}
+
+  /* —— 跃迁 / 闪烁 —— */
+  .node.jump .fx{animation:jumpFlash .55s ease;transform-box:fill-box;transform-origin:center}
+  @keyframes jumpFlash{0%{transform:scale(1)}42%{transform:scale(1.45);filter:brightness(2.2)}100%{transform:scale(1)}}
   .node.jump .halo{opacity:1;stroke-width:3.2}
 
-  /* 星线 */
-  .link{stroke:rgba(130,150,220,.16);stroke-width:1.2;fill:none;transition:stroke .4s ease}
-  .link.on{stroke-width:2;stroke-opacity:.55}
-  .lane{stroke:rgba(120,140,210,.14);stroke-width:1;stroke-dasharray:3 9;fill:none;animation:laneFlow 26s linear infinite}
-  @keyframes laneFlow{to{stroke-dashoffset:-240}}
-  .zoneGlowText{text-anchor:middle;pointer-events:none}
+  /* ============================================================
+     ✦ 连接线：基础层 + 流动光点层
+     ============================================================ */
+  .lnk{transition:opacity .35s ease}
+  .lnk .lbase{fill:none;stroke-width:1.3}
+  .lnk .lflow{fill:none;stroke-width:2;stroke-linecap:round;stroke-dasharray:3 15;animation:flowdash 1.7s linear infinite}
+  @keyframes flowdash{to{stroke-dashoffset:-18}}
+  .lnk.on .lbase{stroke-width:1.8;opacity:.85}
+  /* 跨域隐藏关联线：平时极淡 */
+  .lnk.lx .lbase{stroke:rgba(190,170,120,.16);stroke-width:1;stroke-dasharray:2 7}
+  .lnk.lx .lflow{opacity:0;transition:opacity .3s ease}
+  .lnk.lx.hl .lbase{stroke:rgba(255,215,130,.75)}
+  .lnk.lx.hl .lflow{opacity:1;stroke:#ffd97a}
+  /* 悬停聚焦：无关线淡出，相关线点亮 */
+  #mapSvg.focusing .lnk{opacity:.1}
+  #mapSvg.focusing .lnk.hl{opacity:1}
+  #mapSvg.focusing .lnk.hl .lbase{stroke-width:2;opacity:1}
+
+  /* 星域光斑与标签 */
+  .zoneGlowText{text-anchor:middle;pointer-events:none;transition:opacity .5s ease}
   .zname{font-size:20px;font-weight:900;fill:#dfe8ff;letter-spacing:2px}
   .zsub{font-size:12px;font-weight:700;fill:#8697c4;letter-spacing:1px}
-  .watermark{font-size:15px;font-weight:800;fill:rgba(150,170,230,.14);letter-spacing:6px;text-anchor:middle;pointer-events:none}
+  .zoneBlob{transition:opacity .6s ease}
+  .watermark{font-size:15px;font-weight:800;fill:rgba(150,170,230,.14);letter-spacing:6px;text-anchor:middle;pointer-events:none;transition:opacity .5s ease}
+  /* 关系模式：地图元素淡出 */
+  #mapLinks{transition:opacity .45s ease}
+  #relLinks{opacity:0;pointer-events:none;transition:opacity .55s ease}
+  .rel-mode #mapLinks{opacity:0}
+  .rel-mode #relLinks{opacity:1;transition-delay:.32s}
+  .rel-mode .zoneGlowText,.rel-mode .watermark,.rel-mode .zoneBlob{opacity:0}
+  .rel-lab{font-size:11px;font-weight:700;fill:rgba(255,222,150,.85);text-anchor:middle;letter-spacing:1px}
+  .rel-link{fill:none;stroke:rgba(255,214,130,.55);stroke-width:1.6}
+  .rel-link-g{animation:relFadeIn .5s ease both}
+  @keyframes relFadeIn{from{opacity:0}}
+  .rel-link .rl-flow{fill:none;stroke:#ffd97a;stroke-width:2;stroke-dasharray:2.5 14;animation:flowdash 1.5s linear infinite;stroke-linecap:round}
+  .rel-node-halo{fill:none;stroke:rgba(255,214,130,.5);stroke-width:1.4;stroke-dasharray:3 6;animation:haloSpin 14s linear infinite;transform-box:fill-box;transform-origin:center}
+  @keyframes haloSpin{to{transform:rotate(360deg)}}
 
-  /* —— 工具行 —— */
+  /* —— 关系模式下的节点状态 —— */
+  .node.faded{opacity:.13}
+  .node.faded:hover{opacity:.55}
+  .node.faded .fx{transform:scale(.55)}
+  .node.faded:hover .fx{transform:scale(.8)}
+  .node.center .fx{transform:scale(1.5)}
+  .node.center:hover .fx{transform:scale(1.58)}
+  .node.center .halo{stroke-width:2.6;opacity:1}
+  .node.center .spike{opacity:1;animation-duration:2.2s}
+  .node.center .label{font-size:18px;fill:#fff}
+  .node.center .hit{r:58px}
+
+  /* ============================================================
+     ✦ 工具行 / 关系信息卡
+     ============================================================ */
   .toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:16px}
   .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;font-weight:700;color:#9fb0d8}
   .legend span{display:inline-flex;align-items:center;gap:6px}
   .lg-dot{width:12px;height:12px;border-radius:50%;display:inline-block;flex:0 0 auto}
-  .lg-lit{background:linear-gradient(135deg,#8b5cf6,#38bdf8);box-shadow:0 0 8px rgba(139,92,246,.8)}
-  .lg-dim{background:#141a30;border:1.4px dashed rgba(120,140,200,.5)}
-  .lg-line{width:22px;height:0;border-top:2px dashed rgba(130,150,220,.45);display:inline-block}
+  .lg-lit{background:radial-gradient(circle at 35% 35%,#fff,#a78bfa 60%,#38bdf8);box-shadow:0 0 10px rgba(139,92,246,.9)}
+  .lg-dim{background:#151b33;border:1.4px dashed rgba(120,140,200,.5)}
+  .lg-line{width:22px;height:0;border-top:2px dashed rgba(255,214,130,.6);display:inline-block}
   button.rand{
     margin-left:auto;border:1px solid rgba(140,170,255,.4);border-radius:999px;padding:11px 20px;font-family:inherit;cursor:pointer;
     font-size:13.5px;font-weight:800;color:#0a0f24;background:linear-gradient(100deg,#ffd97a,#fbbf24);
@@ -117,9 +169,36 @@
   button.rand:active{transform:translateY(2px);box-shadow:0 3px 0 #8a6a1a}
   .tipnote{width:100%;font-size:11.5px;color:#6d7ca8;font-weight:600}
 
+  /* —— 关系视图：顶部提示 + 底部信息卡 —— */
+  .relhint{
+    position:absolute;top:14px;left:50%;transform:translateX(-50%) translateY(-8px);opacity:0;pointer-events:none;
+    background:rgba(14,20,40,.92);border:1px solid rgba(255,214,130,.4);border-radius:999px;
+    padding:8px 18px;font-size:12px;font-weight:700;color:#ffe6b0;white-space:nowrap;max-width:92%;
+    overflow:hidden;text-overflow:ellipsis;transition:opacity .4s ease,transform .4s ease;z-index:5;
+  }
+  .relhint.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .relbar{
+    position:absolute;left:50%;bottom:14px;transform:translateX(-50%) translateY(16px);opacity:0;pointer-events:none;
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;
+    background:rgba(13,19,38,.94);border:1px solid rgba(140,170,255,.32);border-radius:20px;
+    padding:13px 18px;box-shadow:0 20px 50px rgba(0,0,0,.55);max-width:94%;z-index:6;
+    transition:opacity .4s ease,transform .45s cubic-bezier(.2,.9,.3,1.1);
+  }
+  .relbar.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;transition-delay:.25s}
+  .relbar .rbinfo{min-width:0}
+  .relbar b{font-size:14.5px;letter-spacing:.5px;display:block}
+  .relbar .rbdesc{font-size:11.5px;color:#9fb0d8;font-weight:600;display:block;margin-top:2px;max-width:420px}
+  .relbar .rbacts{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .relbar a.rbgo{text-decoration:none;border:0;border-radius:999px;padding:11px 20px;font-size:13px;font-weight:800;color:#241a02;
+    background:linear-gradient(100deg,#ffd97a,#fbbf24);box-shadow:0 5px 0 #8a6a1a;cursor:pointer;white-space:nowrap}
+  .relbar a.rbgo:active{transform:translateY(2px);box-shadow:0 2px 0 #8a6a1a}
+  .relbar button.rbbak{border:1px solid rgba(140,170,255,.45);border-radius:999px;padding:10px 18px;font-family:inherit;font-size:13px;
+    font-weight:800;color:#cfe0ff;background:rgba(24,32,60,.8);cursor:pointer;white-space:nowrap}
+  .relbar button.rbbak:hover{border-color:rgba(170,200,255,.8)}
+
   /* —— 悬停详情卡 —— */
   .tip{position:fixed;z-index:80;pointer-events:none;opacity:0;transform:translateY(6px);transition:opacity .18s ease,transform .18s ease;
-    background:rgba(14,20,40,.96);border:1px solid rgba(130,160,230,.35);border-radius:14px;padding:12px 15px;max-width:250px;
+    background:rgba(14,20,40,.96);border:1px solid rgba(130,160,230,.35);border-radius:14px;padding:12px 15px;max-width:262px;
     box-shadow:0 18px 44px rgba(0,0,0,.55)}
   .tip.show{opacity:1;transform:none}
   .tip b{font-size:14px;letter-spacing:.5px}
@@ -127,6 +206,7 @@
   .tip .st{font-size:11.5px;font-weight:800}
   .tip .st.ok{color:#8be9b0}
   .tip .st.no{color:#8a93b8}
+  .tip .hint{display:block;margin-top:6px;font-size:10.5px;color:#6d7ca8;font-weight:700}
 
   .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(12px);opacity:0;z-index:90;
     background:rgba(14,20,40,.96);border:1px solid rgba(130,160,255,.4);border-radius:999px;padding:12px 24px;
@@ -142,12 +222,25 @@
     .hright{width:100%;margin-left:0;justify-content:space-between}
     .toolbar{gap:10px}
     button.rand{margin-left:0;width:100%}
+    .relbar{flex-direction:column;gap:10px;padding:12px 14px;bottom:10px}
+    .relbar .rbacts{width:100%;justify-content:center}
   }
+  /* 移动端：整体尺寸上调一档（viewBox 更小，统一放大提升可读性） */
+  #mapSvg.mob .node .label{font-size:18px}
+  #mapSvg.mob .node .ico{font-size:19px}
+  #mapSvg.mob .node .core{r:15px}
+  #mapSvg.mob .node .halo{r:30px}
+  #mapSvg.mob .node .ring{r:27px}
+  #mapSvg.mob .node .glow{r:42px}
+  #mapSvg.mob .node .hit{r:47px}
+  #mapSvg.mob .zname{font-size:21px}
+  #mapSvg.mob .zsub{font-size:13px}
+  #mapSvg.mob .rel-lab{font-size:12px}
   @media (prefers-reduced-motion: reduce){
-    .node.lit .halo{animation:none}
-    .lane{animation:none}
+    .node .pos{transition:none}
+    .node .fx,.node .halo,.node .spike,.node .glow{animation:none !important;transition:none}
+    .lnk .lflow,.rel-link .rl-flow,.rel-node-halo{animation:none}
     .banner{animation:none}
-    .node .core{transition:none}
   }
 
   /* —— 返回主页（全站统一 · 2026-09-29）—— */
@@ -184,18 +277,26 @@
 
   <div class="banner" id="banner">🎉 宇宙全图鉴达成 —— 13 颗星全部点亮，你就是这个宇宙的常客</div>
 
-  <div class="stage">
+  <div class="stage" id="stage">
     <svg id="mapSvg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="全站作品星图"></svg>
+    <div class="relhint" id="relhint">✦ 星图关系视图 · 点击其他星切换中心 · 点空白 / ESC 返回</div>
+    <div class="relbar" id="relbar">
+      <div class="rbinfo"><b id="rbName">—</b><span class="rbdesc" id="rbDesc"></span></div>
+      <div class="rbacts">
+        <a class="rbgo" id="rbGo" href="#">🚀 前往作品</a>
+        <button class="rbbak" id="rbBack" type="button">↩ 返回星图</button>
+      </div>
+    </div>
   </div>
 
   <div class="toolbar">
     <div class="legend">
       <span><i class="lg-dot lg-lit"></i>已点亮 · 去过的作品</span>
       <span><i class="lg-dot lg-dim"></i>暗星 · 还没去过</span>
-      <span><i class="lg-line"></i>星域航道</span>
+      <span><i class="lg-line"></i>星图关系连线</span>
     </div>
     <button class="rand" id="btnRandom" type="button">🎲 带我去一颗暗星</button>
-    <div class="tipnote">点任意一颗星即可前往对应作品 · 去过一次它就会亮起来 ✨</div>
+    <div class="tipnote">悬停星星会暂停星图动画并预览它的关系 · 点击星星展开「星图关系视图」· Ctrl / 中键点击直接前往</div>
   </div>
 </div>
 
@@ -258,8 +359,7 @@
   /* ============================================================
      📐 布局数据（扩展点！）
      —— 新增作品：往 SITES 加一行（id=成就id，zone=所属星域）
-     —— 新增星域：往 ZONES 加一条（给出桌面 desk / 移动 mob 的中心与可选半径）
-       节点坐标由环形算法自动排布，无需手填
+     —— 新增关系：同星域自动互相关联；跨星域在 REL_X 加一行 [a, b, '关系名']
      ============================================================ */
   var ZONES = [
     { key: 'fun',  name: '娱乐星域', sub: '下棋 · 转着玩',  c1: '#8b5cf6', c2: '#ec4899', c: '#a78bfa',
@@ -287,126 +387,290 @@
     { id: 'site.fake',     name: '假加载页', ico: '🎭', zone: 'fun2', url: 'https://startian.top/fake/',     desc: '进度条卡在 99%，陪你唠两句才肯承认早就好了。' },
     { id: 'site.report',   name: '诊断报告', ico: '🩺', zone: 'fun2', url: 'https://startian.top/report/',   desc: 'AI 给今天的你开一张体检单，纯玄学仅供参考。' }
   ];
+  /* ✦ 跨星域关系（手工维护，会显示在「星图关系视图」里）*/
+  var REL_X = [
+    ['site.fit',      'site.geometry', '同门数学'],
+    ['site.music',    'site.geometry', '函数玩法'],
+    ['site.cuoti',    'site.daka',     '学习搭子'],
+    ['site.fake',     'site.report',   '整活担当'],
+    ['site.star',     'site.life',     '生成艺术'],
+    ['site.tujie',    'site.star',     '视觉玩具']
+  ];
+
+  /* ============ 派生数据 ============ */
+  function siteById(id) { for (var i = 0; i < SITES.length; i++) if (SITES[i].id === id) return SITES[i]; return null; }
+  function zoneOf(s) { for (var i = 0; i < ZONES.length; i++) if (ZONES[i].key === s.zone) return ZONES[i]; return ZONES[0]; }
+  function zoneShort(s) { var z = zoneOf(s); return { 'fun': '娱乐', 'tool': '工具', 'fun2': '整活' }[z.key]; }
+  /* 关系表：同域全关联 + 跨域手工 */
+  var REL = {};
+  SITES.forEach(function (s) {
+    REL[s.id] = [];
+    SITES.forEach(function (o) {
+      if (o.id !== s.id && o.zone === s.zone) REL[s.id].push({ id: o.id, label: '同属' + zoneShort(s) });
+    });
+  });
+  REL_X.forEach(function (r) {
+    if (!REL[r[0]] || !REL[r[1]]) return;
+    REL[r[0]].push({ id: r[1], label: r[2] });
+    REL[r[1]].push({ id: r[0], label: r[2] });
+  });
 
   /* ============ 运行时状态 ============ */
   var mob = false;
   var confettiRuns = 0;
+  var view = { mode: 'map', center: null };   /* 状态机：map（全景）| rel（星图关系视图） */
   var svg = document.getElementById('mapSvg');
+  var stage = document.getElementById('stage');
   var MQ = window.matchMedia('(max-width: 760px)');
   mob = MQ.matches;
+
+  var GEO = {};        /* 布局缓存：mob/W/H/中心点/每域节点坐标/星位表 */
+  var nodesIndex = {}; /* id -> { a, pos, fx, site } */
+  var linksFor = {};   /* id -> [<g.lnk>] 供 hover 聚焦 */
+  var relLayer = null;
 
   function isLit(s) { return STAch.has(s.id); }
   function litCount() { return SITES.filter(isLit).length; }
 
-  function zoneLayout(z) {
-    var c = mob ? z.mob : z.desk;
-    var members = SITES.filter(function (s) { return s.zone === z.key; });
-    var n = members.length;
-    /* 环形半径随节点数自动外扩（加作品不挤爆） */
-    var r = mob ? Math.min(128, 74 + n * 8) : Math.min(178, 90 + n * 10);
-    var pts = members.map(function (s, i) {
-      var a = (-90 + i * 360 / n) * Math.PI / 180;
-      return { s: s, x: c.x + r * Math.cos(a), y: c.y + r * Math.sin(a), a: a };
-    });
-    return { c: c, r: r, pts: pts, members: members };
-  }
-
-  /* ============ 渲染 ============ */
-  function render() {
+  function calcGeo() {
     mob = MQ.matches;
     var W = mob ? 420 : 1180;
     var H = mob ? 1060 : 720;
+    var layouts = {};
+    var pos = {};
+    ZONES.forEach(function (z) {
+      var c = mob ? z.mob : z.desk;
+      var members = SITES.filter(function (s) { return s.zone === z.key; });
+      var n = members.length;
+      var r = mob ? Math.min(128, 74 + n * 8) : Math.min(178, 90 + n * 10);
+      var pts = members.map(function (s, i) {
+        var a = (-90 + i * 360 / n) * Math.PI / 180;
+        var p = { s: s, x: c.x + r * Math.cos(a), y: c.y + r * Math.sin(a) };
+        pos[s.id] = p;
+        return p;
+      });
+      layouts[z.key] = { c: c, r: r, pts: pts };
+    });
+    GEO = { W: W, H: H, center: mob ? { x: 210, y: 507 } : { x: 590, y: 352 }, layouts: layouts, pos: pos };
+  }
+
+  /* ============ 渲染：结构一次构建 ============ */
+  function render() {
+    calcGeo();
+    var W = GEO.W, H = GEO.H;
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     svg.classList.toggle('mob', mob);
-
-    var layouts = {};
-    ZONES.forEach(function (z) { layouts[z.key] = zoneLayout(z); });
+    nodesIndex = {}; linksFor = {};
 
     var s = '';
-    /* —— defs —— */
     s += '<defs>';
     ZONES.forEach(function (z) {
       s += '<radialGradient id="zg-' + z.key + '"><stop offset="0" stop-color="' + z.c + '" stop-opacity=".16"/><stop offset="1" stop-color="' + z.c + '" stop-opacity="0"/></radialGradient>';
+      s += '<radialGradient id="gl-' + z.key + '"><stop offset="0" stop-color="' + z.c + '" stop-opacity=".5"/><stop offset=".45" stop-color="' + z.c + '" stop-opacity=".18"/><stop offset="1" stop-color="' + z.c + '" stop-opacity="0"/></radialGradient>';
     });
-    s += '<linearGradient id="coreGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c4b5fd"/><stop offset=".45" stop-color="#8b5cf6"/><stop offset="1" stop-color="#38bdf8"/></linearGradient>';
+    s += '<linearGradient id="coreGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".4" stop-color="#c4b5fd"/><stop offset="1" stop-color="#7dd3fc"/></linearGradient>';
     s += '</defs>';
 
-    /* —— 星域光斑 —— */
+    /* 星域光斑 */
     ZONES.forEach(function (z) {
-      var L = layouts[z.key];
+      var L = GEO.layouts[z.key];
       var gr = mob ? L.r + 96 : L.r + 118;
-      s += '<circle cx="' + L.c.x + '" cy="' + L.c.y + '" r="' + gr + '" fill="url(#zg-' + z.key + ')"/>';
+      s += '<circle class="zoneBlob" cx="' + L.c.x + '" cy="' + L.c.y + '" r="' + gr + '" fill="url(#zg-' + z.key + ')"/>';
     });
 
-    /* —— 星域航道（域间虚线）—— */
-    var zs = ZONES.map(function (z) { return layouts[z.key].c; });
-    for (var i = 0; i < zs.length; i++) {
-      var j = (i + 1) % zs.length;
-      s += '<path class="lane" d="M' + zs[i].x + ' ' + zs[i].y + ' Q' + ((zs[i].x + zs[j].x) / 2 + (mob ? 30 : -40)) + ' ' + ((zs[i].y + zs[j].y) / 2 + (mob ? -18 : 26)) + ' ' + zs[j].x + ' ' + zs[j].y + '"/>';
-    }
-
-    /* —— 星域中心标签 —— */
+    /* 星域中心标签 */
     ZONES.forEach(function (z) {
-      var L = layouts[z.key];
+      var L = GEO.layouts[z.key];
       s += '<g class="zoneGlowText" transform="translate(' + L.c.x + ' ' + L.c.y + ')">';
       s += '<text class="zname" y="-4">' + z.name + '</text>';
       s += '<text class="zsub" y="20">' + z.sub + '</text>';
       s += '</g>';
     });
-
-    /* —— 中央水印（仅桌面）—— */
     if (!mob) s += '<text class="watermark" x="590" y="648">✦ STARTIAN UNIVERSE ✦</text>';
 
-    /* —— 域内星座线（两节点间连线，两端点亮则变亮）—— */
+    /* 星域航道（域间虚线） */
+    var zs = ZONES.map(function (z) { return GEO.layouts[z.key].c; });
+    for (var i = 0; i < zs.length; i++) {
+      var j = (i + 1) % zs.length;
+      s += '<path class="lane" d="M' + zs[i].x + ' ' + zs[i].y + ' Q' + ((zs[i].x + zs[j].x) / 2 + (mob ? 30 : -40)) + ' ' + ((zs[i].y + zs[j].y) / 2 + (mob ? -18 : 26)) + ' ' + zs[j].x + ' ' + zs[j].y + '" style="stroke:rgba(120,140,210,.13);stroke-width:1;stroke-dasharray:3 9;fill:none"/>';
+    }
+
+    /* —— 连接线：域内环线（基础层 + 流动层）+ 跨域隐藏关联线 —— */
+    s += '<g id="mapLinks">';
     ZONES.forEach(function (z) {
-      var L = layouts[z.key];
-      var pts = L.pts;
+      var pts = GEO.layouts[z.key].pts;
       for (var k = 0; k < pts.length; k++) {
         var p1 = pts[k], p2 = pts[(k + 1) % pts.length];
-        var on = isLit(p1.s) && isLit(p2.s);
-        s += '<line class="link' + (on ? ' on' : '') + '" x1="' + p1.x + '" y1="' + p1.y + '" x2="' + p2.x + '" y2="' + p2.y + '"' + (on ? ' stroke="' + z.c + '"' : '') + '/>';
+        s += lineGroup(z, p1, p2);
       }
     });
+    REL_X.forEach(function (r) {
+      var pa = GEO.pos[r[0]], pb = GEO.pos[r[1]];
+      if (!pa || !pb) return;
+      s += '<g class="lnk lx" data-a="' + r[0] + '" data-b="' + r[1] + '">' +
+        '<line class="lbase" x1="' + pa.x + '" y1="' + pa.y + '" x2="' + pb.x + '" y2="' + pb.y + '" stroke="rgba(190,170,120,.16)"/>' +
+        '<line class="lflow" x1="' + pa.x + '" y1="' + pa.y + '" x2="' + pb.x + '" y2="' + pb.y + '" stroke="#ffd97a" style="animation-delay:' + (Math.random() * -1.5).toFixed(2) + 's"/>' +
+        '</g>';
+    });
+    s += '</g>';
+
+    /* 星图关系层（进入关系视图时填充） */
+    s += '<g id="relLinks"></g>';
 
     /* —— 节点 —— */
+    s += '<g id="nodesLayer">';
     ZONES.forEach(function (z) {
-      var L = layouts[z.key];
-      var coreR = mob ? 21 : 25;
-      var haloR = coreR + (mob ? 10 : 12);
-      L.pts.forEach(function (p) {
+      GEO.layouts[z.key].pts.forEach(function (p) {
         var lit = isLit(p.s);
-        s += '<a class="node' + (lit ? ' lit' : '') + '" href="' + p.s.url + '" data-id="' + p.s.id + '" style="--c:' + z.c + '" aria-label="' + p.s.name + (lit ? '（已点亮）' : '（未点亮）') + '">';
-        s += '<g transform="translate(' + p.x + ' ' + p.y + ')">';
-        if (lit) s += '<circle class="halo" r="' + haloR + '"/>';
-        else s += '<circle class="ring" r="' + (coreR + 7) + '"/>';
+        var coreR = 13;
+        var dl = (-Math.random() * 3).toFixed(2) + 's';
+        s += '<a class="node' + (lit ? ' lit' : '') + '" href="' + p.s.url + '" data-id="' + p.s.id + '" style="--c:' + z.c + ';--dl:' + dl + '" aria-label="' + p.s.name + (lit ? '（已点亮）' : '（未点亮）') + '">';
+        s += '<g class="pos" style="transform:translate(' + p.x + 'px,' + p.y + 'px)">';
+        if (lit) {
+          s += '<circle class="glow" r="38" fill="url(#gl-' + z.key + ')"/>';
+          s += '<circle class="halo" r="27"/>';
+        } else {
+          s += '<circle class="ring" r="24"/>';
+        }
         s += '<g class="fx">';
-        s += '<circle class="core" r="' + coreR + '"/>';
-        s += '<text class="ico" y="' + (mob ? 1 : 1) + '">' + p.s.ico + '</text>';
+        if (lit) s += '<path class="spike" d="M0,-40 L2.6,-16 L0,-12 L-2.6,-16 Z M0,40 L2.6,16 L0,12 L-2.6,16 Z M-40,0 L-16,2.6 L-12,0 L-16,-2.6 Z M40,0 L16,2.6 L12,0 L16,-2.6 Z"/>';
+        s += '<circle class="core" r="' + (lit ? coreR : 12) + '"/>';
         s += '</g>';
-        s += '<text class="label" y="' + (coreR + (mob ? 21 : 22)) + '">' + p.s.name + '</text>';
-        s += '<circle class="hit" r="' + (coreR + 21) + '"/>';
+        s += '<text class="ico" y="0.5">' + p.s.ico + '</text>';
+        s += '<text class="label" y="46">' + p.s.name + '</text>';
+        s += '<circle class="hit" r="42"/>';
         s += '</g></a>';
       });
     });
+    s += '</g>';
 
     svg.innerHTML = s;
+
+    /* 索引与事件 */
+    [].forEach.call(svg.querySelectorAll('.node'), function (a) {
+      var id = a.getAttribute('data-id');
+      nodesIndex[id] = { a: a, pos: a.querySelector('.pos'), fx: a.querySelector('.fx'), site: siteById(id) };
+    });
+    [].forEach.call(svg.querySelectorAll('#mapLinks .lnk'), function (g) {
+      var a = g.getAttribute('data-a'), b = g.getAttribute('data-b');
+      (linksFor[a] = linksFor[a] || []).push(g);
+      (linksFor[b] = linksFor[b] || []).push(g);
+    });
+    relLayer = document.getElementById('relLinks');
     bindNodes();
     updateHeader();
 
-    /* 测试钩子：布局几何（供自动化断言） */
-    window.__mapInfo = {
-      mob: mob, W: W, H: H,
-      nodes: [].map.call(svg.querySelectorAll('.node'), function (a) {
-        var g = a.querySelector('g');
-        var m = /translate\(([-\d.]+) ([-\d.]+)\)/.exec(g.getAttribute('transform'));
-        var lb = a.querySelector('.label');
-        return { id: a.getAttribute('data-id'), x: +m[1], y: +m[2], lit: a.classList.contains('lit'),
-          labelBBox: (function(){ var b = lb.getBBox(); return { x: b.x, y: b.y, w: b.width, h: b.height }; })() };
-      })
-    };
+    /* 若正处于关系视图，重建后无过渡恢复到关系布局 */
+    if (view.mode === 'rel' && view.center && nodesIndex[view.center]) {
+      svg.classList.add('no-trans');
+      applyRelLayout(view.center);
+      requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('no-trans'); }); });
+    }
+    refreshInfo();
+  }
+  function lineGroup(z, p1, p2) {
+    var on = isLit(p1.s) && isLit(p2.s);
+    var g = '<g class="lnk' + (on ? ' on' : '') + '" data-a="' + p1.s.id + '" data-b="' + p2.s.id + '">' +
+      '<line class="lbase" x1="' + p1.x + '" y1="' + p1.y + '" x2="' + p2.x + '" y2="' + p2.y + '" stroke="' + (on ? z.c : 'rgba(130,150,220,.13)') + '"/>';
+    if (on) g += '<line class="lflow" x1="' + p1.x + '" y1="' + p1.y + '" x2="' + p2.x + '" y2="' + p2.y + '" stroke="' + z.c + '" style="animation-delay:' + (Math.random() * -1.5).toFixed(2) + 's"/>';
+    return g + '</g>';
   }
 
-  /* ============ 头部进度 ============ */
+  /* ============ 位置与布局切换 ============ */
+  function setPositions(targets) {
+    Object.keys(targets).forEach(function (id) {
+      var n = nodesIndex[id];
+      if (!n) return;
+      var t = targets[id];
+      n.pos.style.transform = 'translate(' + t.x + 'px,' + t.y + 'px)';
+    });
+  }
+  function mapTargets() {
+    var t = {};
+    SITES.forEach(function (s) {
+      var p = GEO.pos[s.id];
+      t[s.id] = { x: p.x, y: p.y };
+    });
+    return t;
+  }
+  function applyRelLayout(centerId) {
+    var W = GEO.W, H = GEO.H, C = GEO.center;
+    var related = REL[centerId] || [];
+    var relIds = related.map(function (r) { return r.id; });
+    var targets = {};
+    var ringN = related.length;
+    var R1 = mob ? (ringN > 5 ? 136 : 118) : (ringN > 5 ? 218 : 192);
+    /* 关联星环排（按全图上相对中心的方向排序，保留方位记忆） */
+    var sorted = related.slice().sort(function (x, y) {
+      var px = GEO.pos[x.id], py = GEO.pos[y.id];
+      return Math.atan2(px.y - C.y, px.x - C.x) - Math.atan2(py.y - C.y, py.x - C.x);
+    });
+    sorted.forEach(function (r, i) {
+      var a = (-90 + i * 360 / Math.max(1, sorted.length)) * Math.PI / 180;
+      targets[r.id] = { x: C.x + R1 * Math.cos(a), y: C.y + R1 * Math.sin(a) };
+    });
+    targets[centerId] = { x: C.x, y: C.y };
+    /* 其余星推到外圈并淡化 */
+    var pad = 34;
+    SITES.forEach(function (s) {
+      if (targets[s.id]) return;
+      var p = GEO.pos[s.id];
+      var dx = p.x - C.x, dy = p.y - C.y;
+      var d = Math.hypot(dx, dy) || 1;
+      var push = mob ? 1.32 : 1.42;
+      var tx = C.x + dx * push, ty = C.y + dy * push;
+      tx = Math.max(pad, Math.min(W - pad, tx));
+      ty = Math.max(pad, Math.min(H - pad, ty));
+      targets[s.id] = { x: tx, y: ty };
+    });
+    setPositions(targets);
+
+    /* 节点状态类 */
+    SITES.forEach(function (s) {
+      var n = nodesIndex[s.id];
+      if (!n) return;
+      n.a.classList.toggle('center', s.id === centerId);
+      n.a.classList.toggle('faded', !targets[s.id] ? false : (s.id !== centerId && relIds.indexOf(s.id) < 0));
+    });
+    /* 关系线层 */
+    var lines = '';
+    related.forEach(function (r) {
+      var t1 = targets[centerId], t2 = targets[r.id];
+      if (!t2) return;
+      var mx = (t1.x + t2.x) / 2, my = (t1.y + t2.y) / 2;
+      var lx = (t1.x - t2.x), ly = (t1.y - t2.y);
+      var ll = Math.hypot(lx, ly) || 1;
+      var px = mx - ly / ll * 12, py = my + lx / ll * 12;
+      lines += '<g class="rel-link-g">' +
+        '<line class="rel-link" x1="' + t1.x + '" y1="' + t1.y + '" x2="' + t2.x + '" y2="' + t2.y + '"/>' +
+        '<line class="rl-flow" x1="' + t1.x + '" y1="' + t1.y + '" x2="' + t2.x + '" y2="' + t2.y + '" style="animation-delay:' + (-Math.random() * 1.4).toFixed(2) + 's"/>' +
+        '<circle class="rel-node-halo" cx="' + t2.x + '" cy="' + t2.y + '" r="34"/>' +
+        '<text class="rel-lab" x="' + px + '" y="' + py + '">' + r.label + '</text>' +
+        '</g>';
+    });
+    relLayer.innerHTML = lines;
+  }
+  function enterRel(id) {
+    view.mode = 'rel'; view.center = id;
+    svg.classList.add('rel-mode');
+    clearFocus();
+    applyRelLayout(id);
+    refreshInfo();
+  }
+  function exitRel() {
+    if (view.mode !== 'rel') return;
+    view.mode = 'map'; view.center = null;
+    svg.classList.remove('rel-mode');
+    setPositions(mapTargets());
+    SITES.forEach(function (s) {
+      var n = nodesIndex[s.id];
+      if (!n) return;
+      n.a.classList.remove('center', 'faded');
+    });
+    refreshInfo();
+  }
+
+  /* ============ 头部进度 / 横幅 / 信息卡 ============ */
   function updateHeader() {
     var lit = litCount();
     document.getElementById('litN').textContent = lit;
@@ -418,19 +682,44 @@
       if (STAch.unlock('map.all', '宇宙全图鉴', '🌌')) { render(); confetti(); }
     }
   }
+  function refreshInfo() {
+    var bar = document.getElementById('relbar');
+    var hint = document.getElementById('relhint');
+    if (view.mode === 'rel' && view.center) {
+      var s = siteById(view.center);
+      if (s) {
+        document.getElementById('rbName').textContent = s.ico + ' ' + s.name;
+        document.getElementById('rbDesc').textContent = s.desc;
+        document.getElementById('rbGo').setAttribute('href', s.url);
+        bar.classList.add('show');
+        hint.classList.add('show');
+        hint.textContent = '✦ 星图关系视图 · ' + (REL[view.center] || []).length + ' 条关系 · 点击其他星切换中心 · 点空白 / ESC 返回';
+      }
+    } else {
+      bar.classList.remove('show');
+      hint.classList.remove('show');
+    }
+  }
 
   /* ============ 节点交互 ============ */
   var tip = document.getElementById('tip');
   function bindNodes() {
-    [].forEach.call(svg.querySelectorAll('.node'), function (a) {
+    var nodes = svg.querySelectorAll('.node');
+    [].forEach.call(nodes, function (a) {
       var id = a.getAttribute('data-id');
-      var site = null;
-      for (var i = 0; i < SITES.length; i++) if (SITES[i].id === id) site = SITES[i];
+      var site = siteById(id);
       var lit = a.classList.contains('lit');
 
       a.addEventListener('mouseenter', function () {
+        /* ① 暂停所有星图动画 ② 预览该星的关系 */
+        svg.classList.add('freeze');
+        if (view.mode === 'map') {
+          svg.classList.add('focusing');
+          (linksFor[id] || []).forEach(function (g) { g.classList.add('hl'); });
+        }
         tip.innerHTML = '<b>' + site.ico + ' ' + site.name + '</b><p>' + site.desc + '</p>' +
-          '<span class="st ' + (lit ? 'ok' : 'no') + '">' + (lit ? '✨ 已探索 · 点击重温' : '🌑 尚未点亮 · 现在出发') + '</span>';
+          '<span class="st ' + (lit ? 'ok' : 'no') + '">' + (lit ? '✨ 已探索' : '🌑 尚未点亮 · 去逛逛就亮了') + '</span>' +
+          '<span class="hint">点击 → 展开星图关系 · Ctrl/中键 → 直接前往</span>';
         tip.classList.add('show');
       });
       a.addEventListener('mousemove', function (e) {
@@ -440,21 +729,56 @@
         tip.style.left = Math.max(8, x) + 'px';
         tip.style.top = Math.max(8, y) + 'px';
       });
-      a.addEventListener('mouseleave', function () { tip.classList.remove('show'); });
+      a.addEventListener('mouseleave', function () {
+        svg.classList.remove('freeze');
+        clearFocus();
+        tip.classList.remove('show');
+      });
 
       a.addEventListener('click', function (e) {
-        if (e.metaKey || e.ctrlKey || e.shiftKey || (e.button !== undefined && e.button !== 0)) return; /* 新标签等默认行为 */
+        if (e.metaKey || e.ctrlKey || e.shiftKey || (e.button !== undefined && e.button !== 0)) return; /* 修饰键/中键 → 浏览器默认（新标签） */
         e.preventDefault();
-        navigateTo(a, site.url);
+        if (view.mode === 'map') {
+          enterRel(id);                                     /* 全景 → 关系视图（平滑过渡） */
+        } else if (view.center === id) {
+          jumpTo(site.url, nodesIndex[id] && nodesIndex[id].pos);  /* 关系视图内点中心星 → 出发 */
+        } else {
+          enterRel(id);                                     /* 切换中心（平滑再过渡） */
+        }
       });
     });
   }
-
-  function navigateTo(nodeEl, url) {
-    nodeEl.classList.add('jump');
-    if (!isLit({ id: nodeEl.getAttribute('data-id') })) toast('🌑 这一颗还没亮，去点亮它 →');
+  function clearFocus() {
+    svg.classList.remove('focusing');
+    [].forEach.call(svg.querySelectorAll('.lnk.hl'), function (g) { g.classList.remove('hl'); });
+  }
+  function jumpTo(url, posEl) {
+    if (posEl) {
+      var a = posEl.closest('.node');
+      if (a) a.classList.add('jump');
+    }
+    if (!isLit({ id: (posEl && posEl.closest('.node') && posEl.closest('.node').getAttribute('data-id')) || '' })) toast('🌑 这一颗还没亮，去点亮它 →');
     setTimeout(function () { location.href = url; }, 230);
   }
+
+  /* 信息卡按钮 + 空白 / ESC 返回 */
+  document.getElementById('rbBack').addEventListener('click', function () { exitRel(); });
+  document.getElementById('rbGo').addEventListener('click', function (e) {
+    e.preventDefault();
+    var id = view.center;
+    if (!id) return;
+    var s = siteById(id);
+    var n = nodesIndex[id];
+    if (s) jumpTo(s.url, n && n.pos);
+  });
+  svg.addEventListener('click', function (e) {
+    if (view.mode !== 'rel') return;
+    if (e.target.closest && e.target.closest('.node')) return;
+    exitRel();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && view.mode === 'rel') exitRel();
+  });
 
   /* ============ 🎲 带我去一颗暗星 ============ */
   document.getElementById('btnRandom').addEventListener('click', function () {
@@ -463,7 +787,7 @@
     var pick = pool[Math.floor(Math.random() * pool.length)];
     var el = svg.querySelector('.node[data-id="' + pick.id + '"]');
     if (!el) return;
-    try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {}
+    try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e2) {}
     el.classList.add('jump');
     toast('🚀 目标：' + pick.ico + ' ' + pick.name + ' · 出发');
     setTimeout(function () { location.href = pick.url; }, 1000);
@@ -491,12 +815,12 @@
     }
   }
 
-  /* ============ 响应式重建（防抖 + 三重保险：resize / MQ / RO） ============ */
+  /* ============ 响应式重建（防抖 + 三重保险） ============ */
   var rt = null;
   function onOrient() {
     clearTimeout(rt);
     rt = setTimeout(function () {
-      if (MQ.matches !== mob) render();   /* 只在跨断点时重建，避免多余重绘 */
+      if (MQ.matches !== mob) render();
     }, 160);
   }
   window.addEventListener('resize', onOrient);
@@ -504,17 +828,49 @@
   if (MQ.addEventListener) MQ.addEventListener('change', onOrient);
   else if (MQ.addListener) MQ.addListener(onOrient);
   if (window.ResizeObserver) {
-    try { new ResizeObserver(onOrient).observe(document.querySelector('.stage')); } catch (e) {}
+    try { new ResizeObserver(onOrient).observe(stage); } catch (e) {}
   }
 
   /* 启动 */
   render();
 
   /* 测试钩子（不影响页面功能） */
+  window.__mapInfo = function () {
+    return {
+      mob: mob, W: GEO.W, H: GEO.H,
+      mode: view.mode, center: view.center,
+      relCount: view.center ? (REL[view.center] || []).length : 0,
+      nodes: SITES.map(function (s) {
+        var n = nodesIndex[s.id];
+        var m = n ? /translate\(([-\d.]+)px,\s*([-\d.]+)px\)/.exec(n.pos.style.transform || '') : null;
+        var lb = n ? n.a.querySelector('.label') : null;
+        var b = lb ? lb.getBBox() : { x: 0, y: 0, width: 0, height: 0 };
+        return {
+          id: s.id, lit: !!(n && n.a.classList.contains('lit')),
+          center: !!(n && n.a.classList.contains('center')),
+          faded: !!(n && n.a.classList.contains('faded')),
+          x: m ? +m[1] : null, y: m ? +m[2] : null,
+          labelBBox: { x: b.x, y: b.y, w: b.width, h: b.height }
+        };
+      }),
+      relLinks: document.querySelectorAll('#relLinks .rel-link-g').length,
+      mapLinks: document.querySelectorAll('#mapLinks .lnk').length,
+      flowLinks: document.querySelectorAll('.lnk.on').length
+    };
+  };
   window.__mapDbg = {
     render: render,
     confetti: confetti,
-    state: function () { return { lit: litCount(), total: SITES.length, mapAll: STAch.has('map.all'), confettiRuns: confettiRuns }; }
+    enterRel: enterRel,
+    exitRel: exitRel,
+    relOf: function (id) { return (REL[id] || []).slice(); },
+    state: function () {
+      return {
+        lit: litCount(), total: SITES.length, mode: view.mode, center: view.center,
+        mapAll: STAch.has('map.all'), confettiRuns: confettiRuns,
+        freeze: svg.classList.contains('freeze'), focusing: svg.classList.contains('focusing')
+      };
+    }
   };
 })();
 </script>
