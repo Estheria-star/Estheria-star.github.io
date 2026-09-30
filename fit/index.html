@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="函数拟合器：丢一堆散点进去，自动找出最像的函数。startian.top 出品">
+<meta name="theme-color" content="#0b1a16">
+<title>函数拟合器 · startian.top</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;background:radial-gradient(1100px 600px at 50% -80px, #14342a 0%, #0d211b 45%, #08130f 100%);color:#e8fff5;font-family:'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif}
+  header{display:flex;align-items:center;gap:13px;padding:18px 24px;flex-wrap:wrap}
+  header h1{font-size:19px;margin:0;letter-spacing:.5px}
+  header .sub{font-size:12px;color:#7fb8a2;font-weight:600}
+  .home{margin-left:auto;text-decoration:none;font-size:12.5px;font-weight:700;color:#c8f5e4;border:1px solid rgba(90,220,170,.3);border-radius:999px;padding:9px 16px;background:rgba(14,34,26,.7);transition:border-color .2s,transform .2s}
+  .home:hover{border-color:rgba(110,240,190,.7);transform:translateY(-1px)}
+  main{max-width:1080px;margin:0 auto;padding:4px 24px 70px;display:grid;grid-template-columns:1.4fr 1fr;gap:18px;align-items:start}
+  @media (max-width:880px){ main{grid-template-columns:1fr} }
+  .card{background:rgba(16,36,28,.68);border:1px solid rgba(90,220,170,.22);border-radius:22px;padding:16px;box-shadow:0 18px 44px rgba(0,0,0,.35);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+  .card h2{margin:0 0 10px;font-size:12.5px;letter-spacing:2px;color:#7fb8a2;font-weight:800}
+  #plot{width:100%;height:420px;display:block;border-radius:14px;background:rgba(6,16,12,.75);border:1px solid rgba(90,220,170,.18);cursor:crosshair;touch-action:none}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+  button{
+    border:1px solid rgba(90,220,170,.32);border-radius:999px;padding:9px 15px;font-size:12.5px;font-weight:800;
+    font-family:inherit;cursor:pointer;color:#e8fff5;background:linear-gradient(180deg,rgba(50,200,150,.28),rgba(30,150,110,.24));
+    transition:transform .15s ease,border-color .2s ease;
+  }
+  button:hover{border-color:rgba(110,240,190,.7);transform:translateY(-1px)}
+  button.primary{background:linear-gradient(180deg,#3ddba0,#1b9e6e);color:#04211a;border-color:transparent;box-shadow:0 5px 0 #0f5f42,0 12px 24px rgba(40,200,150,.35)}
+  .tip{font-size:11.5px;color:#7fb8a2;line-height:1.8;margin-top:10px}
+  .fits{display:flex;flex-direction:column;gap:8px}
+  .fit{border:1px solid rgba(90,220,170,.22);border-radius:14px;padding:10px 13px;background:rgba(10,26,20,.6);transition:border-color .25s ease,transform .25s ease}
+  .fit.best{border-color:#3ddba0;background:linear-gradient(150deg,rgba(40,150,110,.3),rgba(20,80,60,.3));transform:translateY(-1px);box-shadow:0 10px 26px rgba(30,160,110,.25)}
+  .fit .fn{font-family:ui-monospace,Consolas,monospace;font-size:13px;font-weight:700;color:#d9ffef;word-break:break-all}
+  .fit .meta{display:flex;gap:10px;font-size:11px;color:#8fc9b2;margin-top:5px;font-weight:700}
+  .fit.best .meta{color:#5ff0c0}
+  .data-row{display:flex;gap:8px;margin-top:11px}
+  .data-row textarea{flex:1;height:74px;resize:none;border:1.5px solid rgba(90,220,170,.28);border-radius:12px;padding:9px 11px;font-size:12px;font-family:ui-monospace,Consolas,monospace;color:#e8fff5;background:rgba(8,20,15,.7);outline:none}
+  .data-row textarea:focus{border-color:#3ddba0}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(10px);opacity:0;z-index:60;background:rgba(14,34,26,.95);border:1px solid rgba(90,220,170,.4);border-radius:999px;padding:11px 22px;font-size:13px;font-weight:700;transition:all .3s ease;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+/* —— 返回主页（全站统一 · 2026-09-29）—— */
+.wb-home{position:fixed;left:14px;bottom:14px;z-index:9990;display:inline-flex;align-items:center;gap:5px;
+  padding:8px 13px 8px 10px;border-radius:999px;text-decoration:none;
+  background:rgba(17,24,39,.55);color:#fff;font-size:12.5px;font-weight:600;letter-spacing:.3px;
+  -webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.14);box-shadow:0 6px 18px rgba(0,0,0,.18);
+  transition:background .2s,transform .2s,box-shadow .2s}
+.wb-home:hover{background:rgba(17,24,39,.78);transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.26)}
+.wb-home:active{transform:translateY(0)}
+.wb-home svg{width:13px;height:13px;flex:0 0 auto}
+@media (max-width:620px){ .wb-home{left:10px;bottom:10px;padding:7px 11px 7px 9px;font-size:12px} }
+</style>
+</head>
+<body>
+<header>
+  <h1>📈 函数拟合器</h1>
+  <span class="sub">丢一堆散点进去 · 自动找出最像的函数</span>
+  <a class="home" href="https://startian.top/">← 返回主页</a>
+</header>
+<main>
+  <section class="card">
+    <h2>SCATTER · 散点画布</h2>
+    <canvas id="plot"></canvas>
+    <div class="btns">
+      <button class="primary" id="btnLin" type="button">🎲 撒线性点</button>
+      <button id="btnQuad" type="button">🎲 撒抛物线点</button>
+      <button id="btnExp" type="button">🎲 撒指数点</button>
+      <button id="btnClear" type="button">🧹 清空</button>
+    </div>
+    <p class="tip">点击画布加点 · 右键删除最近的点 · 也可以在下面粘贴数据（每行 x,y 或 x y）</p>
+    <div class="data-row">
+      <textarea id="dataIn" placeholder="1,2.1&#10;2,3.9&#10;3,6.2&#10;4,8.1&#10;5,9.8"></textarea>
+      <button id="btnParse" type="button">导入<br>数据</button>
+    </div>
+  </section>
+  <section class="card">
+    <h2>FIT · 拟合结果（实时）</h2>
+    <div class="fits" id="fits"></div>
+    <p class="tip" id="fitTip" style="margin-top:12px">至少需要 2 个点，多撒几个效果更明显。金色边框 = 当前最像的函数。</p>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+  /* ============ 🏆 跨站成就 SDK ============ */
+  var STAch = (function () {
+    var KEY = 'st_ach';
+    function readCookie() {
+      var m = document.cookie.match(/(?:^|;\s*)st_ach=([^;]*)/);
+      if (!m) return null;
+      try { return JSON.parse(decodeURIComponent(m[1])) || []; } catch (e) { return null; }
+    }
+    function writeCookie(list) {
+      try {
+        var v = encodeURIComponent(JSON.stringify(list));
+        if (v.length < 3800) document.cookie = 'st_ach=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+      } catch (e) {}
+    }
+    var list = readCookie();
+    if (!list) { try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { list = []; } }
+    if (!Array.isArray(list)) list = [];
+    function save() {
+      try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+      writeCookie(list);
+    }
+    function unlock(id, name, ico) {
+      if (list.indexOf(id) >= 0) return false;
+      list.push(id);
+      save();
+      try {
+        var el = document.createElement('div');
+        el.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9999;background:rgba(14,34,28,.95);color:#fff;border:1px solid rgba(90,220,170,.45);border-radius:999px;padding:12px 22px;font:700 13.5px/1.4 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:86vw';
+        el.textContent = '🏆 成就解锁：' + (ico ? ico + ' ' : '') + (name || id);
+        document.body.appendChild(el);
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        setTimeout(function () {
+          el.style.opacity = '0';
+          el.style.transform = 'translateX(-50%) translateY(16px)';
+          setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+        }, 3200);
+      } catch (e) {}
+      return true;
+    }
+    return { list: function () { return list.slice(); }, has: function (id) { return list.indexOf(id) >= 0; }, unlock: unlock };
+  })();
+  window.STAch = STAch;
+  setTimeout(function () { STAch.unlock('site.fit', '数据侦探', '📈'); }, 600);
+
+  var cv = document.getElementById('plot');
+  var ctx = cv.getContext('2d');
+  var dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+  var pts = [];   /* 数据坐标（数学坐标系） */
+
+  /* —— 视图映射：数学坐标 → 屏幕（自动范围） —— */
+  function bounds() {
+    if (!pts.length) return { x0: -5, x1: 5, y0: -5, y1: 5 };
+    var xs = pts.map(function (p) { return p.x; }), ys = pts.map(function (p) { return p.y; });
+    var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs);
+    var y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
+    var mx = (x1 - x0) * 0.18 + 0.5, my = (y1 - y0) * 0.18 + 0.5;
+    return { x0: x0 - mx, x1: x1 + mx, y0: y0 - my, y1: y1 + my };
+  }
+  function toScr(x, y, B) {
+    var W = cv.width, H = cv.height;
+    return { x: (x - B.x0) / (B.x1 - B.x0) * W, y: H - (y - B.y0) / (B.y1 - B.y0) * H };
+  }
+  function toData(sx, sy, B) {
+    var W = cv.width, H = cv.height;
+    return { x: B.x0 + sx / W * (B.x1 - B.x0), y: B.y0 + (H - sy) / H * (B.y1 - B.y0) };
+  }
+
+  /* ============ 拟合引擎 ============ */
+  function solve(A, b) {   /* 高斯消元 */
+    var n = b.length;
+    for (var i = 0; i < n; i++) {
+      var piv = i;
+      for (var r = i + 1; r < n; r++) if (Math.abs(A[r][i]) > Math.abs(A[piv][i])) piv = r;
+      var t = A[i]; A[i] = A[piv]; A[piv] = t;
+      var tb = b[i]; b[i] = b[piv]; b[piv] = tb;
+      if (Math.abs(A[i][i]) < 1e-12) return null;
+      for (var r2 = i + 1; r2 < n; r2++) {
+        var f = A[r2][i] / A[i][i];
+        for (var c = i; c < n; c++) A[r2][c] -= f * A[i][c];
+        b[r2] -= f * b[i];
+      }
+    }
+    var x = new Array(n);
+    for (var i2 = n - 1; i2 >= 0; i2--) {
+      var s = b[i2];
+      for (var c2 = i2 + 1; c2 < n; c2++) s -= A[i2][c2] * x[c2];
+      x[i2] = s / A[i2][i2];
+    }
+    return x;
+  }
+  function polyFit(n) {   /* y = a0 + a1 x + ... + an x^n */
+    if (pts.length < n + 1) return null;
+    var m = n + 1;
+    var M = [], v = [];
+    for (var r = 0; r < m; r++) {
+      M.push([]); v.push(0);
+      for (var c = 0; c < m; c++) {
+        var s = 0;
+        pts.forEach(function (p) { s += Math.pow(p.x, r + c); });
+        M[r].push(s);
+      }
+      var s2 = 0;
+      pts.forEach(function (p) { s2 += p.y * Math.pow(p.x, r); });
+      v[r] = s2;
+    }
+    var co = solve(M, v);
+    return co ? { co: co, fn: function (x) { return co.reduce(function (s, a, i) { return s + a * Math.pow(x, i); }, 0); } } : null;
+  }
+  function linFit(xs, ys) {   /* 对给定成对数据做一次线性最小二乘 */
+    var n = xs.length;
+    if (n < 2) return null;
+    var sx = 0, sy = 0, sxx = 0, sxy = 0;
+    for (var i = 0; i < n; i++) { sx += xs[i]; sy += ys[i]; sxx += xs[i] * xs[i]; sxy += xs[i] * ys[i]; }
+    var d = n * sxx - sx * sx;
+    if (Math.abs(d) < 1e-12) return null;
+    var a = (n * sxy - sx * sy) / d;
+    var b = (sy - a * sx) / n;
+    return { a: a, b: b };
+  }
+  function r2(fn) {
+    var ys = pts.map(function (p) { return p.y; });
+    var mean = ys.reduce(function (s, v) { return s + v; }, 0) / ys.length;
+    var ssr = 0, sst = 0;
+    pts.forEach(function (p) {
+      var e = p.y - fn(p.x);
+      ssr += e * e;
+      sst += (p.y - mean) * (p.y - mean);
+    });
+    if (sst < 1e-12) return 1;
+    return Math.max(0, 1 - ssr / sst);
+  }
+  function fmt(v) {
+    if (!isFinite(v)) return '—';
+    var a = Math.abs(v);
+    if (a >= 1e5 || (a < 1e-3 && a > 0)) return v.toExponential(2);
+    return String(Math.round(v * 10000) / 10000);
+  }
+  function fitAll() {
+    var out = [];
+    if (pts.length >= 2) {
+      var f1 = polyFit(1);
+      if (f1) out.push({ name: '一次函数', expr: 'y = ' + fmt(f1.co[1]) + ' x + ' + fmt(f1.co[0]), fn: f1.fn, n: 2 });
+      var f2 = pts.length >= 3 ? polyFit(2) : null;
+      if (f2) out.push({ name: '二次函数', expr: 'y = ' + fmt(f2.co[2]) + ' x² + ' + fmt(f2.co[1]) + ' x + ' + fmt(f2.co[0]), fn: f2.fn, n: 3 });
+      var f3 = pts.length >= 4 ? polyFit(3) : null;
+      if (f3) out.push({ name: '三次函数', expr: 'y = ' + fmt(f3.co[3]) + ' x³ + ' + fmt(f3.co[2]) + ' x² + ' + fmt(f3.co[1]) + ' x + ' + fmt(f3.co[0]), fn: f3.fn, n: 4 });
+      /* 指数 y = a e^(bx)（y>0 全正） */
+      if (pts.every(function (p) { return p.y > 1e-9; })) {
+        var lf = linFit(pts.map(function (p) { return p.x; }), pts.map(function (p) { return Math.log(p.y); }));
+        if (lf && Math.abs(lf.a) > 1e-9) {
+          out.push({
+            name: '指数函数', expr: 'y = ' + fmt(Math.exp(lf.b)) + ' · e^(' + fmt(lf.a) + ' x)',
+            fn: function (x) { return Math.exp(lf.b) * Math.exp(lf.a * x); }, n: 2
+          });
+        }
+      }
+      /* 幂 y = a x^b（x,y>0） */
+      if (pts.every(function (p) { return p.x > 1e-9 && p.y > 1e-9; })) {
+        var lf2 = linFit(pts.map(function (p) { return Math.log(p.x); }), pts.map(function (p) { return Math.log(p.y); }));
+        if (lf2) {
+          out.push({
+            name: '幂函数', expr: 'y = ' + fmt(Math.exp(lf2.b)) + ' · x^' + fmt(lf2.a),
+            fn: function (x) { return x <= 0 ? NaN : Math.exp(lf2.b) * Math.pow(x, lf2.a); }, n: 2
+          });
+        }
+      }
+      /* 对数 y = a ln x + b（x>0） */
+      if (pts.every(function (p) { return p.x > 1e-9; })) {
+        var lf3 = linFit(pts.map(function (p) { return Math.log(p.x); }), pts.map(function (p) { return p.y; }));
+        if (lf3) {
+          out.push({
+            name: '对数函数', expr: 'y = ' + fmt(lf3.a) + ' ln(x) + ' + fmt(lf3.b),
+            fn: function (x) { return x <= 0 ? NaN : lf3.a * Math.log(x) + lf3.b; }, n: 2
+          });
+        }
+      }
+    }
+    out.forEach(function (f) { f.r2 = r2(f.fn); });
+    out.sort(function (a, b) { return b.r2 - a.r2; });
+    return out;
+  }
+
+  /* ============ 绘制 ============ */
+  function draw() {
+    var W = cv.width, H = cv.height;
+    var B = bounds();
+    ctx.clearRect(0, 0, W, H);
+    /* 网格 */
+    ctx.strokeStyle = 'rgba(90,220,170,.12)';
+    ctx.lineWidth = 1;
+    var steps = 8;
+    for (var i = 0; i <= steps; i++) {
+      var sx = W * i / steps, sy = H * i / steps;
+      ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, H); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, sy); ctx.lineTo(W, sy); ctx.stroke();
+    }
+    /* 坐标轴（0 线） */
+    if (B.y0 < 0 && B.y1 > 0) {
+      var zy = toScr(0, 0, B).y;
+      ctx.strokeStyle = 'rgba(90,220,170,.35)';
+      ctx.beginPath(); ctx.moveTo(0, zy); ctx.lineTo(W, zy); ctx.stroke();
+    }
+    if (B.x0 < 0 && B.x1 > 0) {
+      var zx = toScr(0, 0, B).x;
+      ctx.beginPath(); ctx.moveTo(zx, 0); ctx.lineTo(zx, H); ctx.stroke();
+    }
+    var fits = fitAll();
+    /* 非最优候选：淡线 */
+    fits.slice(1).forEach(function (f) {
+      ctx.strokeStyle = 'rgba(120,200,170,.25)';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      var started = false;
+      for (var px = 0; px <= W; px += 4) {
+        var d = toData(px, 0, B);
+        var yv = f.fn(d.x);
+        if (!isFinite(yv)) { started = false; continue; }
+        var sp = toScr(d.x, yv, B);
+        if (sp.y < -H || sp.y > 2 * H) { started = false; continue; }
+        if (!started) { ctx.moveTo(sp.x, sp.y); started = true; }
+        else ctx.lineTo(sp.x, sp.y);
+      }
+      ctx.stroke();
+    });
+    /* 最优：亮线 */
+    if (fits.length) {
+      var best = fits[0];
+      var grad = ctx.createLinearGradient(0, 0, W, 0);
+      grad.addColorStop(0, '#3ddba0'); grad.addColorStop(.6, '#38bdf8'); grad.addColorStop(1, '#c4b5fd');
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 3 * dpr;
+      ctx.shadowColor = 'rgba(60,220,160,.5)';
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      var started2 = false;
+      for (var px2 = 0; px2 <= W; px2 += 2) {
+        var d2 = toData(px2, 0, B);
+        var yv2 = best.fn(d2.x);
+        if (!isFinite(yv2)) { started2 = false; continue; }
+        var sp2 = toScr(d2.x, yv2, B);
+        if (sp2.y < -H || sp2.y > 2 * H) { started2 = false; continue; }
+        if (!started2) { ctx.moveTo(sp2.x, sp2.y); started2 = true; }
+        else ctx.lineTo(sp2.x, sp2.y);
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+    /* 散点 */
+    pts.forEach(function (p) {
+      var sp3 = toScr(p.x, p.y, B);
+      ctx.fillStyle = '#5ff0c0';
+      ctx.beginPath(); ctx.arc(sp3.x, sp3.y, 4.5 * dpr, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(10,30,22,.9)';
+      ctx.lineWidth = 1.5 * dpr;
+      ctx.stroke();
+    });
+    /* 结果卡 */
+    var wrap = document.getElementById('fits');
+    if (!fits.length) {
+      wrap.innerHTML = '<p style="font-size:12.5px;color:#8fc9b2;margin:4px 2px">还差一点数据…（至少 2 个点）</p>';
+    } else {
+      wrap.innerHTML = fits.map(function (f) {
+        return '<div class="fit' + (f === fits[0] ? ' best' : '') + '">' +
+          '<div class="fn">' + (f === fits[0] ? '🏆 ' : '') + f.name + '：' + f.expr + '</div>' +
+          '<div class="meta"><span>R² = ' + f.r2.toFixed(4) + '</span><span>' + (f.r2 > 0.999 ? '几乎完美吻合' : f.r2 > 0.95 ? '非常吻合' : f.r2 > 0.8 ? '比较吻合' : '勉强') + '</span></div></div>';
+      }).join('');
+    }
+  }
+
+  /* ============ 交互 ============ */
+  function fitOnce() {
+    if (pts.length >= 2 && !fitOnce._done) {
+      fitOnce._done = true;
+      try { STAch.unlock('fit.fit', '找到最像的那个', '🧮'); } catch (e) {}
+    }
+  }
+  var lastFitCheck = 0;
+  function afterChange() {
+    draw();
+    if (pts.length >= 2 && performance.now() - lastFitCheck > 600) {
+      lastFitCheck = performance.now();
+      fitOnce();
+    }
+  }
+  function fit() {
+    var W = cv.clientWidth, H = cv.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    afterChange();
+  }
+  window.addEventListener('resize', fit);
+
+  cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  cv.addEventListener('pointerdown', function (e) {
+    var r = cv.getBoundingClientRect();
+    if (e.button === 2) {
+      /* 删除最近点 */
+      var B = bounds();
+      var d = toData((e.clientX - r.left) * dpr, (e.clientY - r.top) * dpr, B);
+      var bi = -1, bd = 1e9;
+      pts.forEach(function (p, i) {
+        var dd = Math.hypot(p.x - d.x, p.y - d.y);
+        if (dd < bd) { bd = dd; bi = i; }
+      });
+      if (bi >= 0) pts.splice(bi, 1);
+    } else {
+      var B2 = bounds();
+      pts.push(toData((e.clientX - r.left) * dpr, (e.clientY - r.top) * dpr, B2));
+    }
+    afterChange();
+  });
+
+  function rand(gen, n) {
+    pts = [];
+    for (var i = 0; i < n; i++) {
+      var x = -5 + i * 10 / (n - 1);
+      pts.push({ x: x, y: gen(x) + (Math.random() - 0.5) * 2.4 });
+    }
+    afterChange();
+  }
+  document.getElementById('btnLin').addEventListener('click', function () { rand(function (x) { return 1.4 * x + 2.2; }, 11); toast('🎲 撒了一把线性点'); });
+  document.getElementById('btnQuad').addEventListener('click', function () { rand(function (x) { return 0.6 * x * x - 1.2 * x + 1; }, 13); toast('🎲 撒了一把抛物线点'); });
+  document.getElementById('btnExp').addEventListener('click', function () { rand(function (x) { return 1.6 * Math.exp(0.42 * x); }, 11); toast('🎲 撒了一把指数点'); });
+  document.getElementById('btnClear').addEventListener('click', function () { pts = []; afterChange(); });
+  document.getElementById('btnParse').addEventListener('click', function () {
+    var lines = document.getElementById('dataIn').value.split('\n');
+    var got = [];
+    lines.forEach(function (ln) {
+      var m = ln.trim().split(/[,\s;，]+/).map(parseFloat);
+      if (m.length >= 2 && isFinite(m[0]) && isFinite(m[1])) got.push({ x: m[0], y: m[1] });
+    });
+    if (!got.length) { toast('没认出数据…每行写成 1,2.1 这种'); return; }
+    pts = got;
+    afterChange();
+    toast('📥 导入了 ' + got.length + ' 个点');
+  });
+
+  var toastEl = document.getElementById('toast'), toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2200);
+  }
+
+  fit();
+  /* 开场给一把示例数据 */
+  rand(function (x) { return 0.6 * x * x - 1.2 * x + 1; }, 13);
+})();
+</script>
+<!-- 返回主页（全站统一按钮 · 2026-09-29） -->
+<a class="wb-home" href="https://startian.top/" title="返回星恬的小站主页">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>主页</span>
+</a>
+</body>
+</html>
