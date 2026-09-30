@@ -738,6 +738,103 @@ footer a:hover{text-decoration:underline}
 [data-theme="colorful"] .dock .dhint{color:#8f8fc0}
 [data-theme="colorful"] .toast{background:rgba(45,45,94,.96)}
 
+/* —— 🌌 星夜（隐藏主题：解锁后出现在配色面板）—— */
+[data-theme="starry"]{
+  --bg1:#070b18; --bg2:#0d1428;
+  --card:#0f1730; --tint:#141d3a;
+  --line:#243056; --line2:#1b2444;
+  --ink:#e8eeff; --ink2:#aab8e0; --ink3:#7688b8;
+  --accent:#7dd3fc; --accent-deep:#c4b5fd;
+  --sh-sm:0 1px 2px rgba(0,0,0,.5), 0 10px 28px rgba(4,8,26,.55);
+  --sh-lg:0 2px 4px rgba(0,0,0,.6), 0 24px 50px rgba(4,8,26,.65);
+}
+[data-theme="starry"] body{
+  background:
+    radial-gradient(1.4px 1.4px at 22% 18%, rgba(255,255,255,.85), transparent 100%),
+    radial-gradient(1px 1px at 68% 32%, rgba(220,235,255,.7), transparent 100%),
+    radial-gradient(1.8px 1.8px at 42% 74%, rgba(255,255,255,.6), transparent 100%),
+    radial-gradient(1px 1px at 88% 62%, rgba(200,220,255,.65), transparent 100%),
+    radial-gradient(1.2px 1.2px at 12% 88%, rgba(255,255,255,.55), transparent 100%),
+    radial-gradient(1400px 700px at 50% -120px, #16204a 0%, #0a1024 45%, #060912 100%);
+  background-size: 420px 420px, 320px 320px, 520px 520px, 380px 380px, 460px 460px, 100% 100%;
+  background-repeat: repeat, repeat, repeat, repeat, repeat, no-repeat;
+}
+[data-theme="starry"] ::selection{background:#243056}
+[data-theme="starry"] .loadbar{background:linear-gradient(90deg,#7dd3fc,#c4b5fd,#f0abfc)}
+[data-theme="starry"] .nav{background:rgba(9,14,32,.72);border-bottom-color:rgba(36,48,86,.8)}
+[data-theme="starry"] .nav.scrolled{background:rgba(9,14,32,.9)}
+[data-theme="starry"] .brand-sub{color:#7688b8}
+[data-theme="starry"] .brand img{box-shadow:0 0 0 1.5px #0f1730,0 0 0 2.5px #37477f}
+[data-theme="starry"] .nav-links a{color:#aab8e0}
+[data-theme="starry"] .nav-links a:hover{color:#c4b5fd;background:#141d3a}
+[data-theme="starry"] .tk-btn{background:#0f1730}
+[data-theme="starry"] .tk-btn:hover{border-color:#4a5fa8}
+[data-theme="starry"] .tk-panel{background:rgba(13,20,42,.96);border-color:#243056}
+[data-theme="starry"] .tk-seg button{background:#141d3a;border-color:#243056;color:#aab8e0}
+[data-theme="starry"] .tk-seg button:hover{border-color:#4a5fa8}
+[data-theme="starry"] .tk-seg button.on{border-color:#7dd3fc;background:#1a2547;color:#bae6fd}
+[data-theme="starry"] .tk-times input{background:#141d3a;border-color:#243056;color:#e8eeff}
+[data-theme="starry"] .blob{opacity:.4}
+[data-theme="starry"] .blob.b1{background:radial-gradient(circle,#3b4fa0,transparent 70%)}
+[data-theme="starry"] .blob.b2{background:radial-gradient(circle,#6d5fb8,transparent 70%)}
+[data-theme="starry"] .blob.b3{background:radial-gradient(circle,#2a6a96,transparent 70%)}
+[data-theme="starry"] .hero h1{
+  background:linear-gradient(110deg,#e8eeff 18%,#7dd3fc 42%,#c4b5fd 55%,#e8eeff 78%);
+  background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+[data-theme="starry"] .hero-eyebrow{color:#7688b8}
+[data-theme="starry"] .hero .avatar{box-shadow:0 16px 36px rgba(0,0,0,.6),0 0 0 4px #0f1730,0 0 0 6px #37477f}
+[data-theme="starry"] .hero .avatar:hover{box-shadow:0 20px 42px rgba(0,0,0,.7),0 0 0 4px #0f1730,0 0 0 7px #6a5fa8}
+[data-theme="starry"] .btn-p{background:linear-gradient(180deg,#7dd3fc,#4f9fd8);color:#04243e;box-shadow:0 5px 0 #23516e,0 14px 26px rgba(70,140,200,.4)}
+[data-theme="starry"] .btn-p:hover{box-shadow:0 6px 0 #23516e,0 16px 30px rgba(70,140,200,.5)}
+[data-theme="starry"] .btn-p:active{box-shadow:0 2px 0 #23516e}
+[data-theme="starry"] .btn-g{background:#0f1730;border-color:#243056;color:#bae6fd}
+[data-theme="starry"] .btn-g:hover{background:#141d3a;border-color:#4a5fa8}
+[data-theme="starry"] .marquee-track span{color:#8fa0cc}
+[data-theme="starry"] .marquee-track span em{color:#5c6b9a}
+[data-theme="starry"] .sec-eyebrow{color:#7688b8}
+[data-theme="starry"] .tile:hover{border-color:#4a5fa8}
+[data-theme="starry"] .tile-media{box-shadow:0 10px 26px rgba(0,0,0,.5)}
+[data-theme="starry"] .ptag{color:#bae6fd;background:#1a2547;border-color:#37477f}
+[data-theme="starry"] .about,[data-theme="starry"] .intro{background:linear-gradient(160deg,#0c1428,#111a34)}
+[data-theme="starry"] .chip{background:#141d3a;border-color:#243056;color:#aab8e0}
+[data-theme="starry"] .chip:hover{border-color:#4a5fa8}
+[data-theme="starry"] .ct:hover{border-color:#4a5fa8}
+[data-theme="starry"] .ct-ico{background:linear-gradient(150deg,#141d3a,#1a2547);box-shadow:inset 0 0 0 1px #243056}
+[data-theme="starry"] .ct:focus-visible{outline-color:#7dd3fc}
+[data-theme="starry"] .placeholder{border-color:#37477f;color:#7688b8}
+[data-theme="starry"] footer{color:#7688b8;border-top-color:#1b2444}
+[data-theme="starry"] .dock{background:linear-gradient(165deg,#0f1730,#141d3a);border-color:#243056}
+[data-theme="starry"] .dock .tag{color:#bae6fd;background:#1a2547;border-color:#37477f}
+[data-theme="starry"] .dock .dhint{color:#7688b8}
+[data-theme="starry"] .toast{background:rgba(26,37,71,.96)}
+/* 星夜转场：黑幕 + 星蓝光晕 */
+.tk-ring.tk-starry{
+  border-color:rgba(224,242,255,.95);
+  box-shadow:0 0 0 1px rgba(125,211,252,.6) inset, 0 0 30px 6px rgba(125,211,252,.55), 0 0 70px 18px rgba(196,181,253,.4);
+}
+.tk-halo.tk-starry{
+  border-color:rgba(224,242,255,.92);
+  box-shadow:0 0 22px 5px rgba(125,211,252,.55), 0 0 60px 16px rgba(196,181,253,.35), inset 0 0 22px rgba(125,211,252,.4);
+}
+/* 🎨 鼠标拖尾小几何 */
+.trail-p{position:fixed;pointer-events:none;z-index:9400;will-change:transform,opacity;animation:trailFade .95s ease-out forwards}
+@keyframes fall{to{transform:translateY(106vh) rotate(680deg);opacity:.85}}
+@keyframes trailFade{
+  from{opacity:.92;transform:translate(-50%,-50%) rotate(var(--r0,0deg)) scale(1)}
+  to{opacity:0;transform:translate(-50%,-50%) translate(var(--dx,0),var(--dy,18px)) rotate(var(--r1,180deg)) scale(.35)}
+}
+/* 🗝 秘密分区 */
+.zone.secret-zone{display:none}
+.zone.secret-zone.unlocked{display:block;animation:secretIn .8s cubic-bezier(.2,.85,.3,1.1) both}
+@keyframes secretIn{from{opacity:0;transform:translateY(26px) scale(.96)}to{opacity:1;transform:none}}
+.secret-card{padding:26px 26px 22px;text-align:center}
+.secret-card .sc-badge{display:inline-block;font-size:11px;font-weight:800;letter-spacing:3px;color:var(--accent-deep);border:1px solid var(--line);background:var(--tint);border-radius:999px;padding:5px 14px;margin-bottom:14px}
+.secret-card h3{margin:0 0 12px;font-size:19px}
+.secret-card p{margin:0 auto 18px;font-size:13.5px;line-height:2;color:var(--ink2);max-width:560px}
+.secret-card .sc-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.secret-card .sc-row a{text-decoration:none;display:inline-flex;align-items:center}
+
 /* —— 🖌 自定义主题：所有颜色由 JS 生成的变量驱动 —— */
 [data-theme="custom"] body{background:radial-gradient(1400px 700px at 50% -120px, var(--bg2) 0%, var(--bg1) 45%, var(--bg1) 100%)}
 [data-theme="custom"] ::selection{background:var(--tint)}
@@ -959,6 +1056,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       <button type="button" data-mode="warm">🌸 温馨粉</button>
       <button type="button" data-mode="colorful">🎨 缤纷彩</button>
       <button type="button" data-mode="custom">🖌 自定义</button>
+      <button type="button" data-mode="starry" id="tkStarryBtn" style="display:none">🌌 星夜</button>
     </div>
     <div class="tk-p-sub">自动组合（跟随时间切换的配色方案）</div>
     <div class="tk-seg tk-seg-2" id="tkPair">
@@ -1188,6 +1286,31 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
         </div>
       </section>
 
+      <section class="zone secret-zone" data-zone="secret" style="--d:.2s">
+        <button class="zone-head" type="button" aria-expanded="false">
+          <span class="zone-ico zc-secret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span>
+          <span class="zone-info">
+            <span class="zone-name">秘密</span>
+            <span class="zone-sub">给逛完全站的人</span>
+          </span>
+          <span class="zone-count">??</span>
+          <span class="zone-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+        </button>
+        <div class="zone-body">
+          <div class="zone-inner">
+            <div class="secret-card">
+              <div class="sc-badge">🗝 SECRET</div>
+              <h3>你居然真的逛完了整站</h3>
+              <p>谢谢你，认真的旅人。<br>这个小站里的每一样东西，都是一个个深夜里「再改最后一版」攒出来的。<br>送你一句话 ——<b>愿你对这个世界，永远保持好奇</b>。<br><span style="opacity:.65">—— 星恬 &amp; 月月 🌙</span></p>
+              <div class="sc-row">
+                <button class="btn btn-p" id="btnSecretConfetti" type="button">🎉 撒一次花</button>
+                <a class="btn btn-g" href="https://startian.top/star/">🌌 去看颗星星</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </div>
   </section>
 
@@ -1231,7 +1354,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       </a>
     </div>
     <div class="ach-cross reveal" style="--d:.16s">
-      <div class="acx-head"><span class="acx-title">🏆 跨站成就柜</span><span class="acx-prog">已点亮 <b id="achLit">0</b> / <span id="achTotal">22</span></span></div>
+      <div class="acx-head"><span class="acx-title">🏆 跨站成就柜</span><span class="acx-prog">已点亮 <b id="achLit">0</b> / <span id="achTotal">24</span></span></div>
       <div class="acx-grid" id="achGrid"></div>
       <div class="acx-tip">游玩任意小站会自动点亮 · 记录只存本机（全站共享），不上传任何地方</div>
     </div>
@@ -1430,7 +1553,8 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       themeColorPurple: '#130d20',
       themeColorFresh: '#e2f7ea',
       themeColorWarm: '#ffe9f1',
-      themeColorColorful: '#15152b'
+      themeColorColorful: '#15152b',
+      themeColorStarry: '#070b18'
     };
     /* ---- 🖌 自定义主题引擎：两色生成整套变量 ---- */
     var CUSTOM_KEY = 'startian_custom_v1';
@@ -1510,7 +1634,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       CUSTOM_VARS.forEach(function (k) { root.style.removeProperty(k); });
     }
     window.__geoCustom = { apply: applyCustom, load: loadCustom, resolve: resolveCustom, clear: clearCustomVars, presets: CUSTOM_PRESETS };
-    var NAME = { light: '蓝白 ☀️', dark: '暗红 🌙', purple: '梦幻紫 🔮', fresh: '清新绿 🌿', warm: '温馨粉 🌸', colorful: '缤纷彩 🎨', custom: '自定义 🖌' };
+    var NAME = { light: '蓝白 ☀️', dark: '暗红 🌙', purple: '梦幻紫 🔮', fresh: '清新绿 🌿', warm: '温馨粉 🌸', colorful: '缤纷彩 🎨', custom: '自定义 🖌', starry: '星夜 🌌' };
     var state = { mode: 'auto', lightAt: CFG.defaultLightAt, darkAt: CFG.defaultDarkAt, autoPair: 'classic' };
     var current = 'light';
     var busy = false;
@@ -1523,7 +1647,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
         if (raw) {
           var p = JSON.parse(raw);
           if (p && typeof p === 'object') {
-            if (['auto', 'light', 'dark', 'purple', 'fresh', 'warm', 'colorful', 'custom'].indexOf(p.mode) >= 0) state.mode = p.mode;
+            if (['auto', 'light', 'dark', 'purple', 'fresh', 'warm', 'colorful', 'custom', 'starry'].indexOf(p.mode) >= 0) state.mode = p.mode;
             if (['classic', 'dreamy', 'pink'].indexOf(p.autoPair) >= 0) state.autoPair = p.autoPair;
             if (p.lightAt) state.lightAt = p.lightAt;
             if (p.darkAt) state.darkAt = p.darkAt;
@@ -1578,7 +1702,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       setAvatar(theme);
       var m = document.querySelector('meta[name="theme-color"]');
       var MC = { dark: CFG.themeColorDark, purple: CFG.themeColorPurple, fresh: CFG.themeColorFresh, warm: CFG.themeColorWarm, colorful: CFG.themeColorColorful };
-      var mc = MC[theme];
+      var mc = MC[theme] || (theme === 'starry' ? CFG.themeColorStarry : null);
       if (theme === 'custom') { try { mc = loadCustom().bg; } catch (e) {} }
       if (m) m.setAttribute('content', mc || CFG.themeColorLight);
       syncUI();
@@ -1661,7 +1785,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     }
     function runCurtain(theme) {
       var isLightTheme = (theme === 'light' || theme === 'fresh' || theme === 'warm' || (theme === 'custom' && !customDark()));
-      var GLOW = { light: ' tk-light', purple: ' tk-purple', fresh: ' tk-fresh', warm: ' tk-warm', colorful: ' tk-colorful', custom: ' tk-custom' };
+      var GLOW = { light: ' tk-light', purple: ' tk-purple', fresh: ' tk-fresh', warm: ' tk-warm', colorful: ' tk-colorful', custom: ' tk-custom', starry: ' tk-starry' };
       var glowCls = GLOW[theme] || '';
       document.documentElement.classList.add('tk-switching');
       black.className = 'tk-black' + (theme === 'fresh' ? ' tk-fresh' : (theme === 'warm' ? ' tk-warm' : (isLightTheme ? ' tk-light' : '')));
@@ -1829,7 +1953,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     }
     function syncUI() {
       var b = $('tkBtn');
-      var MODE_ICON = { auto: '🕖', light: '☀️', dark: '🌙', purple: '🔮', fresh: '🌿', warm: '🌸', colorful: '🎨', custom: '🖌' };
+      var MODE_ICON = { auto: '🕖', light: '☀️', dark: '🌙', purple: '🔮', fresh: '🌿', warm: '🌸', colorful: '🎨', custom: '🖌', starry: '🌌' };
       if (b) b.textContent = MODE_ICON[state.mode] || '☀️';
       var seg = $('tkSeg');
       if (seg) {
@@ -2020,6 +2144,8 @@ var ACH_DEFS = [
   { id: 'music.play', ico: '🎹', name: '音色实验', desc: '用自定义函数发声' },
   { id: 'site.fake', ico: '🎭', name: '耐心钉子户', desc: '到访假加载页' },
   { id: 'fake.done', ico: '💬', name: '陪着进度条聊完天', desc: '在假加载页等到真相' },
+  { id: 'home.starry', ico: '🌌', name: '追星者', desc: '发现了隐藏主题「星夜」' },
+  { id: 'home.secret', ico: '🗝', name: '找到秘密的人', desc: '解锁了隐藏分区' },
   { id: 'explorer.all', ico: '🧭', name: '全站探险家', desc: '集齐全部站点足迹' }
 ];
 function renderAch() {
@@ -2049,6 +2175,140 @@ setTimeout(function () {
   if (fresh || all) renderAch();
 }, 700);
 window.__renderAch = renderAch;
+
+/* ============================================================
+   🌌 隐藏主题「星夜」：Konami 秘技 / 长按 logo 解锁
+   ============================================================ */
+var STARRY_KEY = 'starry_unlocked';
+function showStarryBtn() {
+  var b = document.getElementById('tkStarryBtn');
+  if (b) b.style.display = '';
+}
+try { if (localStorage.getItem(STARRY_KEY)) showStarryBtn(); } catch (e) {}
+function unlockStarry() {
+  var first = false;
+  try {
+    if (!localStorage.getItem(STARRY_KEY)) { localStorage.setItem(STARRY_KEY, '1'); first = true; }
+  } catch (e) {}
+  showStarryBtn();
+  if (first) {
+    try { STAch.unlock('home.starry', '追星者', '🌌'); renderAch(); } catch (e) {}
+    try {
+      var el = document.createElement('div');
+      el.style.cssText = 'position:fixed;left:50%;top:26%;transform:translateX(-50%) scale(.9);opacity:0;z-index:9999;background:rgba(12,18,40,.95);color:#e8eeff;border:1px solid rgba(125,211,252,.5);border-radius:20px;padding:22px 34px;font:800 16px/1.7 system-ui,sans-serif;box-shadow:0 24px 60px rgba(0,0,0,.55);text-align:center;transition:all .5s cubic-bezier(.2,.85,.3,1.1);pointer-events:none';
+      el.innerHTML = '🌌 你发现了隐藏主题<br><span style="font-size:13px;font-weight:600;opacity:.8">「星夜」已加入配色面板</span>';
+      document.body.appendChild(el);
+      requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%) scale(1)'; });
+      setTimeout(function () {
+        el.style.opacity = '0';
+        setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 600);
+      }, 2800);
+    } catch (e) {}
+    setTimeout(function () { try { window.ThemeKit.set('starry'); } catch (e) {} }, 1100);
+  } else {
+    try { window.ThemeKit.set('starry'); } catch (e) {}
+  }
+}
+/* Konami：↑↑↓↓←→←→BA */
+(function () {
+  var K = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
+  var seq = [];
+  document.addEventListener('keydown', function (e) {
+    var tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea') return;
+    seq.push(e.code);
+    if (seq.length > K.length) seq.shift();
+    if (seq.join(',') === K.join(',')) { seq = []; unlockStarry(); }
+  });
+})();
+/* 长按 logo（1.5 秒） */
+(function () {
+  var brand = document.querySelector('.brand');
+  if (!brand) return;
+  var lt = null;
+  brand.addEventListener('pointerdown', function () {
+    clearTimeout(lt);
+    lt = setTimeout(function () { lt = null; unlockStarry(); }, 1500);
+  });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) {
+    brand.addEventListener(ev, function () { if (lt) { clearTimeout(lt); lt = null; } });
+  });
+})();
+
+/* ============================================================
+   🎨 鼠标拖尾小几何
+   ============================================================ */
+(function () {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) return;
+  var POLYS = [
+    'polygon(50% 0,100% 100%,0 100%)',
+    'polygon(50% 0,100% 50%,50% 100%,0 50%)',
+    'polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)',
+    'polygon(0 0,100% 0,100% 100%,0 100%)'
+  ];
+  var last = 0;
+  document.addEventListener('pointermove', function (e) {
+    var now = performance.now();
+    if (now - last < 34) return;
+    last = now;
+    if (document.querySelectorAll('.trail-p').length > 46) return;
+    var el = document.createElement('span');
+    el.className = 'trail-p';
+    var size = 4 + Math.random() * 6;
+    var rot0 = Math.floor(Math.random() * 360), rot1 = rot0 + Math.floor((Math.random() - 0.5) * 240);
+    var dx = Math.round((Math.random() - 0.5) * 44), dy = Math.round((Math.random() - 0.5) * 34 + 16);
+    var useTheme = Math.random() < 0.6;
+    var hue = Math.floor(Math.random() * 360);
+    el.style.cssText = 'left:' + e.clientX + 'px;top:' + e.clientY + 'px;width:' + size.toFixed(1) + 'px;height:' + size.toFixed(1) + 'px;' +
+      'background:' + (useTheme ? 'var(--accent)' : 'hsl(' + hue + ',72%,64%)') + ';' +
+      'clip-path:' + POLYS[Math.floor(Math.random() * POLYS.length)] + ';' +
+      '--r0:' + rot0 + 'deg;--r1:' + rot1 + 'deg;--dx:' + dx + 'px;--dy:' + dy + 'px;';
+    document.body.appendChild(el);
+    el.addEventListener('animationend', function () { if (el.parentNode) el.parentNode.removeChild(el); });
+  }, { passive: true });
+})();
+
+/* ============================================================
+   🗝 隐藏分区：集齐全部站点足迹后出现
+   ============================================================ */
+function checkSecretZone() {
+  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake'];
+  var all = sites.every(function (id) { return STAch.has(id); });
+  if (!all) return;
+  var z = document.querySelector('.secret-zone');
+  if (z && !z.classList.contains('unlocked')) {
+    z.classList.add('unlocked');
+    try { STAch.unlock('home.secret', '找到秘密的人', '🗝'); renderAch(); } catch (e) {}
+    setTimeout(function () {
+      try { z.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+      z.classList.add('open');
+      var b = z.querySelector('.zone-head');
+      if (b) b.setAttribute('aria-expanded', 'true');
+    }, 700);
+  }
+}
+setTimeout(function () {
+  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake'];
+  var all = sites.every(function (id) { return STAch.has(id); });
+  if (all) STAch.unlock('explorer.all', '全站探险家', '🧭');
+  if (all) renderAch();
+  checkSecretZone();
+}, 1500);
+
+/* 🎉 秘密区撒花 */
+document.addEventListener('click', function (e) {
+  var b = e.target.closest && e.target.closest('#btnSecretConfetti');
+  if (!b) return;
+  var cols = ['#38bdf8', '#6366f1', '#a855f7', '#f472b6', '#fbbf24', '#34d399'];
+  for (var i = 0; i < 90; i++) {
+    var sp = document.createElement('span');
+    sp.style.cssText = 'position:fixed;top:-20px;z-index:9600;pointer-events:none;width:9px;height:14px;border-radius:2px;left:' + (Math.random() * 100) + 'vw;background:' + cols[i % cols.length] + ';animation:fall ' + (1.6 + Math.random() * 1.8) + 's linear ' + (Math.random() * 0.8) + 's forwards';
+    document.body.appendChild(sp);
+    setTimeout((function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; })(sp), 4400);
+  }
+});
+window.__checkSecretZone = checkSecretZone;
 
 /* —— 💬 问候语随时间变 —— */
 (function () {
@@ -2101,14 +2361,29 @@ window.__renderAch = renderAch;
     btn.addEventListener('click', function () {
       var zone = btn.closest('.zone');
       if (!zone) return;
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       var open = zone.classList.toggle('open');
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
       if (open) {
+        /* 记录展开前的滚动位置（收起时回位用） */
+        zone._preY = window.scrollY;
+        zone._postY = undefined;
         /* 自动居中：等布局展开后平滑滚到视口中央 */
         setTimeout(function () {
-          var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
           try { zone.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' }); } catch (e) { zone.scrollIntoView(); }
-        }, 800);   /* 等展开动画完全结束再滚动，居中才精准 */
+          /* 滚动结束后记录落点（用于判断用户之后有没有手动滚动过） */
+          setTimeout(function () { zone._postY = window.scrollY; }, reduce ? 60 : 1500);
+        }, 800);
+      } else {
+        /* 收起：若用户没有手动滚动过，平滑滚回展开前的位置；否则只保证卡片头在视口内 */
+        var cur = window.scrollY;
+        if (zone._preY !== undefined && zone._postY !== undefined && Math.abs(cur - zone._postY) < 80) {
+          try { window.scrollTo({ top: zone._preY, behavior: reduce ? 'auto' : 'smooth' }); } catch (e) { window.scrollTo(0, zone._preY); }
+        } else if (zone._preY !== undefined) {
+          setTimeout(function () {
+            try { zone.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'nearest' }); } catch (e) {}
+          }, 580);
+        }
       }
     });
   });
