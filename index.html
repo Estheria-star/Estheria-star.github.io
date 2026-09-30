@@ -1008,6 +1008,9 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       <span>🗓️ 打卡日程</span><span><em>·</em></span>
       <span>🧠 mix9 神经网络</span><span><em>·</em></span>
       <span>✨ 种子星空</span><span><em>·</em></span>
+      <span>🦠 生命花园</span><span><em>·</em></span>
+      <span>🎵 函数音乐</span><span><em>·</em></span>
+      <span>🎭 假加载页</span><span><em>·</em></span>
       <span>🎨 配色实验室</span><span><em>·</em></span>
       <span>😏 偶尔整活</span><span><em>·</em></span>
       <span>🌙 startian.top</span><span><em>·</em></span>
@@ -1048,7 +1051,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
             <span class="zone-name">娱乐</span>
             <span class="zone-sub">下棋、转转玩的 · 放松向</span>
           </span>
-          <span class="zone-count">3 个作品</span>
+          <span class="zone-count">5 个作品</span>
           <span class="zone-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
         </button>
         <div class="zone-body">
@@ -1079,6 +1082,24 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
           <h3>像素星空生成器</h3>
           <p>点一下生成一片独一无二的星空：种子编号可复现、可分享（「我的星空 #3721」），还能下载 1920×1080 做壁纸。</p>
           <span class="cta">去看星星 <i>→</i></span>
+        </div>
+      </a>
+      <a class="tile" style="--d:.20s" data-demo="life" href="https://startian.top/life/">
+        <div class="tile-media"><img src="demos/life.jpg" alt="生命游戏花园演示" loading="lazy"></div>
+        <div class="tile-body">
+          <span class="ptag">元胞自动机 · 解压</span>
+          <h3>康威生命游戏花园</h3>
+          <p>撒一把种子看细胞生长：能存「物种」、还能让两个物种相向对撞，看它们擦出什么火花。能玩一晚上的那种。</p>
+          <span class="cta">去播种 <i>→</i></span>
+        </div>
+      </a>
+      <a class="tile flip" style="--d:.26s" data-demo="music" href="https://startian.top/music/">
+        <div class="tile-media"><img src="demos/music.jpg" alt="函数音乐演示" loading="lazy"></div>
+        <div class="tile-body">
+          <span class="ptag">数学 · 音乐</span>
+          <h3>函数音乐</h3>
+          <p>把函数画成声波：正弦是纯音、方波是游戏机、随便叠几个三角函数就是一个新乐器——图形还会跟着跳。</p>
+          <span class="cta">去弹一段 <i>→</i></span>
         </div>
       </a>
             </div>
@@ -1138,7 +1159,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
             <span class="zone-name">整活</span>
             <span class="zone-sub">没啥用但挺逗 · 会心一笑</span>
           </span>
-          <span class="zone-count">1 个作品</span>
+          <span class="zone-count">2 个作品</span>
           <span class="zone-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
         </button>
         <div class="zone-body">
@@ -1151,6 +1172,15 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
           <h3>整活 · 隐私协议</h3>
           <p>伪装成「服务协议与隐私政策」的整活小页面：郑重其事地点下「同意并继续」，就会收获一点小小的惊喜（笑）。</p>
           <span class="cta">点一下 <i>→</i></span>
+        </div>
+      </a>
+      <a class="tile flip" style="--d:.08s" data-demo="fake" href="https://startian.top/fake/">
+        <div class="tile-media"><img src="demos/fake.jpg" alt="假加载页演示" loading="lazy"></div>
+        <div class="tile-body">
+          <span class="ptag">整活 · 反转</span>
+          <h3>假加载页</h3>
+          <p>一个非常正经的加载页面：进度条卡在 99% 开始跟你唠嗑，聊两句它才肯承认其实早就加载完了。</p>
+          <span class="cta">去等一等 <i>→</i></span>
         </div>
       </a>
             </div>
@@ -1201,7 +1231,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       </a>
     </div>
     <div class="ach-cross reveal" style="--d:.16s">
-      <div class="acx-head"><span class="acx-title">🏆 跨站成就柜</span><span class="acx-prog">已点亮 <b id="achLit">0</b> / <span id="achTotal">14</span></span></div>
+      <div class="acx-head"><span class="acx-title">🏆 跨站成就柜</span><span class="acx-prog">已点亮 <b id="achLit">0</b> / <span id="achTotal">22</span></span></div>
       <div class="acx-grid" id="achGrid"></div>
       <div class="acx-tip">游玩任意小站会自动点亮 · 记录只存本机（全站共享），不上传任何地方</div>
     </div>
@@ -1982,6 +2012,14 @@ var ACH_DEFS = [
   { id: 'geo.custom_solid', ico: '🧩', name: '造物主', desc: '组合出自定义立体' },
   { id: 'star.wall', ico: '🖼️', name: '把星空带回家', desc: '下载一张星空壁纸' },
   { id: 'colorlab.export', ico: '📤', name: '配色输出', desc: '在配色实验室导出 CSS' },
+  { id: 'site.life', ico: '🦠', name: '观察者', desc: '到访生命游戏花园' },
+  { id: 'life.seed', ico: '🌱', name: '物种收藏家', desc: '在生命花园保存一个物种' },
+  { id: 'life.pattern', ico: '🧬', name: '生命造物', desc: '放置一个物种' },
+  { id: 'life.collide', ico: '⚔', name: '物种碰撞实验', desc: '让两个物种对撞' },
+  { id: 'site.music', ico: '🎵', name: '频率玩家', desc: '到访函数音乐' },
+  { id: 'music.play', ico: '🎹', name: '音色实验', desc: '用自定义函数发声' },
+  { id: 'site.fake', ico: '🎭', name: '耐心钉子户', desc: '到访假加载页' },
+  { id: 'fake.done', ico: '💬', name: '陪着进度条聊完天', desc: '在假加载页等到真相' },
   { id: 'explorer.all', ico: '🧭', name: '全站探险家', desc: '集齐全部站点足迹' }
 ];
 function renderAch() {
@@ -2005,7 +2043,7 @@ renderAch();
 /* 到访主页：解锁 + 全站探险家检查 */
 setTimeout(function () {
   var fresh = STAch.unlock('home.visit', '初次到访', '🏠');
-  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab'];
+  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake'];
   var all = sites.every(function (id) { return STAch.has(id); });
   if (all) STAch.unlock('explorer.all', '全站探险家', '🧭');
   if (fresh || all) renderAch();
