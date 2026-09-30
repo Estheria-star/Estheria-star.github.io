@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<script>document.documentElement.classList.add('js');(function(){try{var p=JSON.parse(localStorage.getItem('startian_theme_v1')||'{}');var m=p.mode||'auto',t=m;if(m==='auto'){var n=new Date(),x=n.getHours()*60+n.getMinutes();var l=((p.lightAt||'07:00')+'').split(':'),d=((p.darkAt||'19:00')+'').split(':');var lm=(+l[0])*60+(+l[1]||0),dm=(+d[0])*60+(+d[1]||0);t=(lm<dm)?((x>=lm&&x<dm)?'light':'dark'):((x>=lm||x<dm)?'light':'dark');var pr=p.autoPair||'classic';if(pr==='dreamy'){t=(t==='light')?'fresh':'purple';}else if(pr==='pink'){t=(t==='light')?'warm':'colorful';}}document.documentElement.setAttribute('data-theme',t);if(t==='custom'){try{var rc=JSON.parse(localStorage.getItem('startian_custom_resolved_v1')||'null');if(rc){for(var ck in rc){if(ck!=='__dark'&&typeof rc[ck]==='string')document.documentElement.style.setProperty(ck,rc[ck]);}}}catch(e){}}var avm={dark:'avatar-dark.jpg',purple:'avatar-purple.jpg',fresh:'avatar-fresh.jpg',warm:'avatar-warm.jpg',colorful:'avatar-colorful.jpg'};var avp=avm[t]||'';if(avp){var ln=document.createElement('link');ln.rel='preload';ln.as='image';ln.href=avp;document.head.appendChild(ln);}}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
+<script>document.documentElement.classList.add('js');(function(){try{var p=JSON.parse(localStorage.getItem('startian_theme_v1')||'{}');var m=p.mode||'auto',t=m;if(m==='auto'){var n=new Date(),x=n.getHours()*60+n.getMinutes();var l=((p.lightAt||'07:00')+'').split(':'),d=((p.darkAt||'19:00')+'').split(':');var lm=(+l[0])*60+(+l[1]||0),dm=(+d[0])*60+(+d[1]||0);t=(lm<dm)?((x>=lm&&x<dm)?'light':'dark'):((x>=lm||x<dm)?'light':'dark');var pr=p.autoPair||'classic';if(pr==='dreamy'){t=(t==='light')?'fresh':'purple';}else if(pr==='pink'){t=(t==='light')?'warm':'colorful';}}document.documentElement.setAttribute('data-theme',t);if(t==='custom'){try{var rc=JSON.parse(localStorage.getItem('startian_custom_resolved_v1')||'null');if(rc){for(var ck in rc){if(ck!=='__dark'&&typeof rc[ck]==='string')document.documentElement.style.setProperty(ck,rc[ck]);}}}catch(e){}}var avm={dark:'avatar-dark.jpg',purple:'avatar-purple.jpg',fresh:'avatar-fresh.jpg',warm:'avatar-warm.jpg',colorful:'avatar-colorful.jpg',custom:''};var avp=avm[t]||'';window.__initAvatar=avp||'avatar.png';if(avp){var ln=document.createElement('link');ln.rel='preload';ln.as='image';ln.href=avp;document.head.appendChild(ln);}}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>星恬的小站 · startian.top</title>
 <meta name="description" content="星恬的小站 —— 下棋、画几何、捣鼓 AI 小玩意。五子棋、几何工坊与更多作品在此。">
@@ -153,6 +153,8 @@ section{scroll-margin-top:96px}
 .sec-sub{margin-top:10px; font-size:13.5px; color:var(--ink3); letter-spacing:.4px}
 
 /* —— 作品瓷砖 —— */
+/* 头像 img 解析瞬间（尚未由内联脚本设 src）：先隐藏，设上即显示，避免旧头像/alt 闪烁 */
+.brand img:not([src]),.avatar img:not([src]){visibility:hidden}
 .tiles{display:grid; grid-template-columns:1fr; gap:26px}
 .tile{
   display:grid; grid-template-columns:1.08fr 1fr; gap:28px; align-items:center;
@@ -921,7 +923,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
 
 <nav class="nav" id="nav">
   <div class="nav-in">
-    <a class="brand" href="#top"><img src="avatar.png" alt="" data-avatar>星恬<span class="brand-sub"> · startian.top</span></a>
+    <a class="brand" href="#top"><img alt="" data-avatar id="navAvatar"><script>(function(){var i=document.getElementById("navAvatar");i.src=window.__initAvatar||"avatar.png";})();</script>星恬<span class="brand-sub"> · startian.top</span></a>
     <div class="nav-links">
       <a href="#projects">项目</a>
       <a href="#achievements">成就</a>
@@ -971,7 +973,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
 <div class="wrap" id="top">
 
   <section class="hero">
-    <div class="avatar reveal" style="--d:.02s"><img src="avatar.png" alt="星恬" data-avatar></div>
+    <div class="avatar reveal" style="--d:.02s"><img alt="星恬" data-avatar id="heroAvatar"><script>(function(){var i=document.getElementById("heroAvatar");i.src=window.__initAvatar||"avatar.png";})();</script></div>
     <div class="hero-eyebrow reveal" style="--d:.1s">STARTIAN.TOP</div>
     <h1 class="reveal" style="--d:.16s">星恬的小站</h1>
     <div class="hero-tag reveal" style="--d:.24s">下棋 · 画几何 · 捣鼓 AI 小玩意 —— 欢迎来逛逛</div>
@@ -1476,7 +1478,8 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     }
     function expected() { return state.mode === 'auto' ? expectedByTime() : state.mode; }
     function reduced() { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
-    function spin(ms, fn) { var id = setTimeout(fn, ms); timers.push(id); return id; }
+    var gen = 0;   /* 转场代际：打断旧转场后，其所有后续回调自动失效 */
+    function spin(ms, fn) { var g = gen; var id = setTimeout(function () { if (g === gen) fn(); }, ms); timers.push(id); return id; }
 
     function ensureStage() {
       if (stage) return;
@@ -1507,6 +1510,22 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       if (m) m.setAttribute('content', mc || CFG.themeColorLight);
       syncUI();
     }
+    /* 打断当前转场：代际 +1、清定时器、重置舞台（快速切换用） */
+    function cancelCurtain() {
+      gen++;
+      timers.forEach(function (id) { clearTimeout(id); });
+      timers = [];
+      document.documentElement.classList.remove('tk-switching');
+      if (stage) {
+        black.className = 'tk-black';
+        black.style.webkitMaskImage = '';
+        black.style.maskImage = '';
+        ring.className = 'tk-ring'; ring.style.cssText = '';
+        halo.className = 'tk-halo'; halo.style.cssText = '';
+        shards.className = 'tk-shards'; shards.innerHTML = '';
+      }
+      busy = false;
+    }
     function resetStage() {
       document.documentElement.classList.remove('tk-switching');
       if (stage) {
@@ -1530,8 +1549,9 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     function easeOutCubic(p) { return 1 - Math.pow(1 - p, 3); }
     function easeInOutCubic(p) { return p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; }
     function anim(ms, ease, step, done) {
-      var t0 = performance.now();
+      var t0 = performance.now(), g = gen;
       function frame(t) {
+        if (g !== gen) return;   /* 转场已被打断 */
         var p = Math.min(1, (t - t0) / ms);
         step(ease(p));
         if (p < 1) requestAnimationFrame(frame);
@@ -1709,7 +1729,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     }
 
     function apply(theme, animate) {
-      if (busy) { spin(2300, function () { apply(expected(), true); }); return; }   // 动画中 → 排队，按最新期望重试
+      if (busy) cancelCurtain();   /* 快速切换：直接打断当前转场，立即执行最新目标（替代旧排队机制） */
       if (theme === current) { setThemeInstant(theme); return; }
       if (animate && !reduced()) { toTheme(theme); }
       else setThemeInstant(theme);
