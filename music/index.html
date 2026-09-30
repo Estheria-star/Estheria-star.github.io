@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="函数音乐：把数学函数画成声波，不同函数不同音色，图形跟着跳。startian.top 出品">
+<meta name="theme-color" content="#12081c">
+<title>函数音乐 · startian.top</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;background:radial-gradient(1200px 700px at 50% -100px, #251238 0%, #150a22 45%, #0c0616 100%);color:#f0e8ff;font-family:'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif}
+  header{display:flex;align-items:center;gap:14px;padding:18px 24px;flex-wrap:wrap}
+  header h1{font-size:19px;margin:0;letter-spacing:.5px;background:linear-gradient(100deg,#f0e8ff 20%,#c084fc 45%,#f472b6 60%,#f0e8ff 85%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  header .sub{font-size:12px;color:#9d86c9;font-weight:600}
+  .home{margin-left:auto;text-decoration:none;font-size:12.5px;font-weight:700;color:#e0cfff;border:1px solid rgba(190,150,255,.3);border-radius:999px;padding:9px 16px;background:rgba(24,14,40,.7);transition:border-color .2s,transform .2s}
+  .home:hover{border-color:rgba(210,170,255,.7);transform:translateY(-1px)}
+  main{max-width:1000px;margin:0 auto;padding:6px 24px 70px;display:flex;flex-direction:column;gap:18px}
+  .card{background:rgba(28,16,46,.66);border:1px solid rgba(160,120,220,.24);border-radius:22px;padding:18px 20px;box-shadow:0 18px 44px rgba(0,0,0,.35);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+  .card h2{margin:0 0 12px;font-size:13px;letter-spacing:2px;color:#9d86c9;font-weight:800}
+  #wave{width:100%;height:220px;display:block;border-radius:16px;background:rgba(12,6,22,.6);border:1px solid rgba(160,120,220,.18)}
+  .fx{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{
+    border:1px solid rgba(180,140,240,.3);border-radius:999px;padding:8px 14px;font-size:12.5px;font-weight:700;
+    color:#e0cfff;background:rgba(50,28,80,.5);cursor:pointer;font-family:inherit;transition:all .18s ease;
+  }
+  .chip:hover{border-color:rgba(210,170,255,.75);transform:translateY(-1px)}
+  .chip.on{border-color:#c084fc;background:linear-gradient(180deg,rgba(150,80,230,.5),rgba(110,50,190,.45));color:#fff;box-shadow:0 6px 18px rgba(160,90,240,.35)}
+  .input-row{display:flex;gap:10px;margin-top:12px}
+  .input-row input{
+    flex:1;border:1.5px solid rgba(180,140,240,.3);border-radius:12px;padding:11px 14px;font-size:13.5px;
+    font-family:ui-monospace,Consolas,monospace;color:#f0e8ff;background:rgba(14,8,26,.7);outline:none;
+  }
+  .input-row input:focus{border-color:#c084fc}
+  .btn{
+    border:0;border-radius:12px;padding:11px 20px;font-size:13.5px;font-weight:800;font-family:inherit;cursor:pointer;
+    color:#fff;background:linear-gradient(100deg,#a855f7,#ec4899);box-shadow:0 5px 0 #5b21b6,0 12px 24px rgba(150,80,240,.35);
+    transition:transform .15s ease,box-shadow .2s ease;
+  }
+  .btn:active{transform:translateY(2px);box-shadow:0 2px 0 #5b21b6}
+  .btn.ghost{background:rgba(50,28,80,.5);border:1.5px solid rgba(180,140,240,.35);color:#e0cfff;box-shadow:none}
+  .btn.ghost:hover{border-color:rgba(210,170,255,.75)}
+  .piano{display:flex;gap:7px;margin-top:6px;flex-wrap:wrap}
+  .key{
+    flex:1;min-width:56px;height:120px;border-radius:0 0 14px 14px;border:1px solid rgba(180,140,240,.4);
+    background:linear-gradient(180deg,#f2ecff,#d8c8f5);cursor:pointer;position:relative;
+    display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;
+    font-size:12px;font-weight:800;color:#4a2d78;font-family:inherit;
+    transition:all .09s ease;user-select:none;-webkit-user-select:none;touch-action:none;
+  }
+  .key:hover{background:linear-gradient(180deg,#ffffff,#e8dcff)}
+  .key.press{background:linear-gradient(180deg,#c084fc,#a855f7);color:#fff;transform:translateY(3px);box-shadow:0 0 24px rgba(190,120,255,.7)}
+  .key small{position:absolute;top:8px;left:0;right:0;text-align:center;font-size:10px;opacity:.65;font-weight:700}
+  .tip{font-size:11.5px;color:#9d86c9;margin-top:10px;line-height:1.8}
+  .toast{
+    position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(10px);opacity:0;z-index:9;
+    background:rgba(28,16,46,.95);border:1px solid rgba(190,150,255,.4);border-radius:999px;
+    padding:11px 22px;font-size:13px;font-weight:700;color:#f0e8ff;transition:all .3s ease;pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%)}
+  @media (max-width:640px){
+    .key{min-width:38px;height:96px;font-size:11px}
+    #wave{height:170px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🎵 函数音乐</h1>
+  <span class="sub">把函数画成声波 · 不同函数不同音色 · 图形跟着跳</span>
+  <a class="home" href="https://startian.top/">← 返回主页</a>
+</header>
+<main>
+  <section class="card">
+    <h2>WAVEFORM · 一个周期的波形</h2>
+    <canvas id="wave"></canvas>
+    <div class="fx">
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="input-row">
+      <input id="finput" value="sin(t) + 0.5*sin(2*t)" spellcheck="false" placeholder="f(t)，t ∈ [-π, π]，如 sin(t) + 0.3*sin(5*t)">
+      <button class="btn ghost" id="btnApply" type="button">应用函数</button>
+    </div>
+    <p class="tip">这就是「音色」的形状：正弦是纯音，方波是游戏机味，锯齿是合成器味，随便叠几层三角/正弦就是新乐器。</p>
+  </section>
+
+  <section class="card">
+    <h2>KEYBOARD · 用这个音色弹一弹</h2>
+    <div class="piano" id="piano"></div>
+    <div class="fx" style="margin-top:14px">
+      <button class="btn" id="btnTune" type="button">▶ 试听一小段</button>
+      <button class="btn ghost" id="btnStart" type="button">🔊 开启声音</button>
+      <span class="tip" style="margin:0">电脑键盘：A S D F G H J K 也能弹 · 第一次要先「开启声音」</span>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+  /* ============ 🏆 跨站成就 SDK ============ */
+  var STAch = (function () {
+    var KEY = 'st_ach';
+    function readCookie() {
+      var m = document.cookie.match(/(?:^|;\s*)st_ach=([^;]*)/);
+      if (!m) return null;
+      try { return JSON.parse(decodeURIComponent(m[1])) || []; } catch (e) { return null; }
+    }
+    function writeCookie(list) {
+      try {
+        var v = encodeURIComponent(JSON.stringify(list));
+        if (v.length < 3800) document.cookie = 'st_ach=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+      } catch (e) {}
+    }
+    var list = readCookie();
+    if (!list) { try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { list = []; } }
+    if (!Array.isArray(list)) list = [];
+    function save() {
+      try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+      writeCookie(list);
+    }
+    function unlock(id, name, ico) {
+      if (list.indexOf(id) >= 0) return false;
+      list.push(id);
+      save();
+      try {
+        var el = document.createElement('div');
+        el.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9999;background:rgba(38,18,60,.95);color:#fff;border:1px solid rgba(190,150,255,.45);border-radius:999px;padding:12px 22px;font:700 13.5px/1.4 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:86vw';
+        el.textContent = '🏆 成就解锁：' + (ico ? ico + ' ' : '') + (name || id);
+        document.body.appendChild(el);
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        setTimeout(function () {
+          el.style.opacity = '0';
+          el.style.transform = 'translateX(-50%) translateY(16px)';
+          setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+        }, 3200);
+      } catch (e) {}
+      return true;
+    }
+    return { list: function () { return list.slice(); }, has: function (id) { return list.indexOf(id) >= 0; }, unlock: unlock };
+  })();
+  window.STAch = STAch;
+  setTimeout(function () { STAch.unlock('site.music', '频率玩家', '🎵'); }, 600);
+
+  /* ============ 音频 ============ */
+  var actx = null;
+  var master = null;
+  function ensureAudio() {
+    if (actx) { if (actx.state === 'suspended') actx.resume(); return true; }
+    try {
+      actx = new (window.AudioContext || window.webkitAudioContext)();
+      master = actx.createGain();
+      master.gain.value = 0.16;
+      master.connect(actx.destination);
+      return true;
+    } catch (e) { toast('这个浏览器不支持 Web Audio'); return false; }
+  }
+
+  /* 函数 → 一个周期采样（t ∈ [-π, π)） */
+  var N = 256;
+  function sampleWave(fn) {
+    var s = new Float32Array(N);
+    var peak = 0;
+    for (var i = 0; i < N; i++) {
+      var t = (i / N) * 2 * Math.PI - Math.PI;
+      var v = fn(t);
+      if (!isFinite(v)) v = 0;
+      s[i] = v;
+      peak = Math.max(peak, Math.abs(v));
+    }
+    if (peak > 1e-6) for (var j = 0; j < N; j++) s[j] /= peak;
+    return s;
+  }
+  /* 采样 → PeriodicWave（DFT 前 N/2 谐波） */
+  function waveToPeriodic(samples) {
+    var half = N / 2;
+    var real = new Float32Array(half), imag = new Float32Array(half);
+    for (var k = 1; k < half; k++) {
+      var re = 0, im = 0;
+      for (var n = 0; n < N; n++) {
+        var ang = 2 * Math.PI * k * n / N;
+        re += samples[n] * Math.cos(ang);
+        im -= samples[n] * Math.sin(ang);
+      }
+      real[k] = 2 * re / N;
+      imag[k] = 2 * im / N;
+    }
+    return actx.createPeriodicWave(real, imag, { disableNormalization: false });
+  }
+
+  /* 预设函数（t ∈ [-π, π]） */
+  var PRESETS = [
+    { name: '纯正弦', src: 'sin(t)' },
+    { name: '方波感', src: 'sign(sin(t))' },
+    { name: '锯齿', src: '2*(t/PI) - sign(t)' },
+    { name: '三角', src: '(2/PI)*asin(sin(t))' },
+    { name: '风琴', src: 'sin(t) + 0.5*sin(2*t) + 0.25*sin(3*t)' },
+    { name: '金属', src: 'sin(t) + 0.6*sin(3.7*t) + 0.4*sin(7.1*t)' },
+    { name: '混沌雾', src: 'sin(t) * sin(7*t + sin(3*t))' },
+    { name: '阶梯', src: 'floor(3*sin(t))/3' }
+  ];
+
+  var SAFE = 'sin cos tan asin acos atan sinh cosh tanh abs sign floor ceil round exp log sqrt pow min max PI E random';
+  function compile(src) {
+    var defs = SAFE.split(' ').map(function (n) { return 'var ' + n + ' = Math.' + n + ';'; }).join('');
+    var f = new Function('t', defs + ' return (' + src + ');');
+    /* 抽样校验 */
+    for (var i = 0; i < 16; i++) {
+      var v = f((i / 16) * 2 * Math.PI - Math.PI);
+      if (typeof v !== 'number' || !isFinite(v)) throw new Error('函数在这附近算不出数');
+    }
+    return f;
+  }
+
+  var curFn = null, curSrc = 'sin(t)', curWave = null, waveSamples = null;
+
+  function applySource(src, silent) {
+    var fn;
+    try { fn = compile(src); }
+    catch (e) { toast('这个函数有点问题：' + e.message); return false; }
+    curFn = fn;
+    curSrc = src;
+    waveSamples = sampleWave(fn);
+    if (actx) curWave = waveToPeriodic(waveSamples);
+    drawWave(0);
+    if (!silent) toast('🎼 音色已换成：' + src);
+    return true;
+  }
+
+  /* ============ 波形绘制（播放时起伏）============ */
+  var wcv = document.getElementById('wave');
+  var wctx = wcv.getContext('2d');
+  var dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+  var animPhase = 0, animAmp = 0;
+
+  function fitWave() {
+    wcv.width = wcv.clientWidth * dpr;
+    wcv.height = wcv.clientHeight * dpr;
+    drawWave(0);
+  }
+  function drawWave(t) {
+    var W = wcv.width, H = wcv.height;
+    wctx.clearRect(0, 0, W, H);
+    if (!waveSamples) return;
+    /* 网格 */
+    wctx.strokeStyle = 'rgba(160,120,220,.14)';
+    wctx.lineWidth = 1;
+    wctx.beginPath();
+    wctx.moveTo(0, H / 2); wctx.lineTo(W, H / 2);
+    wctx.stroke();
+    for (var gx = 0; gx <= 8; gx++) {
+      wctx.beginPath();
+      wctx.moveTo(W * gx / 8, 0); wctx.lineTo(W * gx / 8, H);
+      wctx.stroke();
+    }
+    /* 波形 */
+    var amp = (H * 0.36) * (1 + animAmp * 0.35);
+    var grad = wctx.createLinearGradient(0, 0, W, 0);
+    grad.addColorStop(0, '#a855f7');
+    grad.addColorStop(0.5, '#ec4899');
+    grad.addColorStop(1, '#22d3ee');
+    wctx.strokeStyle = grad;
+    wctx.lineWidth = 2.5 * dpr;
+    wctx.shadowColor = 'rgba(190,120,255,' + (0.35 + animAmp * 0.4) + ')';
+    wctx.shadowBlur = 14 * (0.4 + animAmp);
+    wctx.beginPath();
+    var steps = 256;
+    for (var i = 0; i <= steps; i++) {
+      var idx = i % N;
+      var v = waveSamples[idx] * (1 + 0 + 0);
+      /* 播放时轻微波动：叠加相位移动的发光轨迹 */
+      var y = H / 2 - v * amp;
+      if (i === 0) wctx.moveTo(0, y);
+      else wctx.lineTo(W * i / steps, y);
+    }
+    wctx.stroke();
+    wctx.shadowBlur = 0;
+  }
+
+  var waveRaf = false;
+  function animateWave(active) {
+    if (!active) { animAmp = 0; drawWave(0); return; }
+    if (waveRaf) return;
+    waveRaf = true;
+    var t0 = performance.now();
+    function frame(t) {
+      if (performance.now() - t0 > 0 && !activeVoices.size && !melodyPlaying) {
+        waveRaf = false;
+        animAmp = 0;
+        drawWave(0);
+        return;
+      }
+      animPhase += 0.12;
+      animAmp = 0.5 + 0.5 * Math.sin(animPhase);
+      drawWave(animPhase);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* ============ 发声 ============ */
+  var activeVoices = new Map();   /* note -> voice */
+  function midiFreq(n) { return 261.625565 * Math.pow(2, n / 12); }
+
+  function playNote(note, vel) {
+    if (!ensureAudio()) return;
+    if (activeVoices.has(note)) return;
+    if (!curWave) curWave = waveToPeriodic(waveSamples);
+    var osc = actx.createOscillator();
+    osc.setPeriodicWave(curWave);
+    osc.frequency.value = midiFreq(note);
+    var g = actx.createGain();
+    var v = (vel || 0.9) * 0.9;
+    g.gain.setValueAtTime(0.0001, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(v, actx.currentTime + 0.015);
+    g.gain.exponentialRampToValueAtTime(v * 0.55, actx.currentTime + 0.18);
+    osc.connect(g); g.connect(master);
+    osc.start();
+    activeVoices.set(note, { osc: osc, g: g });
+    animateWave(true);
+  }
+  function stopNote(note) {
+    var vc = activeVoices.get(note);
+    if (!vc) return;
+    activeVoices.delete(note);
+    try {
+      vc.g.gain.cancelScheduledValues(actx.currentTime);
+      vc.g.gain.setValueAtTime(Math.max(0.0001, vc.g.gain.value), actx.currentTime);
+      vc.g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + 0.28);
+      vc.osc.stop(actx.currentTime + 0.32);
+    } catch (e) {}
+  }
+
+  /* ============ 钢琴 UI ============ */
+  var KEYS = [
+    { note: 0, name: 'C', kb: 'KeyA' }, { note: 2, name: 'D', kb: 'KeyS' },
+    { note: 4, name: 'E', kb: 'KeyD' }, { note: 5, name: 'F', kb: 'KeyF' },
+    { note: 7, name: 'G', kb: 'KeyG' }, { note: 9, name: 'A', kb: 'KeyH' },
+    { note: 11, name: 'B', kb: 'KeyJ' }, { note: 12, name: 'C⁺', kb: 'KeyK' }
+  ];
+  var piano = document.getElementById('piano');
+  piano.innerHTML = KEYS.map(function (k, i) {
+    return '<div class="key" data-note="' + k.note + '" data-i="' + i + '"><small>' + k.kb.replace('Key', '') + '</small>' + k.name + '</div>';
+  }).join('');
+  var noteKeyByI = {};
+  KEYS.forEach(function (k, i) { noteKeyByI[i] = k.note; });
+
+  function pressByIndex(i) {
+    var el = piano.querySelector('[data-i="' + i + '"]');
+    if (!el || el.classList.contains('press')) return;
+    el.classList.add('press');
+    playNote(KEYS[i].note, 0.95);
+    try { STAch.unlock('music.play', '音色实验', '🎵'); } catch (e) {}
+  }
+  function releaseByIndex(i) {
+    var el = piano.querySelector('[data-i="' + i + '"]');
+    if (el) el.classList.remove('press');
+    stopNote(KEYS[i].note);
+  }
+
+  [].forEach.call(piano.querySelectorAll('.key'), function (el) {
+    el.addEventListener('pointerdown', function (e) { e.preventDefault(); pressByIndex(+el.getAttribute('data-i')); });
+    el.addEventListener('pointerup', function () { releaseByIndex(+el.getAttribute('data-i')); });
+    el.addEventListener('pointerleave', function () { releaseByIndex(+el.getAttribute('data-i')); });
+    el.addEventListener('pointercancel', function () { releaseByIndex(+el.getAttribute('data-i')); });
+  });
+
+  var kbDown = {};
+  document.addEventListener('keydown', function (e) {
+    if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+    var tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea') return;
+    for (var i = 0; i < KEYS.length; i++) {
+      if (KEYS[i].kb === e.code && !kbDown[e.code]) { kbDown[e.code] = 1; pressByIndex(i); break; }
+    }
+  });
+  document.addEventListener('keyup', function (e) {
+    if (!kbDown[e.code]) return;
+    delete kbDown[e.code];
+    for (var i = 0; i < KEYS.length; i++) if (KEYS[i].kb === e.code) { releaseByIndex(i); break; }
+  });
+
+  /* ============ 试听小段 ============ */
+  var melodyPlaying = false;
+  function melodyRun(seq) {
+    /* 用调度循环重写：每拍前进一步 */
+    var i = 0;
+    function next() {
+      if (i >= seq.length) { melodyPlaying = false; return; }
+      var n = seq[i], dur = 190;
+      try {
+        if (!curWave) curWave = waveToPeriodic(waveSamples);
+        var osc = actx.createOscillator();
+        osc.setPeriodicWave(curWave);
+        osc.frequency.value = midiFreq(n);
+        var g = actx.createGain();
+        g.gain.setValueAtTime(0.0001, actx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.8, actx.currentTime + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur / 1000 + 0.12);
+        osc.connect(g); g.connect(master);
+        osc.start(); osc.stop(actx.currentTime + dur / 1000 + 0.2);
+      } catch (e) {}
+      var ki = -1;
+      for (var j = 0; j < KEYS.length; j++) if (KEYS[j].note === n % 12 && n < 13) ki = j;
+      if (ki >= 0) {
+        var el = piano.querySelector('[data-i="' + ki + '"]');
+        if (el) { el.classList.add('press'); (function (ee) { setTimeout(function () { ee.classList.remove('press'); }, dur); })(el); }
+      }
+      animateWave(true);
+      i++;
+      setTimeout(next, dur);
+    }
+    melodyPlaying = true;
+    next();
+    animateWave(true);
+    try { STAch.unlock('music.play', '音色实验', '🎵'); } catch (e) {}
+  }
+
+  document.getElementById('btnTune').addEventListener('click', function () {
+    if (!ensureAudio()) return;
+    melodyRun([0, 4, 7, 12, 7, 4, 0, 7, 4, 2, 0, -1 + 12, 0]);
+  });
+  document.getElementById('btnStart').addEventListener('click', function () {
+    if (ensureAudio()) toast('🔊 声音已开启，弹吧');
+  });
+
+  /* ============ 预设 chips ============ */
+  var chips = document.getElementById('chips');
+  chips.innerHTML = PRESETS.map(function (p, i) {
+    return '<button class="chip' + (i === 0 ? ' on' : '') + '" type="button" data-i="' + i + '">' + p.name + '</button>';
+  }).join('');
+  chips.addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    [].forEach.call(chips.querySelectorAll('.chip'), function (x) { x.classList.remove('on'); });
+    b.classList.add('on');
+    var p = PRESETS[+b.getAttribute('data-i')];
+    document.getElementById('finput').value = p.src;
+    applySource(p.src, true);
+    toast('🎼 已切换到「' + p.name + '」：' + p.src);
+  });
+  document.getElementById('btnApply').addEventListener('click', function () {
+    var src = document.getElementById('finput').value.trim();
+    if (!src) return;
+    if (applySource(src)) {
+      [].forEach.call(chips.querySelectorAll('.chip'), function (x) { x.classList.remove('on'); });
+      try { STAch.unlock('music.play', '音色实验', '🎵'); } catch (e) {}
+    }
+  });
+  document.getElementById('finput').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') document.getElementById('btnApply').click();
+  });
+
+  var toastEl = document.getElementById('toast'), toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2600);
+  }
+
+  /* 初始化 */
+  window.addEventListener('resize', fitWave);
+  fitWave();
+  applySource('sin(t)', true);
+})();
+</script>
+</body>
+</html>
