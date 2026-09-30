@@ -153,6 +153,22 @@ section{scroll-margin-top:96px}
 .sec-sub{margin-top:10px; font-size:13.5px; color:var(--ink3); letter-spacing:.4px}
 
 /* —— 作品瓷砖 —— */
+/* 🏆 跨站成就柜 */
+.ach-cross{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px 22px;box-shadow:var(--sh-sm)}
+.acx-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.acx-title{font-size:15px;font-weight:800;color:var(--ink)}
+.acx-prog{margin-left:auto;font-size:12px;font-weight:700;color:var(--ink3)}
+.acx-prog b{color:var(--accent-deep);font-size:16px}
+.acx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.acx-item{display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--tint);opacity:.42;filter:grayscale(1);transition:opacity .35s ease,filter .35s ease,border-color .35s ease,transform .35s ease}
+.acx-item.lit{opacity:1;filter:none;border-color:var(--accent);transform:translateY(-1px)}
+.acx-item .em{font-size:19px;flex:0 0 auto}
+.acx-item .nm{font-size:12px;font-weight:800;line-height:1.3;color:var(--ink)}
+.acx-item .ds{font-size:10.5px;color:var(--ink3);margin-top:1px}
+.acx-tip{margin-top:12px;font-size:11px;color:var(--ink3)}
+/* 💭 脑内小剧场 */
+.theater{text-align:center;font-size:12.5px;color:var(--ink3);font-style:italic;padding:0 16px 10px;line-height:1.8}
+.theater #mono{color:var(--ink2)}
 /* 头像 img 解析瞬间（尚未由内联脚本设 src）：先隐藏，设上即显示，避免旧头像/alt 闪烁 */
 .brand img:not([src]),.avatar img:not([src]){visibility:hidden}
 .tiles{display:grid; grid-template-columns:1fr; gap:26px}
@@ -991,6 +1007,8 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       <span>📐 几何工坊</span><span><em>·</em></span>
       <span>🗓️ 打卡日程</span><span><em>·</em></span>
       <span>🧠 mix9 神经网络</span><span><em>·</em></span>
+      <span>✨ 种子星空</span><span><em>·</em></span>
+      <span>🎨 配色实验室</span><span><em>·</em></span>
       <span>😏 偶尔整活</span><span><em>·</em></span>
       <span>🌙 startian.top</span><span><em>·</em></span>
     </div>
@@ -1030,7 +1048,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
             <span class="zone-name">娱乐</span>
             <span class="zone-sub">下棋、转转玩的 · 放松向</span>
           </span>
-          <span class="zone-count">2 个作品</span>
+          <span class="zone-count">3 个作品</span>
           <span class="zone-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
         </button>
         <div class="zone-body">
@@ -1054,6 +1072,15 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
           <span class="cta">玩一下 <i>→</i></span>
         </div>
       </a>
+      <a class="tile flip" style="--d:.14s" data-demo="star" href="https://startian.top/star/">
+        <div class="tile-media"><img src="demos/star.jpg" alt="像素星空生成器演示" loading="lazy"></div>
+        <div class="tile-body">
+          <span class="ptag">生成艺术 · 解压</span>
+          <h3>像素星空生成器</h3>
+          <p>点一下生成一片独一无二的星空：种子编号可复现、可分享（「我的星空 #3721」），还能下载 1920×1080 做壁纸。</p>
+          <span class="cta">去看星星 <i>→</i></span>
+        </div>
+      </a>
             </div>
           </div>
         </div>
@@ -1066,7 +1093,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
             <span class="zone-name">工具</span>
             <span class="zone-sub">学习与效率 · 干正事用</span>
           </span>
-          <span class="zone-count">2 个作品</span>
+          <span class="zone-count">3 个作品</span>
           <span class="zone-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
         </button>
         <div class="zone-body">
@@ -1088,6 +1115,15 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
           <h3>打卡日程表</h3>
           <p>给自己定几个小目标：一键打卡、连续天数 🔥、月度日历回顾；数据只存在你的浏览器里，可离线使用。</p>
           <span class="cta">来打卡 <i>→</i></span>
+        </div>
+      </a>
+      <a class="tile flip" style="--d:.14s" data-demo="colorlab" href="https://startian.top/colorlab/">
+        <div class="tile-media"><img src="demos/colorlab.jpg" alt="配色实验室演示" loading="lazy"></div>
+        <div class="tile-body">
+          <span class="ptag">设计 · 工具</span>
+          <h3>配色实验室</h3>
+          <p>选两个颜色，实时预览整套 UI（按钮 / 卡片 / 玻璃导航全派生），一键复制或下载 CSS 变量，直接拿去用。</p>
+          <span class="cta">去调色 <i>→</i></span>
         </div>
       </a>
             </div>
@@ -1164,6 +1200,12 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
         <span class="cta">去打卡 <i>→</i></span>
       </a>
     </div>
+    <div class="ach-cross reveal" style="--d:.16s">
+      <div class="acx-head"><span class="acx-title">🏆 跨站成就柜</span><span class="acx-prog">已点亮 <b id="achLit">0</b> / <span id="achTotal">14</span></span></div>
+      <div class="acx-grid" id="achGrid"></div>
+      <div class="acx-tip">游玩任意小站会自动点亮 · 记录只存本机（全站共享），不上传任何地方</div>
+    </div>
+
   </section>
 
   <section id="contact">
@@ -1201,6 +1243,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
   </section>
 
   <footer class="reveal" style="--d:.1s">
+    <div class="theater">💭 <span id="mono"></span></div>
     © 2026 星恬 · startian.top<br>
     也欢迎来 <a href="https://space.bilibili.com/3494370703575552" target="_blank" rel="noopener">B 站</a> 和 <a href="https://github.com/Estheria-star" target="_blank" rel="noopener">GitHub</a> 找我玩
   </footer>
@@ -1875,6 +1918,141 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
   })();
   window.ThemeKit = ThemeKit;   // 对外暴露：其他项目可按同款方式接入
   /* ================= /THEMEKIT ================= */
+})();
+</script>
+<script>
+/* ============================================================
+   🏆 跨站成就 SDK（cookie 域名 .startian.top + localStorage 兜底）
+   各子站复制本段即可上报成就（存 ID 列表，体积远小于 4KB）
+   ============================================================ */
+var STAch = (function () {
+  var KEY = 'st_ach';
+  function readCookie() {
+    var m = document.cookie.match(/(?:^|;\s*)st_ach=([^;]*)/);
+    if (!m) return null;
+    try { return JSON.parse(decodeURIComponent(m[1])) || []; } catch (e) { return null; }
+  }
+  function writeCookie(list) {
+    try {
+      var v = encodeURIComponent(JSON.stringify(list));
+      if (v.length < 3800) document.cookie = 'st_ach=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+    } catch (e) {}
+  }
+  var list = readCookie();
+  if (!list) { try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { list = []; } }
+  if (!Array.isArray(list)) list = [];
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+    writeCookie(list);
+  }
+  function unlock(id, name, ico) {
+    if (list.indexOf(id) >= 0) return false;
+    list.push(id);
+    save();
+    try {
+      var el = document.createElement('div');
+      el.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9999;background:rgba(22,26,48,.94);color:#fff;border:1px solid rgba(140,170,255,.42);border-radius:999px;padding:12px 22px;font:700 13.5px/1.4 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:86vw';
+      el.textContent = '🏆 成就解锁：' + (ico ? ico + ' ' : '') + (name || id);
+      document.body.appendChild(el);
+      requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+      setTimeout(function () {
+        el.style.opacity = '0';
+        el.style.transform = 'translateX(-50%) translateY(16px)';
+        setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+      }, 3200);
+    } catch (e) {}
+    return true;
+  }
+  return { list: function () { return list.slice(); }, has: function (id) { return list.indexOf(id) >= 0; }, unlock: unlock };
+})();
+window.STAch = STAch;
+
+/* —— 跨站成就定义与渲染 —— */
+var ACH_DEFS = [
+  { id: 'home.visit', ico: '🏠', name: '初次到访', desc: '来过 startian.top' },
+  { id: 'site.gomoku', ico: '⚫', name: '棋友', desc: '到访五子棋' },
+  { id: 'site.geometry', ico: '📐', name: '几何学徒', desc: '到访几何工坊' },
+  { id: 'site.daka', ico: '🗓️', name: '自律伊始', desc: '到访打卡日程表' },
+  { id: 'site.zhenghuo', ico: '😏', name: '上当一次', desc: '到访整活页' },
+  { id: 'site.tujie', ico: '⬡', name: '维度漫游', desc: '到访六边形展示器' },
+  { id: 'site.star', ico: '✨', name: '摘星人', desc: '到访星空生成器' },
+  { id: 'site.colorlab', ico: '🎨', name: '调色师', desc: '到访配色实验室' },
+  { id: 'geo.ai_build', ico: '🤖', name: 'AI 造物', desc: '让几何工坊 AI 出图' },
+  { id: 'geo.sphere', ico: '🔮', name: '球心捕手', desc: '生成外接球 / 内切球' },
+  { id: 'geo.custom_solid', ico: '🧩', name: '造物主', desc: '组合出自定义立体' },
+  { id: 'star.wall', ico: '🖼️', name: '把星空带回家', desc: '下载一张星空壁纸' },
+  { id: 'colorlab.export', ico: '📤', name: '配色输出', desc: '在配色实验室导出 CSS' },
+  { id: 'explorer.all', ico: '🧭', name: '全站探险家', desc: '集齐全部站点足迹' }
+];
+function renderAch() {
+  var grid = document.getElementById('achGrid');
+  if (!grid) return;
+  var lit = 0;
+  grid.innerHTML = ACH_DEFS.map(function (a) {
+    var on = STAch.has(a.id);
+    if (on) lit++;
+    return '<div class="acx-item' + (on ? ' lit' : '') + '" title="' + (on ? '已解锁' : '未解锁') + '">' +
+      '<span class="em">' + a.ico + '</span>' +
+      '<span><span class="nm">' + a.name + '</span><br><span class="ds">' + a.desc + '</span></span></div>';
+  }).join('');
+  var c = document.getElementById('achLit');
+  if (c) c.textContent = lit;
+  var t = document.getElementById('achTotal');
+  if (t) t.textContent = ACH_DEFS.length;
+}
+renderAch();
+
+/* 到访主页：解锁 + 全站探险家检查 */
+setTimeout(function () {
+  var fresh = STAch.unlock('home.visit', '初次到访', '🏠');
+  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab'];
+  var all = sites.every(function (id) { return STAch.has(id); });
+  if (all) STAch.unlock('explorer.all', '全站探险家', '🧭');
+  if (fresh || all) renderAch();
+}, 700);
+window.__renderAch = renderAch;
+
+/* —— 💬 问候语随时间变 —— */
+(function () {
+  var tag = document.querySelector('.hero-tag');
+  if (!tag) return;
+  var h = new Date().getHours();
+  var greet = h < 5 ? '这么晚还没睡？那来逛点好玩的' :
+              h < 11 ? '早呀，今天想玩点什么？' :
+              h < 14 ? '中午好，来放松一下？' :
+              h < 18 ? '下午好，看看又多了什么新玩意' :
+              '晚上好，来一局或者看片星星？';
+  tag.textContent = greet + ' ✦ 下棋 · 画几何 · 捣鼓 AI 小玩意';
+})();
+
+/* —— 💭 脑内小剧场（每次刷新随机一句）—— */
+(function () {
+  var el = document.getElementById('mono');
+  if (!el) return;
+  var MONOS = [
+    '今天也在想：如果坐标轴会做梦，会梦到什么？',
+    '刚刚好像有个 bug 从我眼前飞过去了。',
+    '检测到你在发呆，推荐去星空页生成一颗星星。',
+    '面包会有的，闭环也会有的。',
+    '本人的脑子现在运行在 30 帧，请多包涵。',
+    '二面角今天也想被正确地求出来。',
+    '我把昨天没解出的题藏在草稿箱第三页了，嘘。',
+    '好想给每个来玩的访客发一颗糖。',
+    '今天的风很温柔，适合写一个不带 bug 的函数。',
+    '如果灵感没来，就先随机一点。',
+    '有时候觉得自己是一个渲染循环，一直在画下一帧。',
+    '建议：喝口水，伸个懒腰，然后去点亮两颗星星。',
+    '刚刚认真思考了三秒人生，然后继续摸鱼。',
+    '向量会相加，开心也要叠加。',
+    '今天也要把边界条件照顾好呀。',
+    '我刚试着数星星，数到 3721 就走神了。',
+    '别问我为什么，问就是艺术效果。',
+    '这行独白是随机出现的，就像你遇见这个小站一样。',
+    '把耳机戴上，世界就安静成一块画布。',
+    '凌晨的心事，到了早上都会变成待办。',
+    '你已经很棒了，真的。'
+  ];
+  el.textContent = MONOS[Math.floor(Math.random() * MONOS.length)];
 })();
 </script>
 <script>
