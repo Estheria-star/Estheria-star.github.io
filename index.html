@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<script>document.documentElement.classList.add('js');(function(){try{var p=JSON.parse(localStorage.getItem('startian_theme_v1')||'{}');var m=p.mode||'auto',t=m;if(m==='auto'){var n=new Date(),x=n.getHours()*60+n.getMinutes();var l=((p.lightAt||'07:00')+'').split(':'),d=((p.darkAt||'19:00')+'').split(':');var lm=(+l[0])*60+(+l[1]||0),dm=(+d[0])*60+(+d[1]||0);t=(lm<dm)?((x>=lm&&x<dm)?'light':'dark'):((x>=lm||x<dm)?'light':'dark');if((p.autoPair||'classic')==='dreamy'){t=(t==='light')?'fresh':'purple';}}document.documentElement.setAttribute('data-theme',t);var avm={dark:'avatar-dark.jpg',purple:'avatar-purple.jpg',fresh:'avatar-fresh.jpg'};var avp=avm[t]||'';if(avp){var ln=document.createElement('link');ln.rel='preload';ln.as='image';ln.href=avp;document.head.appendChild(ln);}}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
+<script>document.documentElement.classList.add('js');(function(){try{var p=JSON.parse(localStorage.getItem('startian_theme_v1')||'{}');var m=p.mode||'auto',t=m;if(m==='auto'){var n=new Date(),x=n.getHours()*60+n.getMinutes();var l=((p.lightAt||'07:00')+'').split(':'),d=((p.darkAt||'19:00')+'').split(':');var lm=(+l[0])*60+(+l[1]||0),dm=(+d[0])*60+(+d[1]||0);t=(lm<dm)?((x>=lm&&x<dm)?'light':'dark'):((x>=lm||x<dm)?'light':'dark');if((p.autoPair||'classic')==='dreamy'){t=(t==='light')?'fresh':'purple';}}document.documentElement.setAttribute('data-theme',t);var avm={dark:'avatar-dark.jpg',purple:'avatar-purple.jpg',fresh:'avatar-fresh.jpg',warm:'avatar-warm.jpg',colorful:'avatar-colorful.jpg'};var avp=avm[t]||'';if(avp){var ln=document.createElement('link');ln.rel='preload';ln.as='image';ln.href=avp;document.head.appendChild(ln);}}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>星恬的小站 · startian.top</title>
 <meta name="description" content="星恬的小站 —— 下棋、画几何、捣鼓 AI 小玩意。五子棋、几何工坊与更多作品在此。">
@@ -364,11 +364,11 @@ footer a:hover{text-decoration:underline}
 }
 .tk-panel.show{opacity:1;transform:none;pointer-events:auto}
 .tk-p-title{font-size:13.5px;font-weight:800;letter-spacing:.5px;color:var(--ink)}
-.tk-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}
+.tk-seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
 .tk-seg.tk-seg-2{grid-template-columns:1fr 1fr;margin-top:8px}
 .tk-seg button{
-  padding:9px 2px;border-radius:12px;border:1.5px solid var(--line);background:#f7fbff;
-  font-size:11.5px;font-weight:700;color:var(--ink2);cursor:pointer;font-family:inherit;
+  padding:9px 1px;border-radius:12px;border:1.5px solid var(--line);background:#f7fbff;
+  font-size:11px;font-weight:700;color:var(--ink2);cursor:pointer;font-family:inherit;
   transition:all .18s ease;white-space:nowrap;
 }
 .tk-seg button:hover{border-color:#a6d1f8}
@@ -589,6 +589,126 @@ footer a:hover{text-decoration:underline}
 [data-theme="fresh"] .dock .dhint{color:#6f987f}
 [data-theme="fresh"] .toast{background:rgba(22,55,38,.95)}
 
+/* —— 温馨粉（浅色·柔和粉）—— */
+[data-theme="warm"]{
+  --bg1:#fff5f8; --bg2:#ffe9f1;
+  --card:#ffffff; --tint:#fff0f5;
+  --line:#f9d2e2; --line2:#fce0eb;
+  --ink:#4a2533; --ink2:#8a5a6e; --ink3:#b88a9c;
+  --accent:#ec4899; --accent-deep:#db2777;
+  --sh-sm:0 1px 2px rgba(120,40,70,.06), 0 10px 28px rgba(140,60,90,.10);
+  --sh-lg:0 2px 4px rgba(120,40,70,.08), 0 24px 50px rgba(140,60,90,.14);
+}
+[data-theme="warm"] ::selection{background:#fbcfe8}
+[data-theme="warm"] .loadbar{background:linear-gradient(90deg,#f472b6,#ec4899,#f9a8d4)}
+[data-theme="warm"] .nav{background:rgba(255,250,252,.72);border-bottom-color:rgba(249,210,226,.8)}
+[data-theme="warm"] .nav.scrolled{background:rgba(255,250,252,.9)}
+[data-theme="warm"] .brand-sub{color:#b88a9c}
+[data-theme="warm"] .brand img{box-shadow:0 0 0 1.5px #fff,0 0 0 2.5px #f9b8d4}
+[data-theme="warm"] .nav-links a{color:#8a5a6e}
+[data-theme="warm"] .nav-links a:hover{color:#db2777;background:#fce7f3}
+[data-theme="warm"] .tk-btn:hover{border-color:#f9b8d4}
+[data-theme="warm"] .tk-panel{background:rgba(255,255,255,.96);border-color:#f9d2e2}
+[data-theme="warm"] .tk-seg button{background:#fff7fa;border-color:#f9d2e2;color:#8a5a6e}
+[data-theme="warm"] .tk-seg button:hover{border-color:#f9a8d4}
+[data-theme="warm"] .tk-seg button.on{border-color:#db2777;background:#fce7f3;color:#be185d}
+[data-theme="warm"] .tk-times input{background:#fffbfc;border-color:#f9d2e2}
+[data-theme="warm"] .tk-times input:focus{border-color:#f472b6}
+[data-theme="warm"] .blob{opacity:.55}
+[data-theme="warm"] .blob.b1{background:radial-gradient(circle,#fbcfe8,transparent 70%)}
+[data-theme="warm"] .blob.b2{background:radial-gradient(circle,#ffe4ef,transparent 70%)}
+[data-theme="warm"] .blob.b3{background:radial-gradient(circle,#fdd5e6,transparent 70%)}
+[data-theme="warm"] .hero h1{
+  background:linear-gradient(110deg,#4a2533 20%,#ec4899 42%,#f9a8d4 52%,#4a2533 72%);
+  background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+[data-theme="warm"] .hero-eyebrow{color:#b88a9c}
+[data-theme="warm"] .hero .avatar{box-shadow:0 16px 36px rgba(140,60,90,.22),0 0 0 4px #fff,0 0 0 6px #f9b8d4}
+[data-theme="warm"] .hero .avatar:hover{box-shadow:0 20px 42px rgba(140,60,90,.28),0 0 0 4px #fff,0 0 0 7px #f472b6}
+[data-theme="warm"] .btn-p{background:linear-gradient(180deg,#f472b6,#db2777);box-shadow:0 5px 0 #9d174d,0 14px 26px rgba(190,24,93,.35)}
+[data-theme="warm"] .btn-p:hover{box-shadow:0 6px 0 #9d174d,0 16px 30px rgba(190,24,93,.42)}
+[data-theme="warm"] .btn-p:active{box-shadow:0 2px 0 #9d174d}
+[data-theme="warm"] .btn-g{background:#fff5f8;border-color:#f9d2e2;color:#db2777}
+[data-theme="warm"] .btn-g:hover{background:#fce7f3;border-color:#f9a8d4}
+[data-theme="warm"] .marquee-track span{color:#a87890}
+[data-theme="warm"] .marquee-track span em{color:#c8a0b4}
+[data-theme="warm"] .sec-eyebrow{color:#b88a9c}
+[data-theme="warm"] .tile:hover{border-color:#f9a8d4}
+[data-theme="warm"] .tile-media{box-shadow:0 10px 26px rgba(140,60,90,.16)}
+[data-theme="warm"] .ptag{color:#be185d;background:#fce7f3;border-color:#fbcfe8}
+[data-theme="warm"] .about,[data-theme="warm"] .intro{background:linear-gradient(160deg,#fff7fa,#fff0f5)}
+[data-theme="warm"] .chip{background:#fff0f5;border-color:#f9d2e2;color:#8a5a6e}
+[data-theme="warm"] .chip:hover{border-color:#f9a8d4}
+[data-theme="warm"] .ct:hover{border-color:#f9a8d4}
+[data-theme="warm"] .ct-ico{background:linear-gradient(150deg,#fff0f5,#fce7f3);box-shadow:inset 0 0 0 1px #f9d2e2}
+[data-theme="warm"] .ct:focus-visible{outline-color:#ec4899}
+[data-theme="warm"] .placeholder{border-color:#f9b8d4;color:#b88a9c}
+[data-theme="warm"] footer{color:#b88a9c;border-top-color:#fce0eb}
+[data-theme="warm"] .dock{background:linear-gradient(165deg,#fffafc,#fff0f5);border-color:#f9d2e2}
+[data-theme="warm"] .dock .tag{color:#be185d;background:#fce7f3;border-color:#fbcfe8}
+[data-theme="warm"] .dock .dhint{color:#b88a9c}
+[data-theme="warm"] .toast{background:rgba(190,24,93,.95)}
+
+/* —— 缤纷彩（深色·彩虹）—— */
+[data-theme="colorful"]{
+  --bg1:#15152b; --bg2:#1e1e40;
+  --card:#1e1e38; --tint:#272750;
+  --line:#3d3d70; --line2:#303060;
+  --ink:#f2f2ff; --ink2:#c0c0ea; --ink3:#8f8fc0;
+  --accent:#a78bfa; --accent-deep:#22d3ee;
+  --sh-sm:0 1px 2px rgba(0,0,0,.45), 0 10px 28px rgba(10,10,40,.5);
+  --sh-lg:0 2px 4px rgba(0,0,0,.55), 0 24px 50px rgba(10,10,40,.6);
+}
+[data-theme="colorful"] ::selection{background:#3d3d70}
+[data-theme="colorful"] .loadbar{background:linear-gradient(90deg,#ff5f6d,#ffc371,#4dd0e1,#a78bfa,#f472b6)}
+[data-theme="colorful"] .nav{background:rgba(21,21,43,.72);border-bottom-color:rgba(61,61,112,.7)}
+[data-theme="colorful"] .nav.scrolled{background:rgba(21,21,43,.88)}
+[data-theme="colorful"] .brand-sub{color:#8f8fc0}
+[data-theme="colorful"] .brand img{box-shadow:0 0 0 1.5px #1e1e38,0 0 0 2.5px #3d3d70}
+[data-theme="colorful"] .nav-links a{color:#c0c0ea}
+[data-theme="colorful"] .nav-links a:hover{color:#4dd0e1;background:#272750}
+[data-theme="colorful"] .tk-btn{background:#1e1e38}
+[data-theme="colorful"] .tk-btn:hover{border-color:#6d5fbf}
+[data-theme="colorful"] .tk-panel{background:rgba(26,26,50,.96);border-color:#3d3d70}
+[data-theme="colorful"] .tk-seg button{background:#272750;border-color:#3d3d70;color:#c0c0ea}
+[data-theme="colorful"] .tk-seg button:hover{border-color:#6d5fbf}
+[data-theme="colorful"] .tk-seg button.on{border-color:#22d3ee;background:#2d2d5e;color:#7ee8f8}
+[data-theme="colorful"] .tk-times input{background:#272750;border-color:#3d3d70;color:#f2f2ff}
+[data-theme="colorful"] .blob{opacity:.42}
+[data-theme="colorful"] .blob.b1{background:radial-gradient(circle,#ff5f6d,transparent 70%)}
+[data-theme="colorful"] .blob.b2{background:radial-gradient(circle,#22d3ee,transparent 70%)}
+[data-theme="colorful"] .blob.b3{background:radial-gradient(circle,#a78bfa,transparent 70%)}
+[data-theme="colorful"] .hero h1{
+  background:linear-gradient(110deg,#f2f2ff 12%,#ff8a80 30%,#ffd54f 45%,#4dd0e1 62%,#b39ddb 78%,#f2f2ff 92%);
+  background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+[data-theme="colorful"] .hero-eyebrow{color:#8f8fc0}
+[data-theme="colorful"] .hero .avatar{box-shadow:0 16px 36px rgba(0,0,0,.55),0 0 0 4px #1e1e38,0 0 0 6px #3d3d70}
+[data-theme="colorful"] .hero .avatar:hover{box-shadow:0 20px 42px rgba(0,0,0,.65),0 0 0 4px #1e1e38,0 0 0 7px #6d5fbf}
+[data-theme="colorful"] .btn-p{background:linear-gradient(100deg,#f472b6,#a78bfa 48%,#22d3ee);box-shadow:0 5px 0 #4c1d95,0 14px 26px rgba(124,58,237,.45)}
+[data-theme="colorful"] .btn-p:hover{box-shadow:0 6px 0 #4c1d95,0 16px 30px rgba(124,58,237,.55)}
+[data-theme="colorful"] .btn-p:active{box-shadow:0 2px 0 #4c1d95}
+[data-theme="colorful"] .btn-g{background:#1e1e38;border-color:#3d3d70;color:#7ee8f8}
+[data-theme="colorful"] .btn-g:hover{background:#272750;border-color:#6d5fbf}
+[data-theme="colorful"] .marquee-track span{color:#a9a9d8}
+[data-theme="colorful"] .marquee-track span em{color:#77779f}
+[data-theme="colorful"] .sec-eyebrow{color:#8f8fc0}
+[data-theme="colorful"] .tile:hover{border-color:#6d5fbf}
+[data-theme="colorful"] .tile-media{box-shadow:0 10px 26px rgba(0,0,0,.5)}
+[data-theme="colorful"] .ptag{color:#7ee8f8;background:#2d2d5e;border-color:#40408a}
+[data-theme="colorful"] .about,[data-theme="colorful"] .intro{background:linear-gradient(160deg,#1b1b38,#1e1e40)}
+[data-theme="colorful"] .chip{background:#272750;border-color:#3d3d70;color:#c0c0ea}
+[data-theme="colorful"] .chip:hover{border-color:#6d5fbf}
+[data-theme="colorful"] .ct:hover{border-color:#6d5fbf}
+[data-theme="colorful"] .ct-ico{background:linear-gradient(150deg,#272750,#2d2d5e);box-shadow:inset 0 0 0 1px #3d3d70}
+[data-theme="colorful"] .ct:focus-visible{outline-color:#22d3ee}
+[data-theme="colorful"] .placeholder{border-color:#3d3d70;color:#8f8fc0}
+[data-theme="colorful"] footer{color:#8f8fc0;border-top-color:#303060}
+[data-theme="colorful"] .dock{background:linear-gradient(165deg,#1e1e38,#272750);border-color:#3d3d70}
+[data-theme="colorful"] .dock .tag{color:#7ee8f8;background:#2d2d5e;border-color:#40408a}
+[data-theme="colorful"] .dock .dhint{color:#8f8fc0}
+[data-theme="colorful"] .toast{background:rgba(45,45,94,.96)}
+
 /* —— 转场舞台（多主题：黑幕=暗红/紫；白幕=蓝白/绿）—— */
 .tk-stage{position:fixed;inset:0;z-index:200;pointer-events:none;overflow:hidden}
 .tk-black{position:absolute;inset:0;background:#0a0507;opacity:0;transition:opacity .7s ease;pointer-events:none}
@@ -637,6 +757,25 @@ footer a:hover{text-decoration:underline}
 .tk-halo.tk-fresh{
   border-color:rgba(255,255,255,.95);
   box-shadow:0 0 22px 5px rgba(255,255,255,.7), 0 0 60px 16px rgba(134,239,172,.42), inset 0 0 22px rgba(255,255,255,.5);
+}
+/* 温馨粉转场（浅色：粉白幕 + 玫瑰粉光晕） */
+.tk-black.tk-warm{background:linear-gradient(165deg,#ffffff 0%,#fff5f8 45%,#ffe0ee 100%)}
+.tk-ring.tk-warm{
+  border-color:rgba(255,255,255,.95);
+  box-shadow:0 0 0 1px rgba(236,72,153,.45) inset, 0 0 30px 6px rgba(244,114,182,.6), 0 0 70px 18px rgba(244,114,182,.32);
+}
+.tk-halo.tk-warm{
+  border-color:rgba(255,255,255,.95);
+  box-shadow:0 0 22px 5px rgba(255,255,255,.7), 0 0 60px 16px rgba(244,114,182,.4), inset 0 0 22px rgba(255,255,255,.5);
+}
+/* 缤纷彩转场（深色：黑幕 + 青紫光晕） */
+.tk-ring.tk-colorful{
+  border-color:rgba(224,242,255,.95);
+  box-shadow:0 0 0 1px rgba(167,139,250,.6) inset, 0 0 30px 6px rgba(34,211,238,.55), 0 0 70px 18px rgba(167,139,250,.4);
+}
+.tk-halo.tk-colorful{
+  border-color:rgba(224,242,254,.92);
+  box-shadow:0 0 22px 5px rgba(34,211,238,.55), 0 0 60px 16px rgba(167,139,250,.35), inset 0 0 22px rgba(34,211,238,.4);
 }
 .tk-shards{position:absolute;inset:0}
 .tk-shard{
@@ -732,6 +871,8 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       <button type="button" data-mode="dark">🌙 暗红</button>
       <button type="button" data-mode="purple">🔮 梦幻紫</button>
       <button type="button" data-mode="fresh">🌿 清新绿</button>
+      <button type="button" data-mode="warm">🌸 温馨粉</button>
+      <button type="button" data-mode="colorful">🎨 缤纷彩</button>
     </div>
     <div class="tk-p-sub">自动组合（跟随时间切换的两套配色）</div>
     <div class="tk-seg tk-seg-2" id="tkPair">
@@ -1127,12 +1268,16 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       darkAvatar: 'avatar-dark.jpg',
       purpleAvatar: 'avatar-purple.jpg',
       freshAvatar: 'avatar-fresh.jpg',
+      warmAvatar: 'avatar-warm.jpg',
+      colorfulAvatar: 'avatar-colorful.jpg',
       themeColorLight: '#E6F7FF',
       themeColorDark: '#1c0c12',
       themeColorPurple: '#130d20',
-      themeColorFresh: '#e2f7ea'
+      themeColorFresh: '#e2f7ea',
+      themeColorWarm: '#ffe9f1',
+      themeColorColorful: '#15152b'
     };
-    var NAME = { light: '蓝白 ☀️', dark: '暗红 🌙', purple: '梦幻紫 🔮', fresh: '清新绿 🌿' };
+    var NAME = { light: '蓝白 ☀️', dark: '暗红 🌙', purple: '梦幻紫 🔮', fresh: '清新绿 🌿', warm: '温馨粉 🌸', colorful: '缤纷彩 🎨' };
     var state = { mode: 'auto', lightAt: CFG.defaultLightAt, darkAt: CFG.defaultDarkAt, autoPair: 'classic' };
     var current = 'light';
     var busy = false;
@@ -1145,7 +1290,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
         if (raw) {
           var p = JSON.parse(raw);
           if (p && typeof p === 'object') {
-            if (p.mode === 'auto' || p.mode === 'light' || p.mode === 'dark' || p.mode === 'purple' || p.mode === 'fresh') state.mode = p.mode;
+            if (p.mode === 'auto' || p.mode === 'light' || p.mode === 'dark' || p.mode === 'purple' || p.mode === 'fresh' || p.mode === 'warm' || p.mode === 'colorful') state.mode = p.mode;
             if (p.autoPair === 'classic' || p.autoPair === 'dreamy') state.autoPair = p.autoPair;
             if (p.lightAt) state.lightAt = p.lightAt;
             if (p.darkAt) state.darkAt = p.darkAt;
@@ -1185,7 +1330,8 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       document.body.appendChild(stage);
     }
     function setAvatar(theme) {
-      var src = theme === 'dark' ? CFG.darkAvatar : (theme === 'purple' ? CFG.purpleAvatar : (theme === 'fresh' ? CFG.freshAvatar : CFG.lightAvatar));
+      var AV = { dark: CFG.darkAvatar, purple: CFG.purpleAvatar, fresh: CFG.freshAvatar, warm: CFG.warmAvatar, colorful: CFG.colorfulAvatar };
+      var src = AV[theme] || CFG.lightAvatar;
       var imgs = document.querySelectorAll('img[data-avatar]');
       for (var i = 0; i < imgs.length; i++) imgs[i].setAttribute('src', src);
     }
@@ -1194,10 +1340,8 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       document.documentElement.setAttribute('data-theme', theme);
       setAvatar(theme);
       var m = document.querySelector('meta[name="theme-color"]');
-      if (m) m.setAttribute('content',
-        theme === 'dark' ? CFG.themeColorDark :
-        (theme === 'purple' ? CFG.themeColorPurple :
-        (theme === 'fresh' ? CFG.themeColorFresh : CFG.themeColorLight)));
+      var MC = { dark: CFG.themeColorDark, purple: CFG.themeColorPurple, fresh: CFG.themeColorFresh, warm: CFG.themeColorWarm, colorful: CFG.themeColorColorful };
+      if (m) m.setAttribute('content', MC[theme] || CFG.themeColorLight);
       syncUI();
     }
     function resetStage() {
@@ -1260,13 +1404,14 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       };
     }
     function runCurtain(theme) {
-      var isLightTheme = (theme === 'light' || theme === 'fresh');   /* 浅色主题 = 白幕；暗红 / 梦幻紫 = 黑幕 */
-      var glowCls = theme === 'light' ? ' tk-light' : (theme === 'purple' ? ' tk-purple' : (theme === 'fresh' ? ' tk-fresh' : ''));
+      var isLightTheme = (theme === 'light' || theme === 'fresh' || theme === 'warm');   /* 浅色主题 = 白幕 */
+      var GLOW = { light: ' tk-light', purple: ' tk-purple', fresh: ' tk-fresh', warm: ' tk-warm', colorful: ' tk-colorful' };
+      var glowCls = GLOW[theme] || '';
       document.documentElement.classList.add('tk-switching');
-      black.className = 'tk-black' + (isLightTheme ? (theme === 'fresh' ? ' tk-fresh' : ' tk-light') : '');
+      black.className = 'tk-black' + (theme === 'fresh' ? ' tk-fresh' : (theme === 'warm' ? ' tk-warm' : (isLightTheme ? ' tk-light' : '')));
       black.style.webkitMaskImage = '';
       black.style.maskImage = '';
-      ring.className = 'tk-ring' + (isLightTheme ? (theme === 'fresh' ? ' tk-fresh' : ' tk-light') : '');
+      ring.className = 'tk-ring' + (theme === 'fresh' ? ' tk-fresh' : (theme === 'warm' ? ' tk-warm' : (isLightTheme ? ' tk-light' : '')));
       // rAF 后再挂 tk-on：保证幕布走渐隐过渡（舞台已预创建，首切也平滑）
       requestAnimationFrame(function () { black.classList.add('tk-on'); });   // ① 当前界面渐隐进幕布（0.7s）
       function anchor() {
@@ -1427,7 +1572,8 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     }
     function syncUI() {
       var b = $('tkBtn');
-      if (b) b.textContent = state.mode === 'auto' ? '🕖' : (state.mode === 'dark' ? '🌙' : (state.mode === 'purple' ? '🔮' : '☀️'));
+      var MODE_ICON = { auto: '🕖', light: '☀️', dark: '🌙', purple: '🔮', fresh: '🌿', warm: '🌸', colorful: '🎨' };
+      if (b) b.textContent = MODE_ICON[state.mode] || '☀️';
       var seg = $('tkSeg');
       if (seg) {
         [].forEach.call(seg.querySelectorAll('button'), function (x) {
