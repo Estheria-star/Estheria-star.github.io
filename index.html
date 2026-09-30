@@ -280,8 +280,9 @@ footer a:hover{text-decoration:underline}
 /* ============================================================
    🗂 作品三大分区（娱乐 / 工具 / 整活）：可折叠 + 错落动画
    ============================================================ */
-.zones{display:flex;flex-direction:column;gap:18px}
-.zone{border:1px solid var(--line);border-radius:22px;background:var(--card);overflow:hidden;box-shadow:var(--sh-sm);transition:border-color .3s ease,box-shadow .3s ease}
+.zones{display:flex;gap:16px;align-items:flex-start}
+.zone{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:22px;background:var(--card);overflow:hidden;box-shadow:var(--sh-sm);transition:flex-grow .55s cubic-bezier(.25,.9,.3,1),border-color .3s ease,box-shadow .3s ease}
+.zone.open{flex-grow:4}
 .zone:hover{box-shadow:var(--sh-lg);border-color:var(--line-2)}
 .zone-head{width:100%;display:flex;align-items:center;gap:15px;padding:17px 20px;border:0;background:transparent;cursor:pointer;font-family:inherit;text-align:left;color:var(--ink);transition:background .25s ease}
 .zone-head:hover{background:var(--tint)}
@@ -302,6 +303,16 @@ footer a:hover{text-decoration:underline}
 .zone-arrow svg{width:18px;height:18px}
 .zone:not(.open) .zone-arrow{transform:rotate(-90deg)}
 .zone.open .zone-arrow{color:var(--accent-deep)}
+/* 收起态：竖排入口卡（图标居中 + 名称） */
+.zone:not(.open) .zone-head{flex-direction:column;align-items:center;text-align:center;gap:11px;padding:26px 14px;transition:none}
+.zone:not(.open) .zone-info{align-items:center;gap:5px}
+.zone:not(.open) .zone-count{margin:0;font-size:11px}
+.zone:not(.open) .zone-arrow{display:none}
+.zone:not(.open) .zone-ico{width:54px;height:54px;border-radius:17px}
+.zone:not(.open) .zone-ico svg{width:25px;height:25px}
+/* 展开瞬间的轻弹入 */
+.zone.open .zone-head{animation:zoneHeadIn .45s cubic-bezier(.2,.85,.3,1.1) both}
+@keyframes zoneHeadIn{from{opacity:.4;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .zone-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .55s cubic-bezier(.25,.9,.3,1)}
 .zone.open .zone-body{grid-template-rows:1fr}
 .zone-inner{overflow:hidden;min-height:0}
@@ -310,7 +321,16 @@ footer a:hover{text-decoration:underline}
 /* 展开时项目依次错落出现 */
 .zone.open .tile{animation:zoneTileIn .55s cubic-bezier(.2,.85,.3,1.1) both;animation-delay:calc(var(--d,0s) + .06s)}
 @keyframes zoneTileIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
-@media (max-width:760px){
+@media (max-width:860px){
+  .zones{flex-direction:column}
+  .zone{width:100%;flex:none}
+  .zone.open{flex-grow:0}
+  .zone:not(.open) .zone-head{flex-direction:row;align-items:center;text-align:left;gap:11px;padding:14px 15px}
+  .zone:not(.open) .zone-info{align-items:flex-start;gap:3px}
+  .zone:not(.open) .zone-count{margin-left:auto;font-size:11px}
+  .zone:not(.open) .zone-arrow{display:grid}
+  .zone:not(.open) .zone-ico{width:38px;height:38px;border-radius:12px}
+  .zone:not(.open) .zone-ico svg{width:18px;height:18px}
   .zone{border-radius:18px}
   .zone-head{padding:14px 15px;gap:11px}
   .zone-ico{width:38px;height:38px;border-radius:12px}
@@ -780,8 +800,8 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
 
     <div class="zones">
 
-      <section class="zone open reveal" data-zone="fun" style="--d:.05s">
-        <button class="zone-head" type="button" aria-expanded="true">
+      <section class="zone reveal" data-zone="fun" style="--d:.05s">
+        <button class="zone-head" type="button" aria-expanded="false">
           <span class="zone-ico zc-fun"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="13" rx="6"/><path d="M7 13h4M9 11v4M15.5 12.5h.01M18 15h.01"/></svg></span>
           <span class="zone-info">
             <span class="zone-name">娱乐</span>
@@ -816,8 +836,8 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
         </div>
       </section>
 
-      <section class="zone open reveal" data-zone="tool" style="--d:.1s">
-        <button class="zone-head" type="button" aria-expanded="true">
+      <section class="zone reveal" data-zone="tool" style="--d:.1s">
+        <button class="zone-head" type="button" aria-expanded="false">
           <span class="zone-ico zc-tool"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a5 5 0 0 0-6.6 6.6L3 18l3 3 5.1-5.1a5 5 0 0 0 6.6-6.6l-3.2 3.2-2.5-.5-.5-2.5z"/></svg></span>
           <span class="zone-info">
             <span class="zone-name">工具</span>
@@ -852,8 +872,8 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
         </div>
       </section>
 
-      <section class="zone open reveal" data-zone="fun2" style="--d:.15s">
-        <button class="zone-head" type="button" aria-expanded="true">
+      <section class="zone reveal" data-zone="fun2" style="--d:.15s">
+        <button class="zone-head" type="button" aria-expanded="false">
           <span class="zone-ico zc-zhenghuo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18 9.5l-4.1 1.9L12 16l-1.9-4.6L6 9.5l4.1-1.9z"/><path d="M18.5 15l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/></svg></span>
           <span class="zone-info">
             <span class="zone-name">整活</span>
@@ -1506,6 +1526,13 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       if (!zone) return;
       var open = zone.classList.toggle('open');
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open) {
+        /* 自动居中：等布局展开后平滑滚到视口中央 */
+        setTimeout(function () {
+          var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          try { zone.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' }); } catch (e) { zone.scrollIntoView(); }
+        }, 800);   /* 等展开动画完全结束再滚动，居中才精准 */
+      }
     });
   });
 })();
