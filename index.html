@@ -1110,6 +1110,9 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       <span>🎵 函数音乐</span><span><em>·</em></span>
       <span>🎭 假加载页</span><span><em>·</em></span>
       <span>🎨 配色实验室</span><span><em>·</em></span>
+      <span>📈 函数拟合</span><span><em>·</em></span>
+      <span>📕 错题本</span><span><em>·</em></span>
+      <span>🩺 今日诊断</span><span><em>·</em></span>
       <span>😏 偶尔整活</span><span><em>·</em></span>
       <span>🌙 startian.top</span><span><em>·</em></span>
     </div>
@@ -1212,7 +1215,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
             <span class="zone-name">工具</span>
             <span class="zone-sub">学习与效率 · 干正事用</span>
           </span>
-          <span class="zone-count">3 个作品</span>
+          <span class="zone-count">5 个作品</span>
           <span class="zone-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
         </button>
         <div class="zone-body">
@@ -1245,6 +1248,24 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
           <span class="cta">去调色 <i>→</i></span>
         </div>
       </a>
+      <a class="tile" style="--d:.20s" data-demo="fit" href="https://startian.top/fit/">
+        <div class="tile-media"><img src="demos/fit.jpg" alt="函数拟合器演示" loading="lazy"></div>
+        <div class="tile-body">
+          <span class="ptag">数学 · 工具</span>
+          <h3>函数拟合器</h3>
+          <p>丢进一堆散点，自动找出最像的函数：线性 / 二次 / 三次 / 指数 / 幂 / 对数六种模型实时比拼 R²，画布点一点数据就重算。</p>
+          <span class="cta">去拟合 <i>→</i></span>
+        </div>
+      </a>
+      <a class="tile flip" style="--d:.26s" data-demo="cuoti" href="https://startian.top/cuoti/">
+        <div class="tile-media"><img src="demos/cuoti.jpg" alt="错题本演示" loading="lazy"></div>
+        <div class="tile-body">
+          <span class="ptag">学习 · 记忆科学</span>
+          <h3>错题本 · 间隔重复</h3>
+          <p>把错题记下来，按遗忘曲线自动排复习：忘了就回炉，记住就拉长间隔——用最少的复习次数，换最牢的记忆。</p>
+          <span class="cta">去记错题 <i>→</i></span>
+        </div>
+      </a>
             </div>
           </div>
         </div>
@@ -1257,7 +1278,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
             <span class="zone-name">整活</span>
             <span class="zone-sub">没啥用但挺逗 · 会心一笑</span>
           </span>
-          <span class="zone-count">2 个作品</span>
+          <span class="zone-count">3 个作品</span>
           <span class="zone-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
         </button>
         <div class="zone-body">
@@ -1279,6 +1300,15 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
           <h3>假加载页</h3>
           <p>一个非常正经的加载页面：进度条卡在 99% 开始跟你唠嗑，聊两句它才肯承认其实早就加载完了。</p>
           <span class="cta">去等一等 <i>→</i></span>
+        </div>
+      </a>
+      <a class="tile" style="--d:.14s" data-demo="report" href="https://startian.top/report/">
+        <div class="tile-media"><img src="demos/report.jpg" alt="今日份诊断报告演示" loading="lazy"></div>
+        <div class="tile-body">
+          <span class="ptag">趣味 · 玄学</span>
+          <h3>今日份诊断报告</h3>
+          <p>给今天的你开一张体检单：精神状态、欧气、发量……七项指标每日不同，还能换变体、存成报告图，纯玄学仅供参考（笑）。</p>
+          <span class="cta">去体检 <i>→</i></span>
         </div>
       </a>
             </div>
@@ -1354,7 +1384,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       </a>
     </div>
     <div class="ach-cross reveal" style="--d:.16s">
-      <div class="acx-head"><span class="acx-title">🏆 跨站成就柜</span><span class="acx-prog">已点亮 <b id="achLit">0</b> / <span id="achTotal">24</span></span></div>
+      <div class="acx-head"><span class="acx-title">🏆 跨站成就柜</span><span class="acx-prog">已点亮 <b id="achLit">0</b> / <span id="achTotal">32</span></span></div>
       <div class="acx-grid" id="achGrid"></div>
       <div class="acx-tip">游玩任意小站会自动点亮 · 记录只存本机（全站共享），不上传任何地方</div>
     </div>
@@ -2144,6 +2174,14 @@ var ACH_DEFS = [
   { id: 'music.play', ico: '🎹', name: '音色实验', desc: '用自定义函数发声' },
   { id: 'site.fake', ico: '🎭', name: '耐心钉子户', desc: '到访假加载页' },
   { id: 'fake.done', ico: '💬', name: '陪着进度条聊完天', desc: '在假加载页等到真相' },
+  { id: 'site.report', ico: '🩺', name: '体检常客', desc: '到访今日份诊断报告' },
+  { id: 'report.save', ico: '📸', name: '晒报告的人', desc: '保存了一张诊断报告' },
+  { id: 'site.fit', ico: '📈', name: '数据侦探', desc: '到访函数拟合器' },
+  { id: 'fit.fit', ico: '🧮', name: '找到最像的那个', desc: '完成一次函数拟合' },
+  { id: 'site.cuoti', ico: '📕', name: '错题整理者', desc: '到访错题本' },
+  { id: 'cuoti.add', ico: '✍️', name: '第一次记错题', desc: '在错题本录入一道题' },
+  { id: 'cuoti.review', ico: '🔁', name: '复习打卡', desc: '在错题本完成一次复习' },
+  { id: 'cuoti.master', ico: '🎓', name: '真的学会了', desc: '让一道错题进入「已掌握」' },
   { id: 'home.starry', ico: '🌌', name: '追星者', desc: '发现了隐藏主题「星夜」' },
   { id: 'home.secret', ico: '🗝', name: '找到秘密的人', desc: '解锁了隐藏分区' },
   { id: 'explorer.all', ico: '🧭', name: '全站探险家', desc: '集齐全部站点足迹' }
@@ -2169,7 +2207,7 @@ renderAch();
 /* 到访主页：解锁 + 全站探险家检查 */
 setTimeout(function () {
   var fresh = STAch.unlock('home.visit', '初次到访', '🏠');
-  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake'];
+  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti'];
   var all = sites.every(function (id) { return STAch.has(id); });
   if (all) STAch.unlock('explorer.all', '全站探险家', '🧭');
   if (fresh || all) renderAch();
@@ -2273,7 +2311,7 @@ function unlockStarry() {
    🗝 隐藏分区：集齐全部站点足迹后出现
    ============================================================ */
 function checkSecretZone() {
-  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake'];
+  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti'];
   var all = sites.every(function (id) { return STAch.has(id); });
   if (!all) return;
   var z = document.querySelector('.secret-zone');
@@ -2289,7 +2327,7 @@ function checkSecretZone() {
   }
 }
 setTimeout(function () {
-  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake'];
+  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti'];
   var all = sites.every(function (id) { return STAch.has(id); });
   if (all) STAch.unlock('explorer.all', '全站探险家', '🧭');
   if (all) renderAch();
