@@ -1428,7 +1428,13 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     function customDark() {
       try { return JSON.parse(localStorage.getItem(CUSTOM_RESOLVED_KEY) || '{}').__dark === '1'; } catch (e) { return false; }
     }
-    window.__geoCustom = { apply: applyCustom, load: loadCustom, resolve: resolveCustom, presets: CUSTOM_PRESETS };
+    /* 自定义主题变量清单：切换离开自定义时必须清除（内联变量优先级最高，否则会盖住其它主题） */
+    var CUSTOM_VARS = ['--bg1', '--bg2', '--card', '--tint', '--line', '--line2', '--ink', '--ink2', '--ink3', '--accent', '--accent-deep', '--glass-nav', '--tk-glow', '--tk-glow2', '--sh-sm', '--sh-lg'];
+    function clearCustomVars() {
+      var root = document.documentElement;
+      CUSTOM_VARS.forEach(function (k) { root.style.removeProperty(k); });
+    }
+    window.__geoCustom = { apply: applyCustom, load: loadCustom, resolve: resolveCustom, clear: clearCustomVars, presets: CUSTOM_PRESETS };
     var NAME = { light: '蓝白 ☀️', dark: '暗红 🌙', purple: '梦幻紫 🔮', fresh: '清新绿 🌿', warm: '温馨粉 🌸', colorful: '缤纷彩 🎨', custom: '自定义 🖌' };
     var state = { mode: 'auto', lightAt: CFG.defaultLightAt, darkAt: CFG.defaultDarkAt, autoPair: 'classic' };
     var current = 'light';
@@ -1491,6 +1497,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     function setThemeInstant(theme) {
       current = theme;
       if (theme === 'custom') { try { applyCustom(loadCustom(), false); } catch (e) {} }
+      else clearCustomVars();   /* 离开自定义主题：清掉内联变量，恢复各主题自身配色 */
       document.documentElement.setAttribute('data-theme', theme);
       setAvatar(theme);
       var m = document.querySelector('meta[name="theme-color"]');
