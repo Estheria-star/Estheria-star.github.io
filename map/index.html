@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="星恬的宇宙地图：13 颗作品星串起整个小站，去过的会亮起来，点一颗星即可前往。startian.top 全站导航">
+<meta name="theme-color" content="#05070f">
+<title>宇宙地图 · startian.top</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{
+    background:radial-gradient(1200px 700px at 50% -180px,#141b38 0%,#0a0f24 45%,#05070f 100%);
+    background-attachment:fixed;
+    color:#e8eeff;font-family:'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+    overflow-x:hidden;
+  }
+  /* —— 星点背景（纯 CSS 平铺，零成本）—— */
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:
+      radial-gradient(1.2px 1.2px at 24px 32px, rgba(255,255,255,.55), transparent),
+      radial-gradient(1px 1px at 86px 128px, rgba(190,214,255,.42), transparent),
+      radial-gradient(1.6px 1.6px at 168px 66px, rgba(255,255,255,.32), transparent),
+      radial-gradient(1px 1px at 244px 188px, rgba(170,196,255,.45), transparent),
+      radial-gradient(1.3px 1.3px at 300px 100px, rgba(255,255,255,.28), transparent);
+    background-size:340px 260px;
+  }
+  /* —— 大光斑 —— */
+  .neb{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0}
+  .neb.a{width:430px;height:430px;left:-130px;top:-90px;background:radial-gradient(circle,#6d28d9,transparent 70%);opacity:.3}
+  .neb.b{width:470px;height:470px;right:-150px;top:110px;background:radial-gradient(circle,#0e7490,transparent 70%);opacity:.26}
+  .neb.c{width:400px;height:400px;left:32%;bottom:-180px;background:radial-gradient(circle,#b45309,transparent 70%);opacity:.16}
+
+  .wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:26px 20px 90px}
+
+  /* —— 头部 —— */
+  header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+  .hd-eyebrow{font-size:11px;letter-spacing:4px;font-weight:800;color:#7f8fc0;margin-bottom:5px}
+  h1{font-size:23px;margin:0 0 3px;letter-spacing:.5px}
+  .sub{font-size:12.5px;color:#8fa0c8;font-weight:600}
+  .hright{margin-left:auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .prog{display:flex;flex-direction:column;gap:5px;min-width:150px}
+  .prog .t{font-size:12.5px;font-weight:700;color:#b9c6e8}
+  .prog .t b{color:#ffd97a;font-size:14px}
+  .prog .bar{height:7px;border-radius:999px;background:rgba(20,28,54,.9);border:1px solid rgba(120,150,220,.25);overflow:hidden}
+  .prog .bar i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#8b5cf6,#38bdf8,#fbbf24);transition:width .7s cubic-bezier(.25,.9,.3,1)}
+  .home{text-decoration:none;font-size:12.5px;font-weight:700;color:#cfe0ff;border:1px solid rgba(130,160,230,.3);border-radius:999px;padding:9px 16px;background:rgba(16,24,48,.7);transition:border-color .2s,transform .2s;white-space:nowrap}
+  .home:hover{border-color:rgba(160,190,255,.7);transform:translateY(-1px)}
+
+  /* —— 全图鉴横幅 —— */
+  .banner{display:none;margin-bottom:14px;padding:13px 20px;border-radius:16px;font-size:14px;font-weight:800;letter-spacing:.5px;
+    background:linear-gradient(100deg,rgba(139,92,246,.22),rgba(56,189,248,.2),rgba(251,191,36,.2));
+    border:1px solid rgba(180,200,255,.35);box-shadow:0 0 34px rgba(120,140,255,.25);animation:bannerGlow 2.6s ease-in-out infinite}
+  .banner.show{display:block}
+  @keyframes bannerGlow{0%,100%{box-shadow:0 0 26px rgba(120,140,255,.22)}50%{box-shadow:0 0 44px rgba(160,180,255,.42)}}
+
+  /* —— 地图舞台 —— */
+  .stage{position:relative;border:1px solid rgba(110,140,220,.22);border-radius:26px;overflow:hidden;
+    background:radial-gradient(900px 520px at 50% 0%,rgba(30,40,80,.55),rgba(10,15,34,.65));
+    box-shadow:0 30px 80px rgba(0,0,0,.5), inset 0 0 60px rgba(60,80,160,.12)}
+  #mapSvg{display:block;width:100%;height:auto}
+
+  /* —— SVG 节点样式 —— */
+  .node{cursor:pointer;text-decoration:none}
+  .node .core{transition:transform .25s cubic-bezier(.3,1.4,.5,1),filter .3s ease;transform-box:fill-box;transform-origin:center}
+  .node:hover .core{transform:scale(1.12)}
+  .node .halo{transform-box:fill-box;transform-origin:center}
+  .node .label{font-size:15px;font-weight:800;fill:#7a86a8;letter-spacing:1px;text-anchor:middle;transition:fill .25s ease;pointer-events:none}
+  .node .ico{font-size:23px;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+  .node .hit{fill:transparent}
+  .node .zline{pointer-events:none}
+
+  /* 未点亮：暗星 */
+  .node:not(.lit) .core{fill:#141a30;stroke:rgba(120,140,200,.38);stroke-width:1.4}
+  .node:not(.lit) .ring{fill:none;stroke:rgba(110,130,190,.3);stroke-width:1;stroke-dasharray:4 6}
+  .node:not(.lit) .ico{opacity:.32;filter:grayscale(1) brightness(.9)}
+  .node:not(.lit):hover .core{stroke:rgba(170,190,255,.75)}
+  .node:not(.lit):hover .label{fill:#c6d2f0}
+
+  /* 点亮：明灯 */
+  .node.lit .core{fill:url(#coreGrad);stroke:none;filter:drop-shadow(0 0 9px var(--c))}
+  .node.lit .halo{fill:none;stroke:var(--c);stroke-width:1.6;opacity:.85;animation:breathe 3.2s ease-in-out infinite}
+  .node.lit .label{fill:#eef4ff;text-shadow:0 0 12px rgba(140,170,255,.6)}
+  .node.lit:hover .halo{stroke-width:2.4}
+  @keyframes breathe{0%,100%{opacity:.4;transform:scale(.94)}50%{opacity:1;transform:scale(1.05)}}
+
+  /* 跃迁 / 闪烁 */
+  .node.jump .core,.node.jump .fx{animation:jumpFlash .55s ease}
+  .node.jump .fx{transform-box:fill-box;transform-origin:center}
+  @keyframes jumpFlash{0%{transform:scale(1)}42%{transform:scale(1.4);filter:brightness(2.2) drop-shadow(0 0 18px var(--c))}100%{transform:scale(1)}}
+  .node.jump .halo{opacity:1;stroke-width:3.2}
+
+  /* 星线 */
+  .link{stroke:rgba(130,150,220,.16);stroke-width:1.2;fill:none;transition:stroke .4s ease}
+  .link.on{stroke-width:2;stroke-opacity:.55}
+  .lane{stroke:rgba(120,140,210,.14);stroke-width:1;stroke-dasharray:3 9;fill:none;animation:laneFlow 26s linear infinite}
+  @keyframes laneFlow{to{stroke-dashoffset:-240}}
+  .zoneGlowText{text-anchor:middle;pointer-events:none}
+  .zname{font-size:20px;font-weight:900;fill:#dfe8ff;letter-spacing:2px}
+  .zsub{font-size:12px;font-weight:700;fill:#8697c4;letter-spacing:1px}
+  .watermark{font-size:15px;font-weight:800;fill:rgba(150,170,230,.14);letter-spacing:6px;text-anchor:middle;pointer-events:none}
+
+  /* —— 工具行 —— */
+  .toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:16px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;font-weight:700;color:#9fb0d8}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .lg-dot{width:12px;height:12px;border-radius:50%;display:inline-block;flex:0 0 auto}
+  .lg-lit{background:linear-gradient(135deg,#8b5cf6,#38bdf8);box-shadow:0 0 8px rgba(139,92,246,.8)}
+  .lg-dim{background:#141a30;border:1.4px dashed rgba(120,140,200,.5)}
+  .lg-line{width:22px;height:0;border-top:2px dashed rgba(130,150,220,.45);display:inline-block}
+  button.rand{
+    margin-left:auto;border:1px solid rgba(140,170,255,.4);border-radius:999px;padding:11px 20px;font-family:inherit;cursor:pointer;
+    font-size:13.5px;font-weight:800;color:#0a0f24;background:linear-gradient(100deg,#ffd97a,#fbbf24);
+    box-shadow:0 6px 0 #8a6a1a,0 14px 30px rgba(251,191,36,.25);transition:transform .15s ease;
+  }
+  button.rand:active{transform:translateY(2px);box-shadow:0 3px 0 #8a6a1a}
+  .tipnote{width:100%;font-size:11.5px;color:#6d7ca8;font-weight:600}
+
+  /* —— 悬停详情卡 —— */
+  .tip{position:fixed;z-index:80;pointer-events:none;opacity:0;transform:translateY(6px);transition:opacity .18s ease,transform .18s ease;
+    background:rgba(14,20,40,.96);border:1px solid rgba(130,160,230,.35);border-radius:14px;padding:12px 15px;max-width:250px;
+    box-shadow:0 18px 44px rgba(0,0,0,.55)}
+  .tip.show{opacity:1;transform:none}
+  .tip b{font-size:14px;letter-spacing:.5px}
+  .tip p{margin:5px 0 7px;font-size:12px;line-height:1.75;color:#a9b6da}
+  .tip .st{font-size:11.5px;font-weight:800}
+  .tip .st.ok{color:#8be9b0}
+  .tip .st.no{color:#8a93b8}
+
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(12px);opacity:0;z-index:90;
+    background:rgba(14,20,40,.96);border:1px solid rgba(130,160,255,.4);border-radius:999px;padding:12px 24px;
+    font-size:13px;font-weight:700;transition:all .3s ease;pointer-events:none;max-width:86vw;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+
+  .fall{position:fixed;top:-20px;z-index:9000;pointer-events:none;width:9px;height:14px;border-radius:2px}
+  @keyframes fall{to{transform:translateY(105vh) rotate(540deg)}}
+
+  @media (max-width:760px){
+    .wrap{padding:18px 12px 80px}
+    h1{font-size:20px}
+    .hright{width:100%;margin-left:0;justify-content:space-between}
+    .toolbar{gap:10px}
+    button.rand{margin-left:0;width:100%}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .node.lit .halo{animation:none}
+    .lane{animation:none}
+    .banner{animation:none}
+    .node .core{transition:none}
+  }
+
+  /* —— 返回主页（全站统一 · 2026-09-29）—— */
+  .wb-home{position:fixed;left:14px;bottom:14px;z-index:9990;display:inline-flex;align-items:center;gap:5px;
+    padding:8px 13px 8px 10px;border-radius:999px;text-decoration:none;
+    background:rgba(17,24,39,.55);color:#fff;font-size:12.5px;font-weight:600;letter-spacing:.3px;
+    -webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);
+    border:1px solid rgba(255,255,255,.14);box-shadow:0 6px 18px rgba(0,0,0,.18);
+    transition:background .2s,transform .2s,box-shadow .2s}
+  .wb-home:hover{background:rgba(17,24,39,.78);transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.26)}
+  .wb-home:active{transform:translateY(0)}
+  .wb-home svg{width:13px;height:13px;flex:0 0 auto}
+  @media (max-width:620px){ .wb-home{left:10px;bottom:10px;padding:7px 11px 7px 9px;font-size:12px} }
+</style>
+</head>
+<body>
+<div class="neb a"></div><div class="neb b"></div><div class="neb c"></div>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="hd-eyebrow">THE STARTIAN UNIVERSE</div>
+      <h1>🗺️ 星恬的宇宙地图</h1>
+      <div class="sub" id="hdSub">13 颗星串起整个小站 · 去过的会亮起来</div>
+    </div>
+    <div class="hright">
+      <div class="prog">
+        <span class="t">已点亮 <b id="litN">0</b> / <span id="litT">13</span></span>
+        <div class="bar"><i id="litBar"></i></div>
+      </div>
+      <a class="home" href="https://startian.top/">← 返回主页</a>
+    </div>
+  </header>
+
+  <div class="banner" id="banner">🎉 宇宙全图鉴达成 —— 13 颗星全部点亮，你就是这个宇宙的常客</div>
+
+  <div class="stage">
+    <svg id="mapSvg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="全站作品星图"></svg>
+  </div>
+
+  <div class="toolbar">
+    <div class="legend">
+      <span><i class="lg-dot lg-lit"></i>已点亮 · 去过的作品</span>
+      <span><i class="lg-dot lg-dim"></i>暗星 · 还没去过</span>
+      <span><i class="lg-line"></i>星域航道</span>
+    </div>
+    <button class="rand" id="btnRandom" type="button">🎲 带我去一颗暗星</button>
+    <div class="tipnote">点任意一颗星即可前往对应作品 · 去过一次它就会亮起来 ✨</div>
+  </div>
+</div>
+
+<div class="tip" id="tip"></div>
+<div class="toast" id="toast"></div>
+
+<!-- 返回主页（全站统一按钮 · 2026-09-29） -->
+<a class="wb-home" href="https://startian.top/" title="返回星恬的小站主页">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>主页</span>
+</a>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============ 🏆 跨站成就 SDK ============ */
+  var STAch = (function () {
+    var KEY = 'st_ach';
+    function readCookie() {
+      var m = document.cookie.match(/(?:^|;\s*)st_ach=([^;]*)/);
+      if (!m) return null;
+      try { return JSON.parse(decodeURIComponent(m[1])) || []; } catch (e) { return null; }
+    }
+    function writeCookie(list) {
+      try {
+        var v = encodeURIComponent(JSON.stringify(list));
+        if (v.length < 3800) document.cookie = 'st_ach=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+      } catch (e) {}
+    }
+    var list = readCookie();
+    if (!list) { try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { list = []; } }
+    if (!Array.isArray(list)) list = [];
+    function save() {
+      try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+      writeCookie(list);
+    }
+    function unlock(id, name, ico) {
+      if (list.indexOf(id) >= 0) return false;
+      list.push(id);
+      save();
+      try {
+        var el = document.createElement('div');
+        el.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9999;background:rgba(20,30,56,.95);color:#fff;border:1px solid rgba(140,170,255,.42);border-radius:999px;padding:12px 22px;font:700 13.5px/1.4 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:86vw';
+        el.textContent = '🏆 成就解锁：' + (ico ? ico + ' ' : '') + (name || id);
+        document.body.appendChild(el);
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        setTimeout(function () {
+          el.style.opacity = '0';
+          el.style.transform = 'translateX(-50%) translateY(16px)';
+          setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+        }, 3200);
+      } catch (e) {}
+      return true;
+    }
+    return { list: function () { return list.slice(); }, has: function (id) { return list.indexOf(id) >= 0; }, unlock: unlock };
+  })();
+  window.STAch = STAch;
+  setTimeout(function () { STAch.unlock('site.map', '星图领航员', '🗺️'); }, 600);
+
+  /* ============================================================
+     📐 布局数据（扩展点！）
+     —— 新增作品：往 SITES 加一行（id=成就id，zone=所属星域）
+     —— 新增星域：往 ZONES 加一条（给出桌面 desk / 移动 mob 的中心与可选半径）
+       节点坐标由环形算法自动排布，无需手填
+     ============================================================ */
+  var ZONES = [
+    { key: 'fun',  name: '娱乐星域', sub: '下棋 · 转着玩',  c1: '#8b5cf6', c2: '#ec4899', c: '#a78bfa',
+      desk: { x: 288, y: 318 }, mob: { x: 210, y: 235 } },
+    { key: 'tool', name: '工具星域', sub: '学习与效率',     c1: '#38bdf8', c2: '#6366f1', c: '#5eb2f6',
+      desk: { x: 634, y: 438 }, mob: { x: 210, y: 568 } },
+    { key: 'fun2', name: '整活星域', sub: '没啥用但挺逗',   c1: '#fbbf24', c2: '#f97316', c: '#fbbf24',
+      desk: { x: 970, y: 246 }, mob: { x: 210, y: 884 } }
+  ];
+  var SITES = [
+    /* 🎮 娱乐星域 */
+    { id: 'site.gomoku',   name: '五子棋',   ico: '⚫', zone: 'fun',  url: 'https://wuziqi.startian.top/', desc: '学习反制版：AI 会记住你的棋风，下一局反制你。' },
+    { id: 'site.tujie',    name: '六边形',   ico: '⬡', zone: 'fun',  url: 'https://startian.top/tujie/',   desc: '无上限展开的六边形几何展示器，转一转挺上头。' },
+    { id: 'site.star',     name: '星空',     ico: '✨', zone: 'fun',  url: 'https://startian.top/star/',    desc: '种子生成独一无二的星空，还能下载当壁纸。' },
+    { id: 'site.life',     name: '生命游戏', ico: '🦠', zone: 'fun',  url: 'https://startian.top/life/',    desc: '撒一把种子看细胞生长，还能让两个物种对撞。' },
+    { id: 'site.music',    name: '函数音乐', ico: '🎵', zone: 'fun',  url: 'https://startian.top/music/',   desc: '把函数画成声波，图形会跟着一起跳。' },
+    /* 🧰 工具星域 */
+    { id: 'site.geometry', name: '几何工坊', ico: '📐', zone: 'tool', url: 'https://geometry.startian.top/', desc: '高中数学几何工作台，AI 读题自动出图。' },
+    { id: 'site.daka',     name: '打卡日程', ico: '🗓️', zone: 'tool', url: 'https://daka.startian.top/',     desc: '给自己定小目标，一键打卡 · 数据只在本地。' },
+    { id: 'site.colorlab', name: '配色实验室', ico: '🎨', zone: 'tool', url: 'https://startian.top/colorlab/', desc: '选两个颜色，实时生成整套 UI 配色并导出 CSS。' },
+    { id: 'site.fit',      name: '函数拟合', ico: '📈', zone: 'tool', url: 'https://startian.top/fit/',      desc: '丢一堆散点进去，自动找出最像的那个函数。' },
+    { id: 'site.cuoti',    name: '错题本',   ico: '📕', zone: 'tool', url: 'https://startian.top/cuoti/',    desc: '按记忆曲线自动排复习，让时间帮你记住。' },
+    /* 🎭 整活星域 */
+    { id: 'site.zhenghuo', name: '整活',     ico: '😏', zone: 'fun2', url: 'https://startian.top/zhenghuo/', desc: '假装正经的「隐私协议」，点同意有惊喜。' },
+    { id: 'site.fake',     name: '假加载页', ico: '🎭', zone: 'fun2', url: 'https://startian.top/fake/',     desc: '进度条卡在 99%，陪你唠两句才肯承认早就好了。' },
+    { id: 'site.report',   name: '诊断报告', ico: '🩺', zone: 'fun2', url: 'https://startian.top/report/',   desc: 'AI 给今天的你开一张体检单，纯玄学仅供参考。' }
+  ];
+
+  /* ============ 运行时状态 ============ */
+  var mob = false;
+  var confettiRuns = 0;
+  var svg = document.getElementById('mapSvg');
+  var MQ = window.matchMedia('(max-width: 760px)');
+  mob = MQ.matches;
+
+  function isLit(s) { return STAch.has(s.id); }
+  function litCount() { return SITES.filter(isLit).length; }
+
+  function zoneLayout(z) {
+    var c = mob ? z.mob : z.desk;
+    var members = SITES.filter(function (s) { return s.zone === z.key; });
+    var n = members.length;
+    /* 环形半径随节点数自动外扩（加作品不挤爆） */
+    var r = mob ? Math.min(128, 74 + n * 8) : Math.min(178, 90 + n * 10);
+    var pts = members.map(function (s, i) {
+      var a = (-90 + i * 360 / n) * Math.PI / 180;
+      return { s: s, x: c.x + r * Math.cos(a), y: c.y + r * Math.sin(a), a: a };
+    });
+    return { c: c, r: r, pts: pts, members: members };
+  }
+
+  /* ============ 渲染 ============ */
+  function render() {
+    mob = MQ.matches;
+    var W = mob ? 420 : 1180;
+    var H = mob ? 1060 : 720;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.classList.toggle('mob', mob);
+
+    var layouts = {};
+    ZONES.forEach(function (z) { layouts[z.key] = zoneLayout(z); });
+
+    var s = '';
+    /* —— defs —— */
+    s += '<defs>';
+    ZONES.forEach(function (z) {
+      s += '<radialGradient id="zg-' + z.key + '"><stop offset="0" stop-color="' + z.c + '" stop-opacity=".16"/><stop offset="1" stop-color="' + z.c + '" stop-opacity="0"/></radialGradient>';
+    });
+    s += '<linearGradient id="coreGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c4b5fd"/><stop offset=".45" stop-color="#8b5cf6"/><stop offset="1" stop-color="#38bdf8"/></linearGradient>';
+    s += '</defs>';
+
+    /* —— 星域光斑 —— */
+    ZONES.forEach(function (z) {
+      var L = layouts[z.key];
+      var gr = mob ? L.r + 96 : L.r + 118;
+      s += '<circle cx="' + L.c.x + '" cy="' + L.c.y + '" r="' + gr + '" fill="url(#zg-' + z.key + ')"/>';
+    });
+
+    /* —— 星域航道（域间虚线）—— */
+    var zs = ZONES.map(function (z) { return layouts[z.key].c; });
+    for (var i = 0; i < zs.length; i++) {
+      var j = (i + 1) % zs.length;
+      s += '<path class="lane" d="M' + zs[i].x + ' ' + zs[i].y + ' Q' + ((zs[i].x + zs[j].x) / 2 + (mob ? 30 : -40)) + ' ' + ((zs[i].y + zs[j].y) / 2 + (mob ? -18 : 26)) + ' ' + zs[j].x + ' ' + zs[j].y + '"/>';
+    }
+
+    /* —— 星域中心标签 —— */
+    ZONES.forEach(function (z) {
+      var L = layouts[z.key];
+      s += '<g class="zoneGlowText" transform="translate(' + L.c.x + ' ' + L.c.y + ')">';
+      s += '<text class="zname" y="-4">' + z.name + '</text>';
+      s += '<text class="zsub" y="20">' + z.sub + '</text>';
+      s += '</g>';
+    });
+
+    /* —— 中央水印（仅桌面）—— */
+    if (!mob) s += '<text class="watermark" x="590" y="648">✦ STARTIAN UNIVERSE ✦</text>';
+
+    /* —— 域内星座线（两节点间连线，两端点亮则变亮）—— */
+    ZONES.forEach(function (z) {
+      var L = layouts[z.key];
+      var pts = L.pts;
+      for (var k = 0; k < pts.length; k++) {
+        var p1 = pts[k], p2 = pts[(k + 1) % pts.length];
+        var on = isLit(p1.s) && isLit(p2.s);
+        s += '<line class="link' + (on ? ' on' : '') + '" x1="' + p1.x + '" y1="' + p1.y + '" x2="' + p2.x + '" y2="' + p2.y + '"' + (on ? ' stroke="' + z.c + '"' : '') + '/>';
+      }
+    });
+
+    /* —— 节点 —— */
+    ZONES.forEach(function (z) {
+      var L = layouts[z.key];
+      var coreR = mob ? 21 : 25;
+      var haloR = coreR + (mob ? 10 : 12);
+      L.pts.forEach(function (p) {
+        var lit = isLit(p.s);
+        s += '<a class="node' + (lit ? ' lit' : '') + '" href="' + p.s.url + '" data-id="' + p.s.id + '" style="--c:' + z.c + '" aria-label="' + p.s.name + (lit ? '（已点亮）' : '（未点亮）') + '">';
+        s += '<g transform="translate(' + p.x + ' ' + p.y + ')">';
+        if (lit) s += '<circle class="halo" r="' + haloR + '"/>';
+        else s += '<circle class="ring" r="' + (coreR + 7) + '"/>';
+        s += '<g class="fx">';
+        s += '<circle class="core" r="' + coreR + '"/>';
+        s += '<text class="ico" y="' + (mob ? 1 : 1) + '">' + p.s.ico + '</text>';
+        s += '</g>';
+        s += '<text class="label" y="' + (coreR + (mob ? 21 : 22)) + '">' + p.s.name + '</text>';
+        s += '<circle class="hit" r="' + (coreR + 21) + '"/>';
+        s += '</g></a>';
+      });
+    });
+
+    svg.innerHTML = s;
+    bindNodes();
+    updateHeader();
+
+    /* 测试钩子：布局几何（供自动化断言） */
+    window.__mapInfo = {
+      mob: mob, W: W, H: H,
+      nodes: [].map.call(svg.querySelectorAll('.node'), function (a) {
+        var g = a.querySelector('g');
+        var m = /translate\(([-\d.]+) ([-\d.]+)\)/.exec(g.getAttribute('transform'));
+        var lb = a.querySelector('.label');
+        return { id: a.getAttribute('data-id'), x: +m[1], y: +m[2], lit: a.classList.contains('lit'),
+          labelBBox: (function(){ var b = lb.getBBox(); return { x: b.x, y: b.y, w: b.width, h: b.height }; })() };
+      })
+    };
+  }
+
+  /* ============ 头部进度 ============ */
+  function updateHeader() {
+    var lit = litCount();
+    document.getElementById('litN').textContent = lit;
+    document.getElementById('litT').textContent = SITES.length;
+    document.getElementById('litBar').style.width = Math.round(lit / SITES.length * 100) + '%';
+    document.getElementById('hdSub').textContent = SITES.length + ' 颗星串起整个小站 · 去过的会亮起来';
+    if (lit >= SITES.length) {
+      document.getElementById('banner').classList.add('show');
+      if (STAch.unlock('map.all', '宇宙全图鉴', '🌌')) { render(); confetti(); }
+    }
+  }
+
+  /* ============ 节点交互 ============ */
+  var tip = document.getElementById('tip');
+  function bindNodes() {
+    [].forEach.call(svg.querySelectorAll('.node'), function (a) {
+      var id = a.getAttribute('data-id');
+      var site = null;
+      for (var i = 0; i < SITES.length; i++) if (SITES[i].id === id) site = SITES[i];
+      var lit = a.classList.contains('lit');
+
+      a.addEventListener('mouseenter', function () {
+        tip.innerHTML = '<b>' + site.ico + ' ' + site.name + '</b><p>' + site.desc + '</p>' +
+          '<span class="st ' + (lit ? 'ok' : 'no') + '">' + (lit ? '✨ 已探索 · 点击重温' : '🌑 尚未点亮 · 现在出发') + '</span>';
+        tip.classList.add('show');
+      });
+      a.addEventListener('mousemove', function (e) {
+        var w = tip.offsetWidth, h = tip.offsetHeight;
+        var x = Math.min(e.clientX + 18, window.innerWidth - w - 10);
+        var y = Math.min(e.clientY + 16, window.innerHeight - h - 10);
+        tip.style.left = Math.max(8, x) + 'px';
+        tip.style.top = Math.max(8, y) + 'px';
+      });
+      a.addEventListener('mouseleave', function () { tip.classList.remove('show'); });
+
+      a.addEventListener('click', function (e) {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || (e.button !== undefined && e.button !== 0)) return; /* 新标签等默认行为 */
+        e.preventDefault();
+        navigateTo(a, site.url);
+      });
+    });
+  }
+
+  function navigateTo(nodeEl, url) {
+    nodeEl.classList.add('jump');
+    if (!isLit({ id: nodeEl.getAttribute('data-id') })) toast('🌑 这一颗还没亮，去点亮它 →');
+    setTimeout(function () { location.href = url; }, 230);
+  }
+
+  /* ============ 🎲 带我去一颗暗星 ============ */
+  document.getElementById('btnRandom').addEventListener('click', function () {
+    var pool = SITES.filter(function (s) { return !isLit(s); });
+    if (!pool.length) { toast('🎉 没有暗星了，全图鉴达成！'); return; }
+    var pick = pool[Math.floor(Math.random() * pool.length)];
+    var el = svg.querySelector('.node[data-id="' + pick.id + '"]');
+    if (!el) return;
+    try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {}
+    el.classList.add('jump');
+    toast('🚀 目标：' + pick.ico + ' ' + pick.name + ' · 出发');
+    setTimeout(function () { location.href = pick.url; }, 1000);
+  });
+
+  /* ============ 工具 ============ */
+  var toastEl = document.getElementById('toast'), toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2300);
+  }
+  function confetti() {
+    confettiRuns++;
+    var cols = ['#8b5cf6', '#38bdf8', '#fbbf24', '#ec4899', '#34d399'];
+    for (var i = 0; i < 80; i++) {
+      var sp = document.createElement('span');
+      sp.className = 'fall';
+      sp.style.left = (Math.random() * 100) + 'vw';
+      sp.style.background = cols[i % cols.length];
+      sp.style.animation = 'fall ' + (1.8 + Math.random() * 1.8) + 's linear ' + (Math.random() * .6) + 's forwards';
+      document.body.appendChild(sp);
+      setTimeout((function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; })(sp), 4600);
+    }
+  }
+
+  /* ============ 响应式重建（防抖 + 三重保险：resize / MQ / RO） ============ */
+  var rt = null;
+  function onOrient() {
+    clearTimeout(rt);
+    rt = setTimeout(function () {
+      if (MQ.matches !== mob) render();   /* 只在跨断点时重建，避免多余重绘 */
+    }, 160);
+  }
+  window.addEventListener('resize', onOrient);
+  window.addEventListener('orientationchange', onOrient);
+  if (MQ.addEventListener) MQ.addEventListener('change', onOrient);
+  else if (MQ.addListener) MQ.addListener(onOrient);
+  if (window.ResizeObserver) {
+    try { new ResizeObserver(onOrient).observe(document.querySelector('.stage')); } catch (e) {}
+  }
+
+  /* 启动 */
+  render();
+
+  /* 测试钩子（不影响页面功能） */
+  window.__mapDbg = {
+    render: render,
+    confetti: confetti,
+    state: function () { return { lit: litCount(), total: SITES.length, mapAll: STAch.has('map.all'), confettiRuns: confettiRuns }; }
+  };
+})();
+</script>
+</body>
+</html>
