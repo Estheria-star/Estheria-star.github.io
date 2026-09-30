@@ -277,6 +277,54 @@ footer a:hover{text-decoration:underline}
 .dock .ddesc{font-size:13px; color:var(--ink2); line-height:1.85}
 .dock .dhint{margin-top:auto; font-size:11.5px; color:#9dbedd; letter-spacing:.5px}
 
+/* ============================================================
+   🗂 作品三大分区（娱乐 / 工具 / 整活）：可折叠 + 错落动画
+   ============================================================ */
+.zones{display:flex;flex-direction:column;gap:18px}
+.zone{border:1px solid var(--line);border-radius:22px;background:var(--card);overflow:hidden;box-shadow:var(--sh-sm);transition:border-color .3s ease,box-shadow .3s ease}
+.zone:hover{box-shadow:var(--sh-lg);border-color:var(--line-2)}
+.zone-head{width:100%;display:flex;align-items:center;gap:15px;padding:17px 20px;border:0;background:transparent;cursor:pointer;font-family:inherit;text-align:left;color:var(--ink);transition:background .25s ease}
+.zone-head:hover{background:var(--tint)}
+.zone-head:active{background:var(--tint)}
+.zone-head:focus-visible{outline:2px solid var(--accent-deep);outline-offset:-3px}
+.zone-ico{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;flex:0 0 auto;color:#fff;transition:transform .35s cubic-bezier(.3,.9,.3,1.3)}
+.zone-ico svg{width:21px;height:21px}
+.zone:hover .zone-ico{transform:scale(1.08) rotate(-4deg)}
+.zone.open .zone-ico{transform:scale(1.04)}
+.zc-fun{background:linear-gradient(145deg,#8b5cf6,#ec4899)}
+.zc-tool{background:linear-gradient(145deg,#0ea5e9,#2563eb)}
+.zc-zhenghuo{background:linear-gradient(145deg,#f59e0b,#ef4444)}
+.zone-info{display:flex;flex-direction:column;gap:3px;min-width:0}
+.zone-name{font-size:16.5px;font-weight:800;letter-spacing:.4px}
+.zone-sub{font-size:12px;color:var(--ink3);font-weight:600}
+.zone-count{font-size:11.5px;font-weight:700;color:var(--ink3);background:var(--tint);border:1px solid var(--line);border-radius:999px;padding:3px 11px;margin-left:auto;white-space:nowrap}
+.zone-arrow{width:26px;height:26px;display:grid;place-items:center;color:var(--ink3);flex:0 0 auto;transition:transform .45s cubic-bezier(.3,.9,.3,1.25),color .25s ease}
+.zone-arrow svg{width:18px;height:18px}
+.zone:not(.open) .zone-arrow{transform:rotate(-90deg)}
+.zone.open .zone-arrow{color:var(--accent-deep)}
+.zone-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .55s cubic-bezier(.25,.9,.3,1)}
+.zone.open .zone-body{grid-template-rows:1fr}
+.zone-inner{overflow:hidden;min-height:0}
+.zone .tiles{padding:2px 18px 20px;transition:opacity .34s ease,transform .45s ease}
+.zone:not(.open) .tiles{opacity:0;transform:translateY(-8px)}
+/* 展开时项目依次错落出现 */
+.zone.open .tile{animation:zoneTileIn .55s cubic-bezier(.2,.85,.3,1.1) both;animation-delay:calc(var(--d,0s) + .06s)}
+@keyframes zoneTileIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+@media (max-width:760px){
+  .zone{border-radius:18px}
+  .zone-head{padding:14px 15px;gap:11px}
+  .zone-ico{width:38px;height:38px;border-radius:12px}
+  .zone-ico svg{width:18px;height:18px}
+  .zone-name{font-size:15px}
+  .zone-sub{display:none}
+  .zone-count{font-size:11px;padding:2px 9px}
+  .zone .tiles{padding:0 12px 14px}
+}
+@media (prefers-reduced-motion: reduce){
+  .zone-body,.zone .tiles,.zone-arrow,.zone-ico{transition:none !important}
+  .zone.open .tile{animation:none !important}
+}
+
 /* ================= 🎨 THEMEKIT：主题样式（可复用模块）================= */
 .brand-sub{color:#9dbedd;font-weight:700}
 .tk-btn{
@@ -730,8 +778,22 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     </a>
     ============================================================ -->
 
-    <div class="tiles">
-      <a class="tile reveal" style="--d:.05s" data-demo="wuziqi" href="https://wuziqi.startian.top/">
+    <div class="zones">
+
+      <section class="zone open reveal" data-zone="fun" style="--d:.05s">
+        <button class="zone-head" type="button" aria-expanded="true">
+          <span class="zone-ico zc-fun"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="13" rx="6"/><path d="M7 13h4M9 11v4M15.5 12.5h.01M18 15h.01"/></svg></span>
+          <span class="zone-info">
+            <span class="zone-name">娱乐</span>
+            <span class="zone-sub">下棋、转转玩的 · 放松向</span>
+          </span>
+          <span class="zone-count">2 个作品</span>
+          <span class="zone-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+        </button>
+        <div class="zone-body">
+          <div class="zone-inner">
+            <div class="tiles">
+      <a class="tile" style="--d:.02s" data-demo="wuziqi" href="https://wuziqi.startian.top/">
         <div class="tile-media"><img src="demos/wuziqi.jpg" alt="五子棋演示" loading="lazy"></div>
         <div class="tile-body">
           <span class="ptag">游戏 · AI</span>
@@ -740,38 +802,43 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
           <span class="cta">来一局 <i>→</i></span>
         </div>
       </a>
-
-      <a class="tile flip reveal" style="--d:.1s" data-demo="geometry" href="https://geometry.startian.top/">
-        <div class="tile-media"><img src="demos/geometry.jpg" alt="几何工坊演示" loading="lazy"></div>
-        <div class="tile-body">
-          <span class="ptag">教学 · 工具</span>
-          <h3>几何工坊 · 数学工作台</h3>
-          <p>面向高中数学的几何教学工作台：平面 / 立体双模式，函数实时绘制、向量关系自动判定、面积体积二面角一键求解。</p>
-          <span class="cta">去作图 <i>→</i></span>
-        </div>
-      </a>
-
-      <a class="tile reveal" style="--d:.15s" data-demo="tujie" href="https://startian.top/tujie/">
+      <a class="tile flip" style="--d:.08s" data-demo="tujie" href="https://startian.top/tujie/">
         <div class="tile-media"><img src="demos/tujie.jpg" alt="六边形维度展示器演示" loading="lazy"></div>
         <div class="tile-body">
-          <span class="ptag">可视化</span>
+          <span class="ptag">可视化 · 解压</span>
           <h3>六边形维度展示器</h3>
           <p>无上限展开的六边形几何展示器：多层级嵌套、旋转与配色实验，随手转一转就挺上头。</p>
           <span class="cta">玩一下 <i>→</i></span>
         </div>
       </a>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <a class="tile flip reveal" style="--d:.2s" data-demo="zhenghuo" href="https://startian.top/zhenghuo/">
-        <div class="tile-media"><img src="demos/zhenghuo.jpg" alt="整活演示" loading="lazy"></div>
+      <section class="zone open reveal" data-zone="tool" style="--d:.1s">
+        <button class="zone-head" type="button" aria-expanded="true">
+          <span class="zone-ico zc-tool"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a5 5 0 0 0-6.6 6.6L3 18l3 3 5.1-5.1a5 5 0 0 0 6.6-6.6l-3.2 3.2-2.5-.5-.5-2.5z"/></svg></span>
+          <span class="zone-info">
+            <span class="zone-name">工具</span>
+            <span class="zone-sub">学习与效率 · 干正事用</span>
+          </span>
+          <span class="zone-count">2 个作品</span>
+          <span class="zone-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+        </button>
+        <div class="zone-body">
+          <div class="zone-inner">
+            <div class="tiles">
+      <a class="tile" style="--d:.02s" data-demo="geometry" href="https://geometry.startian.top/">
+        <div class="tile-media"><img src="demos/geometry.jpg" alt="几何工坊演示" loading="lazy"></div>
         <div class="tile-body">
-          <span class="ptag">趣味</span>
-          <h3>整活 · 隐私协议</h3>
-          <p>伪装成「服务协议与隐私政策」的整活小页面：郑重其事地点下「同意并继续」，就会收获一点小小的惊喜（笑）。</p>
-          <span class="cta">点一下 <i>→</i></span>
+          <span class="ptag">教学 · AI 出图</span>
+          <h3>几何工坊 · 数学工作台</h3>
+          <p>面向高中数学的几何教学工作台：平面 / 立体双模式，函数实时绘制、向量关系自动判定、面积体积二面角一键求解，还能让 AI 读题自动出图。</p>
+          <span class="cta">去作图 <i>→</i></span>
         </div>
       </a>
-
-      <a class="tile reveal" style="--d:.25s" data-demo="daka" href="https://daka.startian.top/">
+      <a class="tile flip" style="--d:.08s" data-demo="daka" href="https://daka.startian.top/">
         <div class="tile-media"><img src="demos/daka.jpg" alt="打卡日程表演示" loading="lazy"></div>
         <div class="tile-body">
           <span class="ptag">效率 · 工具</span>
@@ -780,6 +847,38 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
           <span class="cta">来打卡 <i>→</i></span>
         </div>
       </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="zone open reveal" data-zone="fun2" style="--d:.15s">
+        <button class="zone-head" type="button" aria-expanded="true">
+          <span class="zone-ico zc-zhenghuo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18 9.5l-4.1 1.9L12 16l-1.9-4.6L6 9.5l4.1-1.9z"/><path d="M18.5 15l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/></svg></span>
+          <span class="zone-info">
+            <span class="zone-name">整活</span>
+            <span class="zone-sub">没啥用但挺逗 · 会心一笑</span>
+          </span>
+          <span class="zone-count">1 个作品</span>
+          <span class="zone-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+        </button>
+        <div class="zone-body">
+          <div class="zone-inner">
+            <div class="tiles">
+      <a class="tile" style="--d:.02s" data-demo="zhenghuo" href="https://startian.top/zhenghuo/">
+        <div class="tile-media"><img src="demos/zhenghuo.jpg" alt="整活演示" loading="lazy"></div>
+        <div class="tile-body">
+          <span class="ptag">趣味 · 彩蛋</span>
+          <h3>整活 · 隐私协议</h3>
+          <p>伪装成「服务协议与隐私政策」的整活小页面：郑重其事地点下「同意并继续」，就会收获一点小小的惊喜（笑）。</p>
+          <span class="cta">点一下 <i>→</i></span>
+        </div>
+      </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </div>
   </section>
 
@@ -1395,6 +1494,20 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
   })();
   window.ThemeKit = ThemeKit;   // 对外暴露：其他项目可按同款方式接入
   /* ================= /THEMEKIT ================= */
+})();
+</script>
+<script>
+/* 🗂 作品分区：展开 / 收起 + 错落动画（错落动画由 .open 类切换自动重播） */
+(function () {
+  var heads = document.querySelectorAll('.zone-head');
+  [].forEach.call(heads, function (btn) {
+    btn.addEventListener('click', function () {
+      var zone = btn.closest('.zone');
+      if (!zone) return;
+      var open = zone.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  });
 })();
 </script>
 </body>
