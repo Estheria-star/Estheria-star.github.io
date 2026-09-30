@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="配色实验室：选两色，实时预览整套 UI，一键导出 CSS 变量。startian.top 出品">
+<meta name="theme-color" content="#eef8ff">
+<title>配色实验室 · startian.top</title>
+<style>
+  :root{
+    --bg1:#eef8ff; --bg2:#d9edff; --card:#ffffff; --tint:#f2f9ff;
+    --line:#c9e3f5; --line2:#dceefb;
+    --ink:#153046; --ink2:#3f6485; --ink3:#7195b3;
+    --accent:#3f7fd6; --accent-deep:#245ea8;
+    --glass-nav:rgba(250,253,255,.82);
+    --sh-sm:0 1px 2px rgba(20,50,80,.06), 0 10px 28px rgba(30,80,130,.1);
+    --sh-lg:0 2px 4px rgba(20,50,80,.08), 0 24px 50px rgba(30,80,130,.14);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;min-height:100vh;font-family:'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+    color:var(--ink);
+    background:radial-gradient(1400px 700px at 50% -120px, var(--bg2) 0%, var(--bg1) 45%, var(--bg1) 100%);
+    transition:background .3s ease,color .2s ease;
+  }
+  header{
+    position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:14px;
+    padding:14px 22px;background:var(--glass-nav);
+    -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  header h1{font-size:17px;margin:0;letter-spacing:.5px}
+  header .sub{font-size:12px;color:var(--ink3);font-weight:600}
+  .back{
+    margin-left:auto;text-decoration:none;font-size:12.5px;font-weight:700;color:var(--accent-deep);
+    border:1px solid var(--line);border-radius:999px;padding:7px 14px;background:var(--card);
+    transition:border-color .2s ease,transform .2s ease;
+  }
+  .back:hover{border-color:var(--accent);transform:translateY(-1px)}
+  main{
+    max-width:1180px;margin:0 auto;padding:26px 22px 60px;
+    display:grid;grid-template-columns:300px 1fr;gap:22px;align-items:start;
+  }
+  @media (max-width:900px){ main{grid-template-columns:1fr} }
+  .panel{
+    background:var(--card);border:1px solid var(--line);border-radius:20px;
+    box-shadow:var(--sh-sm);padding:18px;transition:background .3s ease,border-color .3s ease;
+  }
+  .panel h2{font-size:13px;letter-spacing:1px;color:var(--ink3);margin:0 0 14px;font-weight:800}
+  .clr-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .clr-row label{flex:1;font-size:13px;font-weight:700;color:var(--ink2)}
+  .clr-row input[type=color]{
+    width:52px;height:34px;padding:0;border:1.5px solid var(--line);border-radius:10px;
+    background:var(--card);cursor:pointer;
+  }
+  .clr-row input[type=color]::-webkit-color-swatch-wrapper{padding:3px}
+  .clr-row input[type=color]::-webkit-color-swatch{border:0;border-radius:6px}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:7px;
+    border:0;border-radius:12px;padding:11px 14px;font-size:13px;font-weight:800;
+    font-family:inherit;cursor:pointer;transition:transform .15s ease,box-shadow .2s ease,background .2s ease;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn-p{
+    flex:1;color:#fff;
+    background:linear-gradient(180deg,var(--accent),var(--accent-deep));
+    box-shadow:0 4px 0 rgba(0,0,0,.22),0 12px 22px rgba(0,0,0,.18);
+  }
+  .btn-g{
+    flex:1;color:var(--accent-deep);background:var(--tint);border:1.5px solid var(--line);
+  }
+  .btn-g:hover{border-color:var(--accent)}
+  .btn-row{display:flex;gap:10px;margin-top:4px}
+  .tip{font-size:11.5px;line-height:1.7;color:var(--ink3);margin-top:12px}
+  /* —— 预览样板间 —— */
+  .pv-nav{
+    display:flex;align-items:center;gap:12px;padding:12px 16px;
+    background:var(--glass-nav);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;
+  }
+  .pv-logo{width:30px;height:30px;border-radius:50%;background:linear-gradient(150deg,var(--accent),var(--accent-deep))}
+  .pv-brand{font-size:14px;font-weight:800}
+  .pv-nav a{margin-left:auto;font-size:12px;font-weight:700;color:var(--ink2);text-decoration:none;padding:6px 10px;border-radius:9px}
+  .pv-nav a:hover{color:var(--accent-deep);background:var(--tint)}
+  .pv-body{border:1px solid var(--line);border-radius:0 0 20px 20px;background:var(--bg1);padding:24px 20px;display:flex;flex-direction:column;gap:18px}
+  .pv-eyebrow{font-size:11px;font-weight:800;letter-spacing:2px;color:var(--ink3)}
+  .pv-h1{
+    margin:6px 0 0;font-size:30px;font-weight:900;letter-spacing:.5px;line-height:1.25;
+    background:linear-gradient(110deg,var(--ink) 20%,var(--accent) 45%,var(--accent-deep) 55%,var(--ink) 75%);
+    background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .pv-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:620px){ .pv-cards{grid-template-columns:1fr} }
+  .pv-card{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;
+    box-shadow:var(--sh-sm);transition:border-color .2s ease,transform .2s ease;
+  }
+  .pv-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .pv-tag{
+    display:inline-block;font-size:10.5px;font-weight:800;color:var(--accent-deep);
+    background:var(--tint);border:1px solid var(--line);border-radius:999px;padding:2px 9px;margin-bottom:8px;
+  }
+  .pv-card h3{margin:0 0 6px;font-size:14.5px}
+  .pv-card p{margin:0;font-size:12px;line-height:1.65;color:var(--ink2)}
+  .pv-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .pv-input{
+    flex:1;min-width:140px;background:var(--card);border:1.5px solid var(--line);border-radius:11px;
+    padding:10px 12px;font-size:13px;color:var(--ink);outline:none;font-family:inherit;
+  }
+  .pv-input:focus{border-color:var(--accent)}
+  .pv-chip{font-size:11.5px;font-weight:700;background:var(--tint);border:1px solid var(--line);border-radius:999px;padding:5px 12px;color:var(--ink2)}
+  /* —— 导出 —— */
+  #cssOut{
+    margin:0;padding:14px;border-radius:14px;background:var(--tint);border:1px solid var(--line);
+    font-family:ui-monospace,Consolas,monospace;font-size:12px;line-height:1.8;color:var(--ink);
+    overflow:auto;max-height:300px;white-space:pre;
+  }
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);opacity:0;
+    background:var(--glass-nav);border:1px solid var(--line);border-radius:999px;
+    padding:10px 20px;font-size:13px;font-weight:700;color:var(--ink);box-shadow:var(--sh-lg);
+    transition:opacity .3s ease,transform .3s ease;pointer-events:none;z-index:99;
+    -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎨 配色实验室</h1>
+  <span class="sub">选两色 · 实时预览 · 导出 CSS 变量</span>
+  <a class="back" href="https://startian.top/">← 返回主页</a>
+</header>
+<main>
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <section class="panel">
+      <h2>调色盘</h2>
+      <div class="clr-row"><label>底色（背景）</label><input type="color" id="cBg" value="#eef8ff"></div>
+      <div class="clr-row"><label>主色（点缀）</label><input type="color" id="cAc" value="#3f7fd6"></div>
+      <div class="btn-row">
+        <button class="btn btn-p" id="btnRand" type="button">🎲 随机灵感</button>
+        <button class="btn btn-g" id="btnReset" type="button">↺ 重置</button>
+      </div>
+      <p class="tip">文字黑白会根据底色明暗自动判定；卡片、线条、按钮、阴影、玻璃导航全部由这两色派生。深色底也能玩。</p>
+    </section>
+    <section class="panel">
+      <h2>导出</h2>
+      <div class="btn-row" style="margin-bottom:12px">
+        <button class="btn btn-p" id="btnCopy" type="button">复制 CSS</button>
+        <button class="btn btn-g" id="btnDl" type="button">下载 .css</button>
+      </div>
+      <pre id="cssOut"></pre>
+    </section>
+  </div>
+
+  <section class="panel" style="padding:0;overflow:hidden">
+    <div class="pv-nav">
+      <div class="pv-logo"></div>
+      <span class="pv-brand">样板间 · 你的配色长这样</span>
+      <a href="javascript:void(0)">首页</a>
+    </div>
+    <div class="pv-body">
+      <div>
+        <div class="pv-eyebrow">DEMO PREVIEW</div>
+        <div class="pv-h1">这是大标题的样子</div>
+      </div>
+      <div class="pv-cards">
+        <div class="pv-card">
+          <span class="pv-tag">卡片标签</span>
+          <h3>一张小卡片</h3>
+          <p>正文文字的颜色、卡片背景、边框与阴影，都从你的两个颜色推算出来，改一下底色试试。</p>
+        </div>
+        <div class="pv-card">
+          <span class="pv-tag">另一个标签</span>
+          <h3>再加一张</h3>
+          <p>悬停卡片、聚焦输入框都会有主色反馈——这就是导出后在项目里用的效果。</p>
+        </div>
+      </div>
+      <div class="pv-row">
+        <input class="pv-input" placeholder="输入框试试聚焦效果…">
+        <span class="pv-chip">标签胶囊</span>
+        <span class="pv-chip">✏️ 小徽章</span>
+      </div>
+      <div class="pv-row">
+        <button class="btn btn-p" style="flex:0 0 auto;min-width:130px" type="button">主按钮</button>
+        <button class="btn btn-g" style="flex:0 0 auto;min-width:110px" type="button">次按钮</button>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+/* ============================================================
+   🏆 跨站成就 SDK（startian.top 全站共享；cookie + localStorage 兜底）
+   ============================================================ */
+var STAch = (function () {
+  var KEY = 'st_ach';
+  function readCookie() {
+    var m = document.cookie.match(/(?:^|;\s*)st_ach=([^;]*)/);
+    if (!m) return null;
+    try { return JSON.parse(decodeURIComponent(m[1])) || []; } catch (e) { return null; }
+  }
+  function writeCookie(list) {
+    try {
+      var v = encodeURIComponent(JSON.stringify(list));
+      if (v.length < 3800) document.cookie = 'st_ach=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+    } catch (e) {}
+  }
+  var list = readCookie();
+  if (!list) { try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { list = []; } }
+  if (!Array.isArray(list)) list = [];
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+    writeCookie(list);
+  }
+  function unlock(id, name, ico) {
+    if (list.indexOf(id) >= 0) return false;
+    list.push(id);
+    save();
+    try {
+      var el = document.createElement('div');
+      el.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9999;background:rgba(22,26,48,.94);color:#fff;border:1px solid rgba(140,170,255,.42);border-radius:999px;padding:12px 22px;font:700 13.5px/1.4 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:86vw';
+      el.textContent = '🏆 成就解锁：' + (ico ? ico + ' ' : '') + (name || id);
+      document.body.appendChild(el);
+      requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+      setTimeout(function () {
+        el.style.opacity = '0';
+        el.style.transform = 'translateX(-50%) translateY(16px)';
+        setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+      }, 3200);
+    } catch (e) {}
+    return true;
+  }
+  return { list: function () { return list.slice(); }, has: function (id) { return list.indexOf(id) >= 0; }, unlock: unlock };
+})();
+window.STAch = STAch;
+setTimeout(function () { STAch.unlock('site.colorlab', '调色师', '🎨'); }, 600);
+
+  /* ===== 颜色工具（与主页 ThemeKit 同款算法） ===== */
+  function hex2rgb(h) {
+    h = String(h).replace('#', '');
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    var n = parseInt(h, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function rgb2hex(r) {
+    return '#' + r.map(function (v) {
+      var x = Math.round(Math.max(0, Math.min(255, v))).toString(16);
+      return x.length < 2 ? '0' + x : x;
+    }).join('');
+  }
+  function mixc(a, b, t) {
+    var A = hex2rgb(a), B = hex2rgb(b);
+    return rgb2hex(A.map(function (v, i) { return v + (B[i] - v) * t; }));
+  }
+  function lumc(hex) { var r = hex2rgb(hex); return (0.299 * r[0] + 0.587 * r[1] + 0.114 * r[2]) / 255; }
+  function rgbaStr(hex, a) { var r = hex2rgb(hex); return 'rgba(' + r[0] + ',' + r[1] + ',' + r[2] + ',' + a + ')'; }
+
+  function resolve(bg, ac) {
+    var dark = lumc(bg) < 0.45;
+    var ink = dark ? mixc(bg, '#ffffff', 0.92) : mixc(bg, '#000000', 0.88);
+    var ink2 = dark ? mixc(bg, '#ffffff', 0.66) : mixc(bg, '#000000', 0.58);
+    var ink3 = dark ? mixc(bg, '#ffffff', 0.44) : mixc(bg, '#000000', 0.4);
+    var card = dark ? mixc(bg, '#ffffff', 0.07) : mixc(bg, '#ffffff', 0.85);
+    var tint = dark ? mixc(bg, '#ffffff', 0.13) : mixc(bg, '#ffffff', 0.55);
+    var line = dark ? mixc(bg, '#ffffff', 0.22) : mixc(bg, '#000000', 0.14);
+    var line2 = dark ? mixc(bg, '#ffffff', 0.15) : mixc(bg, '#000000', 0.09);
+    var adeep = dark ? mixc(ac, '#ffffff', 0.25) : mixc(ac, '#000000', 0.28);
+    return {
+      '--bg1': bg, '--bg2': mixc(bg, adeep, dark ? 0.14 : 0.08),
+      '--card': card, '--tint': tint, '--line': line, '--line2': line2,
+      '--ink': ink, '--ink2': ink2, '--ink3': ink3,
+      '--accent': ac, '--accent-deep': adeep,
+      '--glass-nav': rgbaStr(mixc(bg, '#ffffff', dark ? 0.06 : 0.72), 0.82),
+      '--sh-sm': '0 1px 2px rgba(0,0,0,' + (dark ? 0.4 : 0.05) + '), 0 10px 28px rgba(0,0,0,' + (dark ? 0.45 : 0.1) + ')',
+      '--sh-lg': '0 2px 4px rgba(0,0,0,' + (dark ? 0.5 : 0.08) + '), 0 24px 50px rgba(0,0,0,' + (dark ? 0.55 : 0.14) + ')',
+      '__dark': dark
+    };
+  }
+
+  var PRESETS = [
+    ['#eef8ff', '#3f7fd6'], ['#fdf2f8', '#db2777'], ['#f0fdf4', '#16a34a'],
+    ['#fefce8', '#ca8a04'], ['#faf5ff', '#9333ea'], ['#fff7ed', '#ea580c'],
+    ['#161226', '#a78bfa'], ['#0f172a', '#38bdf8'], ['#1c1917', '#f59e0b'],
+    ['#0d1f1a', '#2dd4bf'], ['#1a0f14', '#fb7185'], ['#111827', '#4ade80']
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var root = document.documentElement;
+  var out = $('cssOut');
+
+  function apply(bg, ac) {
+    var rv = resolve(bg, ac);
+    Object.keys(rv).forEach(function (k) { if (k !== '__dark') root.style.setProperty(k, rv[k]); });
+    /* 导出文本 */
+    var lines = [':root {'];
+    Object.keys(rv).forEach(function (k) {
+      if (k === '__dark') return;
+      lines.push('  ' + k + ': ' + rv[k] + ';');
+    });
+    lines.push('}');
+    out.textContent = lines.join('\n');
+    /* 主题色/标题 */
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', bg);
+    document.title = '配色实验室 · ' + bg + ' / ' + ac + ' · startian.top';
+  }
+
+  $('cBg').addEventListener('input', function () { apply(this.value, $('cAc').value); });
+  $('cAc').addEventListener('input', function () { apply($('cBg').value, this.value); });
+  $('btnRand').addEventListener('click', function () {
+    var p = PRESETS[Math.floor(Math.random() * PRESETS.length)];
+    $('cBg').value = p[0]; $('cAc').value = p[1];
+    apply(p[0], p[1]);
+    toast('🎲 ' + p[0] + ' / ' + p[1]);
+  });
+  $('btnReset').addEventListener('click', function () {
+    $('cBg').value = '#eef8ff'; $('cAc').value = '#3f7fd6';
+    apply('#eef8ff', '#3f7fd6');
+  });
+  $('btnCopy').addEventListener('click', function () {
+    var text = out.textContent;
+    function done() { toast('✓ 已复制 CSS 变量'); try { STAch.unlock('colorlab.export', '配色输出', '📤'); } catch (e) {} }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallback(); });
+    } else fallback();
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { toast('复制失败，请手动选择代码块'); }
+      document.body.removeChild(ta);
+    }
+  });
+  $('btnDl').addEventListener('click', function () {
+    var blob = new Blob(['/* 配色实验室 · startian.top 导出\n * 用法：把这段放进 :root{} 或 html[data-theme="你的主题名"]\n */\n' + out.textContent + '\n'], { type: 'text/css' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'palette-' + $('cBg').value.replace('#', '') + '-' + $('cAc').value.replace('#', '') + '.css';
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
+    toast('⬇️ 已下载 CSS 文件');
+    try { STAch.unlock('colorlab.export', '配色输出', '📤'); } catch (e) {}
+  });
+
+  var toastEl = $('toast'), toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2200);
+  }
+
+  /* 初始：从 URL 参数恢复配色（分享友好） */
+  var q = new URLSearchParams(location.search);
+  var initBg = q.get('bg') || '#eef8ff', initAc = q.get('ac') || '#3f7fd6';
+  if (/^#?[0-9a-fA-F]{6}$/.test(initBg.replace('#', ''))) initBg = '#' + initBg.replace('#', '');
+  if (/^#?[0-9a-fA-F]{6}$/.test(initAc.replace('#', ''))) initAc = '#' + initAc.replace('#', '');
+  $('cBg').value = initBg; $('cAc').value = initAc;
+  apply(initBg, initAc);
+})();
+</script>
+</body>
+</html>
