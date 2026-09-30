@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<script>document.documentElement.classList.add('js');(function(){try{var p=JSON.parse(localStorage.getItem('startian_theme_v1')||'{}');var m=p.mode||'auto',t=m;if(m==='auto'){var n=new Date(),x=n.getHours()*60+n.getMinutes();var l=((p.lightAt||'07:00')+'').split(':'),d=((p.darkAt||'19:00')+'').split(':');var lm=(+l[0])*60+(+l[1]||0),dm=(+d[0])*60+(+d[1]||0);t=(lm<dm)?((x>=lm&&x<dm)?'light':'dark'):((x>=lm||x<dm)?'light':'dark');if((p.autoPair||'classic')==='dreamy'){t=(t==='light')?'fresh':'purple';}}document.documentElement.setAttribute('data-theme',t);var avm={dark:'avatar-dark.jpg',purple:'avatar-purple.jpg',fresh:'avatar-fresh.jpg',warm:'avatar-warm.jpg',colorful:'avatar-colorful.jpg'};var avp=avm[t]||'';if(avp){var ln=document.createElement('link');ln.rel='preload';ln.as='image';ln.href=avp;document.head.appendChild(ln);}}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
+<script>document.documentElement.classList.add('js');(function(){try{var p=JSON.parse(localStorage.getItem('startian_theme_v1')||'{}');var m=p.mode||'auto',t=m;if(m==='auto'){var n=new Date(),x=n.getHours()*60+n.getMinutes();var l=((p.lightAt||'07:00')+'').split(':'),d=((p.darkAt||'19:00')+'').split(':');var lm=(+l[0])*60+(+l[1]||0),dm=(+d[0])*60+(+d[1]||0);t=(lm<dm)?((x>=lm&&x<dm)?'light':'dark'):((x>=lm||x<dm)?'light':'dark');var pr=p.autoPair||'classic';if(pr==='dreamy'){t=(t==='light')?'fresh':'purple';}else if(pr==='pink'){t=(t==='light')?'warm':'colorful';}}document.documentElement.setAttribute('data-theme',t);if(t==='custom'){try{var rc=JSON.parse(localStorage.getItem('startian_custom_resolved_v1')||'null');if(rc){for(var ck in rc){if(ck!=='__dark'&&typeof rc[ck]==='string')document.documentElement.style.setProperty(ck,rc[ck]);}}}catch(e){}}var avm={dark:'avatar-dark.jpg',purple:'avatar-purple.jpg',fresh:'avatar-fresh.jpg',warm:'avatar-warm.jpg',colorful:'avatar-colorful.jpg'};var avp=avm[t]||'';if(avp){var ln=document.createElement('link');ln.rel='preload';ln.as='image';ln.href=avp;document.head.appendChild(ln);}}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>星恬的小站 · startian.top</title>
 <meta name="description" content="星恬的小站 —— 下棋、画几何、捣鼓 AI 小玩意。五子棋、几何工坊与更多作品在此。">
@@ -381,6 +381,17 @@ footer a:hover{text-decoration:underline}
   font-size:13px;font-weight:700;color:var(--ink);background:#fbfdff;outline:none;
 }
 .tk-times input:focus{border-color:#8fc0ec}
+/* 🖌 自定义调色区 */
+.tk-custom{display:none;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.tk-custom.show{display:block;animation:tkCustomIn .35s cubic-bezier(.2,.85,.3,1.1) both}
+@keyframes tkCustomIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.tk-custom-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.tk-custom-row label{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:700;color:var(--ink2);cursor:pointer;flex:1}
+.tk-custom-row input[type="color"]{width:38px;height:26px;padding:0;border:1.5px solid var(--line);border-radius:8px;background:var(--card);cursor:pointer}
+.tk-custom-row input[type="color"]::-webkit-color-swatch-wrapper{padding:2px}
+.tk-custom-row input[type="color"]::-webkit-color-swatch{border:0;border-radius:5px}
+.tk-custom-tip{font-size:10.5px;color:var(--ink3);line-height:1.6;margin-top:2px}
+.tk-seg-2 button.tk-pair-wide{grid-column:1 / -1}
 .tk-p-hint{font-size:11px;color:var(--ink3);margin-top:10px;line-height:1.7}
 
 /* —— 暗黑 + 酒红/玫瑰红 —— */
@@ -709,6 +720,62 @@ footer a:hover{text-decoration:underline}
 [data-theme="colorful"] .dock .dhint{color:#8f8fc0}
 [data-theme="colorful"] .toast{background:rgba(45,45,94,.96)}
 
+/* —— 🖌 自定义主题：所有颜色由 JS 生成的变量驱动 —— */
+[data-theme="custom"] body{background:radial-gradient(1400px 700px at 50% -120px, var(--bg2) 0%, var(--bg1) 45%, var(--bg1) 100%)}
+[data-theme="custom"] ::selection{background:var(--tint)}
+[data-theme="custom"] .loadbar{background:linear-gradient(90deg,var(--accent),var(--accent-deep))}
+[data-theme="custom"] .nav{background:var(--glass-nav);border-bottom-color:var(--line)}
+[data-theme="custom"] .nav.scrolled{background:var(--glass-nav)}
+[data-theme="custom"] .brand-sub{color:var(--ink3)}
+[data-theme="custom"] .brand img{box-shadow:0 0 0 1.5px var(--card),0 0 0 2.5px var(--line)}
+[data-theme="custom"] .nav-links a{color:var(--ink2)}
+[data-theme="custom"] .nav-links a:hover{color:var(--accent-deep);background:var(--tint)}
+[data-theme="custom"] .tk-btn{background:var(--card)}
+[data-theme="custom"] .tk-btn:hover{border-color:var(--accent)}
+[data-theme="custom"] .tk-panel{background:var(--glass-nav);border-color:var(--line)}
+[data-theme="custom"] .tk-seg button{background:var(--tint);border-color:var(--line);color:var(--ink2)}
+[data-theme="custom"] .tk-seg button:hover{border-color:var(--accent)}
+[data-theme="custom"] .tk-seg button.on{border-color:var(--accent-deep);background:var(--card);color:var(--accent-deep)}
+[data-theme="custom"] .tk-times input{background:var(--card);border-color:var(--line);color:var(--ink)}
+[data-theme="custom"] .blob{opacity:.3}
+[data-theme="custom"] .blob.b1{background:radial-gradient(circle,var(--accent),transparent 70%)}
+[data-theme="custom"] .blob.b2{background:radial-gradient(circle,var(--accent-deep),transparent 70%)}
+[data-theme="custom"] .blob.b3{background:radial-gradient(circle,var(--tint),transparent 70%)}
+[data-theme="custom"] .hero h1{
+  background:linear-gradient(110deg,var(--ink) 20%,var(--accent) 45%,var(--accent-deep) 55%,var(--ink) 75%);
+  background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+[data-theme="custom"] .hero-eyebrow{color:var(--ink3)}
+[data-theme="custom"] .hero .avatar{box-shadow:0 16px 36px rgba(0,0,0,.25),0 0 0 4px var(--card),0 0 0 6px var(--line)}
+[data-theme="custom"] .hero .avatar:hover{box-shadow:0 20px 42px rgba(0,0,0,.32),0 0 0 4px var(--card),0 0 0 7px var(--accent)}
+[data-theme="custom"] .btn-p{background:linear-gradient(180deg,var(--accent),var(--accent-deep));box-shadow:0 5px 0 rgba(0,0,0,.28),0 14px 26px rgba(0,0,0,.22)}
+[data-theme="custom"] .btn-p:active{box-shadow:0 2px 0 rgba(0,0,0,.28)}
+[data-theme="custom"] .btn-g{background:var(--card);border-color:var(--line);color:var(--accent-deep)}
+[data-theme="custom"] .btn-g:hover{background:var(--tint);border-color:var(--accent)}
+[data-theme="custom"] .marquee-track span{color:var(--ink2)}
+[data-theme="custom"] .sec-eyebrow{color:var(--ink3)}
+[data-theme="custom"] .tile:hover{border-color:var(--accent)}
+[data-theme="custom"] .tile-media{box-shadow:0 10px 26px rgba(0,0,0,.18)}
+[data-theme="custom"] .ptag{color:var(--accent-deep);background:var(--tint);border-color:var(--line)}
+[data-theme="custom"] .about,[data-theme="custom"] .intro{background:linear-gradient(160deg,var(--card),var(--tint))}
+[data-theme="custom"] .chip{background:var(--tint);border-color:var(--line);color:var(--ink2)}
+[data-theme="custom"] .chip:hover{border-color:var(--accent)}
+[data-theme="custom"] .ct:hover{border-color:var(--accent)}
+[data-theme="custom"] .ct-ico{background:linear-gradient(150deg,var(--tint),var(--card));box-shadow:inset 0 0 0 1px var(--line)}
+[data-theme="custom"] .placeholder{border-color:var(--line);color:var(--ink3)}
+[data-theme="custom"] footer{color:var(--ink3);border-top-color:var(--line2)}
+[data-theme="custom"] .dock{background:linear-gradient(165deg,var(--card),var(--tint));border-color:var(--line)}
+[data-theme="custom"] .toast{background:var(--glass-nav)}
+/* 自定义主题转场：光晕取主题主色 */
+.tk-ring.tk-custom{
+  border-color:rgba(255,255,255,.9);
+  box-shadow:0 0 0 1px var(--tk-glow) inset, 0 0 30px 6px var(--tk-glow), 0 0 70px 18px var(--tk-glow2);
+}
+.tk-halo.tk-custom{
+  border-color:rgba(255,255,255,.9);
+  box-shadow:0 0 22px 5px var(--tk-glow), 0 0 60px 16px var(--tk-glow2), inset 0 0 22px var(--tk-glow);
+}
+
 /* —— 转场舞台（多主题：黑幕=暗红/紫；白幕=蓝白/绿）—— */
 .tk-stage{position:fixed;inset:0;z-index:200;pointer-events:none;overflow:hidden}
 .tk-black{position:absolute;inset:0;background:#0a0507;opacity:0;transition:opacity .7s ease;pointer-events:none}
@@ -873,11 +940,24 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       <button type="button" data-mode="fresh">🌿 清新绿</button>
       <button type="button" data-mode="warm">🌸 温馨粉</button>
       <button type="button" data-mode="colorful">🎨 缤纷彩</button>
+      <button type="button" data-mode="custom">🖌 自定义</button>
     </div>
-    <div class="tk-p-sub">自动组合（跟随时间切换的两套配色）</div>
+    <div class="tk-p-sub">自动组合（跟随时间切换的配色方案）</div>
     <div class="tk-seg tk-seg-2" id="tkPair">
       <button type="button" data-pair="classic">☀️ 蓝白 ⇄ 🌙 暗红</button>
       <button type="button" data-pair="dreamy">🌿 清新绿 ⇄ 🔮 梦幻紫</button>
+      <button type="button" data-pair="pink" class="tk-pair-wide">🌸 温馨粉 ⇄ 🎨 缤纷彩</button>
+    </div>
+    <div class="tk-custom" id="tkCustom">
+      <div class="tk-custom-row">
+        <label>底色 <input type="color" id="tkCustomBg" value="#f4f1ff"></label>
+        <label>主色 <input type="color" id="tkCustomAc" value="#7c5cf0"></label>
+      </div>
+      <div class="tk-custom-row">
+        <button type="button" class="btn btn-ghost btn-xs" id="tkCustomRand" style="flex:1">🎲 随机灵感</button>
+        <button type="button" class="btn btn-ghost btn-xs" id="tkCustomReset" style="flex:1">↺ 恢复默认</button>
+      </div>
+      <div class="tk-custom-tip">选底色与主色，整站配色（含转场光晕）自动生成 · 仅存本机</div>
     </div>
     <div class="tk-p-sub">自定义切换时刻（跟随时间模式生效）</div>
     <div class="tk-times">
@@ -1277,7 +1357,79 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       themeColorWarm: '#ffe9f1',
       themeColorColorful: '#15152b'
     };
-    var NAME = { light: '蓝白 ☀️', dark: '暗红 🌙', purple: '梦幻紫 🔮', fresh: '清新绿 🌿', warm: '温馨粉 🌸', colorful: '缤纷彩 🎨' };
+    /* ---- 🖌 自定义主题引擎：两色生成整套变量 ---- */
+    var CUSTOM_KEY = 'startian_custom_v1';
+    var CUSTOM_RESOLVED_KEY = 'startian_custom_resolved_v1';
+    var CUSTOM_DEFAULT = { bg: '#f4f1ff', ac: '#7c5cf0' };
+    var CUSTOM_PRESETS = [
+      { bg: '#fdf2f8', ac: '#db2777' }, { bg: '#eff6ff', ac: '#2563eb' },
+      { bg: '#f0fdf4', ac: '#16a34a' }, { bg: '#fefce8', ac: '#ca8a04' },
+      { bg: '#faf5ff', ac: '#9333ea' }, { bg: '#fff7ed', ac: '#ea580c' },
+      { bg: '#161226', ac: '#a78bfa' }, { bg: '#0f172a', ac: '#38bdf8' },
+      { bg: '#1c1917', ac: '#f59e0b' }, { bg: '#0d1f1a', ac: '#2dd4bf' },
+      { bg: '#1a0f14', ac: '#fb7185' }, { bg: '#111827', ac: '#4ade80' }
+    ];
+    function hex2rgb(h) {
+      h = String(h).replace('#', '');
+      if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+      var n = parseInt(h, 16);
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    }
+    function rgb2hex(r) {
+      return '#' + r.map(function (v) {
+        var x = Math.round(Math.max(0, Math.min(255, v))).toString(16);
+        return x.length < 2 ? '0' + x : x;
+      }).join('');
+    }
+    function mixc(a, b, t) {
+      var A = hex2rgb(a), B = hex2rgb(b);
+      return rgb2hex(A.map(function (v, i) { return v + (B[i] - v) * t; }));
+    }
+    function lumc(hex) { var r = hex2rgb(hex); return (0.299 * r[0] + 0.587 * r[1] + 0.114 * r[2]) / 255; }
+    function rgbaStr(hex, a) { var r = hex2rgb(hex); return 'rgba(' + r[0] + ',' + r[1] + ',' + r[2] + ',' + a + ')'; }
+    function resolveCustom(cs) {
+      var bg = cs.bg || CUSTOM_DEFAULT.bg, ac = cs.ac || CUSTOM_DEFAULT.ac;
+      var dark = lumc(bg) < 0.45;
+      var ink = dark ? mixc(bg, '#ffffff', 0.92) : mixc(bg, '#000000', 0.88);
+      var ink2 = dark ? mixc(bg, '#ffffff', 0.66) : mixc(bg, '#000000', 0.58);
+      var ink3 = dark ? mixc(bg, '#ffffff', 0.44) : mixc(bg, '#000000', 0.4);
+      var card = dark ? mixc(bg, '#ffffff', 0.07) : mixc(bg, '#ffffff', 0.85);
+      var tint = dark ? mixc(bg, '#ffffff', 0.13) : mixc(bg, '#ffffff', 0.55);
+      var line = dark ? mixc(bg, '#ffffff', 0.22) : mixc(bg, '#000000', 0.14);
+      var line2 = dark ? mixc(bg, '#ffffff', 0.15) : mixc(bg, '#000000', 0.09);
+      var adeep = dark ? mixc(ac, '#ffffff', 0.25) : mixc(ac, '#000000', 0.28);
+      return {
+        '__dark': dark ? '1' : '',
+        '--bg1': bg, '--bg2': mixc(bg, adeep, dark ? 0.14 : 0.08),
+        '--card': card, '--tint': tint, '--line': line, '--line2': line2,
+        '--ink': ink, '--ink2': ink2, '--ink3': ink3,
+        '--accent': ac, '--accent-deep': adeep,
+        '--glass-nav': rgbaStr(mixc(bg, '#ffffff', dark ? 0.06 : 0.72), 0.82),
+        '--tk-glow': rgbaStr(ac, 0.5), '--tk-glow2': rgbaStr(ac, 0.26),
+        '--sh-sm': '0 1px 2px rgba(0,0,0,' + (dark ? 0.4 : 0.05) + '), 0 10px 28px rgba(0,0,0,' + (dark ? 0.45 : 0.1) + ')',
+        '--sh-lg': '0 2px 4px rgba(0,0,0,' + (dark ? 0.5 : 0.08) + '), 0 24px 50px rgba(0,0,0,' + (dark ? 0.55 : 0.14) + ')'
+      };
+    }
+    function loadCustom() {
+      try { var c = JSON.parse(localStorage.getItem(CUSTOM_KEY) || 'null'); if (c && c.bg && c.ac) return c; } catch (e) {}
+      return { bg: CUSTOM_DEFAULT.bg, ac: CUSTOM_DEFAULT.ac };
+    }
+    function applyCustom(cs, persist) {
+      var rv = resolveCustom(cs);
+      var root = document.documentElement;
+      Object.keys(rv).forEach(function (k) { if (k !== '__dark') root.style.setProperty(k, rv[k]); });
+      if (persist) {
+        try {
+          localStorage.setItem(CUSTOM_KEY, JSON.stringify(cs));
+          localStorage.setItem(CUSTOM_RESOLVED_KEY, JSON.stringify(rv));
+        } catch (e) {}
+      }
+    }
+    function customDark() {
+      try { return JSON.parse(localStorage.getItem(CUSTOM_RESOLVED_KEY) || '{}').__dark === '1'; } catch (e) { return false; }
+    }
+    window.__geoCustom = { apply: applyCustom, load: loadCustom, resolve: resolveCustom, presets: CUSTOM_PRESETS };
+    var NAME = { light: '蓝白 ☀️', dark: '暗红 🌙', purple: '梦幻紫 🔮', fresh: '清新绿 🌿', warm: '温馨粉 🌸', colorful: '缤纷彩 🎨', custom: '自定义 🖌' };
     var state = { mode: 'auto', lightAt: CFG.defaultLightAt, darkAt: CFG.defaultDarkAt, autoPair: 'classic' };
     var current = 'light';
     var busy = false;
@@ -1290,8 +1442,8 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
         if (raw) {
           var p = JSON.parse(raw);
           if (p && typeof p === 'object') {
-            if (p.mode === 'auto' || p.mode === 'light' || p.mode === 'dark' || p.mode === 'purple' || p.mode === 'fresh' || p.mode === 'warm' || p.mode === 'colorful') state.mode = p.mode;
-            if (p.autoPair === 'classic' || p.autoPair === 'dreamy') state.autoPair = p.autoPair;
+            if (['auto', 'light', 'dark', 'purple', 'fresh', 'warm', 'colorful', 'custom'].indexOf(p.mode) >= 0) state.mode = p.mode;
+            if (['classic', 'dreamy', 'pink'].indexOf(p.autoPair) >= 0) state.autoPair = p.autoPair;
             if (p.lightAt) state.lightAt = p.lightAt;
             if (p.darkAt) state.darkAt = p.darkAt;
           }
@@ -1313,6 +1465,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       else inLight = (l < d) ? (t >= l && t < d) : (t >= l || t < d);
       /* 自动组合：classic = 蓝白⇄暗红；dreamy = 清新绿⇄梦幻紫 */
       if (state.autoPair === 'dreamy') return inLight ? 'fresh' : 'purple';
+      if (state.autoPair === 'pink') return inLight ? 'warm' : 'colorful';
       return inLight ? 'light' : 'dark';
     }
     function expected() { return state.mode === 'auto' ? expectedByTime() : state.mode; }
@@ -1337,11 +1490,14 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     }
     function setThemeInstant(theme) {
       current = theme;
+      if (theme === 'custom') { try { applyCustom(loadCustom(), false); } catch (e) {} }
       document.documentElement.setAttribute('data-theme', theme);
       setAvatar(theme);
       var m = document.querySelector('meta[name="theme-color"]');
       var MC = { dark: CFG.themeColorDark, purple: CFG.themeColorPurple, fresh: CFG.themeColorFresh, warm: CFG.themeColorWarm, colorful: CFG.themeColorColorful };
-      if (m) m.setAttribute('content', MC[theme] || CFG.themeColorLight);
+      var mc = MC[theme];
+      if (theme === 'custom') { try { mc = loadCustom().bg; } catch (e) {} }
+      if (m) m.setAttribute('content', mc || CFG.themeColorLight);
       syncUI();
     }
     function resetStage() {
@@ -1404,8 +1560,8 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       };
     }
     function runCurtain(theme) {
-      var isLightTheme = (theme === 'light' || theme === 'fresh' || theme === 'warm');   /* 浅色主题 = 白幕 */
-      var GLOW = { light: ' tk-light', purple: ' tk-purple', fresh: ' tk-fresh', warm: ' tk-warm', colorful: ' tk-colorful' };
+      var isLightTheme = (theme === 'light' || theme === 'fresh' || theme === 'warm' || (theme === 'custom' && !customDark()));
+      var GLOW = { light: ' tk-light', purple: ' tk-purple', fresh: ' tk-fresh', warm: ' tk-warm', colorful: ' tk-colorful', custom: ' tk-custom' };
       var glowCls = GLOW[theme] || '';
       document.documentElement.classList.add('tk-switching');
       black.className = 'tk-black' + (theme === 'fresh' ? ' tk-fresh' : (theme === 'warm' ? ' tk-warm' : (isLightTheme ? ' tk-light' : '')));
@@ -1463,6 +1619,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       spin(780 + 540 + 170 + 920 + 250, resetStage);
     }
     function toTheme(theme) {
+      if (theme === 'custom') { try { applyCustom(loadCustom(), false); } catch (e) {} }
       if (busy || current === theme) return;
       busy = true;
       ensureStage();
@@ -1561,7 +1718,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       if (state.mode === 'auto') { var e = expectedByTime(); if (e !== current) apply(e, true); }
     }
     function setAutoPair(pair) {
-      state.autoPair = (pair === 'dreamy') ? 'dreamy' : 'classic';
+      state.autoPair = (['dreamy', 'pink'].indexOf(pair) >= 0) ? pair : 'classic';
       save(); syncUI();
       if (state.mode === 'auto') { var e = expectedByTime(); if (e !== current) apply(e, true); }
     }
@@ -1572,7 +1729,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     }
     function syncUI() {
       var b = $('tkBtn');
-      var MODE_ICON = { auto: '🕖', light: '☀️', dark: '🌙', purple: '🔮', fresh: '🌿', warm: '🌸', colorful: '🎨' };
+      var MODE_ICON = { auto: '🕖', light: '☀️', dark: '🌙', purple: '🔮', fresh: '🌿', warm: '🌸', colorful: '🎨', custom: '🖌' };
       if (b) b.textContent = MODE_ICON[state.mode] || '☀️';
       var seg = $('tkSeg');
       if (seg) {
@@ -1585,6 +1742,14 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
         [].forEach.call(pair.querySelectorAll('button'), function (x) {
           x.classList.toggle('on', x.getAttribute('data-pair') === state.autoPair);
         });
+      }
+      var cu = $('tkCustom');
+      if (cu) cu.classList.toggle('show', state.mode === 'custom');
+      var cbv = $('tkCustomBg'), cav = $('tkCustomAc');
+      if (cbv && cav && state.mode === 'custom') {
+        var lc = loadCustom();
+        if (document.activeElement !== cbv) cbv.value = lc.bg;
+        if (document.activeElement !== cav) cav.value = lc.ac;
       }
       var li = $('tkLightAt'), di = $('tkDarkAt');
       if (li && document.activeElement !== li) li.value = state.lightAt;
@@ -1635,6 +1800,29 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       var li = $('tkLightAt'), di = $('tkDarkAt');
       if (li) li.addEventListener('change', function () { setTimes(li.value, di.value); });
       if (di) di.addEventListener('change', function () { setTimes(li.value, di.value); });
+      /* 🖌 自定义调色 */
+      var cbg = $('tkCustomBg'), cac = $('tkCustomAc');
+      function onCustomColor() {
+        if (!cbg || !cac) return;
+        applyCustom({ bg: cbg.value, ac: cac.value }, true);
+        if (current !== 'custom') set('custom');
+        else syncUI();
+      }
+      if (cbg) cbg.addEventListener('input', onCustomColor);
+      if (cac) cac.addEventListener('input', onCustomColor);
+      var rnd = $('tkCustomRand');
+      if (rnd) rnd.addEventListener('click', function () {
+        var ps = CUSTOM_PRESETS[Math.floor(Math.random() * CUSTOM_PRESETS.length)];
+        if (cbg) cbg.value = ps.bg;
+        if (cac) cac.value = ps.ac;
+        onCustomColor();
+      });
+      var rst = $('tkCustomReset');
+      if (rst) rst.addEventListener('click', function () {
+        if (cbg) cbg.value = CUSTOM_DEFAULT.bg;
+        if (cac) cac.value = CUSTOM_DEFAULT.ac;
+        onCustomColor();
+      });
     }
 
     load();
