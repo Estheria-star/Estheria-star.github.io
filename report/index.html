@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="AI 给今天的你打分：每次刷新生成一张今日份诊断报告，像体检单。startian.top 出品">
+<meta name="theme-color" content="#0f1a2e">
+<title>今日份诊断报告 · startian.top</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;background:radial-gradient(1100px 600px at 50% -80px, #1b2c4a 0%, #101a30 45%, #0a1122 100%);color:#eef4ff;font-family:'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif}
+  .wrap{max-width:720px;margin:0 auto;padding:30px 22px 70px;display:flex;flex-direction:column;gap:16px}
+  .head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .head h1{font-size:20px;margin:0;letter-spacing:.5px}
+  .head .sub{font-size:12px;color:#8ba0c8;font-weight:600}
+  .home{margin-left:auto;text-decoration:none;font-size:12.5px;font-weight:700;color:#cfe0ff;border:1px solid rgba(130,160,230,.3);border-radius:999px;padding:9px 16px;background:rgba(20,30,54,.7);transition:border-color .2s,transform .2s}
+  .home:hover{border-color:rgba(160,190,255,.7);transform:translateY(-1px)}
+  .report{
+    background:rgba(23,34,60,.72);border:1px solid rgba(120,150,220,.26);border-radius:24px;
+    padding:26px 26px 22px;box-shadow:0 26px 64px rgba(0,0,0,.5);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    position:relative;overflow:hidden;
+  }
+  .report::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#38bdf8,#818cf8,#c084fc,#f472b6)}
+  .r-head{display:flex;align-items:baseline;gap:12px;border-bottom:1px dashed rgba(130,160,220,.3);padding-bottom:14px;margin-bottom:16px;flex-wrap:wrap}
+  .r-title{font-size:17px;font-weight:900;letter-spacing:1px}
+  .r-title small{font-size:11px;color:#8ba0c8;font-weight:700;letter-spacing:2px;display:block;margin-top:3px}
+  .r-date{margin-left:auto;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;color:#9fb4e0}
+  .r-id{font-size:11px;color:#6d80aa;font-family:ui-monospace,Consolas,monospace}
+  .rows{display:flex;flex-direction:column;gap:11px}
+  .row{display:grid;grid-template-columns:76px 1fr 44px;align-items:center;gap:12px}
+  .row .k{font-size:13px;font-weight:800;color:#dbe6ff}
+  .bar{height:10px;border-radius:999px;background:rgba(10,16,32,.85);border:1px solid rgba(120,150,220,.2);overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:999px;width:0;transition:width .9s cubic-bezier(.25,.9,.3,1)}
+  .row .v{font-family:ui-monospace,Consolas,monospace;font-size:13.5px;font-weight:800;text-align:right}
+  .row .cm{grid-column:2 / 4;font-size:11.5px;color:#8ba0c8;line-height:1.6;margin-top:-4px}
+  .sum{margin-top:18px;border-top:1px dashed rgba(130,160,220,.3);padding-top:14px}
+  .sum .st{font-size:13.5px;line-height:2;color:#cdd9f2}
+  .sum .st b{color:#8fd0ff}
+  .grade{
+    display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:20px;
+    font-size:28px;font-weight:900;float:right;margin-left:14px;
+    background:linear-gradient(150deg,#38bdf8,#818cf8);box-shadow:0 12px 28px rgba(90,130,255,.4);color:#fff;
+  }
+  .sign{margin-top:14px;text-align:right;font-size:12px;color:#7d90ba;line-height:1.9}
+  .btns{display:flex;gap:12px;flex-wrap:wrap}
+  .btn{
+    border:0;border-radius:14px;padding:13px 22px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;
+    color:#fff;background:linear-gradient(100deg,#38bdf8,#6366f1,#a855f7);box-shadow:0 6px 0 #2b3a8f,0 14px 30px rgba(90,120,255,.4);
+    transition:transform .15s ease,box-shadow .2s ease;
+  }
+  .btn:active{transform:translateY(2px);box-shadow:0 2px 0 #2b3a8f}
+  .btn.ghost{background:rgba(30,44,80,.6);border:1.5px solid rgba(130,160,230,.35);box-shadow:none;color:#cfe0ff}
+  .btn.ghost:hover{border-color:rgba(160,190,255,.8)}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(10px);opacity:0;z-index:60;background:rgba(20,30,56,.95);border:1px solid rgba(130,160,255,.4);border-radius:999px;padding:11px 22px;font-size:13px;font-weight:700;transition:all .3s ease;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+  @media (max-width:560px){
+    .row{grid-template-columns:64px 1fr 40px;gap:9px}
+    .report{padding:20px 18px}
+  }
+/* —— 返回主页（全站统一 · 2026-09-29）—— */
+.wb-home{position:fixed;left:14px;bottom:14px;z-index:9990;display:inline-flex;align-items:center;gap:5px;
+  padding:8px 13px 8px 10px;border-radius:999px;text-decoration:none;
+  background:rgba(17,24,39,.55);color:#fff;font-size:12.5px;font-weight:600;letter-spacing:.3px;
+  -webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.14);box-shadow:0 6px 18px rgba(0,0,0,.18);
+  transition:background .2s,transform .2s,box-shadow .2s}
+.wb-home:hover{background:rgba(17,24,39,.78);transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.26)}
+.wb-home:active{transform:translateY(0)}
+.wb-home svg{width:13px;height:13px;flex:0 0 auto}
+@media (max-width:620px){ .wb-home{left:10px;bottom:10px;padding:7px 11px 7px 9px;font-size:12px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <h1>🩺 今日份诊断报告</h1>
+    <span class="sub">每次刷新都是一份新的 · 同一天永远同一份</span>
+    <a class="home" href="https://startian.top/">← 返回主页</a>
+  </div>
+  <div class="report" id="report">
+    <div class="r-head">
+      <div class="r-title">STAR 综合状态体检单<small>DAILY DIAGNOSTIC REPORT</small></div>
+      <div class="r-date" id="rDate"></div>
+      <div class="r-id" id="rId" style="width:100%"></div>
+    </div>
+    <div class="rows" id="rows"></div>
+    <div class="sum">
+      <div class="grade" id="grade">A</div>
+      <div class="st" id="summary"></div>
+      <div class="sign">主检医师：月月 🌙<br>本报告由随机算法开具 · 仅供开心 · 不作任何医疗建议</div>
+    </div>
+  </div>
+  <div class="btns">
+    <button class="btn" id="btnReroll" type="button">🔁 换一份（今日变体）</button>
+    <button class="btn ghost" id="btnSave" type="button">⬇ 保存报告图</button>
+    <button class="btn ghost" id="btnShare" type="button">🔗 分享</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+  /* ============ 🏆 跨站成就 SDK ============ */
+  var STAch = (function () {
+    var KEY = 'st_ach';
+    function readCookie() {
+      var m = document.cookie.match(/(?:^|;\s*)st_ach=([^;]*)/);
+      if (!m) return null;
+      try { return JSON.parse(decodeURIComponent(m[1])) || []; } catch (e) { return null; }
+    }
+    function writeCookie(list) {
+      try {
+        var v = encodeURIComponent(JSON.stringify(list));
+        if (v.length < 3800) document.cookie = 'st_ach=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+      } catch (e) {}
+    }
+    var list = readCookie();
+    if (!list) { try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { list = []; } }
+    if (!Array.isArray(list)) list = [];
+    function save() {
+      try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+      writeCookie(list);
+    }
+    function unlock(id, name, ico) {
+      if (list.indexOf(id) >= 0) return false;
+      list.push(id);
+      save();
+      try {
+        var el = document.createElement('div');
+        el.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9999;background:rgba(20,30,56,.95);color:#fff;border:1px solid rgba(140,170,255,.42);border-radius:999px;padding:12px 22px;font:700 13.5px/1.4 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:86vw';
+        el.textContent = '🏆 成就解锁：' + (ico ? ico + ' ' : '') + (name || id);
+        document.body.appendChild(el);
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        setTimeout(function () {
+          el.style.opacity = '0';
+          el.style.transform = 'translateX(-50%) translateY(16px)';
+          setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+        }, 3200);
+      } catch (e) {}
+      return true;
+    }
+    return { list: function () { return list.slice(); }, has: function (id) { return list.indexOf(id) >= 0; }, unlock: unlock };
+  })();
+  window.STAch = STAch;
+  setTimeout(function () { STAch.unlock('site.report', '体检常客', '🩺'); }, 600);
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function pick(rnd, arr) { return arr[Math.floor(rnd() * arr.length)]; }
+
+  var ITEMS = [
+    { k: '精神状态', ico: '🧠', low: ['电量不足，建议立即补充奶茶', '看起来像刚重启过，还有点懵', '大脑正在后台更新，请稍候'], mid: ['运转正常，偶尔走神', '状态在线，能扛住一门作业', '脑子转得动，摸鱼效率尤佳'], high: ['今天的你思路异常清晰', '精神小伙/姑娘，可以拆个难题庆祝一下'] },
+    { k: '专注力', ico: '🎯', low: ['注意力滑得像块肥皂', '十分钟看了五次手机（预测）', '书本翻开了，眼神在外面'], mid: ['能连续专注一小会儿', '效率尚可，建议番茄钟加持'], high: ['专注力拉满，建议立刻去干件正事'] },
+    { k: '欧气', ico: '🍀', low: ['今天抽卡建议观望', '非酋气息浓烈，不宜抽奖', '欧气余额不足，请谨慎出门'], mid: ['欧气平平，正常发挥', '运气凑合，能抢到食堂最后一份'], high: ['欧气爆棚！适合抽卡 / 抢票 / 表白（选一个）'] },
+    { k: '发量', ico: '💇', low: ['枕头上的头发比头上的多', '写题可以，掉发不行，请早睡', '每一根都珍贵，请温柔对待'], mid: ['发量稳定，无需慌张', '还算浓密，问题不大'], high: ['发量浓密到令人羡慕', '这发量，可以尝试熬夜（不建议）'] },
+    { k: '战斗力', ico: '⚔️', low: ['战斗力低迷，请补充碳水和糖', '今日不宜硬刚难题', '建议打一局五子棋找回自信'], mid: ['战斗力中规中矩', '能解决今天的作业量'], high: ['战斗力爆表，压轴题也可一战'] },
+    { k: '睡意', ico: '😴', low: ['清醒得很（咖啡因立功）', '睡意全无，适合搞创作'], mid: ['有一点点困，可以撑住'], high: ['睡意爆棚！快去看枕头', '眼皮已经在打架了，别硬撑'] },
+    { k: '玄学值', ico: '🔮', low: ['今日不宜相信直觉', '第六感有点飘'], mid: ['直觉尚可使用'], high: ['直觉准确度奇高，第一选择通常是对的'] }
+  ];
+
+  var SUMMARIES = [
+    '综合来看：今天状态【{g}】。{a}', '体检结论：【{g}】。{a}', '总体评估：【{g}】。{a}'
+  ];
+  var ADVICE = [
+    '建议：喝口水，伸个懒腰，然后去把最想做的那个小项目点开。',
+    '建议：先完成一件最小的任务，今天就会顺起来。',
+    '建议：对自己宽容一点，状态是曲线不是直线。',
+    '建议：去 star 页面生成一颗星星，据说能回血。',
+    '建议：早点睡。真的。',
+    '建议：今天适合做点让自己开心的小事。'
+  ];
+
+  var lastVariant = 0;
+
+  function build(variant) {
+    var d = new Date();
+    var ymd = d.getFullYear() + '-0' + (d.getMonth() + 1) + '-0' + d.getDate();
+    ymd = ymd.replace(/-0(\d\d)/g, '-$1');
+    var seedBase = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+    var rnd = mulberry32(seedBase * 100 + variant);
+
+    var rows = [], total = 0;
+    var html = '';
+    ITEMS.forEach(function (it, idx) {
+      var v = 42 + Math.floor(rnd() * 58);   /* 42-99 */
+      var cm = v < 60 ? pick(rnd, it.low) : (v < 82 ? pick(rnd, it.mid) : pick(rnd, it.high));
+      total += v;
+      var hue = v < 60 ? 'linear-gradient(90deg,#f87171,#fb923c)' : (v < 82 ? 'linear-gradient(90deg,#38bdf8,#818cf8)' : 'linear-gradient(90deg,#34d399,#38bdf8)');
+      html += '<div class="row">' +
+        '<span class="k">' + it.ico + ' ' + it.k + '</span>' +
+        '<span class="bar"><i data-w="' + v + '" style="background:' + hue + '"></i></span>' +
+        '<span class="v">' + v + '</span>' +
+        '<span class="cm">' + cm + '</span></div>';
+      rows.push({ k: it.k, v: v });
+    });
+    var avg = Math.round(total / ITEMS.length);
+    var grade = avg >= 88 ? 'S' : avg >= 78 ? 'A' : avg >= 66 ? 'B' : avg >= 54 ? 'C' : 'D';
+    var suf = { S: '状态史诗级，建议截图留念。', A: '相当不错的一天。', B: '稳稳的，正常发挥。', C: '有点疲惫，需要关照一下自己。', D: '今天的主题是：活着就行，明天再战。' }[grade];
+
+    document.getElementById('rDate').textContent = ymd + ' · ' + ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+    document.getElementById('rId').textContent = '报告编号 STAR-' + seedBase + '-' + (variant + 1) + ' · 综合分 ' + avg;
+    document.getElementById('rows').innerHTML = html;
+    document.getElementById('grade').textContent = grade;
+    document.getElementById('summary').innerHTML = pick(rnd, SUMMARIES).replace('{g}', grade + ' 级').replace('{a}', suf) + '<br>' + pick(rnd, ADVICE).replace('建议：', '<b>建议：</b>');
+
+    /* 进度条动画 */
+    setTimeout(function () {
+      [].forEach.call(document.querySelectorAll('.bar i'), function (el) {
+        el.style.width = el.getAttribute('data-w') + '%';
+      });
+    }, 80);
+    return { ymd: ymd, avg: avg, grade: grade, rows: rows };
+  }
+
+  var toastEl = document.getElementById('toast'), toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2200);
+  }
+
+  var cur = build(0);
+
+  document.getElementById('btnReroll').addEventListener('click', function () {
+    lastVariant++;
+    cur = build(lastVariant);
+    document.getElementById('report').animate([{ opacity: .5 }, { opacity: 1 }], { duration: 320, easing: 'ease' });
+    toast('🔁 今日变体 #' + (lastVariant + 1));
+  });
+
+  /* 保存为图片 */
+  document.getElementById('btnSave').addEventListener('click', function () {
+    var W = 760, H = 120 + cur.rows.length * 46 + 210;
+    var cv = document.createElement('canvas');
+    var dp = 2;
+    cv.width = W * dp; cv.height = H * dp;
+    var g = cv.getContext('2d');
+    g.scale(dp, dp);
+    var grad = g.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, '#1b2c4a'); grad.addColorStop(1, '#0a1122');
+    g.fillStyle = grad; g.fillRect(0, 0, W, H);
+    /* 顶部彩条 */
+    var bar = g.createLinearGradient(0, 0, W, 0);
+    bar.addColorStop(0, '#38bdf8'); bar.addColorStop(.5, '#818cf8'); bar.addColorStop(1, '#c084fc');
+    g.fillStyle = bar; g.fillRect(0, 0, W, 6);
+    g.fillStyle = '#eef4ff';
+    g.font = '800 26px "Segoe UI","Microsoft YaHei",sans-serif';
+    g.fillText('STAR 综合状态体检单', 40, 66);
+    g.fillStyle = '#8ba0c8';
+    g.font = '700 14px "Segoe UI","Microsoft YaHei",sans-serif';
+    g.fillText('DAILY DIAGNOSTIC REPORT · ' + cur.ymd, 40, 92);
+    g.font = '800 16px "Segoe UI","Microsoft YaHei",sans-serif';
+    var y0 = 138;
+    cur.rows.forEach(function (r, i) {
+      var y = y0 + i * 46;
+      g.fillStyle = '#dbe6ff'; g.font = '800 15px "Segoe UI","Microsoft YaHei",sans-serif';
+      g.fillText(r.k, 40, y);
+      g.fillStyle = 'rgba(10,16,32,.9)';
+      g.fillRect(140, y - 13, 460, 14);
+      var col = r.v < 60 ? '#fb923c' : (r.v < 82 ? '#818cf8' : '#34d399');
+      g.fillStyle = col;
+      g.fillRect(140, y - 13, 460 * r.v / 100, 14);
+      g.fillStyle = '#eef4ff'; g.font = '800 15px ui-monospace,Consolas,monospace';
+      g.fillText(String(r.v), 620, y);
+    });
+    var yb = y0 + cur.rows.length * 46 + 18;
+    g.fillStyle = '#8ba0c8'; g.font = '700 14px "Segoe UI","Microsoft YaHei",sans-serif';
+    g.fillText('综合分 ' + cur.avg + ' · 评级 ' + cur.grade, 40, yb);
+    g.fillStyle = '#7d90ba'; g.font = '600 13px "Segoe UI","Microsoft YaHei",sans-serif';
+    g.fillText('主检医师：月月 🌙 · startian.top/report · 仅供开心', 40, yb + 30);
+    g.fillStyle = 'rgba(130,160,220,.5)';
+    g.fillRect(40, yb + 48, W - 80, 1);
+    g.fillStyle = '#6d80aa'; g.font = '600 12px "Segoe UI","Microsoft YaHei",sans-serif';
+    g.fillText('报告编号 STAR-' + cur.ymd.replace(/-/g, '') + ' · 生成于 ' + new Date().toLocaleString(), 40, yb + 70);
+    cv.toBlob(function (blob) {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'daily-report-' + cur.ymd + '.png';
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+      toast('⬇️ 报告图已保存');
+      try { STAch.unlock('report.save', '晒报告的人', '📸'); } catch (e) {}
+    }, 'image/png');
+  });
+
+  document.getElementById('btnShare').addEventListener('click', function () {
+    var url = 'https://startian.top/report/';
+    function done() { toast('🔗 链接已复制，喊朋友来做个体检'); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, fb);
+    else fb();
+    function fb() { toast('报告地址：' + url); }
+  });
+})();
+</script>
+<!-- 返回主页（全站统一按钮 · 2026-09-29） -->
+<a class="wb-home" href="https://startian.top/" title="返回星恬的小站主页">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>主页</span>
+</a>
+</body>
+</html>
