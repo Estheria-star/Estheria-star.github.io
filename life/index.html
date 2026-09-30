@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="康威生命游戏花园：撒种子看细胞生长，能存「物种」、能让两个物种对撞。startian.top 出品">
+<meta name="theme-color" content="#081018">
+<title>生命游戏花园 · startian.top</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#081018}
+  canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair;user-select:none;-webkit-user-select:none}
+  .bar{
+    position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:5;
+    display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:center;max-width:94vw;
+    background:rgba(8,20,26,.68);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);
+    border:1px solid rgba(80,220,180,.22);border-radius:999px;padding:9px 13px;
+    box-shadow:0 16px 44px rgba(0,0,0,.5);
+  }
+  .stat{
+    font-family:ui-monospace,Consolas,monospace;font-size:12px;font-weight:700;color:#bfe9dd;
+    padding:0 6px;white-space:nowrap;letter-spacing:.4px;
+  }
+  .stat b{color:#5ff0c0}
+  button{
+    border:1px solid rgba(90,220,180,.32);border-radius:999px;padding:8px 14px;
+    font-size:12.5px;font-weight:800;font-family:inherit;cursor:pointer;color:#e2fff5;
+    background:linear-gradient(180deg,rgba(50,200,150,.28),rgba(30,150,110,.24));
+    transition:transform .15s ease,border-color .2s ease,box-shadow .2s ease;white-space:nowrap;
+  }
+  button:hover{border-color:rgba(110,240,200,.7);transform:translateY(-1px)}
+  button:active{transform:translateY(1px)}
+  button.primary{
+    background:linear-gradient(180deg,#3ddba0,#1b9e6e);color:#04211a;border-color:transparent;
+    box-shadow:0 5px 0 #0f5f42,0 12px 24px rgba(40,200,150,.35);
+  }
+  button.primary:active{box-shadow:0 2px 0 #0f5f42}
+  select{
+    border:1px solid rgba(90,220,180,.32);border-radius:999px;padding:8px 12px;font-size:12.5px;font-weight:700;
+    font-family:inherit;color:#e2fff5;background:rgba(10,30,26,.9);cursor:pointer;outline:none;
+  }
+  .home{
+    position:fixed;left:16px;bottom:16px;z-index:5;text-decoration:none;font-size:12.5px;font-weight:700;
+    color:#a8e8d8;background:rgba(8,22,28,.72);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    border:1px solid rgba(90,220,180,.28);border-radius:999px;padding:10px 16px;
+    transition:border-color .2s ease,transform .2s ease;
+  }
+  .home:hover{border-color:rgba(110,240,200,.6);transform:translateY(-2px)}
+  .hint{
+    position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:4;font-size:11.5px;
+    color:rgba(180,230,215,.55);white-space:nowrap;pointer-events:none;
+  }
+  .toast{
+    position:fixed;left:50%;top:76px;transform:translateX(-50%) translateY(-8px);opacity:0;z-index:6;
+    background:rgba(8,26,24,.92);border:1px solid rgba(90,220,180,.35);border-radius:999px;
+    padding:9px 18px;font-size:12.5px;font-weight:700;color:#e2fff5;
+    transition:opacity .3s ease,transform .3s ease;pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%)}
+  .sp-list{
+    position:fixed;right:14px;top:88px;z-index:5;display:flex;flex-direction:column;gap:7px;max-height:60vh;overflow:auto;
+  }
+  .sp-list button{font-size:11.5px;padding:7px 12px;border-radius:12px;text-align:left}
+  @media (max-width:720px){
+    .bar{top:10px;left:10px;right:10px;transform:none;border-radius:18px;padding:8px}
+    .hint{display:none}
+    .sp-list{top:auto;bottom:70px}
+  }
+</style>
+</head>
+<body>
+<canvas id="garden"></canvas>
+<div class="bar">
+  <span class="stat">第 <b id="gen">0</b> 代</span>
+  <span class="stat">活细胞 <b id="alive">0</b></span>
+  <button class="primary" id="btnPlay" type="button">▶ 生长</button>
+  <button id="btnRand" type="button">🌱 撒种子</button>
+  <button id="btnClear" type="button">🧹 清空</button>
+  <select id="selPattern">
+    <option value="">✳ 种植图案…</option>
+    <option value="glider">滑翔机</option>
+    <option value="lwss">轻型飞船</option>
+    <option value="pulsar">脉冲星</option>
+    <option value="rpent">R-五连</option>
+  </select>
+  <select id="selSpeed">
+    <option value="8">×1</option>
+    <option value="16" selected>×2</option>
+    <option value="32">×4</option>
+    <option value="64">×8</option>
+  </select>
+  <button id="btnSave" type="button">💾 存物种</button>
+  <button id="btnCollide" type="button">⚔ 物种对撞</button>
+</div>
+<div class="sp-list" id="spList"></div>
+<a class="home" href="https://startian.top/">← 返回主页</a>
+<div class="hint">拖动平移 · 滚轮缩放 · 按住鼠标画细胞 · 选「种植图案」后点网格放置 · 右键擦除</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+  /* ============ 🏆 跨站成就 SDK ============ */
+  var STAch = (function () {
+    var KEY = 'st_ach';
+    function readCookie() {
+      var m = document.cookie.match(/(?:^|;\s*)st_ach=([^;]*)/);
+      if (!m) return null;
+      try { return JSON.parse(decodeURIComponent(m[1])) || []; } catch (e) { return null; }
+    }
+    function writeCookie(list) {
+      try {
+        var v = encodeURIComponent(JSON.stringify(list));
+        if (v.length < 3800) document.cookie = 'st_ach=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+      } catch (e) {}
+    }
+    var list = readCookie();
+    if (!list) { try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { list = []; } }
+    if (!Array.isArray(list)) list = [];
+    function save() {
+      try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+      writeCookie(list);
+    }
+    function unlock(id, name, ico) {
+      if (list.indexOf(id) >= 0) return false;
+      list.push(id);
+      save();
+      try {
+        var el = document.createElement('div');
+        el.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9999;background:rgba(12,32,28,.95);color:#fff;border:1px solid rgba(90,220,180,.45);border-radius:999px;padding:12px 22px;font:700 13.5px/1.4 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:86vw';
+        el.textContent = '🏆 成就解锁：' + (ico ? ico + ' ' : '') + (name || id);
+        document.body.appendChild(el);
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        setTimeout(function () {
+          el.style.opacity = '0';
+          el.style.transform = 'translateX(-50%) translateY(16px)';
+          setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+        }, 3200);
+      } catch (e) {}
+      return true;
+    }
+    return { list: function () { return list.slice(); }, has: function (id) { return list.indexOf(id) >= 0; }, unlock: unlock };
+  })();
+  window.STAch = STAch;
+  setTimeout(function () { STAch.unlock('site.life', '播种者', '🦠'); }, 600);
+
+  /* ============ 世界 ============ */
+  var cv = document.getElementById('garden');
+  var ctx = cv.getContext('2d');
+  var dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+  var W = 0, H = 0;
+  var CELL = 14;                      /* 基准格子像素 */
+  var view = { x: 0, y: 0, s: 1 };    /* 平移 + 缩放 */
+  var GW = 0, GH = 0;                 /* 世界格子尺寸 */
+  var cur = null, nxt = null, age = null;
+  var running = false, gen = 0;
+  var speed = 16;                     /* 代/秒 */
+  var lastStep = 0;
+
+  function worldSize() {
+    GW = Math.ceil(W / CELL * 3 / view.s) + 8;
+    GH = Math.ceil(H / CELL * 3 / view.s) + 8;
+    GW = Math.min(GW, 2200); GH = Math.min(GH, 2200);
+  }
+  function resizeWorld(keep) {
+    var oc = cur, oa = age, oGW = GW, oGH = GH;
+    worldSize();
+    cur = new Uint8Array(GW * GH);
+    nxt = new Uint8Array(GW * GH);
+    age = new Uint16Array(GW * GH);
+    if (keep && oc) {
+      for (var y = 0; y < Math.min(oGH, GH); y++) {
+        for (var x = 0; x < Math.min(oGW, GW); x++) {
+          cur[y * GW + x] = oc[y * oGW + x];
+          age[y * GW + x] = oa[y * oGW + x];
+        }
+      }
+    }
+  }
+
+  /* 屏幕 ↔ 格子坐标 */
+  function scr2cell(px, py) {
+    var cx = W / 2 + view.x, cy = H / 2 + view.y;
+    var gx = Math.floor((px - cx) / (CELL * view.s) + GW / 2);
+    var gy = Math.floor((py - cy) / (CELL * view.s) + GH / 2);
+    return { x: gx, y: gy };
+  }
+  function cell2scr(gx, gy) {
+    var cx = W / 2 + view.x, cy = H / 2 + view.y;
+    return { x: cx + (gx - GW / 2) * CELL * view.s, y: cy + (gy - GH / 2) * CELL * view.s };
+  }
+
+  /* ============ 演化（B3/S23）============ */
+  function step() {
+    var changed = 0;
+    for (var y = 0; y < GH; y++) {
+      for (var x = 0; x < GW; x++) {
+        var i = y * GW + x;
+        var n = 0;
+        for (var dy = -1; dy <= 1; dy++) {
+          var yy = y + dy; if (yy < 0 || yy >= GH) continue;
+          for (var dx = -1; dx <= 1; dx++) {
+            if (!dx && !dy) continue;
+            var xx = x + dx; if (xx < 0 || xx >= GW) continue;
+            n += cur[yy * GW + xx];
+          }
+        }
+        var a = cur[i];
+        var na = a ? ((n === 2 || n === 3) ? 1 : 0) : (n === 3 ? 1 : 0);
+        nxt[i] = na;
+        if (na) { age[i] = a ? Math.min(65535, age[i] + 1) : 1; }
+        if (na !== a) changed++;
+      }
+    }
+    var t = cur; cur = nxt; nxt = t;
+    gen++;
+    if (changed === 0) { running = false; updatePlayBtn(); toast('🕊 世界已稳定（第 ' + gen + ' 代）'); }
+    return changed;
+  }
+
+  /* ============ 渲染 ============ */
+  function draw() {
+    ctx.fillStyle = '#081018';
+    ctx.fillRect(0, 0, cv.width, cv.height);
+    var cs = CELL * view.s * dpr;
+    /* 网格线（够大时才画） */
+    if (cs >= 20) {
+      ctx.strokeStyle = 'rgba(70,160,140,.10)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      var o = cell2scr(0, 0);
+      var sx0 = o.x * dpr, sy0 = o.y * dpr;
+      for (var gx = 0; gx <= GW; gx++) {
+        var px = sx0 + gx * cs;
+        if (px < -10 || px > cv.width + 10) continue;
+        ctx.moveTo(px, Math.max(0, sy0)); ctx.lineTo(px, Math.min(cv.height, sy0 + GH * cs));
+      }
+      for (var gy = 0; gy <= GH; gy++) {
+        var py = sy0 + gy * cs;
+        if (py < -10 || py > cv.height + 10) continue;
+        ctx.moveTo(Math.max(0, sx0), py); ctx.lineTo(Math.min(cv.width, sx0 + GW * cs), py);
+      }
+      ctx.stroke();
+    }
+    /* 细胞：新生青绿 → 老年紫（按年龄渐变）+ 轻发光 */
+    var r = cs * 0.34;
+    for (var y = 0; y < GH; y++) {
+      for (var x = 0; x < GW; x++) {
+        var i = y * GW + x;
+        if (!cur[i]) continue;
+        var p = cell2scr(x, y);
+        var px2 = (p.x + cs / 2 / dpr) * dpr, py2 = (p.y + cs / 2 / dpr) * dpr;
+        if (px2 < -20 || px2 > cv.width + 20 || py2 < -20 || py2 > cv.height + 20) continue;
+        var a2 = Math.min(1, age[i] / 14);
+        var rr = Math.round(60 + 130 * (1 - a2));
+        var gg = Math.round(235 - 70 * a2);
+        var bb = Math.round(170 + 60 * a2);
+        ctx.fillStyle = 'rgba(' + rr + ',' + gg + ',' + bb + ',' + (0.95 - 0.35 * a2).toFixed(2) + ')';
+        if (age[i] === 1) {
+          ctx.beginPath(); ctx.arc(px2, py2, r * 1.8, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(95,240,192,.22)';
+          ctx.fill();
+          ctx.fillStyle = 'rgba(150,255,220,1)';
+        }
+        ctx.beginPath(); ctx.arc(px2, py2, r, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  }
+
+  function updateStats() {
+    var n = 0;
+    for (var i = 0; i < cur.length; i++) if (cur[i]) n++;
+    document.getElementById('gen').textContent = gen;
+    document.getElementById('alive').textContent = n;
+    return n;
+  }
+
+  var rafActive = false;
+  function loop(ts) {
+    if (running && ts - lastStep >= 1000 / speed) {
+      lastStep = ts;
+      step();
+      draw();
+      updateStats();
+    }
+    if (rafActive) requestAnimationFrame(loop);
+  }
+  function startLoop() { if (!rafActive) { rafActive = true; requestAnimationFrame(loop); } }
+
+  function updatePlayBtn() {
+    document.getElementById('btnPlay').textContent = running ? '⏸ 暂停' : '▶ 生长';
+  }
+
+  /* ============ 图案库 ============ */
+  var PATTERNS = {
+    glider: [[1,0],[2,1],[0,2],[1,2],[2,2]],
+    lwss: [[1,0],[4,0],[0,1],[0,2],[4,2],[0,3],[1,3],[2,3],[3,3]],
+    pulsar: (function () {
+      var p = [];
+      var arms = [[2,0],[3,0],[4,0],[8,0],[9,0],[10,0],[0,2],[5,2],[7,2],[12,2],[0,3],[5,3],[7,3],[12,3],[0,4],[5,4],[7,4],[12,4],[2,5],[3,5],[4,5],[8,5],[9,5],[10,5]];
+      arms.forEach(function (a) { p.push([a[0], a[1]]); });
+      arms.forEach(function (a) { p.push([a[1], a[0]]); });
+      arms.forEach(function (a) { p.push([12 - a[0], 12 - a[1]]); });
+      arms.forEach(function (a) { p.push([12 - a[1], 12 - a[0]]); });
+      return p;
+    })(),
+    rpent: [[1,0],[2,0],[0,1],[1,1],[1,2]]
+  };
+  var plantMode = '';
+
+  /* ============ 交互 ============ */
+  var ptrs = new Map();
+  var dragging = false, painting = false, erasing = false, moved = false, lastPt = null;
+  var pinchBase = null;
+
+  cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+  cv.addEventListener('pointerdown', function (e) {
+    try { cv.setPointerCapture(e.pointerId); } catch (er) {}
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (ptrs.size === 2) {
+      var arr = Array.from(ptrs.values());
+      pinchBase = {
+        d: Math.max(1, Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y)),
+        cx: (arr[0].x + arr[1].x) / 2, cy: (arr[0].y + arr[1].y) / 2,
+        s: view.s, vx: view.x, vy: view.y
+      };
+      painting = false;
+      return;
+    }
+    moved = false;
+    lastPt = { x: e.clientX, y: e.clientY };
+    if (plantMode) return;   /* 种植模式：按下即放置，由 up 处理 */
+    if (e.button === 2) { erasing = true; painting = true; }
+    else { erasing = false; painting = true; }
+    paintAt(e.clientX, e.clientY);
+  });
+
+  function paintAt(px, py) {
+    var c = scr2cell(px, py);
+    if (c.x < 0 || c.y < 0 || c.x >= GW || c.y >= GH) return;
+    var i = c.y * GW + c.x;
+    cur[i] = erasing ? 0 : 1;
+    if (!erasing) age[i] = 1;
+    draw();
+  }
+
+  cv.addEventListener('pointermove', function (e) {
+    if (!ptrs.has(e.pointerId)) return;
+    var prev = ptrs.get(e.pointerId);
+    var dx = e.clientX - prev.x, dy = e.clientY - prev.y;
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (Math.abs(e.clientX - (lastPt ? lastPt.x : e.clientX)) > 2 || Math.abs(dy) > 2) moved = true;
+    if (ptrs.size === 2 && pinchBase) {
+      var arr = Array.from(ptrs.values());
+      var d = Math.max(1, Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y));
+      var cx = (arr[0].x + arr[1].x) / 2, cy = (arr[0].y + arr[1].y) / 2;
+      var k = (Math.max(0.35, Math.min(3, pinchBase.s * d / pinchBase.d))) / pinchBase.s;
+      var Cx = W / 2, Cy = H / 2;
+      view.s = pinchBase.s * k;
+      view.x = pinchBase.vx + (cx - pinchBase.cx) + (pinchBase.cx - Cx) * (1 - k);
+      view.y = pinchBase.vy + (cy - pinchBase.cy) + (pinchBase.cy - Cy) * (1 - k);
+      draw();
+      return;
+    }
+    if (painting) {
+      paintAt(e.clientX, e.clientY);
+      return;
+    }
+    /* 平移画布 */
+    view.x += dx;
+    view.y += dy;
+    draw();
+  });
+
+  function ptrUp(e) {
+    var wasMoved = moved;
+    ptrs.delete(e.pointerId);
+    if (ptrs.size < 2) pinchBase = null;
+    if (plantMode && !wasMoved && !pinching()) {
+      var c = scr2cell(e.clientX, e.clientY);
+      plantAt(c.x, c.y, PATTERNS[plantMode]);
+      plantMode = '';
+      document.getElementById('selPattern').value = '';
+    }
+    painting = false;
+    erasing = false;
+    if (ptrs.size === 0) {
+      if (!wasMoved) { /* 单击无移动：保留刚画的细胞 */ }
+      updateStats();
+    }
+  }
+  function pinching() { return ptrs.size >= 2; }
+  cv.addEventListener('pointerup', ptrUp);
+  cv.addEventListener('pointercancel', function (e) { ptrs.delete(e.pointerId); painting = false; });
+
+  cv.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    var before = view.s;
+    var next = Math.max(0.35, Math.min(3, before * Math.exp(-e.deltaY * 0.0016)));
+    if (next === before) return;
+    var cx = W / 2, cy = H / 2;
+    view.x += (before - next) * (e.clientX - cx);
+    view.y += (before - next) * (e.clientY - cy);
+    view.s = next;
+    if (view.s > 1.4 && GW * CELL * view.s > 3 * W) resizeWorld(true);
+    draw();
+  }, { passive: false });
+
+  /* 放置图案（以 c 为中心） */
+  function plantAt(cx, cy, pat) {
+    if (!pat) return;
+    var minx = 1e9, miny = 1e9, maxx = -1e9, maxy = -1e9;
+    pat.forEach(function (p) { minx = Math.min(minx, p[0]); miny = Math.min(miny, p[1]); maxx = Math.max(maxx, p[0]); maxy = Math.max(maxy, p[1]); });
+    var ox = cx - Math.round((minx + maxx) / 2), oy = cy - Math.round((miny + maxy) / 2);
+    pat.forEach(function (p) {
+      var x = ox + p[0], y = oy + p[1];
+      if (x < 2 || y < 2 || x >= GW - 2 || y >= GH - 2) return;
+      cur[y * GW + x] = 1;
+      age[y * GW + x] = 1;
+    });
+    draw(); updateStats();
+  }
+
+  document.getElementById('selPattern').addEventListener('change', function () {
+    plantMode = this.value;
+    if (plantMode) toast('✳ 点击网格放置「' + this.selectedOptions[0].textContent + '」');
+  });
+
+  /* ============ 物种保存 / 对撞 ============ */
+  var SPKEY = 'life_species_v1';
+  function loadSpecies() { try { return JSON.parse(localStorage.getItem(SPKEY) || '[]'); } catch (e) { return []; } }
+  function saveSpecies(list) { try { localStorage.setItem(SPKEY, JSON.stringify(list)); } catch (e) {} }
+  function speciesSnapshot() {
+    var alive = [];
+    for (var i = 0; i < cur.length; i++) if (cur[i]) alive.push([i % GW, Math.floor(i / GW)]);
+    if (!alive.length) return null;
+    var minx = 1e9, miny = 1e9;
+    alive.forEach(function (p) { minx = Math.min(minx, p[0]); miny = Math.min(miny, p[1]); });
+    var norm = alive.map(function (p) { return [p[0] - minx, p[1] - miny]; });
+    return { cells: norm, n: norm.length };
+  }
+
+  function renderSpList() {
+    var list = loadSpecies();
+    var wrap = document.getElementById('spList');
+    wrap.innerHTML = list.map(function (sp, i) {
+      return '<button type="button" data-sp="' + i + '" title="点击放置物种">🧬 ' + sp.name + '(' + sp.n + ' 细胞)</button>';
+    }).join('');
+  }
+  document.getElementById('spList').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-sp]');
+    if (!b) return;
+    var list = loadSpecies();
+    var sp = list[+b.getAttribute('data-sp')];
+    if (!sp) return;
+    plantAt(Math.floor(GW / 2), Math.floor(GH / 2), sp.cells);
+    toast('🧬 已放置物种「' + sp.name + '」');
+    try { STAch.unlock('life.pattern', '生命造物', '🧬'); } catch (er) {}
+  });
+
+  document.getElementById('btnSave').addEventListener('click', function () {
+    var snap = speciesSnapshot();
+    if (!snap) { toast('先撒点种子再保存吧'); return; }
+    var list = loadSpecies();
+    var name = '物种' + (list.length + 1);
+    list.push({ name: name, cells: snap.cells, n: snap.n, at: Date.now() });
+    saveSpecies(list.slice(-24));
+    renderSpList();
+    toast('💾 已保存「' + name + '」（' + snap.n + ' 细胞）');
+    try { STAch.unlock('life.seed', '播种者之手', '🌱'); } catch (e) {}
+  });
+
+  document.getElementById('btnCollide').addEventListener('click', function () {
+    var list = loadSpecies();
+    if (list.length < 2) { toast('至少要有两个物种才能对撞（先各画一个再存）'); return; }
+    /* 取最近两个：左 A 右 B，水平镜像，向中间出发 */
+    var A = list[list.length - 2], B = list[list.length - 1];
+    for (var i = 0; i < cur.length; i++) { cur[i] = 0; age[i] = 0; }
+    gen = 0;
+    var midY = Math.floor(GH / 2);
+    var ax = Math.floor(GW * 0.22), bx = Math.floor(GW * 0.78);
+    placeMirrored(A.cells, ax, midY, false);
+    placeMirrored(B.cells, bx, midY, true);
+    running = true; updatePlayBtn(); startLoop();
+    draw(); updateStats();
+    toast('⚔ 「' + A.name + '」 vs 「' + B.name + '」——开撞！');
+    try { STAch.unlock('life.collide', '物种碰撞实验', '⚔'); } catch (e) {}
+  });
+  function placeMirrored(cells, cx, cy, mirror) {
+    var maxx = 0, maxy = 0;
+    cells.forEach(function (p) { maxx = Math.max(maxx, p[0]); maxy = Math.max(maxy, p[1]); });
+    cells.forEach(function (p) {
+      var x = cx + (mirror ? (maxx - p[0]) : p[0]);
+      var y = cy - Math.round(maxy / 2) + p[1];
+      if (x < 2 || y < 2 || x >= GW - 2 || y >= GH - 2) return;
+      cur[y * GW + x] = 1;
+      age[y * GW + x] = 1;
+    });
+  }
+
+  /* ============ 顶栏按钮 ============ */
+  document.getElementById('btnPlay').addEventListener('click', function () {
+    running = !running;
+    updatePlayBtn();
+    if (running) { lastStep = 0; startLoop(); }
+  });
+  document.getElementById('btnRand').addEventListener('click', function () {
+    for (var i = 0; i < cur.length; i++) {
+      cur[i] = Math.random() < 0.18 ? 1 : 0;
+      age[i] = cur[i] ? 1 : 0;
+    }
+    gen = 0;
+    draw(); updateStats();
+    toast('🌱 撒下了一片种子');
+  });
+  document.getElementById('btnClear').addEventListener('click', function () {
+    cur.fill(0); age.fill(0); gen = 0;
+    running = false; updatePlayBtn();
+    draw(); updateStats();
+  });
+  document.getElementById('selSpeed').addEventListener('change', function () { speed = +this.value; });
+
+  var toastEl = document.getElementById('toast'), toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2600);
+  }
+
+  /* ============ 初始化 ============ */
+  function fit() {
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.round(W * dpr);
+    cv.height = Math.round(H * dpr);
+    resizeWorld(true);
+    draw();
+  }
+  window.addEventListener('resize', fit);
+  fit();
+  /* 开局撒一小片种子 + 一个滑翔机 */
+  for (var i = 0; i < cur.length; i++) { cur[i] = Math.random() < 0.12 ? 1 : 0; }
+  plantAt(Math.floor(GW * 0.5), Math.floor(GH * 0.42), PATTERNS.glider);
+  updateStats();
+  renderSpList();
+  startLoop();
+})();
+</script>
+</body>
+</html>
