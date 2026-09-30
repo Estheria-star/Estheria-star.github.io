@@ -1113,6 +1113,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       <span>📈 函数拟合</span><span><em>·</em></span>
       <span>📕 错题本</span><span><em>·</em></span>
       <span>🩺 今日诊断</span><span><em>·</em></span>
+      <span>🗺 宇宙地图</span><span><em>·</em></span>
       <span>😏 偶尔整活</span><span><em>·</em></span>
       <span>🌙 startian.top</span><span><em>·</em></span>
     </div>
@@ -1215,7 +1216,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
             <span class="zone-name">工具</span>
             <span class="zone-sub">学习与效率 · 干正事用</span>
           </span>
-          <span class="zone-count">5 个作品</span>
+          <span class="zone-count">6 个作品</span>
           <span class="zone-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
         </button>
         <div class="zone-body">
@@ -1264,6 +1265,15 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
           <h3>错题本 · 间隔重复</h3>
           <p>把错题记下来，按遗忘曲线自动排复习：忘了就回炉，记住就拉长间隔——用最少的复习次数，换最牢的记忆。</p>
           <span class="cta">去记错题 <i>→</i></span>
+        </div>
+      </a>
+      <a class="tile" style="--d:.32s" data-demo="map" href="https://startian.top/map/">
+        <div class="tile-media"><img src="demos/map.jpg" alt="宇宙地图演示" loading="lazy"></div>
+        <div class="tile-body">
+          <span class="ptag">导览 · 全站地图</span>
+          <h3>宇宙地图 · 全站导航</h3>
+          <p>13 颗作品星串成一片宇宙：去过的会亮起来，点一颗星就能直达 —— 不知道逛哪好，先来这看一眼星图。</p>
+          <span class="cta">去看星图 <i>→</i></span>
         </div>
       </a>
             </div>
@@ -1384,7 +1394,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       </a>
     </div>
     <div class="ach-cross reveal" style="--d:.16s">
-      <div class="acx-head"><span class="acx-title">🏆 跨站成就柜</span><span class="acx-prog">已点亮 <b id="achLit">0</b> / <span id="achTotal">32</span></span></div>
+      <div class="acx-head"><span class="acx-title">🏆 跨站成就柜</span><span class="acx-prog">已点亮 <b id="achLit">0</b> / <span id="achTotal">34</span></span></div>
       <div class="acx-grid" id="achGrid"></div>
       <div class="acx-tip">游玩任意小站会自动点亮 · 记录只存本机（全站共享），不上传任何地方</div>
     </div>
@@ -2182,6 +2192,8 @@ var ACH_DEFS = [
   { id: 'cuoti.add', ico: '✍️', name: '第一次记错题', desc: '在错题本录入一道题' },
   { id: 'cuoti.review', ico: '🔁', name: '复习打卡', desc: '在错题本完成一次复习' },
   { id: 'cuoti.master', ico: '🎓', name: '真的学会了', desc: '让一道错题进入「已掌握」' },
+  { id: 'site.map', ico: '🗺️', name: '星图领航员', desc: '打开全站宇宙地图' },
+  { id: 'map.all', ico: '🌌', name: '宇宙全图鉴', desc: '在地图上点亮全部 13 颗星' },
   { id: 'home.starry', ico: '🌌', name: '追星者', desc: '发现了隐藏主题「星夜」' },
   { id: 'home.secret', ico: '🗝', name: '找到秘密的人', desc: '解锁了隐藏分区' },
   { id: 'explorer.all', ico: '🧭', name: '全站探险家', desc: '集齐全部站点足迹' }
