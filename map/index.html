@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="星恬的宇宙地图：13 颗作品星串起整个小站，去过的会亮起来；点击星星可展开「星图关系视图」。startian.top 全站导航">
+<meta name="description" content="星恬的宇宙地图：13 颗作品星在宇宙里自由漂浮，彼此靠近时自动连线；去过的会亮起来，点击星星可展开「星图关系视图」。startian.top 全站导航">
 <meta name="theme-color" content="#05070f">
 <title>宇宙地图 · startian.top</title>
 <style>
@@ -15,25 +15,23 @@
     color:#e8eeff;font-family:'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
     overflow-x:hidden;
   }
-  /* —— 星点背景（纯 CSS 平铺，零成本）—— */
   body::before{
     content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     background-image:
       radial-gradient(1.2px 1.2px at 24px 32px, rgba(255,255,255,.55), transparent),
       radial-gradient(1px 1px at 86px 128px, rgba(190,214,255,.42), transparent),
-      radial-gradient(1.6px 1.6px at 168px 66px, rgba(255,255,255,.32), transparent),
+      radial-gradient(1.6px 1.6px at 66px 168px, rgba(255,255,255,.32), transparent),
       radial-gradient(1px 1px at 244px 188px, rgba(170,196,255,.45), transparent),
       radial-gradient(1.3px 1.3px at 300px 100px, rgba(255,255,255,.28), transparent);
     background-size:340px 260px;
   }
-  .neb{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0;transition:opacity .8s ease}
+  .neb{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0}
   .neb.a{width:430px;height:430px;left:-130px;top:-90px;background:radial-gradient(circle,#6d28d9,transparent 70%);opacity:.3}
   .neb.b{width:470px;height:470px;right:-150px;top:110px;background:radial-gradient(circle,#0e7490,transparent 70%);opacity:.26}
   .neb.c{width:400px;height:400px;left:32%;bottom:-180px;background:radial-gradient(circle,#b45309,transparent 70%);opacity:.16}
 
   .wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:26px 20px 90px}
 
-  /* —— 头部 —— */
   header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
   .hd-eyebrow{font-size:11px;letter-spacing:4px;font-weight:800;color:#7f8fc0;margin-bottom:5px}
   h1{font-size:23px;margin:0 0 3px;letter-spacing:.5px}
@@ -47,25 +45,22 @@
   .home{text-decoration:none;font-size:12.5px;font-weight:700;color:#cfe0ff;border:1px solid rgba(130,160,230,.3);border-radius:999px;padding:9px 16px;background:rgba(16,24,48,.7);transition:border-color .2s,transform .2s;white-space:nowrap}
   .home:hover{border-color:rgba(160,190,255,.7);transform:translateY(-1px)}
 
-  /* —— 全图鉴横幅 —— */
   .banner{display:none;margin-bottom:14px;padding:13px 20px;border-radius:16px;font-size:14px;font-weight:800;letter-spacing:.5px;
     background:linear-gradient(100deg,rgba(139,92,246,.22),rgba(56,189,248,.2),rgba(251,191,36,.2));
     border:1px solid rgba(180,200,255,.35);box-shadow:0 0 34px rgba(120,140,255,.25);animation:bannerGlow 2.6s ease-in-out infinite}
   .banner.show{display:block}
   @keyframes bannerGlow{0%,100%{box-shadow:0 0 26px rgba(120,140,255,.22)}50%{box-shadow:0 0 44px rgba(160,180,255,.42)}}
 
-  /* —— 地图舞台 —— */
   .stage{position:relative;border:1px solid rgba(110,140,220,.22);border-radius:26px;overflow:hidden;
     background:radial-gradient(900px 520px at 50% 0%,rgba(30,40,80,.55),rgba(10,15,34,.65));
     box-shadow:0 30px 80px rgba(0,0,0,.5), inset 0 0 60px rgba(60,80,160,.12)}
   #mapSvg{display:block;width:100%;height:auto}
 
   /* ============================================================
-     ✦ 星星（重设计）：光晕 / 星芒 / 呼吸光环 / 渐变核心
+     ✦ 星星：光晕 / 星芒 / 呼吸光环 / 渐变核心（由运动系统实时驱动位置）
      ============================================================ */
-  .node{cursor:pointer;text-decoration:none}
-  .node .pos{transition:transform .9s cubic-bezier(.22,.95,.3,1)}
-  #mapSvg.no-trans .pos{transition:none !important}
+  .node{cursor:pointer;text-decoration:none;transition:opacity .55s ease}
+  .node .pos{will-change:transform}
   .node .fx{transition:transform .3s cubic-bezier(.3,1.35,.5,1);transform-box:fill-box;transform-origin:center}
   .node:hover .fx{transform:scale(1.14)}
   .node .core{transition:filter .3s ease}
@@ -73,7 +68,6 @@
   .node .label{font-size:15px;font-weight:800;fill:#7a86a8;letter-spacing:1px;text-anchor:middle;transition:fill .25s ease,font-size .4s ease;pointer-events:none}
   .node .ico{font-size:16px;text-anchor:middle;dominant-baseline:central;pointer-events:none;transition:opacity .3s ease}
   .node .hit{fill:transparent}
-  .node{transition:opacity .55s ease}
 
   /* —— 未点亮：哑光暗星（不发光）—— */
   .node:not(.lit) .core{fill:#151b33;stroke:rgba(122,140,200,.4);stroke-width:1.3}
@@ -91,10 +85,12 @@
   .node.lit:hover .halo{stroke-width:2.3}
   @keyframes breathe{0%,100%{opacity:.38;transform:scale(.93)}50%{opacity:1;transform:scale(1.06)}}
   @keyframes glowPulse{0%,100%{opacity:.55}50%{opacity:1}}
-  @keyframes spikePulse{0%,100%{opacity:.5;transform:scale(.88) rotate(0deg)}50%{opacity:.95;transform:scale(1.08) rotate(0deg)}}
+  @keyframes spikePulse{0%,100%{opacity:.5;transform:scale(.88)}50%{opacity:.95;transform:scale(1.08)}}
 
-  /* —— 悬停暂停：所有循环动画冻结 —— */
-  #mapSvg.freeze *{animation-play-state:paused !important}
+  /* —— 悬停冻结中的星：给个柔和的"凝住"微光提示 —— */
+  .node.frozenStar .halo{stroke-dasharray:3 5;animation-play-state:paused}
+  .node.frozenStar .glow{animation-play-state:paused}
+  .node.frozenStar .spike{animation-play-state:paused}
 
   /* —— 跃迁 / 闪烁 —— */
   .node.jump .fx{animation:jumpFlash .55s ease;transform-box:fill-box;transform-origin:center}
@@ -102,22 +98,13 @@
   .node.jump .halo{opacity:1;stroke-width:3.2}
 
   /* ============================================================
-     ✦ 连接线：基础层 + 流动光点层
+     ✦ 动态连接线（78 对，实时演算：靠近显现 / 远离消失）
      ============================================================ */
-  .lnk{transition:opacity .35s ease}
-  .lnk .lbase{fill:none;stroke-width:1.3}
-  .lnk .lflow{fill:none;stroke-width:2;stroke-linecap:round;stroke-dasharray:3 15;animation:flowdash 1.7s linear infinite}
+  #dynLinks{transition:opacity .45s ease}
+  .rel-mode #dynLinks{opacity:0}
+  .dlink .dbase{fill:none;stroke-width:1.5}
+  .dlink .dflow{fill:none;stroke-width:1.9;stroke-linecap:round;stroke-dasharray:3 15;animation:flowdash 1.6s linear infinite}
   @keyframes flowdash{to{stroke-dashoffset:-18}}
-  .lnk.on .lbase{stroke-width:1.8;opacity:.85}
-  /* 跨域隐藏关联线：平时极淡 */
-  .lnk.lx .lbase{stroke:rgba(190,170,120,.16);stroke-width:1;stroke-dasharray:2 7}
-  .lnk.lx .lflow{opacity:0;transition:opacity .3s ease}
-  .lnk.lx.hl .lbase{stroke:rgba(255,215,130,.75)}
-  .lnk.lx.hl .lflow{opacity:1;stroke:#ffd97a}
-  /* 悬停聚焦：无关线淡出，相关线点亮 */
-  #mapSvg.focusing .lnk{opacity:.1}
-  #mapSvg.focusing .lnk.hl{opacity:1}
-  #mapSvg.focusing .lnk.hl .lbase{stroke-width:2;opacity:1}
 
   /* 星域光斑与标签 */
   .zoneGlowText{text-anchor:middle;pointer-events:none;transition:opacity .5s ease}
@@ -125,11 +112,8 @@
   .zsub{font-size:12px;font-weight:700;fill:#8697c4;letter-spacing:1px}
   .zoneBlob{transition:opacity .6s ease}
   .watermark{font-size:15px;font-weight:800;fill:rgba(150,170,230,.14);letter-spacing:6px;text-anchor:middle;pointer-events:none;transition:opacity .5s ease}
-  /* 关系模式：地图元素淡出 */
-  #mapLinks{transition:opacity .45s ease}
   #relLinks{opacity:0;pointer-events:none;transition:opacity .55s ease}
-  .rel-mode #mapLinks{opacity:0}
-  .rel-mode #relLinks{opacity:1;transition-delay:.32s}
+  .rel-mode #relLinks{opacity:1;transition-delay:.45s}
   .rel-mode .zoneGlowText,.rel-mode .watermark,.rel-mode .zoneBlob{opacity:0}
   .rel-lab{font-size:11px;font-weight:700;fill:rgba(255,222,150,.85);text-anchor:middle;letter-spacing:1px}
   .rel-link{fill:none;stroke:rgba(255,214,130,.55);stroke-width:1.6}
@@ -160,7 +144,7 @@
   .lg-dot{width:12px;height:12px;border-radius:50%;display:inline-block;flex:0 0 auto}
   .lg-lit{background:radial-gradient(circle at 35% 35%,#fff,#a78bfa 60%,#38bdf8);box-shadow:0 0 10px rgba(139,92,246,.9)}
   .lg-dim{background:#151b33;border:1.4px dashed rgba(120,140,200,.5)}
-  .lg-line{width:22px;height:0;border-top:2px dashed rgba(255,214,130,.6);display:inline-block}
+  .lg-line{width:22px;height:0;border-top:2px dashed rgba(140,170,255,.6);display:inline-block}
   button.rand{
     margin-left:auto;border:1px solid rgba(140,170,255,.4);border-radius:999px;padding:11px 20px;font-family:inherit;cursor:pointer;
     font-size:13.5px;font-weight:800;color:#0a0f24;background:linear-gradient(100deg,#ffd97a,#fbbf24);
@@ -169,7 +153,6 @@
   button.rand:active{transform:translateY(2px);box-shadow:0 3px 0 #8a6a1a}
   .tipnote{width:100%;font-size:11.5px;color:#6d7ca8;font-weight:600}
 
-  /* —— 关系视图：顶部提示 + 底部信息卡 —— */
   .relhint{
     position:absolute;top:14px;left:50%;transform:translateX(-50%) translateY(-8px);opacity:0;pointer-events:none;
     background:rgba(14,20,40,.92);border:1px solid rgba(255,214,130,.4);border-radius:999px;
@@ -196,9 +179,8 @@
     font-weight:800;color:#cfe0ff;background:rgba(24,32,60,.8);cursor:pointer;white-space:nowrap}
   .relbar button.rbbak:hover{border-color:rgba(170,200,255,.8)}
 
-  /* —— 悬停详情卡 —— */
   .tip{position:fixed;z-index:80;pointer-events:none;opacity:0;transform:translateY(6px);transition:opacity .18s ease,transform .18s ease;
-    background:rgba(14,20,40,.96);border:1px solid rgba(130,160,230,.35);border-radius:14px;padding:12px 15px;max-width:262px;
+    background:rgba(14,20,40,.96);border:1px solid rgba(130,160,230,.35);border-radius:14px;padding:12px 15px;max-width:272px;
     box-shadow:0 18px 44px rgba(0,0,0,.55)}
   .tip.show{opacity:1;transform:none}
   .tip b{font-size:14px;letter-spacing:.5px}
@@ -237,9 +219,8 @@
   #mapSvg.mob .zsub{font-size:13px}
   #mapSvg.mob .rel-lab{font-size:12px}
   @media (prefers-reduced-motion: reduce){
-    .node .pos{transition:none}
     .node .fx,.node .halo,.node .spike,.node .glow{animation:none !important;transition:none}
-    .lnk .lflow,.rel-link .rl-flow,.rel-node-halo{animation:none}
+    .dlink .dflow,.rel-link .rl-flow,.rel-node-halo{animation:none}
     .banner{animation:none}
   }
 
@@ -293,10 +274,10 @@
     <div class="legend">
       <span><i class="lg-dot lg-lit"></i>已点亮 · 去过的作品</span>
       <span><i class="lg-dot lg-dim"></i>暗星 · 还没去过</span>
-      <span><i class="lg-line"></i>星图关系连线</span>
+      <span><i class="lg-line"></i>星星靠近时自动连线</span>
     </div>
     <button class="rand" id="btnRandom" type="button">🎲 带我去一颗暗星</button>
-    <div class="tipnote">悬停星星会暂停星图动画并预览它的关系 · 点击星星展开「星图关系视图」· Ctrl / 中键点击直接前往</div>
+    <div class="tipnote">星星在自由漂浮，彼此靠近会自动连线 · 悬停任一颗让它停下来 · 点击星星展开「星图关系视图」· Ctrl / 中键点击直接前往</div>
   </div>
 </div>
 
@@ -362,32 +343,25 @@
      —— 新增关系：同星域自动互相关联；跨星域在 REL_X 加一行 [a, b, '关系名']
      ============================================================ */
   var ZONES = [
-    { key: 'fun',  name: '娱乐星域', sub: '下棋 · 转着玩',  c1: '#8b5cf6', c2: '#ec4899', c: '#a78bfa',
-      desk: { x: 288, y: 318 }, mob: { x: 210, y: 235 } },
-    { key: 'tool', name: '工具星域', sub: '学习与效率',     c1: '#38bdf8', c2: '#6366f1', c: '#5eb2f6',
-      desk: { x: 634, y: 438 }, mob: { x: 210, y: 568 } },
-    { key: 'fun2', name: '整活星域', sub: '没啥用但挺逗',   c1: '#fbbf24', c2: '#f97316', c: '#fbbf24',
-      desk: { x: 970, y: 246 }, mob: { x: 210, y: 884 } }
+    { key: 'fun',  name: '娱乐星域', sub: '下棋 · 转着玩',  c: '#a78bfa', desk: { x: 288, y: 318 }, mob: { x: 210, y: 235 } },
+    { key: 'tool', name: '工具星域', sub: '学习与效率',     c: '#5eb2f6', desk: { x: 634, y: 438 }, mob: { x: 210, y: 568 } },
+    { key: 'fun2', name: '整活星域', sub: '没啥用但挺逗',   c: '#fbbf24', desk: { x: 970, y: 246 }, mob: { x: 210, y: 884 } }
   ];
   var SITES = [
-    /* 🎮 娱乐星域 */
     { id: 'site.gomoku',   name: '五子棋',   ico: '⚫', zone: 'fun',  url: 'https://wuziqi.startian.top/', desc: '学习反制版：AI 会记住你的棋风，下一局反制你。' },
     { id: 'site.tujie',    name: '六边形',   ico: '⬡', zone: 'fun',  url: 'https://startian.top/tujie/',   desc: '无上限展开的六边形几何展示器，转一转挺上头。' },
     { id: 'site.star',     name: '星空',     ico: '✨', zone: 'fun',  url: 'https://startian.top/star/',    desc: '种子生成独一无二的星空，还能下载当壁纸。' },
     { id: 'site.life',     name: '生命游戏', ico: '🦠', zone: 'fun',  url: 'https://startian.top/life/',    desc: '撒一把种子看细胞生长，还能让两个物种对撞。' },
     { id: 'site.music',    name: '函数音乐', ico: '🎵', zone: 'fun',  url: 'https://startian.top/music/',   desc: '把函数画成声波，图形会跟着一起跳。' },
-    /* 🧰 工具星域 */
     { id: 'site.geometry', name: '几何工坊', ico: '📐', zone: 'tool', url: 'https://geometry.startian.top/', desc: '高中数学几何工作台，AI 读题自动出图。' },
     { id: 'site.daka',     name: '打卡日程', ico: '🗓️', zone: 'tool', url: 'https://daka.startian.top/',     desc: '给自己定小目标，一键打卡 · 数据只在本地。' },
     { id: 'site.colorlab', name: '配色实验室', ico: '🎨', zone: 'tool', url: 'https://startian.top/colorlab/', desc: '选两个颜色，实时生成整套 UI 配色并导出 CSS。' },
     { id: 'site.fit',      name: '函数拟合', ico: '📈', zone: 'tool', url: 'https://startian.top/fit/',      desc: '丢一堆散点进去，自动找出最像的那个函数。' },
     { id: 'site.cuoti',    name: '错题本',   ico: '📕', zone: 'tool', url: 'https://startian.top/cuoti/',    desc: '按记忆曲线自动排复习，让时间帮你记住。' },
-    /* 🎭 整活星域 */
     { id: 'site.zhenghuo', name: '整活',     ico: '😏', zone: 'fun2', url: 'https://startian.top/zhenghuo/', desc: '假装正经的「隐私协议」，点同意有惊喜。' },
     { id: 'site.fake',     name: '假加载页', ico: '🎭', zone: 'fun2', url: 'https://startian.top/fake/',     desc: '进度条卡在 99%，陪你唠两句才肯承认早就好了。' },
     { id: 'site.report',   name: '诊断报告', ico: '🩺', zone: 'fun2', url: 'https://startian.top/report/',   desc: 'AI 给今天的你开一张体检单，纯玄学仅供参考。' }
   ];
-  /* ✦ 跨星域关系（手工维护，会显示在「星图关系视图」里）*/
   var REL_X = [
     ['site.fit',      'site.geometry', '同门数学'],
     ['site.music',    'site.geometry', '函数玩法'],
@@ -397,11 +371,9 @@
     ['site.tujie',    'site.star',     '视觉玩具']
   ];
 
-  /* ============ 派生数据 ============ */
   function siteById(id) { for (var i = 0; i < SITES.length; i++) if (SITES[i].id === id) return SITES[i]; return null; }
   function zoneOf(s) { for (var i = 0; i < ZONES.length; i++) if (ZONES[i].key === s.zone) return ZONES[i]; return ZONES[0]; }
-  function zoneShort(s) { var z = zoneOf(s); return { 'fun': '娱乐', 'tool': '工具', 'fun2': '整活' }[z.key]; }
-  /* 关系表：同域全关联 + 跨域手工 */
+  function zoneShort(s) { return { 'fun': '娱乐', 'tool': '工具', 'fun2': '整活' }[zoneOf(s).key]; }
   var REL = {};
   SITES.forEach(function (s) {
     REL[s.id] = [];
@@ -418,20 +390,191 @@
   /* ============ 运行时状态 ============ */
   var mob = false;
   var confettiRuns = 0;
-  var view = { mode: 'map', center: null };   /* 状态机：map（全景）| rel（星图关系视图） */
+  var view = { mode: 'map', center: null };
   var svg = document.getElementById('mapSvg');
   var stage = document.getElementById('stage');
   var MQ = window.matchMedia('(max-width: 760px)');
+  var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   mob = MQ.matches;
 
-  var GEO = {};        /* 布局缓存：mob/W/H/中心点/每域节点坐标/星位表 */
-  var nodesIndex = {}; /* id -> { a, pos, fx, site } */
-  var linksFor = {};   /* id -> [<g.lnk>] 供 hover 聚焦 */
+  var GEO = {};
+  var nodesIndex = {};
   var relLayer = null;
 
-  function isLit(s) { return STAch.has(s.id); }
-  function litCount() { return SITES.filter(isLit).length; }
+  /* ═══════════ 运动系统（实时演算）═══════════
+     每颗星在锚点附近用「三频正弦叠加」做不规则漂移（准周期、不重复），
+     叠加锚点回拉（软弹簧）与星间软排斥（防重叠）；
+     78 对星两两实时测距，靠近时连线显现、变亮，远离时淡出消失。 */
+  var STARS = [], starMap = {}, PAIRS = [];
+  var T = 0, lastT = 0, running = false;
+  var hoverId = null;
+  var PARAMS = {};   /* roamR / linkR / minD / amp 随布局切换 */
 
+  function setParams() {
+    PARAMS = mob
+      ? { roam: 20, linkR: 92, minD: 44, ampK: 0.38 }
+      : { roam: 34, linkR: 124, minD: 64, ampK: 1 };
+  }
+
+  function initMotion() {
+    setParams();
+    starMap = {};
+    STARS = SITES.map(function (s) {
+      var a = GEO.pos[s.id];
+      var st = {
+        id: s.id, site: s,
+        ax: a.x, ay: a.y,          /* 锚点（自由漂移的中心） */
+        x: a.x, y: a.y,            /* 当前位置 */
+        amp: (14 + Math.random() * 10) * PARAMS.ampK,
+        w1: 0.25 + Math.random() * 0.28, w2: 0.8 + Math.random() * 0.6, w3: 2.1 + Math.random() * 1.5,
+        p1: Math.random() * 6.28, p2: Math.random() * 6.28, p3: Math.random() * 6.28,
+        p4: Math.random() * 6.28, p5: Math.random() * 6.28, p6: Math.random() * 6.28,
+        frozen: false, flyTo: null
+      };
+      starMap[s.id] = st;
+      return st;
+    });
+    buildPairs();
+    updateLinks();
+    STARS.forEach(writeStarPos);
+  }
+
+  function buildPairs() {
+    PAIRS = [];
+    /* 邻接表：域内环序相邻（这些对常驻一条弱"骨架线"） */
+    var adj = {};
+    ZONES.forEach(function (z) {
+      var members = SITES.filter(function (s) { return s.zone === z.key; });
+      for (var i = 0; i < members.length; i++) {
+        var a = members[i].id, b = members[(i + 1) % members.length].id;
+        adj[a + '|' + b] = 1; adj[b + '|' + a] = 1;
+      }
+    });
+    var gEls = svg.querySelectorAll('#dynLinks .dlink');
+    var idx = 0;
+    for (var i = 0; i < SITES.length; i++) {
+      for (var j = i + 1; j < SITES.length; j++) {
+        var A = SITES[i], B = SITES[j];
+        var isAdj = !!adj[A.id + '|' + B.id];
+        var both = isLit(A) && isLit(B);
+        var sameZone = A.zone === B.zone;
+        var color = both ? (sameZone ? zoneOf(A).c : '#ffd97a') : '#7f96c8';
+        PAIRS.push({
+          a: A.id, b: B.id, adj: isAdj, both: both,
+          g: gEls[idx], base: gEls[idx].querySelector('.dbase'), flow: gEls[idx].querySelector('.dflow'),
+          vis: -1, shown: false
+        });
+        /* 颜色一次定死（点亮状态在页面生命周期内不变） */
+        gEls[idx].querySelector('.dbase').setAttribute('stroke', color);
+        if (gEls[idx].querySelector('.dflow')) gEls[idx].querySelector('.dflow').setAttribute('stroke', color);
+        idx++;
+      }
+    }
+  }
+
+  function writeStarPos(st) {
+    var n = nodesIndex[st.id];
+    if (n) n.pos.style.transform = 'translate(' + st.x.toFixed(1) + 'px,' + st.y.toFixed(1) + 'px)';
+  }
+
+  function step(dt) {
+    T += dt;
+    var roam = PARAMS.roam, linkR = PARAMS.linkR, minD = PARAMS.minD;
+    var relLock = view.mode === 'rel';
+    var i, st, n;
+
+    /* 1) 运动：飞行动画（优先）/ 自由漂移 */
+    for (i = 0; i < STARS.length; i++) {
+      st = STARS[i];
+      if (st.flyTo) {
+        var f = st.flyTo;
+        var k = REDUCE ? 1 : (1 - Math.exp(-dt / 0.15));
+        st.x += (f.x - st.x) * k;
+        st.y += (f.y - st.y) * k;
+        if (Math.hypot(f.x - st.x, f.y - st.y) < 0.6) { st.x = f.x; st.y = f.y; st.flyTo = null; }
+      } else if (!st.frozen && !relLock) {
+        /* 不规则漂移：三频正弦（方向缓慢变化、轨迹不循环） + 锚点回拉 */
+        var vx = st.amp * (0.5 * Math.sin(T * st.w1 + st.p1) + 0.32 * Math.sin(T * st.w2 + st.p2) + 0.18 * Math.sin(T * st.w3 + st.p3));
+        var vy = st.amp * (0.5 * Math.cos(T * st.w2 + st.p4) + 0.32 * Math.cos(T * st.w3 + st.p5) + 0.18 * Math.cos(T * st.w1 + st.p6));
+        vx += (st.ax - st.x) * 0.42;
+        vy += (st.ay - st.y) * 0.42;
+        st.x += vx * dt;
+        st.y += vy * dt;
+      }
+    }
+
+    /* 2) 星间软排斥（防重叠，冻结/飞行中的星让位） */
+    for (i = 0; i < PAIRS.length; i++) {
+      var A = starMap[PAIRS[i].a], B = starMap[PAIRS[i].b];
+      var dx = B.x - A.x, dy = B.y - A.y;
+      var d2 = dx * dx + dy * dy;
+      if (d2 < minD * minD && d2 > 0.0001) {
+        var d = Math.sqrt(d2), push = (minD - d) * 0.5, ux = dx / d, uy = dy / d;
+        var aFixed = A.frozen || A.flyTo, bFixed = B.frozen || B.flyTo;
+        if (aFixed && !bFixed) { B.x += ux * push; B.y += uy * push; }
+        else if (bFixed && !aFixed) { A.x -= ux * push; A.y -= uy * push; }
+        else if (!aFixed && !bFixed) {
+          A.x -= ux * push * 0.5; A.y -= uy * push * 0.5;
+          B.x += ux * push * 0.5; B.y += uy * push * 0.5;
+        }
+      }
+    }
+
+    /* 3) 位置回写 + 实时连线 */
+    for (i = 0; i < STARS.length; i++) writeStarPos(STARS[i]);
+    if (!relLock || anyFlying()) updateLinks();
+  }
+
+  function anyFlying() {
+    for (var i = 0; i < STARS.length; i++) if (STARS[i].flyTo) return true;
+    return false;
+  }
+
+  function updateLinks() {
+    var linkR = PARAMS.linkR, R2 = linkR * linkR;
+    for (var i = 0; i < PAIRS.length; i++) {
+      var p = PAIRS[i];
+      var A = starMap[p.a], B = starMap[p.b];
+      var dx = B.x - A.x, dy = B.y - A.y;
+      var d2 = dx * dx + dy * dy;
+      var vis = 0;
+      if (p.adj) vis = 0.2;                                   /* 同域骨架线常驻 */
+      if (d2 < R2) vis = Math.max(vis, (1 - Math.sqrt(d2) / linkR) * 0.92);
+      if (hoverId && vis > 0.02 && (p.a === hoverId || p.b === hoverId)) {
+        vis = Math.min(1, 0.5 + vis * 0.7);                   /* 悬停加成：该星当前连线全部亮起 */
+      }
+      if (vis < 0.025) {
+        if (p.shown) { p.g.style.display = 'none'; p.shown = false; p.vis = 0; }
+        continue;
+      }
+      if (!p.shown) { p.g.style.display = ''; p.shown = true; }
+      if (Math.abs(vis - p.vis) > 0.012 || !p.shown) { p.g.style.opacity = vis.toFixed(3); p.vis = vis; }
+      p.base.setAttribute('x1', A.x.toFixed(1)); p.base.setAttribute('y1', A.y.toFixed(1));
+      p.base.setAttribute('x2', B.x.toFixed(1)); p.base.setAttribute('y2', B.y.toFixed(1));
+      if (p.flow) {
+        p.flow.setAttribute('x1', A.x.toFixed(1)); p.flow.setAttribute('y1', A.y.toFixed(1));
+        p.flow.setAttribute('x2', B.x.toFixed(1)); p.flow.setAttribute('y2', B.y.toFixed(1));
+      }
+    }
+  }
+
+  var loop = function (now) {
+    if (!running) return;
+    requestAnimationFrame(loop);
+    var dt = (now - lastT) / 1000;
+    lastT = now;
+    if (dt <= 0) return;
+    if (dt > 0.05) dt = 0.05;   /* 防切页回来大跳跃 */
+    step(dt);
+  };
+  function startLoop() {
+    if (running || REDUCE) return;
+    running = true;
+    lastT = performance.now();
+    requestAnimationFrame(loop);
+  }
+
+  /* ============ 渲染 ============ */
   function calcGeo() {
     mob = MQ.matches;
     var W = mob ? 420 : 1180;
@@ -454,13 +597,12 @@
     GEO = { W: W, H: H, center: mob ? { x: 210, y: 507 } : { x: 590, y: 352 }, layouts: layouts, pos: pos };
   }
 
-  /* ============ 渲染：结构一次构建 ============ */
   function render() {
     calcGeo();
     var W = GEO.W, H = GEO.H;
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     svg.classList.toggle('mob', mob);
-    nodesIndex = {}; linksFor = {};
+    nodesIndex = {};
 
     var s = '';
     s += '<defs>';
@@ -471,14 +613,11 @@
     s += '<linearGradient id="coreGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".4" stop-color="#c4b5fd"/><stop offset="1" stop-color="#7dd3fc"/></linearGradient>';
     s += '</defs>';
 
-    /* 星域光斑 */
     ZONES.forEach(function (z) {
       var L = GEO.layouts[z.key];
       var gr = mob ? L.r + 96 : L.r + 118;
       s += '<circle class="zoneBlob" cx="' + L.c.x + '" cy="' + L.c.y + '" r="' + gr + '" fill="url(#zg-' + z.key + ')"/>';
     });
-
-    /* 星域中心标签 */
     ZONES.forEach(function (z) {
       var L = GEO.layouts[z.key];
       s += '<g class="zoneGlowText" transform="translate(' + L.c.x + ' ' + L.c.y + ')">';
@@ -488,41 +627,31 @@
     });
     if (!mob) s += '<text class="watermark" x="590" y="648">✦ STARTIAN UNIVERSE ✦</text>';
 
-    /* 星域航道（域间虚线） */
     var zs = ZONES.map(function (z) { return GEO.layouts[z.key].c; });
     for (var i = 0; i < zs.length; i++) {
       var j = (i + 1) % zs.length;
-      s += '<path class="lane" d="M' + zs[i].x + ' ' + zs[i].y + ' Q' + ((zs[i].x + zs[j].x) / 2 + (mob ? 30 : -40)) + ' ' + ((zs[i].y + zs[j].y) / 2 + (mob ? -18 : 26)) + ' ' + zs[j].x + ' ' + zs[j].y + '" style="stroke:rgba(120,140,210,.13);stroke-width:1;stroke-dasharray:3 9;fill:none"/>';
+      s += '<path d="M' + zs[i].x + ' ' + zs[i].y + ' Q' + ((zs[i].x + zs[j].x) / 2 + (mob ? 30 : -40)) + ' ' + ((zs[i].y + zs[j].y) / 2 + (mob ? -18 : 26)) + ' ' + zs[j].x + ' ' + zs[j].y + '" style="stroke:rgba(120,140,210,.13);stroke-width:1;stroke-dasharray:3 9;fill:none"/>';
     }
 
-    /* —— 连接线：域内环线（基础层 + 流动层）+ 跨域隐藏关联线 —— */
-    s += '<g id="mapLinks">';
-    ZONES.forEach(function (z) {
-      var pts = GEO.layouts[z.key].pts;
-      for (var k = 0; k < pts.length; k++) {
-        var p1 = pts[k], p2 = pts[(k + 1) % pts.length];
-        s += lineGroup(z, p1, p2);
+    /* 动态连线层：78 对骨架（坐标由运动系统每帧写入） */
+    s += '<g id="dynLinks">';
+    for (var a = 0; a < SITES.length; a++) {
+      for (var b = a + 1; b < SITES.length; b++) {
+        var bothL = isLit(SITES[a]) && isLit(SITES[b]);
+        s += '<g class="dlink" style="display:none;opacity:0">' +
+          '<line class="dbase" x1="0" y1="0" x2="0" y2="0"/>' +
+          (bothL ? '<line class="dflow" x1="0" y1="0" x2="0" y2="0" style="animation-delay:' + (Math.random() * -1.6).toFixed(2) + 's"/>' : '') +
+          '</g>';
       }
-    });
-    REL_X.forEach(function (r) {
-      var pa = GEO.pos[r[0]], pb = GEO.pos[r[1]];
-      if (!pa || !pb) return;
-      s += '<g class="lnk lx" data-a="' + r[0] + '" data-b="' + r[1] + '">' +
-        '<line class="lbase" x1="' + pa.x + '" y1="' + pa.y + '" x2="' + pb.x + '" y2="' + pb.y + '" stroke="rgba(190,170,120,.16)"/>' +
-        '<line class="lflow" x1="' + pa.x + '" y1="' + pa.y + '" x2="' + pb.x + '" y2="' + pb.y + '" stroke="#ffd97a" style="animation-delay:' + (Math.random() * -1.5).toFixed(2) + 's"/>' +
-        '</g>';
-    });
+    }
     s += '</g>';
 
-    /* 星图关系层（进入关系视图时填充） */
     s += '<g id="relLinks"></g>';
 
-    /* —— 节点 —— */
     s += '<g id="nodesLayer">';
     ZONES.forEach(function (z) {
       GEO.layouts[z.key].pts.forEach(function (p) {
         var lit = isLit(p.s);
-        var coreR = 13;
         var dl = (-Math.random() * 3).toFixed(2) + 's';
         s += '<a class="node' + (lit ? ' lit' : '') + '" href="' + p.s.url + '" data-id="' + p.s.id + '" style="--c:' + z.c + ';--dl:' + dl + '" aria-label="' + p.s.name + (lit ? '（已点亮）' : '（未点亮）') + '">';
         s += '<g class="pos" style="transform:translate(' + p.x + 'px,' + p.y + 'px)">';
@@ -534,7 +663,7 @@
         }
         s += '<g class="fx">';
         if (lit) s += '<path class="spike" d="M0,-40 L2.6,-16 L0,-12 L-2.6,-16 Z M0,40 L2.6,16 L0,12 L-2.6,16 Z M-40,0 L-16,2.6 L-12,0 L-16,-2.6 Z M40,0 L16,2.6 L12,0 L16,-2.6 Z"/>';
-        s += '<circle class="core" r="' + (lit ? coreR : 12) + '"/>';
+        s += '<circle class="core" r="' + (lit ? 13 : 12) + '"/>';
         s += '</g>';
         s += '<text class="ico" y="0.5">' + p.s.ico + '</text>';
         s += '<text class="label" y="46">' + p.s.name + '</text>';
@@ -546,61 +675,31 @@
 
     svg.innerHTML = s;
 
-    /* 索引与事件 */
-    [].forEach.call(svg.querySelectorAll('.node'), function (a) {
-      var id = a.getAttribute('data-id');
-      nodesIndex[id] = { a: a, pos: a.querySelector('.pos'), fx: a.querySelector('.fx'), site: siteById(id) };
-    });
-    [].forEach.call(svg.querySelectorAll('#mapLinks .lnk'), function (g) {
-      var a = g.getAttribute('data-a'), b = g.getAttribute('data-b');
-      (linksFor[a] = linksFor[a] || []).push(g);
-      (linksFor[b] = linksFor[b] || []).push(g);
+    [].forEach.call(svg.querySelectorAll('.node'), function (el) {
+      var id = el.getAttribute('data-id');
+      nodesIndex[id] = { a: el, pos: el.querySelector('.pos'), fx: el.querySelector('.fx'), site: siteById(id) };
     });
     relLayer = document.getElementById('relLinks');
+
+    hoverId = null;
+    initMotion();
     bindNodes();
     updateHeader();
 
-    /* 若正处于关系视图，重建后无过渡恢复到关系布局 */
     if (view.mode === 'rel' && view.center && nodesIndex[view.center]) {
-      svg.classList.add('no-trans');
-      applyRelLayout(view.center);
-      requestAnimationFrame(function () { requestAnimationFrame(function () { svg.classList.remove('no-trans'); }); });
+      applyRelLayout(view.center, true);
     }
     refreshInfo();
   }
-  function lineGroup(z, p1, p2) {
-    var on = isLit(p1.s) && isLit(p2.s);
-    var g = '<g class="lnk' + (on ? ' on' : '') + '" data-a="' + p1.s.id + '" data-b="' + p2.s.id + '">' +
-      '<line class="lbase" x1="' + p1.x + '" y1="' + p1.y + '" x2="' + p2.x + '" y2="' + p2.y + '" stroke="' + (on ? z.c : 'rgba(130,150,220,.13)') + '"/>';
-    if (on) g += '<line class="lflow" x1="' + p1.x + '" y1="' + p1.y + '" x2="' + p2.x + '" y2="' + p2.y + '" stroke="' + z.c + '" style="animation-delay:' + (Math.random() * -1.5).toFixed(2) + 's"/>';
-    return g + '</g>';
-  }
 
-  /* ============ 位置与布局切换 ============ */
-  function setPositions(targets) {
-    Object.keys(targets).forEach(function (id) {
-      var n = nodesIndex[id];
-      if (!n) return;
-      var t = targets[id];
-      n.pos.style.transform = 'translate(' + t.x + 'px,' + t.y + 'px)';
-    });
-  }
-  function mapTargets() {
-    var t = {};
-    SITES.forEach(function (s) {
-      var p = GEO.pos[s.id];
-      t[s.id] = { x: p.x, y: p.y };
-    });
-    return t;
-  }
-  function applyRelLayout(centerId) {
+  /* ============ 关系视图（飞行目标由运动系统缓动）============ */
+  function applyRelLayout(centerId, immediate) {
     var W = GEO.W, H = GEO.H, C = GEO.center;
     var related = REL[centerId] || [];
     var relIds = related.map(function (r) { return r.id; });
     var targets = {};
     var ringN = related.length;
     var R1 = mob ? (ringN > 5 ? 136 : 118) : (ringN > 5 ? 218 : 192);
-    /* 关联星环排（按全图上相对中心的方向排序，保留方位记忆） */
     var sorted = related.slice().sort(function (x, y) {
       var px = GEO.pos[x.id], py = GEO.pos[y.id];
       return Math.atan2(px.y - C.y, px.x - C.x) - Math.atan2(py.y - C.y, py.x - C.x);
@@ -610,7 +709,6 @@
       targets[r.id] = { x: C.x + R1 * Math.cos(a), y: C.y + R1 * Math.sin(a) };
     });
     targets[centerId] = { x: C.x, y: C.y };
-    /* 其余星推到外圈并淡化 */
     var pad = 34;
     SITES.forEach(function (s) {
       if (targets[s.id]) return;
@@ -623,16 +721,20 @@
       ty = Math.max(pad, Math.min(H - pad, ty));
       targets[s.id] = { x: tx, y: ty };
     });
-    setPositions(targets);
-
-    /* 节点状态类 */
+    SITES.forEach(function (s) {
+      var st = starMap[s.id];
+      if (!st) return;
+      var t = targets[s.id];
+      if (immediate || REDUCE) { st.x = t.x; st.y = t.y; st.flyTo = null; }
+      else st.flyTo = { x: t.x, y: t.y };
+      writeStarPos(st);
+    });
     SITES.forEach(function (s) {
       var n = nodesIndex[s.id];
       if (!n) return;
       n.a.classList.toggle('center', s.id === centerId);
-      n.a.classList.toggle('faded', !targets[s.id] ? false : (s.id !== centerId && relIds.indexOf(s.id) < 0));
+      n.a.classList.toggle('faded', s.id !== centerId && relIds.indexOf(s.id) < 0);
     });
-    /* 关系线层 */
     var lines = '';
     related.forEach(function (r) {
       var t1 = targets[centerId], t2 = targets[r.id];
@@ -653,19 +755,27 @@
   function enterRel(id) {
     view.mode = 'rel'; view.center = id;
     svg.classList.add('rel-mode');
-    clearFocus();
+    hoverId = null;
+    STARS.forEach(function (st) { st.frozen = false; });   /* 防止 hover 残留冻结 */
+    var hn = svg.querySelector('.node.frozenStar');
+    if (hn) hn.classList.remove('frozenStar');
     applyRelLayout(id);
     refreshInfo();
+    if (REDUCE) { /* 无动画环境：确保位置直接落位 */ STARS.forEach(writeStarPos); updateLinks(); }
   }
   function exitRel() {
     if (view.mode !== 'rel') return;
     view.mode = 'map'; view.center = null;
     svg.classList.remove('rel-mode');
-    setPositions(mapTargets());
     SITES.forEach(function (s) {
+      var st = starMap[s.id];
       var n = nodesIndex[s.id];
-      if (!n) return;
-      n.a.classList.remove('center', 'faded');
+      if (st) {
+        if (REDUCE) { st.x = st.ax; st.y = st.ay; st.flyTo = null; }
+        else st.flyTo = { x: st.ax, y: st.ay };
+        writeStarPos(st);
+      }
+      if (n) n.a.classList.remove('center', 'faded');
     });
     refreshInfo();
   }
@@ -704,22 +814,20 @@
   /* ============ 节点交互 ============ */
   var tip = document.getElementById('tip');
   function bindNodes() {
-    var nodes = svg.querySelectorAll('.node');
-    [].forEach.call(nodes, function (a) {
+    [].forEach.call(svg.querySelectorAll('.node'), function (a) {
       var id = a.getAttribute('data-id');
       var site = siteById(id);
       var lit = a.classList.contains('lit');
 
       a.addEventListener('mouseenter', function () {
-        /* ① 暂停所有星图动画 ② 预览该星的关系 */
-        svg.classList.add('freeze');
-        if (view.mode === 'map') {
-          svg.classList.add('focusing');
-          (linksFor[id] || []).forEach(function (g) { g.classList.add('hl'); });
-        }
+        /* 悬停 → 这颗星停止运动（其余世界继续流动） */
+        var st = starMap[id];
+        if (st && view.mode === 'map') st.frozen = true;
+        hoverId = id;
+        a.classList.add('frozenStar');
         tip.innerHTML = '<b>' + site.ico + ' ' + site.name + '</b><p>' + site.desc + '</p>' +
           '<span class="st ' + (lit ? 'ok' : 'no') + '">' + (lit ? '✨ 已探索' : '🌑 尚未点亮 · 去逛逛就亮了') + '</span>' +
-          '<span class="hint">点击 → 展开星图关系 · Ctrl/中键 → 直接前往</span>';
+          '<span class="hint">✋ 已冻结这颗星 · 点击 → 展开星图关系 · Ctrl/中键 → 直接前往</span>';
         tip.classList.add('show');
       });
       a.addEventListener('mousemove', function (e) {
@@ -730,38 +838,34 @@
         tip.style.top = Math.max(8, y) + 'px';
       });
       a.addEventListener('mouseleave', function () {
-        svg.classList.remove('freeze');
-        clearFocus();
+        var st = starMap[id];
+        if (st) st.frozen = false;       /* 解除冻结，继续漂移 */
+        if (hoverId === id) hoverId = null;
+        a.classList.remove('frozenStar');
         tip.classList.remove('show');
       });
 
       a.addEventListener('click', function (e) {
-        if (e.metaKey || e.ctrlKey || e.shiftKey || (e.button !== undefined && e.button !== 0)) return; /* 修饰键/中键 → 浏览器默认（新标签） */
+        if (e.metaKey || e.ctrlKey || e.shiftKey || (e.button !== undefined && e.button !== 0)) return;
         e.preventDefault();
         if (view.mode === 'map') {
-          enterRel(id);                                     /* 全景 → 关系视图（平滑过渡） */
+          enterRel(id);
         } else if (view.center === id) {
-          jumpTo(site.url, nodesIndex[id] && nodesIndex[id].pos);  /* 关系视图内点中心星 → 出发 */
+          jumpTo(site.url, nodesIndex[id] && nodesIndex[id].pos);
         } else {
-          enterRel(id);                                     /* 切换中心（平滑再过渡） */
+          enterRel(id);
         }
       });
     });
-  }
-  function clearFocus() {
-    svg.classList.remove('focusing');
-    [].forEach.call(svg.querySelectorAll('.lnk.hl'), function (g) { g.classList.remove('hl'); });
   }
   function jumpTo(url, posEl) {
     if (posEl) {
       var a = posEl.closest('.node');
       if (a) a.classList.add('jump');
     }
-    if (!isLit({ id: (posEl && posEl.closest('.node') && posEl.closest('.node').getAttribute('data-id')) || '' })) toast('🌑 这一颗还没亮，去点亮它 →');
     setTimeout(function () { location.href = url; }, 230);
   }
 
-  /* 信息卡按钮 + 空白 / ESC 返回 */
   document.getElementById('rbBack').addEventListener('click', function () { exitRel(); });
   document.getElementById('rbGo').addEventListener('click', function (e) {
     e.preventDefault();
@@ -814,6 +918,8 @@
       setTimeout((function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; })(sp), 4600);
     }
   }
+  function isLit(s) { return STAch.has(s.id); }
+  function litCount() { return SITES.filter(isLit).length; }
 
   /* ============ 响应式重建（防抖 + 三重保险） ============ */
   var rt = null;
@@ -833,6 +939,7 @@
 
   /* 启动 */
   render();
+  startLoop();
 
   /* 测试钩子（不影响页面功能） */
   window.__mapInfo = function () {
@@ -841,21 +948,24 @@
       mode: view.mode, center: view.center,
       relCount: view.center ? (REL[view.center] || []).length : 0,
       nodes: SITES.map(function (s) {
+        var st = starMap[s.id];
         var n = nodesIndex[s.id];
-        var m = n ? /translate\(([-\d.]+)px,\s*([-\d.]+)px\)/.exec(n.pos.style.transform || '') : null;
         var lb = n ? n.a.querySelector('.label') : null;
         var b = lb ? lb.getBBox() : { x: 0, y: 0, width: 0, height: 0 };
         return {
           id: s.id, lit: !!(n && n.a.classList.contains('lit')),
           center: !!(n && n.a.classList.contains('center')),
           faded: !!(n && n.a.classList.contains('faded')),
-          x: m ? +m[1] : null, y: m ? +m[2] : null,
+          x: st ? +st.x.toFixed(2) : null, y: st ? +st.y.toFixed(2) : null,
+          ax: st ? st.ax : null, ay: st ? st.ay : null,
+          frozen: st ? st.frozen : false,
+          flying: st ? !!st.flyTo : false,
           labelBBox: { x: b.x, y: b.y, w: b.width, h: b.height }
         };
       }),
-      relLinks: document.querySelectorAll('#relLinks .rel-link-g').length,
-      mapLinks: document.querySelectorAll('#mapLinks .lnk').length,
-      flowLinks: document.querySelectorAll('.lnk.on').length
+      pairs: PAIRS.length,
+      shownLinks: PAIRS.filter(function (p) { return p.shown; }).length,
+      relLinks: document.querySelectorAll('#relLinks .rel-link-g').length
     };
   };
   window.__mapDbg = {
@@ -864,11 +974,25 @@
     enterRel: enterRel,
     exitRel: exitRel,
     relOf: function (id) { return (REL[id] || []).slice(); },
+    /* 手动推进运动（hidden 页面 rAF 被冻结时的测试专用） */
+    tick: function (ms) {
+      var n = Math.max(1, Math.round(ms / 16.7));
+      var dt = (ms / 1000) / n;
+      for (var i = 0; i < n; i++) step(dt);
+      return { T: +T.toFixed(2) };
+    },
+    stars: function () {
+      return STARS.map(function (st) {
+        return { id: st.id, x: +st.x.toFixed(2), y: +st.y.toFixed(2), frozen: st.frozen, flying: !!st.flyTo };
+      });
+    },
     state: function () {
       return {
         lit: litCount(), total: SITES.length, mode: view.mode, center: view.center,
         mapAll: STAch.has('map.all'), confettiRuns: confettiRuns,
-        freeze: svg.classList.contains('freeze'), focusing: svg.classList.contains('focusing')
+        hoverId: hoverId, T: +T.toFixed(2),
+        shownLinks: PAIRS.filter(function (p) { return p.shown; }).length,
+        frozenStars: STARS.filter(function (st) { return st.frozen; }).length
       };
     }
   };
