@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="像素星空生成器：点一下生成一片独一无二的星空，可拖动缩放探索，可下载做壁纸，种子编号可分享。startian.top 出品">
+<meta name="description" content="无限星空生成器：输入种子编号生成一片独一无二的星空，往任何方向拖动都无限延伸；可缩放探索、下载做壁纸，种子+视角可分享。startian.top 出品">
 <meta name="theme-color" content="#070b18">
-<title>像素星空生成器 · startian.top</title>
+<title>无限星空生成器 · 种子生成 · startian.top</title>
 <style>
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;overflow:hidden;background:#070b18}
@@ -78,7 +78,7 @@
   <button id="btnHome" type="button" title="回到原点">⌖</button>
 </div>
 <a class="home" href="https://startian.top/">← 返回主页</a>
-<div class="hint">拖动探索星空 · 滚轮缩放 · 双指缩放 · 「分享这颗」连视角一起发给朋友</div>
+<div class="hint">∞ 无限星空：往任意方向拖动都有新的星 · 滚轮缩放 · 「分享这颗」连视角一起发</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -143,17 +143,146 @@
     };
   }
 
+  /* ============================================================
+     🌌 无限星空引擎（Minecraft 式分块生成）
+     —— 世界划分为 512×512 的区块（chunk），每块由 hash(seed, cx, cy) 独立生成
+     —— 同一颗种子：同一坐标永远同一片星空；往任何方向拖动，无限延伸
+     —— 区块数据按需生成 + LRU 缓存；缩太远时自动抽样（LOD），绘制量恒定
+     ============================================================ */
+  var CHUNK = 512;                 /* 区块边长（世界单位） */
+  var STAR_COLS = ['255,255,255', '210,225,255', '255,240,220', '200,220,255', '255,225,240'];
+  var HUES = [[120, 130, 255], [90, 200, 255], [210, 130, 240], [80, 220, 200], [150, 120, 255]];
+  var chunkCache = {};             /* "seed:cx,cy" → 区块数据 */
+  var chunkLRU = [];               /* 缓存淘汰顺序 */
+  var CACHE_MAX = 900;
+
+  /* 确定性混合哈希：同一 (seed, cx, cy) 永远得到同一随机序列 */
+  function mixHash(seed, cx, cy) {
+    var h = (seed | 0) ^ 0x9e3779b9;
+    h = Math.imul(h ^ (cx | 0), 0x85ebca6b);
+    h = Math.imul(h ^ (cy | 0), 0xc2b2ae35);
+    h ^= h >>> 16; h = Math.imul(h, 0x45d9f3b);
+    h ^= h >>> 16;
+    return h >>> 0;
+  }
+
+  function mkStar(rnd, x0, y0, rMin, rMax, aMin, aMax) {
+    var c = STAR_COLS[(rnd() * STAR_COLS.length) | 0];
+    var a = aMin + rnd() * (aMax - aMin);
+    return {
+      x: x0 + rnd() * CHUNK,
+      y: y0 + rnd() * CHUNK,
+      r: rMin + rnd() * (rMax - rMin),
+      a: a,
+      c: c,
+      css: 'rgba(' + c + ',' + a.toFixed(2) + ')',   /* 预存完整颜色串：绘制时零拼接 */
+      h: rnd()
+    };
+  }
+  function byCss(p, q) { return p.css < q.css ? -1 : (p.css > q.css ? 1 : 0); }
+
+  /* 生成一个区块（纯函数：只依赖 seed/cx/cy，无副作用） */
+  function genChunk(seed, cx, cy) {
+    var rnd = mulberry32(mixHash(seed, cx, cy));
+    var x0 = cx * CHUNK, y0 = cy * CHUNK;
+    var data = { nebs: [], s1: [], s2: [], s3: [], me: null };
+    var i;
+    /* 星云（约 42% 区块有；位置允许溢出边界，与邻块自然衔接） */
+    if (rnd() < 0.42) {
+      var n = rnd() < 0.28 ? 2 : 1;
+      for (i = 0; i < n; i++) {
+        data.nebs.push({
+          x: x0 + (rnd() * 1.5 - 0.25) * CHUNK,
+          y: y0 + (rnd() * 1.5 - 0.25) * CHUNK,
+          r: 130 + rnd() * 260,
+          col: HUES[(rnd() * HUES.length) | 0],
+          a: 0.07 + rnd() * 0.1
+        });
+      }
+    }
+    /* 三层星星：小密暗 → 大疏亮（层内按颜色排序：绘制时大幅减少状态切换） */
+    for (i = 0; i < 160; i++) data.s1.push(mkStar(rnd, x0, y0, 0.4, 0.9, 0.25, 0.55));
+    for (i = 0; i < 60; i++) data.s2.push(mkStar(rnd, x0, y0, 0.8, 1.6, 0.5, 0.85));
+    for (i = 0; i < 18; i++) data.s3.push(mkStar(rnd, x0, y0, 1.5, 2.6, 0.85, 1));
+    data.s1.sort(byCss); data.s2.sort(byCss); data.s3.sort(byCss);
+    /* 流星（少数区块有） */
+    if (rnd() < 0.16) {
+      data.me = {
+        x: x0 + rnd() * CHUNK,
+        y: y0 + rnd() * CHUNK * 0.6,
+        len: 90 + rnd() * 130,
+        ang: Math.PI * 0.75 + (rnd() - 0.5) * 0.3
+      };
+    }
+    return data;
+  }
+
+  function getChunk(seed, cx, cy) {
+    var key = seed + ':' + cx + ',' + cy;
+    var c = chunkCache[key];
+    if (c) return c;
+    c = genChunk(seed, cx, cy);
+    chunkCache[key] = c;
+    chunkLRU.push(key);
+    if (chunkLRU.length > CACHE_MAX) {
+      for (var i = 0; i < 220; i++) delete chunkCache[chunkLRU.shift()];
+    }
+    return c;
+  }
+  function clearChunks() { chunkCache = {}; chunkLRU = []; }
+
+  /* 光晕 sprite：每种星色预渲染一次，drawImage 比逐颗 createRadialGradient 快一个量级 */
+  var haloSprites = {};
+  function haloSprite(cp) {
+    var sp = haloSprites[cp];
+    if (sp) return sp;
+    var sz = 64, c = document.createElement('canvas');
+    c.width = c.height = sz;
+    var g2 = c.getContext('2d');
+    var gr = g2.createRadialGradient(sz / 2, sz / 2, 0, sz / 2, sz / 2, sz / 2);
+    gr.addColorStop(0, 'rgba(' + cp + ',0.55)');
+    gr.addColorStop(0.45, 'rgba(' + cp + ',0.16)');
+    gr.addColorStop(1, 'rgba(' + cp + ',0)');
+    g2.fillStyle = gr;
+    g2.fillRect(0, 0, sz, sz);
+    haloSprites[cp] = c;
+    return c;
+  }
+
+  /* 星云 sprite：每种色调预渲染一次（全强度），绘制时 globalAlpha 缩放（比每帧 createRadialGradient 快得多） */
+  var nebSprites = {};
+  function nebSprite(col) {
+    var key = col[0] + ',' + col[1] + ',' + col[2];
+    var sp = nebSprites[key];
+    if (sp) return sp;
+    var sz = 160, c = document.createElement('canvas');
+    c.width = c.height = sz;
+    var g2 = c.getContext('2d');
+    var gr = g2.createRadialGradient(sz / 2, sz / 2, 0, sz / 2, sz / 2, sz / 2);
+    gr.addColorStop(0, 'rgba(' + key + ',1)');
+    gr.addColorStop(0.45, 'rgba(' + key + ',0.32)');
+    gr.addColorStop(1, 'rgba(' + key + ',0)');
+    g2.fillStyle = gr;
+    g2.fillRect(0, 0, sz, sz);
+    nebSprites[key] = c;
+    return c;
+  }
+
   /* —— 视角：平移（CSS 像素）+ 缩放 —— */
   var view = { x: 0, y: 0, s: 1 };
   var curSeed = 1;
   var W = 0, H = 0;
+  var MIN_S = 0.2, MAX_S = 20;   /* 缩放范围：0.2 ≈ 视野 12800 世界单位宽（无限拖动） */
 
-  /* —— 绘制：世界范围 3×3 视口，供拖动探索 —— */
+  /* —— 绘制：按视口遍历区块（数据按需生成、缓存复用） —— */
+  var MIN_SR = 0.8;   /* 星星屏幕半径下限（px） */
+  var MAX_SR = 8;     /* 上限 */
+  var lastStats = { chunks: 0, drawn: 0, ms: 0 };
   function render(g, W2, H2, seed, v) {
-    var rnd = mulberry32(seed);
-    var SPANX = W2 * 3, SPANY = H2 * 3;
-    var area = SPANX * SPANY / (1280 * 800);
+    var t0 = performance.now();
+    var s = v.s;
 
+    /* 背景（屏幕空间固定渐变） */
     var bgGrad = g.createLinearGradient(0, 0, 0, H2);
     bgGrad.addColorStop(0, '#05070f');
     bgGrad.addColorStop(0.55, '#080d1e');
@@ -161,84 +290,113 @@
     g.fillStyle = bgGrad;
     g.fillRect(0, 0, W2, H2);
 
+    /* 可见世界范围（padding 一个区块，供星云/星芒溢出衔接） */
+    var pad = CHUNK * 1.05;
+    var wx0 = (0 - W2 / 2 - v.x) / s + W2 / 2 - pad;
+    var wx1 = (W2 - W2 / 2 - v.x) / s + W2 / 2 + pad;
+    var wy0 = (0 - H2 / 2 - v.y) / s + H2 / 2 - pad;
+    var wy1 = (H2 - H2 / 2 - v.y) / s + H2 / 2 + pad;
+    var cx0 = Math.floor(wx0 / CHUNK), cx1 = Math.floor(wx1 / CHUNK);
+    var cy0 = Math.floor(wy0 / CHUNK), cy1 = Math.floor(wy1 / CHUNK);
+
+    /* 收集可见区块 */
+    var vis = [];
+    for (var cy = cy0; cy <= cy1; cy++) {
+      for (var cx = cx0; cx <= cx1; cx++) vis.push(getChunk(seed, cx, cy));
+    }
+    lastStats.chunks = vis.length;
+
+    /* LOD：总量超预算时按固定步长抽样（亮星层少抽，暗星层多抽） */
+    var est = vis.length * 238;
+    var stepSmall = 1, stepBig = 1;
+    if (est > 10000) {
+      stepSmall = Math.ceil(est / 10000);
+      stepBig = stepSmall > 2 ? 2 : 1;
+    }
+
     g.save();
     g.translate(W2 / 2 + v.x, H2 / 2 + v.y);
-    g.scale(v.s, v.s);
+    g.scale(s, s);
     g.translate(-W2 / 2, -H2 / 2);
-    var wx0 = W2 / 2 - SPANX / 2, wy0 = H2 / 2 - SPANY / 2;
 
-    var nebulaN = 5 + Math.floor(rnd() * 4);
-    var hues = [[120, 130, 255], [90, 200, 255], [210, 130, 240], [80, 220, 200], [150, 120, 255]];
-    for (var i = 0; i < nebulaN; i++) {
-      var nx = wx0 + rnd() * SPANX, ny = wy0 + rnd() * SPANY;
-      var nr = (Math.min(W2, H2) * (0.25 + rnd() * 0.4));
-      var col = hues[Math.floor(rnd() * hues.length)];
-      var ng = g.createRadialGradient(nx, ny, 0, nx, ny, nr);
-      ng.addColorStop(0, 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',' + (0.10 + rnd() * 0.1).toFixed(2) + ')');
-      ng.addColorStop(1, 'rgba(0,0,0,0)');
-      g.globalCompositeOperation = 'lighter';
-      g.fillStyle = ng;
-      g.beginPath(); g.arc(nx, ny, nr, 0, Math.PI * 2); g.fill();
-    }
+    var i, k, ch, st;
+    var drawn = 0;
 
-    var layers = [
-      { n: Math.round(1250 * area), rMin: 0.4, rMax: 0.9, aMin: 0.25, aMax: 0.55, halo: 0 },
-      { n: Math.round(480 * area), rMin: 0.8, rMax: 1.6, aMin: 0.5, aMax: 0.85, halo: 0.3 },
-      { n: Math.round(126 * area), rMin: 1.5, rMax: 2.6, aMin: 0.85, aMax: 1, halo: 0.75 }
-    ];
-    var starCols = ['255,255,255', '210,225,255', '255,240,220', '200,220,255', '255,225,240'];
-    layers.forEach(function (L) {
-      for (var i2 = 0; i2 < L.n; i2++) {
-        var x = wx0 + rnd() * SPANX, y = wy0 + rnd() * SPANY;
-        var r = L.rMin + rnd() * (L.rMax - L.rMin);
-        var a = L.aMin + rnd() * (L.aMax - L.aMin);
-        var c = starCols[Math.floor(rnd() * starCols.length)];
-        if (L.halo > 0 && rnd() < 0.5) {
-          var hg = g.createRadialGradient(x, y, 0, x, y, r * (L.halo > 0.5 ? 9 : 5));
-          hg.addColorStop(0, 'rgba(' + c + ',' + (0.5 * a).toFixed(2) + ')');
-          hg.addColorStop(1, 'rgba(0,0,0,0)');
-          g.fillStyle = hg;
-          g.beginPath(); g.arc(x, y, r * (L.halo > 0.5 ? 9 : 5), 0, Math.PI * 2); g.fill();
-        }
-        g.globalCompositeOperation = 'source-over';
-        g.fillStyle = 'rgba(' + c + ',' + a.toFixed(2) + ')';
-        g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
-        g.globalCompositeOperation = 'lighter';
-        if (L.halo > 0.5 && rnd() < 0.4) {
-          var sp = r * 7;
-          var lg = g.createLinearGradient(x - sp, y, x + sp, y);
-          lg.addColorStop(0, 'rgba(0,0,0,0)');
-          lg.addColorStop(0.5, 'rgba(' + c + ',' + (0.55 * a).toFixed(2) + ')');
-          lg.addColorStop(1, 'rgba(0,0,0,0)');
-          g.fillStyle = lg;
-          g.fillRect(x - sp, y - 0.6, sp * 2, 1.2);
-          var lg2 = g.createLinearGradient(x, y - sp, x, y + sp);
-          lg2.addColorStop(0, 'rgba(0,0,0,0)');
-          lg2.addColorStop(0.5, 'rgba(' + c + ',' + (0.55 * a).toFixed(2) + ')');
-          lg2.addColorStop(1, 'rgba(0,0,0,0)');
-          g.fillStyle = lg2;
-          g.fillRect(x - 0.6, y - sp, 1.2, sp * 2);
-        }
-      }
-    });
-
-    var meteorN = 1 + Math.floor(rnd() * 2);
-    for (var mi = 0; mi < meteorN; mi++) {
-      if (rnd() < 0.55) {
-        var mx = wx0 + rnd() * SPANX, my = wy0 + rnd() * SPANY * 0.6;
-        var ml = Math.min(W2, H2) * (0.18 + rnd() * 0.2);
-        var ang = Math.PI * 0.75 + (rnd() - 0.5) * 0.3;
-        var ex = mx + Math.cos(ang) * ml, ey = my - Math.sin(ang) * ml;
-        var mg = g.createLinearGradient(mx, my, ex, ey);
-        mg.addColorStop(0, 'rgba(220,235,255,0.85)');
-        mg.addColorStop(1, 'rgba(220,235,255,0)');
-        g.strokeStyle = mg;
-        g.lineWidth = 1.6;
-        g.beginPath(); g.moveTo(mx, my); g.lineTo(ex, ey); g.stroke();
+    /* ① 星云（sprite 绘制 + globalAlpha 控制强度） */
+    g.globalCompositeOperation = 'lighter';
+    for (k = 0; k < vis.length; k++) {
+      ch = vis[k];
+      for (i = 0; i < ch.nebs.length; i++) {
+        var nb = ch.nebs[i];
+        g.globalAlpha = nb.a;
+        g.drawImage(nebSprite(nb.col), nb.x - nb.r, nb.y - nb.r, nb.r * 2, nb.r * 2);
       }
     }
+    g.globalAlpha = 1;
+    g.globalCompositeOperation = 'source-over';
+
+    /* ② 星星：三层，小 → 大（层内已按色排序，fillStyle 切换最少化） */
+    var layers = [['s1', stepSmall, 0], ['s2', stepSmall, 0.5], ['s3', stepBig, 0.55]];
+    var lastCss = '';
+    for (var li = 0; li < layers.length; li++) {
+      var key = layers[li][0], stp = layers[li][1], haloT = layers[li][2];
+      for (k = 0; k < vis.length; k++) {
+        ch = vis[k];
+        var arr = ch[key];
+        for (i = 0; i < arr.length; i += stp) {
+          st = arr[i];
+          var sr = st.r * s;
+          if (sr < MIN_SR) sr = MIN_SR;
+          else if (sr > MAX_SR) sr = MAX_SR;
+          var wr = sr / s;   /* 世界单位半径 */
+          /* 光晕（部分较亮的星）：sprite 已含透明度，无需 globalAlpha */
+          if (haloT > 0 && st.h < haloT && sr > 1.18) {
+            var hr = wr * 5;
+            g.globalCompositeOperation = 'lighter';
+            g.drawImage(haloSprite(st.c), st.x - hr, st.y - hr, hr * 2, hr * 2);
+            g.globalCompositeOperation = 'source-over';
+          }
+          if (st.css !== lastCss) { g.fillStyle = st.css; lastCss = st.css; }
+          if (sr <= 1.5) {
+            g.fillRect(st.x - wr, st.y - wr, wr * 2, wr * 2);
+          } else {
+            g.beginPath(); g.arc(st.x, st.y, wr, 0, Math.PI * 2); g.fill();
+          }
+          drawn++;
+          /* 星芒（很大的亮星） */
+          if (key === 's3' && sr > 2.4 && st.h < 0.45) {
+            var sp = Math.min(wr * 7, MAX_SR * 2.2 / s);
+            g.globalAlpha = st.a * 0.5;
+            g.globalCompositeOperation = 'lighter';
+            g.fillRect(st.x - sp, st.y - wr * 0.22, sp * 2, wr * 0.44);
+            g.fillRect(st.x - wr * 0.22, st.y - sp, wr * 0.44, sp * 2);
+            g.globalCompositeOperation = 'source-over';
+            g.globalAlpha = 1;
+          }
+        }
+      }
+    }
+
+    /* ③ 流星 */
+    g.globalAlpha = 1;
+    g.globalCompositeOperation = 'lighter';
+    for (k = 0; k < vis.length; k++) {
+      ch = vis[k];
+      if (!ch.me) continue;
+      var me = ch.me;
+      var ex = me.x + Math.cos(me.ang) * me.len, ey = me.y - Math.sin(me.ang) * me.len;
+      var mg = g.createLinearGradient(me.x, me.y, ex, ey);
+      mg.addColorStop(0, 'rgba(220,235,255,0.85)');
+      mg.addColorStop(1, 'rgba(220,235,255,0)');
+      g.strokeStyle = mg;
+      g.lineWidth = 1.6 / s;
+      g.beginPath(); g.moveTo(me.x, me.y); g.lineTo(ex, ey); g.stroke();
+    }
+    g.globalAlpha = 1;
     g.globalCompositeOperation = 'source-over';
     g.restore();
+    lastStats.drawn = drawn;
+    lastStats.ms = performance.now() - t0;
   }
 
   function displaySeed() { document.getElementById('seedNo').textContent = '#' + String(curSeed).padStart(4, '0'); }
@@ -271,6 +429,7 @@
   function newSky(seed) {
     curSeed = seed || (Math.floor(Math.random() * 9999) + 1);
     view.x = 0; view.y = 0; view.s = 1;
+    clearChunks();
     displaySeed();
     fit();
     saveUrl();
@@ -279,7 +438,7 @@
   /* —— 缩放：以画布内锚点为中心 —— */
   function zoomAt(px, py, factor) {
     var before = view.s;
-    var next = Math.max(0.3, Math.min(5, before * factor));
+    var next = Math.max(MIN_S, Math.min(MAX_S, before * factor));
     if (next === before) return;
     var cx = W / 2, cy = H / 2;
     view.x += (before - next) * (px - cx);
@@ -317,7 +476,7 @@
       var arr = Array.from(ptrs.values());
       var d = Math.max(1, Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y));
       var cx = (arr[0].x + arr[1].x) / 2, cy = (arr[0].y + arr[1].y) / 2;
-      var k = (Math.max(0.3, Math.min(5, pinchBase.s * d / pinchBase.d))) / pinchBase.s;
+      var k = (Math.max(MIN_S, Math.min(MAX_S, pinchBase.s * d / pinchBase.d))) / pinchBase.s;
       var Cx = W / 2, Cy = H / 2;
       view.s = pinchBase.s * k;
       view.x = pinchBase.vx + (cx - pinchBase.cx) + (pinchBase.cx - Cx) * (1 - k);
@@ -399,13 +558,32 @@
 
   window.addEventListener('resize', fit);
 
+  /* 测试钩子（供自动化验收；不影响页面功能） */
+  window.__sky = {
+    seed: function () { return curSeed; },
+    setSeed: function (n) { newSky(n); },
+    view: view,
+    chunk: function (cx, cy) { return JSON.stringify(getChunk(curSeed, cx, cy)); },
+    chunkCount: function () { return Object.keys(chunkCache).length; },
+    clearChunks: clearChunks,
+    stats: function () { return { chunks: lastStats.chunks, drawn: lastStats.drawn, ms: +lastStats.ms.toFixed(2) }; },
+    size: function () { return { W: W, H: H, dpr: dpr }; },
+    pan: function (dx, dy) { view.x += dx; view.y += dy; draw(); return { x: view.x, y: view.y }; },
+    zoom: function (f) { zoomAt(W / 2, H / 2, f); return view.s; },
+    /* 同步渲染一帧并返回耗时（测试专用：hidden 页面 rAF 冻结时用） */
+    renderNow: function () {
+      render(ctx, cv.width, cv.height, curSeed, { x: view.x * dpr, y: view.y * dpr, s: view.s });
+      return { ms: +lastStats.ms.toFixed(2), chunks: lastStats.chunks, drawn: lastStats.drawn };
+    }
+  };
+
   /* 初始化：URL（seed + 视角） */
   var q = new URLSearchParams(location.search);
   var s = parseInt(q.get('seed') || '', 10);
   curSeed = isFinite(s) && s > 0 ? (s % 100000) : (Math.floor(Math.random() * 9999) + 1);
   var vq = (q.get('v') || '').split(',').map(parseFloat);
   if (vq.length === 3 && vq.every(isFinite)) {
-    view.x = vq[0]; view.y = vq[1]; view.s = Math.max(0.3, Math.min(5, vq[2]));
+    view.x = vq[0]; view.y = vq[1]; view.s = Math.max(MIN_S, Math.min(MAX_S, vq[2]));
   }
   displaySeed();
   fit();
