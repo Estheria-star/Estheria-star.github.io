@@ -1421,7 +1421,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       </a>
     </div>
     <div class="ach-cross reveal" style="--d:.16s">
-      <div class="acx-head"><span class="acx-title">🏆 跨站成就柜</span><span class="acx-prog">已点亮 <b id="achLit">0</b> / <span id="achTotal">35</span></span></div>
+      <div class="acx-head"><span class="acx-title">🏆 跨站成就柜</span><span class="acx-prog">已点亮 <b id="achLit">0</b> / <span id="achTotal">34</span></span></div>
       <div class="acx-grid" id="achGrid"></div>
       <div class="acx-tip">游玩任意小站会自动点亮 · 记录只存本机（全站共享），不上传任何地方</div>
     </div>
@@ -2268,7 +2268,6 @@ var ACH_DEFS = [
   { id: 'map.all', ico: '🌌', name: '宇宙全图鉴', desc: '在地图上点亮全部 13 颗星' },
   { id: 'home.starry', ico: '🌌', name: '追星者', desc: '发现了隐藏主题「星夜」' },
   { id: 'home.secret', ico: '🗝', name: '找到秘密的人', desc: '解锁了隐藏分区' },
-  { id: 'site.stx', ico: '🌙', name: '星恬的访客', desc: '打开了全站的星恬助手' },
   { id: 'explorer.all', ico: '🧭', name: '全站探险家', desc: '集齐全部站点足迹' }
 ];
 function renderAch() {
@@ -2512,9 +2511,5 @@ window.__checkSecretZone = checkSecretZone;
   });
 })();
 </script>
-
-<!-- 🌙 星恬助手（网页版 · 全站跟随）：她会出现在右下角，配置 API 后即可聊天 -->
-<script src="stx/core.js"></script>
-<script src="stx/stx-web.js"></script>
 </body>
 </html>
