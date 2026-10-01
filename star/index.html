@@ -228,119 +228,12 @@
   }
   function byCss(p, q) { return p.css < q.css ? -1 : (p.css > q.css ? 1 : 0); }
 
-  /* ============================================================
-     🪐 行星 v4：分区调色板 + 条纹表面 + 云带 + 颗粒 + 多层环系
-     —— 去"廉价感"：6 组策展配色（低饱和、高值域）、结构化条纹、
-        统一左上光源、环系多环带 + 光照渐变
-     ============================================================ */
-  var PLANET_ARCH = [
-    /* 0 暖色气态巨星（木星感） */
-    { light: [246, 226, 196], base: [214, 172, 128], band: [172, 122, 84], deep: [96, 60, 42], ring: [226, 202, 172] },
-    /* 1 冰巨星（天蓝） */
-    { light: [228, 244, 250], base: [156, 204, 226], band: [100, 154, 190], deep: [44, 82, 122], ring: [204, 226, 240] },
-    /* 2 荒漠行星（赭红） */
-    { light: [244, 214, 178], base: [202, 144, 100], band: [154, 94, 64], deep: [82, 46, 34], ring: [220, 186, 154] },
-    /* 3 海洋行星（深蓝 + 云） */
-    { light: [242, 250, 255], base: [122, 174, 220], band: [70, 118, 180], deep: [30, 56, 102], ring: [194, 218, 238] },
-    /* 4 紫罗兰气态（低饱和） */
-    { light: [238, 228, 248], base: [182, 160, 214], band: [134, 108, 174], deep: [68, 48, 100], ring: [212, 200, 232] },
-    /* 5 青绿世界 */
-    { light: [228, 246, 238], base: [148, 204, 180], band: [92, 154, 134], deep: [42, 80, 70], ring: [202, 228, 218] }
-  ];
-  function jitCol(rnd, c, amt) {
-    var j = function(v) { return Math.max(0, Math.min(255, Math.round(v + (rnd() - 0.5) * 2 * amt))); };
-    return [j(c[0]), j(c[1]), j(c[2])];
-  }
-  function rgbS(c) { return c[0] + ',' + c[1] + ',' + c[2]; }
-
-  function mkPlanet(rnd, px, py, r) {
-    var arch = PLANET_ARCH[(rnd() * PLANET_ARCH.length) | 0];
-    var cols = {
-      light: jitCol(rnd, arch.light, 8),
-      base: jitCol(rnd, arch.base, 12),
-      band: jitCol(rnd, arch.band, 12),
-      deep: jitCol(rnd, arch.deep, 8),
-      ring: jitCol(rnd, arch.ring, 10)
-    };
-    var i;
-    /* 条带：[-1,1] 切分，按调色板循环着色（相邻带色阶分明、整体层次协调） */
-    var bands = [];
-    var n = 6 + ((rnd() * 7) | 0);
-    var cycle = [cols.band, cols.base, cols.light, cols.band, cols.base, cols.deep];
-    var ci = (rnd() * cycle.length) | 0;
-    var wsum = 0, ws = [];
-    for (i = 0; i < n; i++) { var w0 = 0.6 + rnd() * 1.4; ws.push(w0); wsum += w0; }
-    var y = -1;
-    for (i = 0; i < n; i++) {
-      var h = ws[i] / wsum * 2;
-      var cc = cycle[(ci + i) % cycle.length];
-      bands.push({
-        y0: y, y1: Math.min(1, y + h),
-        css: 'rgb(' + rgbS(cc) + ')',
-        a: 0.20 + rnd() * 0.36
-      });
-      y += h;
-      if (y >= 1) break;
-    }
-    /* 云带（横向软椭圆，提亮材质层次） */
-    var clouds = [];
-    if (rnd() < 0.7) {
-      var cn = 2 + ((rnd() * 3) | 0);
-      for (i = 0; i < cn; i++) {
-        clouds.push({
-          x: (rnd() - 0.5) * 1.1, y: (rnd() - 0.5) * 1.1,
-          w: 0.24 + rnd() * 0.4, h: 0.028 + rnd() * 0.05,
-          rot: (rnd() - 0.5) * 0.3, a: 0.10 + rnd() * 0.15,
-          css: 'rgb(' + rgbS(cols.light) + ')'
-        });
-      }
-    }
-    /* 表面颗粒（微噪点，去塑料感） */
-    var speckle = [];
-    var sn = 16 + ((rnd() * 14) | 0);
-    var tries = 0;
-    while (speckle.length < sn && tries < sn * 5) {
-      tries++;
-      var sx2 = (rnd() - 0.5) * 1.7, sy2 = (rnd() - 0.5) * 1.7;
-      if (sx2 * sx2 + sy2 * sy2 > 0.78) continue;
-      speckle.push({ x: sx2, y: sy2, s: 0.018 + rnd() * 0.038, a: 0.05 + rnd() * 0.12, light: rnd() < 0.5 });
-    }
-    /* 环系：多层细环（含间缝）+ 一条宽幅尘埃带 */
-    var rings = [];
-    if (rnd() < 0.52) {
-      var rf = 1.40, rn = 5 + ((rnd() * 5) | 0);
-      while (rings.length < rn && rf < 1.98) {
-        rf += 0.045 + rnd() * 0.085;
-        rings.push({ rf: rf, w: 0.022 + rnd() * 0.048, a: 0.20 + rnd() * 0.55 });
-      }
-      rings.push({ rf: 1.78, w: 0.40, a: 0.05 });   /* 宽幅尘埃带 */
-    }
-    return {
-      x: px, y: py, r: r,
-      cols: cols,
-      col: rgbS(cols.base),                       /* 兼容字段 */
-      tint: rgbS(cols.light),
-      ringRgb: rgbS(cols.ring),
-      bands: bands, clouds: clouds,
-      speckle: {
-        list: speckle,
-        light: 'rgb(' + rgbS(cols.light) + ')',
-        deep: 'rgb(' + rgbS(cols.deep) + ')'
-      },
-      rings: rings,
-      ring: rings.length > 0,
-      tiltY: 0.14 + rnd() * 0.4,
-      rot: rnd() * Math.PI,
-      ph: rnd() * 6.2832
-    };
-  }
-
   /* 生成一个区块（纯函数：只依赖 seed/cx/cy，无副作用）
      —— 含「地貌分型」：低频噪声决定密度（星团 / 普通 / 空洞） */
   function genChunk(seed, cx, cy) {
     var rnd = mulberry32(mixHash(seed, cx, cy));
     var x0 = cx * CHUNK, y0 = cy * CHUNK;
-    var data = { nebs: [], s1: [], s2: [], s3: [], me: null, planet: null, galaxy: null, dens: 1, total: 0 };
+    var data = { nebs: [], s1: [], s2: [], s3: [], me: null, galaxy: null, dens: 1, total: 0 };
     var i;
 
     /* ① 区块性格：双层低频噪声混合（相邻区块平滑过渡） */
@@ -383,11 +276,7 @@
         ph: rnd()
       };
     }
-    /* ⑤ 稀有天体：行星（约 3.5%；空洞区域略降）—— v4：分区调色板 + 条纹表面 + 环系 */
-    if (rnd() < 0.035 * (dens < 0.6 ? 0.6 : 1)) {
-      data.planet = mkPlanet(rnd, x0 + rnd() * CHUNK, y0 + rnd() * CHUNK, 55 + rnd() * 150);
-    }
-    /* ⑥ 稀有天体：螺旋星系（约 1.2%） */
+    /* ⑤ 稀有天体：螺旋星系（约 1.2%） */
     if (rnd() < 0.012) {
       data.galaxy = {
         x: x0 + rnd() * CHUNK,
@@ -488,135 +377,6 @@
     return c;
   }
 
-  /* 行星绘制 v4：分区调色 + 条带表面 + 云 + 颗粒 + 明暗交界 + 大气边缘 + 多层环系
-     全矢量（任意缩放不糊）；光照统一来自左上；环分远/近半，近环半透明盖在球前 */
-  function drawPlanet(g, p, s) {
-    var r = p.r, x = p.x, y = p.y;
-    var lx = -0.42 * r, ly = -0.42 * r;
-    var i;
-
-    /* ① 大气外晕（柔和，不抢主体） */
-    g.globalCompositeOperation = 'lighter';
-    var haze = g.createRadialGradient(x, y, r * 0.85, x, y, r * 1.55);
-    haze.addColorStop(0, 'rgba(' + p.tint + ',0.14)');
-    haze.addColorStop(0.55, 'rgba(' + p.tint + ',0.045)');
-    haze.addColorStop(1, 'rgba(' + p.tint + ',0)');
-    g.fillStyle = haze;
-    g.beginPath(); g.arc(x, y, r * 1.55, 0, 6.2832); g.fill();
-    g.globalCompositeOperation = 'source-over';
-
-    /* ② 远半环（球后） */
-    if (p.ring) drawRingH(g, p, s, false);
-
-    /* ③ 球体表面（裁剪圆内分层绘制） */
-    g.save();
-    g.beginPath(); g.arc(x, y, r, 0, 6.2832); g.clip();
-
-    /* 3.1 基色球（光源侧偏亮） */
-    var bs = g.createRadialGradient(x + lx * 0.5, y + ly * 0.5, r * 0.15, x, y, r * 1.12);
-    bs.addColorStop(0, 'rgba(' + p.cols.light + ',1)');
-    bs.addColorStop(0.45, 'rgba(' + p.cols.base + ',1)');
-    bs.addColorStop(0.82, 'rgba(' + p.cols.band + ',1)');
-    bs.addColorStop(1, 'rgba(' + p.cols.deep + ',1)');
-    g.fillStyle = bs;
-    g.fillRect(x - r, y - r, r * 2, r * 2);
-
-    /* 3.2 条带 */
-    for (i = 0; i < p.bands.length; i++) {
-      var b = p.bands[i];
-      g.globalAlpha = b.a;
-      g.fillStyle = b.css;
-      g.fillRect(x - r, y + b.y0 * r, r * 2, (b.y1 - b.y0) * r + 0.5);
-    }
-    /* 3.3 云带（近观才画，远处保持干净） */
-    if (r * s > 26) {
-      for (i = 0; i < p.clouds.length; i++) {
-        var c = p.clouds[i];
-        g.globalAlpha = c.a;
-        g.fillStyle = c.css;
-        g.beginPath();
-        g.ellipse(x + c.x * r, y + c.y * r, c.w * r, c.h * r, c.rot, 0, 6.2832);
-        g.fill();
-      }
-    }
-    /* 3.4 表面颗粒（近观才画） */
-    if (r * s > 44) {
-      for (i = 0; i < p.speckle.list.length; i++) {
-        var sp = p.speckle.list[i];
-        g.globalAlpha = sp.a;
-        g.fillStyle = sp.light ? p.speckle.light : p.speckle.deep;
-        var sz2 = sp.s * r;
-        g.fillRect(x + sp.x * r, y + sp.y * r, sz2, sz2);
-      }
-    }
-    g.globalAlpha = 1;
-
-    /* 3.5 明暗交界：亮侧柔光 + 背光侧穹顶阴影 */
-    g.globalCompositeOperation = 'lighter';
-    var lit = g.createRadialGradient(x + lx, y + ly, r * 0.06, x + lx, y + ly, r * 1.15);
-    lit.addColorStop(0, 'rgba(255,255,255,0.30)');
-    lit.addColorStop(0.45, 'rgba(255,255,255,0.09)');
-    lit.addColorStop(1, 'rgba(255,255,255,0)');
-    g.fillStyle = lit;
-    g.fillRect(x - r, y - r, r * 2, r * 2);
-    g.globalCompositeOperation = 'source-over';
-    var shd = g.createRadialGradient(x - lx * 1.5, y - ly * 1.5, r * 0.1, x - lx * 1.5, y - ly * 1.5, r * 1.9);
-    shd.addColorStop(0, 'rgba(7,9,20,0.76)');
-    shd.addColorStop(0.55, 'rgba(7,9,20,0.32)');
-    shd.addColorStop(1, 'rgba(7,9,20,0)');
-    g.fillStyle = shd;
-    g.fillRect(x - r, y - r, r * 2, r * 2);
-    /* 3.6 两极微暗（球体立体感） */
-    var polar = g.createLinearGradient(x, y - r, x, y + r);
-    polar.addColorStop(0, 'rgba(6,8,18,0.20)');
-    polar.addColorStop(0.28, 'rgba(6,8,18,0)');
-    polar.addColorStop(0.72, 'rgba(6,8,18,0)');
-    polar.addColorStop(1, 'rgba(6,8,18,0.20)');
-    g.fillStyle = polar;
-    g.fillRect(x - r, y - r, r * 2, r * 2);
-    g.restore();
-
-    /* ③b 大气边缘光（亮侧弧 + 全周薄边，定义球缘） */
-    g.lineCap = 'round';
-    g.strokeStyle = 'rgba(' + p.tint + ',0.42)';
-    g.lineWidth = Math.max(r * 0.024, 1 / s);
-    g.beginPath(); g.arc(x, y, r * 0.982, Math.PI * 0.96, Math.PI * 1.58); g.stroke();
-    g.strokeStyle = 'rgba(' + p.tint + ',0.12)';
-    g.lineWidth = Math.max(r * 0.011, 0.8 / s);
-    g.beginPath(); g.arc(x, y, r * 0.994, 0, 6.2832); g.stroke();
-
-    /* ④ 近半环（球前，半透明 → 真实环系质感） */
-    if (p.ring) drawRingH(g, p, s, true);
-  }
-
-  /* 行星环：多层细环 + 光照渐变（亮侧更亮，暗侧沉入阴影）；front=true 画近半 */
-  function drawRingH(g, p, s, front) {
-    var R = p.r * 2.1;
-    var cs = Math.cos(p.rot), sn = Math.sin(p.rot);
-    var lxs = -0.7071 * cs + -0.7071 * sn;      /* 光照方向 → 环局部坐标 */
-    var litSign = lxs >= 0 ? 1 : -1;
-    g.save();
-    g.translate(p.x, p.y);
-    g.rotate(p.rot);
-    var grad = g.createLinearGradient(litSign * R, 0, -litSign * R, 0);
-    grad.addColorStop(0, 'rgba(' + p.ringRgb + ',0.92)');
-    grad.addColorStop(0.45, 'rgba(' + p.ringRgb + ',0.42)');
-    grad.addColorStop(1, 'rgba(' + p.ringRgb + ',0.12)');
-    var halfK = front ? 1 : 0.52;
-    for (var i = 0; i < p.rings.length; i++) {
-      var rg = p.rings[i];
-      g.strokeStyle = grad;
-      g.globalAlpha = rg.a * halfK;
-      g.lineWidth = Math.max(rg.w * p.r, 0.8 / s);
-      g.beginPath();
-      g.ellipse(0, 0, rg.rf * p.r, rg.rf * p.r * p.tiltY, 0,
-        front ? 0 : Math.PI, front ? Math.PI : Math.PI * 2);
-      g.stroke();
-    }
-    g.globalAlpha = 1;
-    g.restore();
-  }
-
   /* —— 视角：平移（CSS 像素）+ 缩放 —— */
   var view = { x: 0, y: 0, s: 1 };
   var curSeed = 1;
@@ -695,7 +455,7 @@
     g.globalCompositeOperation = 'source-over';
     g.restore();
 
-    /* ② 天体层（星星 + 行星 + 星系 + 流星；视差小） */
+    /* ② 天体层（星星 + 星系 + 流星；视差小） */
     g.save();
     g.translate(W2 / 2 + v.x, H2 / 2 + v.y);
     g.scale(s, s);
@@ -769,13 +529,7 @@
       }
     }
 
-    /* 2c 行星 */
-    for (k = 0; k < vis.length; k++) {
-      ch = vis[k];
-      if (ch.planet) drawPlanet(g, ch.planet, s);
-    }
-
-    /* 2d 流星（周期划过：u∈[0,0.18) 为划过窗口） */
+    /* 2c 流星（周期划过：u∈[0,0.18) 为划过窗口） */
     g.globalCompositeOperation = 'lighter';
     for (k = 0; k < vis.length; k++) {
       ch = vis[k];
