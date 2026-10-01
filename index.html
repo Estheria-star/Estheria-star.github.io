@@ -5,8 +5,8 @@
 <script>document.documentElement.classList.add('js');(function(){try{var p=JSON.parse(localStorage.getItem('startian_theme_v1')||'{}');var m=p.mode||'auto',t=m;if(m==='auto'){var n=new Date(),x=n.getHours()*60+n.getMinutes();var l=((p.lightAt||'07:00')+'').split(':'),d=((p.darkAt||'19:00')+'').split(':');var lm=(+l[0])*60+(+l[1]||0),dm=(+d[0])*60+(+d[1]||0);t=(lm<dm)?((x>=lm&&x<dm)?'light':'dark'):((x>=lm||x<dm)?'light':'dark');var pr=p.autoPair||'classic';if(pr==='dreamy'){t=(t==='light')?'fresh':'purple';}else if(pr==='pink'){t=(t==='light')?'warm':'colorful';}}document.documentElement.setAttribute('data-theme',t);if(t==='custom'){try{var rc=JSON.parse(localStorage.getItem('startian_custom_resolved_v1')||'null');if(rc){for(var ck in rc){if(ck!=='__dark'&&typeof rc[ck]==='string')document.documentElement.style.setProperty(ck,rc[ck]);}}}catch(e){}}var avm={dark:'avatar-dark.jpg',purple:'avatar-purple.jpg',fresh:'avatar-fresh.jpg',warm:'avatar-warm.jpg',colorful:'avatar-colorful.jpg',custom:''};var avp=avm[t]||'';window.__initAvatar=avp||'avatar.png';if(avp){var ln=document.createElement('link');ln.rel='preload';ln.as='image';ln.href=avp;document.head.appendChild(ln);}}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>星恬的小站 · 五子棋 几何工坊 宇宙地图 · startian.top</title>
-<meta name="description" content="星恬的个人作品小站：在线五子棋（AI 学习反制）、高中数学几何工坊、宇宙地图、像素星空、生命游戏、函数音乐、错题本等 13 个免费网页工具，打开即用无需安装。">
-<meta name="keywords" content="星恬,startian,五子棋在线,几何工坊,高中数学几何,宇宙地图,像素星空,生命游戏,函数音乐,错题本,配色实验室">
+<meta name="description" content="星恬的个人作品小站：在线五子棋（AI 学习反制）、高中数学几何工坊、宇宙地图、无限星空生成器、生命游戏、函数音乐、错题本等 13 个免费网页工具，打开即用无需安装。">
+<meta name="keywords" content="星恬,startian,五子棋在线,几何工坊,高中数学几何,宇宙地图,无限星空,星空生成器,生命游戏,函数音乐,错题本,配色实验室">
 <meta name="author" content="星恬">
 <meta name="theme-color" content="#E6F7FF">
 <link rel="canonical" href="https://startian.top/">
@@ -1132,7 +1132,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       <span>📐 几何工坊</span><span><em>·</em></span>
       <span>🗓️ 打卡日程</span><span><em>·</em></span>
       <span>🧠 mix9 神经网络</span><span><em>·</em></span>
-      <span>✨ 种子星空</span><span><em>·</em></span>
+      <span>✨ 无限星空</span><span><em>·</em></span>
       <span>🦠 生命花园</span><span><em>·</em></span>
       <span>🎵 函数音乐</span><span><em>·</em></span>
       <span>🎭 假加载页</span><span><em>·</em></span>
@@ -1205,11 +1205,11 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
         </div>
       </a>
       <a class="tile flip" style="--d:.14s" data-demo="star" href="https://startian.top/star/">
-        <div class="tile-media"><img src="demos/star.jpg" alt="像素星空生成器演示" loading="lazy"></div>
+        <div class="tile-media"><img src="demos/star.jpg" alt="无限星空生成器演示" loading="lazy"></div>
         <div class="tile-body">
           <span class="ptag">生成艺术 · 解压</span>
-          <h3>像素星空生成器</h3>
-          <p>点一下生成一片独一无二的星空：种子编号可复现、可分享（「我的星空 #3721」），还能下载 1920×1080 做壁纸。</p>
+          <h3>无限星空生成器</h3>
+          <p>像 Minecraft 一样用种子生成星空：往任何方向拖动，无限延伸都是同一片宇宙；星云、星芒、流星随种子确定，可复现、可分享、可下载做壁纸。</p>
           <span class="cta">去看星星 <i>→</i></span>
         </div>
       </a>
@@ -1570,8 +1570,8 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     },
     star: {
       img: 'demos/star.jpg',
-      title: '✨ 像素星空生成器',
-      desc: '种子生成独一无二的星空：星云、三层星点、十字星芒与流星一应俱全；拖动平移、滚轮缩放看细节，链接带视角分享（「我的星空 #3721」），还能下载 1920×1080 壁纸。'
+      title: '✨ 无限星空生成器',
+      desc: '像 Minecraft 一样用种子生成无限星空：世界按区块实时生成，往任何方向拖动都无限延伸，同一颗种子同一坐标永远是同一片星空。星云、三层星点、十字星芒与流星一应俱全；滚轮缩放、链接带视角分享（「我的星空 #3721」），还能下载 1920×1080 壁纸。'
     },
     life: {
       img: 'demos/life.jpg',
