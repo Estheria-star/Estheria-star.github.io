@@ -4,14 +4,41 @@
 <meta charset="UTF-8">
 <script>document.documentElement.classList.add('js');(function(){try{var p=JSON.parse(localStorage.getItem('startian_theme_v1')||'{}');var m=p.mode||'auto',t=m;if(m==='auto'){var n=new Date(),x=n.getHours()*60+n.getMinutes();var l=((p.lightAt||'07:00')+'').split(':'),d=((p.darkAt||'19:00')+'').split(':');var lm=(+l[0])*60+(+l[1]||0),dm=(+d[0])*60+(+d[1]||0);t=(lm<dm)?((x>=lm&&x<dm)?'light':'dark'):((x>=lm||x<dm)?'light':'dark');var pr=p.autoPair||'classic';if(pr==='dreamy'){t=(t==='light')?'fresh':'purple';}else if(pr==='pink'){t=(t==='light')?'warm':'colorful';}}document.documentElement.setAttribute('data-theme',t);if(t==='custom'){try{var rc=JSON.parse(localStorage.getItem('startian_custom_resolved_v1')||'null');if(rc){for(var ck in rc){if(ck!=='__dark'&&typeof rc[ck]==='string')document.documentElement.style.setProperty(ck,rc[ck]);}}}catch(e){}}var avm={dark:'avatar-dark.jpg',purple:'avatar-purple.jpg',fresh:'avatar-fresh.jpg',warm:'avatar-warm.jpg',colorful:'avatar-colorful.jpg',custom:''};var avp=avm[t]||'';window.__initAvatar=avp||'avatar.png';if(avp){var ln=document.createElement('link');ln.rel='preload';ln.as='image';ln.href=avp;document.head.appendChild(ln);}}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>星恬的小站 · startian.top</title>
-<meta name="description" content="星恬的小站 —— 下棋、画几何、捣鼓 AI 小玩意。五子棋、几何工坊与更多作品在此。">
+<title>星恬的小站 · 五子棋 几何工坊 宇宙地图 · startian.top</title>
+<meta name="description" content="星恬的个人作品小站：在线五子棋（AI 学习反制）、高中数学几何工坊、宇宙地图、像素星空、生命游戏、函数音乐、错题本等 13 个免费网页工具，打开即用无需安装。">
+<meta name="keywords" content="星恬,startian,五子棋在线,几何工坊,高中数学几何,宇宙地图,像素星空,生命游戏,函数音乐,错题本,配色实验室">
+<meta name="author" content="星恬">
 <meta name="theme-color" content="#E6F7FF">
-<meta property="og:title" content="星恬的小站">
-<meta property="og:description" content="下棋、画几何、捣鼓 AI 小玩意 —— 欢迎来逛逛～">
+<link rel="canonical" href="https://startian.top/">
+<meta property="og:site_name" content="星恬的小站">
+<meta property="og:title" content="星恬的小站 · 13 个免费网页小作品">
+<meta property="og:description" content="下棋、画几何、捣鼓 AI 小玩意 —— 五子棋、几何工坊、宇宙地图等 13 个作品，欢迎来逛逛～">
 <meta property="og:image" content="https://startian.top/avatar.png">
 <meta property="og:url" content="https://startian.top/">
 <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="星恬的小站">
+<meta name="twitter:description" content="五子棋、几何工坊、宇宙地图等 13 个免费网页小作品">
+<meta name="twitter:image" content="https://startian.top/avatar.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "星恬的小站",
+  "url": "https://startian.top/",
+  "description": "星恬的个人作品小站：五子棋、几何工坊、宇宙地图等 13 个免费网页工具",
+  "inLanguage": "zh-CN",
+  "author": {
+    "@type": "Person",
+    "name": "星恬",
+    "url": "https://startian.top/",
+    "sameAs": [
+      "https://github.com/Estheria-star",
+      "https://space.bilibili.com/3494370703575552"
+    ]
+  }
+}
+</script>
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" href="avatar.png">
 <link rel="apple-touch-icon" href="avatar.png">
