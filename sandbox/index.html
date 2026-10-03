@@ -2650,12 +2650,26 @@ var SB = SBX;
     if (b < 0) b = 0; else if (b > 255) b = 255;
     return ((a << 24) | ((b | 0) << 16) | ((g | 0) << 8) | (r | 0)) >>> 0;
   }
+  /* 自适应分辨率：防震荡设计——
+     · 换档后跳过 2 帧（含缓冲重分配成本），冷却 50 帧内不再切档
+     · 降档快（ema>13 立即），升档慢（连续 45 帧低位才升），迟滞带 8.5~13
+     · ema 低通滤波 0.9/0.1，重置到中值 10 避免立刻反向 */
+  var ema = 10, cd = 0, lowStreak = 0, skipFrames = 0;
   function adapt(ms) {
-    /* 带迟滞的自适应档位：降档 >12.5ms；升档 <9ms（区间宽，避免档位来回抖动） */
-    ema = ema * 0.88 + ms * 0.12;
+    if (skipFrames > 0) { skipFrames--; return; }
+    ema = ema * 0.9 + ms * 0.1;
     if (manualHold > 0) { manualHold--; return; }
-    if (ema > 12.5 && qi > 0) { qi--; scale = QUAL[qi]; ema = 8; }
-    else if (ema < 9 && qi < QUAL.length - 1) { qi++; scale = QUAL[qi]; ema = 7; }
+    if (cd > 0) { cd--; return; }
+    if (ema > 13 && qi > 0) {
+      qi--; scale = QUAL[qi];
+      skipFrames = 2; cd = 50; ema = 10; lowStreak = 0;
+    } else if (ema < 8.5) {
+      lowStreak++;
+      if (lowStreak >= 45 && qi < QUAL.length - 1) {
+        qi++; scale = QUAL[qi];
+        skipFrames = 2; cd = 50; ema = 10; lowStreak = 0;
+      }
+    } else lowStreak = 0;
   }
   w3.quality = function () { return { scale: scale, lw: lw, lh: lh, ema: +ema.toFixed(1) }; };
   w3.setQuality = function (s) {
