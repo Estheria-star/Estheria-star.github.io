@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="星恬的宇宙地图：13 颗作品星在宇宙里自由漂浮，彼此靠近时自动连线；去过的会亮起来，点击星星可展开「星图关系视图」。startian.top 全站导航">
+<meta name="description" content="星恬的宇宙地图：14 颗作品星在宇宙里自由漂浮，彼此靠近时自动连线；去过的会亮起来，点击星星可展开「星图关系视图」。startian.top 全站导航">
 <meta name="theme-color" content="#05070f">
 <title>宇宙地图 · startian.top</title>
 <style>
@@ -245,18 +245,18 @@
     <div>
       <div class="hd-eyebrow">THE STARTIAN UNIVERSE</div>
       <h1>🗺️ 星恬的宇宙地图</h1>
-      <div class="sub" id="hdSub">13 颗星串起整个小站 · 去过的会亮起来</div>
+      <div class="sub" id="hdSub">14 颗星串起整个小站 · 去过的会亮起来</div>
     </div>
     <div class="hright">
       <div class="prog">
-        <span class="t">已点亮 <b id="litN">0</b> / <span id="litT">13</span></span>
+        <span class="t">已点亮 <b id="litN">0</b> / <span id="litT">14</span></span>
         <div class="bar"><i id="litBar"></i></div>
       </div>
       <a class="home" href="https://startian.top/">← 返回主页</a>
     </div>
   </header>
 
-  <div class="banner" id="banner">🎉 宇宙全图鉴达成 —— 13 颗星全部点亮，你就是这个宇宙的常客</div>
+  <div class="banner" id="banner">🎉 宇宙全图鉴达成 —— 14 颗星全部点亮，你就是这个宇宙的常客</div>
 
   <div class="stage" id="stage">
     <svg id="mapSvg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="全站作品星图"></svg>
@@ -360,7 +360,8 @@
     { id: 'site.cuoti',    name: '错题本',   ico: '📕', zone: 'tool', url: 'https://startian.top/cuoti/',    desc: '按记忆曲线自动排复习，让时间帮你记住。' },
     { id: 'site.zhenghuo', name: '整活',     ico: '😏', zone: 'fun2', url: 'https://startian.top/zhenghuo/', desc: '假装正经的「隐私协议」，点同意有惊喜。' },
     { id: 'site.fake',     name: '假加载页', ico: '🎭', zone: 'fun2', url: 'https://startian.top/fake/',     desc: '进度条卡在 99%，陪你唠两句才肯承认早就好了。' },
-    { id: 'site.report',   name: '诊断报告', ico: '🩺', zone: 'fun2', url: 'https://startian.top/report/',   desc: 'AI 给今天的你开一张体检单，纯玄学仅供参考。' }
+    { id: 'site.report',   name: '诊断报告', ico: '🩺', zone: 'fun2', url: 'https://startian.top/report/',   desc: 'AI 给今天的你开一张体检单，纯玄学仅供参考。' },
+    { id: 'site.sandbox',  name: '万物沙盒', ico: '🏖', zone: 'fun2', url: 'https://startian.top/sandbox/',  desc: '星海里的像素沙盘：元素反应、光束棱镜与极光。' }
   ];
   var REL_X = [
     ['site.fit',      'site.geometry', '同门数学'],
@@ -368,7 +369,9 @@
     ['site.cuoti',    'site.daka',     '学习搭子'],
     ['site.fake',     'site.report',   '整活担当'],
     ['site.star',     'site.life',     '生成艺术'],
-    ['site.tujie',    'site.star',     '视觉玩具']
+    ['site.tujie',    'site.star',     '视觉玩具'],
+    ['site.sandbox',  'site.star',     '星海同源'],
+    ['site.sandbox',  'site.fake',     '整活担当']
   ];
 
   function siteById(id) { for (var i = 0; i < SITES.length; i++) if (SITES[i].id === id) return SITES[i]; return null; }
