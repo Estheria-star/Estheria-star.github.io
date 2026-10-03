@@ -52,6 +52,11 @@
   @keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:.85}}
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(10px);opacity:0;z-index:60;background:rgba(20,28,52,.95);border:1px solid rgba(130,160,255,.4);border-radius:999px;padding:11px 22px;font-size:13px;font-weight:700;color:#e8f0ff;transition:all .3s ease;pointer-events:none}
   .toast.show{opacity:1;transform:translateX(-50%)}
+
+/* 🔮 ARG · 卡住时，页面悄悄透出「可以打字」的气场 */
+body.arg-wait{cursor:text}
+body.arg-wait #status::after{content:'▍';margin-left:3px;color:#7ba6cf;animation:argBlink 1.05s steps(1) infinite}
+@keyframes argBlink{0%,49%{opacity:1}50%,100%{opacity:0}}
 </style>
 </head>
 <body>
@@ -142,7 +147,7 @@
   var STUCK_LINES = [
     '就差一点点…（骗你的）', '99% 是世界上最远的距离', '进度条正在思考人生…',
     '它说它累了，想歇一会儿', '正在把最后 1% 拆成 100 份慢慢加载…',
-    '别刷新！刷新它会更慢的（真的）', '这一格进度条正在加载它自己的加载动画…', '正在等待一个名字…'
+    '别刷新！刷新它会更慢的（真的）', '这一格进度条正在加载它自己的加载动画…', '正在等待一个名字…', '有人在键盘前面吗？'
   ];
   var pct = 0, lineTimer = null, stuck = false;
   function setPct(v) {
@@ -201,6 +206,7 @@
     if (/走|退|关|撤|不玩|拜拜|再见|88/.test(t)) return pick(CHAT_REPLIES.go);
     if (/为什么|为啥|怎么会|咋/.test(t)) return pick(CHAT_REPLIES.why);
     if (/可爱|喜欢|爱你|厉害|牛|赞|棒/.test(t)) return pick(CHAT_REPLIES.love);
+    if (/等什么|等谁|名字|密码|怎么开|开门/.test(t)) return '它在等一个名字。八个字母……你一路攒的那些，拼起来就是。';
     return pick(CHAT_REPLIES.other);
   }
   function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
@@ -222,6 +228,7 @@
     renderOpts([
       ['多久能好？', '多久能好？'],
       ['你是谁呀？', '你是谁呀？'],
+      ['它在等什么？', '它在等什么？'],
       ['我走了', '我走了'],
       ['为什么不快点？', '为什么不快点？']
     ]);
@@ -400,6 +407,16 @@
     buf = (buf + e.key.toLowerCase()).slice(-16);
     if (buf.slice(-8) === 'estheria' && stuckNow()) openGate();
   });
+  (function () {
+    var tr = document.getElementById('track');
+    if (!tr) return;
+    function sync() {
+      try { document.body.classList.toggle('arg-wait', tr.classList.contains('stuck')); } catch (e) {}
+    }
+    try { new MutationObserver(sync).observe(tr, { attributes: true, attributeFilter: ['class'] }); } catch (e) {}
+    setInterval(sync, 800);
+    sync();
+  })();
   window.__fakeARG = { force: openGate };
 })();
 </script>
