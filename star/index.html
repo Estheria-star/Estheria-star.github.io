@@ -590,6 +590,31 @@
           g.lineWidth = Math.max(1.2, 1.6 / s);
           g.beginPath(); g.arc(asx, asy, Math.max(15, 26 * s) * apul, 0, 6.2832); g.stroke();
           g.restore();
+        } else {
+          /* 记号在屏幕外：贴边一枚小月牙，朝它慢慢拖 */
+          var mg2 = 44;
+          var onScr = asx > mg2 && asx < W2 - mg2 && asy > mg2 && asy < H2 - mg2;
+          if (!onScr) {
+            var ccx = W2 / 2, ccy = H2 / 2;
+            var ddx = asx - ccx, ddy = asy - ccy;
+            var kk2 = Math.min((W2 / 2 - mg2) / Math.max(1, Math.abs(ddx)), (H2 / 2 - mg2) / Math.max(1, Math.abs(ddy)));
+            var tx2 = ccx + ddx * kk2, ty2 = ccy + ddy * kk2;
+            var pp2 = 0.5 + 0.5 * Math.abs(Math.sin((typeof T !== 'undefined' ? T : 0) * 1.4));
+            g.save();
+            g.globalAlpha = 0.62 + 0.38 * pp2;
+            g.globalCompositeOperation = 'lighter';
+            var hg2 = g.createRadialGradient(tx2, ty2, 2, tx2, ty2, 26);
+            hg2.addColorStop(0, 'rgba(198,214,240,.5)');
+            hg2.addColorStop(1, 'rgba(198,214,240,0)');
+            g.fillStyle = hg2;
+            g.fillRect(tx2 - 26, ty2 - 26, 52, 52);
+            g.globalCompositeOperation = 'source-over';
+            g.fillStyle = '#eef4ff';
+            g.beginPath(); g.arc(tx2, ty2, 8.5, 0, 6.2832); g.fill();
+            g.fillStyle = 'rgba(10,15,38,.98)';
+            g.beginPath(); g.arc(tx2 + 3.8, ty2 - 2.4, 7.6, 0, 6.2832); g.fill();
+            g.restore();
+          }
         }
       }
     } catch (eA) {}
