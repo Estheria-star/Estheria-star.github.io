@@ -1,0 +1,2318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>万物沙盒 · 落沙成山、星海可控的像素世界 · 星恬的小站</title>
+<meta name="description" content="万物沙盒：一块漂浮在星海中的像素沙盘。撒沙、放火、种藤蔓，让水流成河；用光束照出反射与彩虹，把夜空搅成极光。22 种元素互相反应，纯前端单文件，打开即玩。">
+<link rel="canonical" href="https://startian.top/sandbox/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="万物沙盒 · 落沙成山、星海可控">
+<meta property="og:description" content="漂浮在星海中的像素沙盘：22 种元素、光束反射与色散、极光可搅、星域来客。纯前端单文件，打开即玩。">
+<meta property="og:url" content="https://startian.top/sandbox/">
+<meta property="og:site_name" content="星恬的小站">
+<link rel="icon" href="/favicon.ico">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "万物沙盒",
+  "url": "https://startian.top/sandbox/",
+  "description": "漂浮在星海中的像素沙盘：22 种元素互相反应、光束反射与棱镜色散、流体极光、滚石物理。",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Web",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" },
+  "author": { "@type": "Person", "name": "星恬", "url": "https://startian.top/" }
+}
+</script>
+<style>
+/* ============================================================
+   万物沙盒 · 样式（星海夜幕主题）
+   ============================================================ */
+:root{
+  --bg:#070b14;
+  --panel:rgba(15,21,36,.8);
+  --panel2:rgba(20,28,48,.72);
+  --line:rgba(122,152,224,.17);
+  --line2:rgba(122,152,224,.3);
+  --t1:#e8eefb; --t2:#a3b2cf; --t3:#63718f;
+  --acc:#6ee7d4; --acc2:#a78bfa; --acc3:#f0abfc;
+  --gold:#f5c86b;
+  --shadow:0 14px 40px rgba(2,6,18,.55);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{
+  background:var(--bg); color:var(--t1);
+  font-family:'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,-apple-system,sans-serif;
+  overflow:hidden;
+}
+.app{height:100%;display:flex;flex-direction:column}
+
+/* ---- 顶栏 ---- */
+.topbar{
+  flex:0 0 auto; display:flex; align-items:center; gap:12px;
+  padding:10px 16px; background:var(--panel);
+  border-bottom:1px solid var(--line);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  position:relative; z-index:30;
+}
+.tb-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;min-width:0}
+.tb-planet{
+  width:34px;height:34px;border-radius:12px;flex:0 0 auto;position:relative;overflow:hidden;
+  background:radial-gradient(circle at 32% 30%, #fff2c9 0 10%, #f0b45c 11% 22%, #7e57c2 23% 60%, #2b1e50 61% 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.18), 0 4px 14px rgba(126,87,194,.4);
+}
+.tb-planet::after{
+  content:"";position:absolute;left:-24%;top:44%;width:148%;height:26%;
+  border-radius:50%;border:2px solid rgba(240,220,255,.75);
+  border-top-color:transparent;border-left-color:rgba(240,220,255,.35);
+  transform:rotate(-16deg);
+}
+.tb-title{font-size:15.5px;font-weight:800;letter-spacing:.4px;white-space:nowrap}
+.tb-sub{font-size:10.5px;color:var(--t3);letter-spacing:2.5px;margin-top:2px;white-space:nowrap;text-transform:uppercase}
+.tb-actions{margin-left:auto;display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.tbtn{
+  border:1px solid var(--line); background:var(--panel2); color:var(--t2);
+  font:700 12px/1 inherit; font-family:inherit;
+  padding:8px 12px; border-radius:11px; cursor:pointer; white-space:nowrap;
+  transition:border-color .18s ease,color .18s ease,transform .18s ease,background .18s ease;
+  display:inline-flex; align-items:center; gap:6px;
+}
+.tbtn:hover{border-color:var(--acc); color:var(--t1); transform:translateY(-1px)}
+.tbtn:active{transform:translateY(0)}
+.tbtn.on{border-color:var(--acc); color:var(--acc); box-shadow:inset 0 0 0 1px rgba(110,231,212,.35)}
+.tbtn .dot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.85}
+
+/* ---- 舞台 ---- */
+.stage{flex:1 1 auto; position:relative; min-height:0; overflow:hidden; display:flex; align-items:center; justify-content:center}
+#cv{display:block; touch-action:none; cursor:crosshair; border-radius:6px; box-shadow:0 24px 70px rgba(0,0,0,.5)}
+.stage-hint{
+  position:absolute; left:50%; bottom:12px; transform:translateX(-50%);
+  font-size:11.5px; color:var(--t3); background:rgba(7,11,20,.6);
+  border:1px solid var(--line); border-radius:999px; padding:6px 14px;
+  pointer-events:none; opacity:1; transition:opacity .8s ease; white-space:nowrap;
+  backdrop-filter:blur(6px); z-index:5;
+}
+.stage-hint.hide{opacity:0}
+#fps{
+  position:absolute; right:10px; bottom:10px; font:600 10.5px/1 ui-monospace,Consolas,monospace;
+  color:var(--t3); background:rgba(7,11,20,.55); border:1px solid var(--line);
+  border-radius:8px; padding:5px 8px; pointer-events:none; z-index:5;
+}
+
+/* ---- 底部调色板 ---- */
+.dock{
+  flex:0 0 auto; background:var(--panel); border-top:1px solid var(--line);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  padding:10px 14px 12px; position:relative; z-index:30;
+}
+.dock-row{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+.pal{display:flex; gap:7px; align-items:flex-start; flex-wrap:wrap; min-width:0; flex:1}
+.pgroup{display:flex; gap:7px; align-items:flex-start; padding:2px 10px 2px 0; border-right:1px dashed var(--line)}
+.pgroup:last-child{border-right:0; padding-right:0}
+.pel{
+  width:52px; border:1px solid transparent; background:transparent; border-radius:12px;
+  padding:5px 2px 4px; cursor:pointer; font-family:inherit; color:var(--t2);
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  transition:transform .15s ease, border-color .15s ease, background .15s ease;
+}
+.pel:hover{transform:translateY(-2px); background:rgba(255,255,255,.04)}
+.pel .sw{
+  width:26px;height:26px;border-radius:9px;flex:0 0 auto;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.22), 0 3px 8px rgba(0,0,0,.35);
+  position:relative; overflow:hidden;
+}
+.pel .sw::after{content:"";position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(145deg,rgba(255,255,255,.28),transparent 55%)}
+.pel .nm{font-size:10.5px;font-weight:700;letter-spacing:.5px;white-space:nowrap;transform:scale(.94)}
+.pel.sel{border-color:var(--acc); background:rgba(110,231,212,.09)}
+.pel.sel .nm{color:var(--acc)}
+.pel .key{
+  position:absolute; top:1px; right:5px; font-size:8.5px; color:var(--t3); font-weight:800;
+}
+.pel{position:relative}
+.sw-water{background:linear-gradient(160deg,#5ab0f0,#2f6fd0)}
+.sw-sand{background:linear-gradient(160deg,#e7b877,#c98c47)}
+.sw-soil{background:linear-gradient(160deg,#a06b45,#7a4a2e)}
+.sw-stone{background:linear-gradient(160deg,#8291a6,#5a667a)}
+.sw-wood{background:linear-gradient(160deg,#a5713d,#7d4f26)}
+.sw-oil{background:linear-gradient(160deg,#4b5230,#2e331c)}
+.sw-acid{background:linear-gradient(160deg,#c6f04a,#86c520)}
+.sw-ice{background:linear-gradient(160deg,#d2f1ff,#8fd4f2)}
+.sw-seed{background:linear-gradient(160deg,#a3c98a,#6f9c52)}
+.sw-fire{background:linear-gradient(160deg,#ffd26b,#f4642e)}
+.sw-lava{background:linear-gradient(160deg,#ff8a4a,#c92c14)}
+.sw-powder{background:linear-gradient(160deg,#6a7284,#3f4553)}
+.sw-fwk{background:linear-gradient(160deg,#e08ad0,#9a4f9e)}
+.sw-lamp{background:linear-gradient(160deg,#ffe9b0,#f0b95c)}
+.sw-glass{background:linear-gradient(160deg,rgba(214,240,255,.85),rgba(140,190,235,.5))}
+.sw-mir-a{background:linear-gradient(135deg,#dbe6f5 46%,#8fa6c8 50%,#4b5a78 54%)}
+.sw-mir-b{background:linear-gradient(45deg,#dbe6f5 46%,#8fa6c8 50%,#4b5a78 54%)}
+.sw-prism{background:linear-gradient(120deg,#ffd2d2,#d2ffe0 30%,#d2e2ff 60%,#ffd2f4)}
+.sw-erase{background:
+  linear-gradient(45deg,rgba(255,255,255,.14) 25%,transparent 25% 75%,rgba(255,255,255,.14) 75%),
+  linear-gradient(45deg,rgba(255,255,255,.14) 25%,transparent 25% 75%,rgba(255,255,255,.14) 75%);
+  background-size:10px 10px; background-position:0 0,5px 5px; background-color:#20293f}
+.sw-beam{background:radial-gradient(circle at 42% 40%,#ffffff 0 18%,#7ee7ff 30%,#8b5cf6 62%,transparent 72%)}
+.sw-boulder{background:radial-gradient(circle at 36% 32%,#c6cfdd 0 22%,#7c8aa0 45%,#3d4759 78%)}
+.sw-stir{background:
+  radial-gradient(circle at 30% 70%,rgba(110,231,212,.85),transparent 46%),
+  radial-gradient(circle at 68% 36%,rgba(167,139,250,.85),transparent 48%),
+  #141b2e}
+.sw-rope{background:linear-gradient(160deg,#c9a06a,#8a6238)}
+.pel .gly{width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:17px}
+
+.dock-side{display:flex;align-items:center;gap:10px}
+.brushbox{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3);white-space:nowrap}
+.brushbox input[type=range]{width:110px; accent-color:var(--acc)}
+.brushbox b{color:var(--t2);min-width:14px;text-align:center;display:inline-block}
+
+/* ---- 弹窗 ---- */
+.modal{position:fixed; inset:0; z-index:100; display:none; align-items:center; justify-content:center; padding:18px}
+.modal.show{display:flex}
+.modal-mask{position:absolute; inset:0; background:rgba(4,7,14,.72); backdrop-filter:blur(6px)}
+.modal-card{
+  position:relative; width:min(680px,94vw); max-height:84vh; overflow:auto;
+  background:linear-gradient(170deg,rgba(22,30,52,.97),rgba(14,19,34,.97));
+  border:1px solid var(--line2); border-radius:20px; box-shadow:var(--shadow);
+  padding:24px 26px 22px;
+}
+.modal-card h3{margin:0 0 4px; font-size:18px; letter-spacing:.5px}
+.modal-card h3 .sub{font-size:11px;color:var(--t3);letter-spacing:2px;font-weight:600;display:block;margin-top:5px}
+.modal-close{
+  position:absolute; top:14px; right:14px; border:1px solid var(--line); background:transparent;
+  color:var(--t2); width:32px; height:32px; border-radius:10px; cursor:pointer; font-size:15px;
+  display:flex; align-items:center; justify-content:center; font-family:inherit;
+}
+.modal-close:hover{border-color:var(--acc); color:var(--t1)}
+.modal-card h4{margin:18px 0 8px; font-size:13.5px; color:var(--acc)}
+.modal-card p,.modal-card li{font-size:12.5px; color:var(--t2); line-height:1.85; margin:5px 0}
+.modal-card ul{margin:6px 0; padding-left:20px}
+.modal-card code{
+  background:rgba(255,255,255,.07); border-radius:6px; padding:1px 7px;
+  font-size:11.5px; color:var(--t1); font-family:ui-monospace,Consolas,monospace;
+}
+.help-grid{display:grid; grid-template-columns:1fr 1fr; gap:6px 18px}
+@media (max-width:640px){.help-grid{grid-template-columns:1fr}}
+
+/* 成就面板 */
+.ach-list{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:14px}
+@media (max-width:640px){.ach-list{grid-template-columns:1fr}}
+.ach-item{
+  display:flex; align-items:center; gap:10px; padding:11px 13px;
+  border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.03);
+  opacity:.45; filter:grayscale(.9); transition:opacity .3s ease,filter .3s ease,border-color .3s ease;
+}
+.ach-item.lit{opacity:1;filter:none;border-color:rgba(245,200,107,.5)}
+.ach-item .em{font-size:20px}
+.ach-item .nm{font-size:12.5px;font-weight:800;color:var(--t1)}
+.ach-item .ds{font-size:10.5px;color:var(--t3);margin-top:2px}
+.ach-stat{font-size:12px;color:var(--t3);margin-top:6px}
+.ach-stat b{color:var(--gold);font-size:15px}
+
+/* 小提示 toast（页面自带，与 STAch 横幅错开位置） */
+.p-toast{
+  position:fixed; left:50%; top:64px; transform:translateX(-50%) translateY(-8px);
+  background:rgba(16,24,44,.94); color:var(--t1); border:1px solid var(--line2);
+  border-radius:12px; padding:9px 16px; font-size:12.5px; font-weight:600;
+  opacity:0; transition:opacity .35s ease,transform .35s ease; pointer-events:none;
+  z-index:120; max-width:86vw; text-align:center;
+}
+.p-toast.show{opacity:1;transform:translateX(-50%)}
+
+/* 滚动条 */
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:rgba(122,152,224,.25);border-radius:6px}
+::-webkit-scrollbar-track{background:transparent}
+
+@media (max-width:900px){
+  .tb-sub{display:none}
+  .tbtn{padding:8px 9px}
+  .tbtn .lbl{display:none}
+  .pel{width:47px}
+  .brushbox input[type=range]{width:76px}
+}
+@media (max-width:560px){
+  .tb-title{font-size:14px}
+  .pel{width:43px}
+  .pel .nm{font-size:9.5px}
+  .stage-hint{font-size:10.5px;padding:5px 11px}
+}
+/* —— 返回主页（全站统一 · 2026-09-29）—— */
+.wb-home{position:fixed;left:14px;bottom:14px;z-index:9990;display:inline-flex;align-items:center;gap:5px;
+  padding:8px 13px 8px 10px;border-radius:999px;text-decoration:none;
+  background:rgba(17,24,39,.55);color:#fff;font-size:12.5px;font-weight:600;letter-spacing:.3px;
+  -webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.14);box-shadow:0 6px 18px rgba(0,0,0,.18);
+  transition:background .2s,transform .2s,box-shadow .2s}
+.wb-home:hover{background:rgba(17,24,39,.78);transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.26)}
+.wb-home:active{transform:translateY(0)}
+.wb-home svg{width:13px;height:13px;flex:0 0 auto}
+@media (max-width:620px){ .wb-home{left:10px;bottom:10px;padding:7px 11px 7px 9px;font-size:12px} }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <a class="tb-logo" href="https://startian.top/" title="返回星恬的小站">
+      <span class="tb-planet"></span>
+      <span>
+        <span class="tb-title">万物沙盒</span>
+        <span class="tb-sub">Everything Sandbox</span>
+      </span>
+    </a>
+    <div class="tb-actions">
+      <button class="tbtn" id="btnPause" title="暂停 / 继续世界演化"><span class="dot"></span><span class="lbl">暂停</span></button>
+      <button class="tbtn" id="btnClear" title="清空整个世界">🧹<span class="lbl">清空</span></button>
+      <button class="tbtn" id="btnNew" title="重新生成地形与星空">🎲<span class="lbl">新世界</span></button>
+      <button class="tbtn" id="btnShot" title="把当前世界导出为 PNG 照片">📷<span class="lbl">光之相机</span></button>
+      <button class="tbtn" id="btnShips" title="召唤星域来客（彩蛋）">🛸<span class="lbl">星域来客</span></button>
+      <button class="tbtn" id="btnAch" title="查看成就">🏆<span class="lbl">成就</span></button>
+      <button class="tbtn" id="btnHelp" title="玩法说明">❓<span class="lbl">帮助</span></button>
+    </div>
+  </header>
+
+  <main class="stage" id="stage">
+    <canvas id="cv"></canvas>
+    <div class="stage-hint" id="hint">按住拖动就能玩 · 试试把火丢进油里 · 天空可以被搅动</div>
+    <div id="fps">--</div>
+  </main>
+
+  <footer class="dock">
+    <div class="dock-row">
+      <div class="pal" id="pal"></div>
+      <div class="dock-side">
+        <div class="brushbox">笔刷 <input type="range" id="brush" min="1" max="12" step="1" value="4"><b id="brushV">4</b></div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ===== 帮助弹窗 ===== -->
+<div class="modal" id="helpModal" role="dialog" aria-modal="true" aria-label="玩法说明">
+  <div class="modal-mask" data-close="helpModal"></div>
+  <div class="modal-card">
+    <button class="modal-close" data-close="helpModal" aria-label="关闭">✕</button>
+    <h3>万物沙盒<span class="sub">EVERYTHING SANDBOX</span></h3>
+    <p>一块漂浮在星海中的像素土地。选一种元素，在画布上按住拖动，世界就会自己活起来。</p>
+    <h4>一、基础玩法</h4>
+    <ul class="help-grid">
+      <li><code>左键拖动</code> 撒下选中的元素</li>
+      <li><code>右键拖动</code> 快速擦除</li>
+      <li><code>笔刷</code> 底部滑杆调粗细</li>
+      <li><code>暂停</code> 冻结世界慢慢摆放</li>
+    </ul>
+    <h4>二、世界会自己发生的事</h4>
+    <ul>
+      <li>水会把火烧成蒸汽，蒸汽飘着飘着又凝成雨落回来</li>
+      <li>木、油、藤蔓都怕火；火药碰到火会炸；烟花会窜上天炸开</li>
+      <li>种子落在水边会发芽长藤；酸能吃穿石头却怕玻璃</li>
+      <li>岩浆又烫又亮，遇到水会凝固成石头</li>
+    </ul>
+    <h4>三、光会拐弯（炫技点）</h4>
+    <ul>
+      <li>选 <code>✨ 光束笔</code>，在画布上按下并拖动来瞄准，松手前光束会一直跟着手指走</li>
+      <li>光束会被 <code>镜 / 镜 \</code> 反射、被玻璃折射、进棱镜散成彩虹</li>
+      <li>光能点燃路上的油和木头；拿镜子铺一条光路试试</li>
+    </ul>
+    <h4>四、物理与天空</h4>
+    <ul>
+      <li>用 <code>⚪ 钢球</code> 点一下生成滚球，把它推下山坡看它滚过沙丘</li>
+      <li>用 <code>🪢 绳</code> 钩住一点，垂下来的绳子会自己荡</li>
+      <li>选 <code>🌀 星流</code> 在天空划动，能把极光搅出漩涡，还能吹散烟</li>
+      <li>天空里偶尔有流星；星域来客偶尔路过，也会偶尔帮你烧点什么</li>
+    </ul>
+    <h4>五、隐藏起来的小事</h4>
+    <ul>
+      <li>试试老派游戏秘技（↑↑↓↓←→←→ B A）</li>
+      <li>深夜的天空和白天不太一样（其实一样，骗你的）</li>
+      <li>更多等你慢慢撞见</li>
+    </ul>
+    <p style="margin-top:16px;color:var(--t3);font-size:11.5px">纯前端单文件 · 零依赖 · 数据不出本机 · 成就与星恬小站互通</p>
+  </div>
+</div>
+
+<!-- ===== 成就弹窗 ===== -->
+<div class="modal" id="achModal" role="dialog" aria-modal="true" aria-label="成就">
+  <div class="modal-mask" data-close="achModal"></div>
+  <div class="modal-card">
+    <button class="modal-close" data-close="achModal" aria-label="关闭">✕</button>
+    <h3>🏆 沙盒成就<span class="sub">SANDBOX ACHIEVEMENTS</span></h3>
+    <div class="ach-stat">已点亮 <b id="achLit">0</b> / <span id="achTotal">7</span> · 与星恬小站成就柜互通</div>
+    <div class="ach-list" id="achList"></div>
+    <p style="margin-top:14px;color:var(--t3);font-size:11.5px">玩着玩着就会亮起来。悄悄说：这页还有一些没写在这里的隐藏成就……</p>
+  </div>
+</div>
+
+<div class="p-toast" id="pToast"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   j1_core — 核心引擎（物质沙盘）
+   320×180 元胞网格 · 22 种元素 · 密度流动 · 反应表 · AO 软阴影渲染
+   ============================================================ */
+var SBX = window.SBX = {};
+var SB = SBX;
+(function () {
+  'use strict';
+
+  var W = SB.W = 320, H = SB.H = 180, N = W * H;
+  SB.N = N;
+
+  /* ---------- 元素编号 ---------- */
+  var T = SB.T = {
+    AIR: 0, SAND: 1, SOIL: 2, STONE: 3, WOOD: 4, OIL: 5, WATER: 6, FIRE: 7,
+    SMOKE: 8, STEAM: 9, ICE: 10, SEED: 11, VINE: 12, ACID: 13, GLASS: 14,
+    MIRL: 15, MIRR: 16, LAMP: 17, LAVA: 18, POWDER: 19, FWK: 20, SPARK: 21,
+    PRISM: 22
+  };
+  var NT = 23;
+
+  /* ---------- 调色板元素表（UI 用，group: 0 物质 1 变化 2 光学 3 工具） ---------- */
+  SB.ELEMENTS = [
+    { id: T.SAND, name: '沙', sw: 'sw-sand', group: 0, key: '1', desc: '会堆积、会塌方' },
+    { id: T.SOIL, name: '土', sw: 'sw-soil', group: 0, desc: '更深的土' },
+    { id: T.STONE, name: '石', sw: 'sw-stone', group: 0, desc: '坚实不塌' },
+    { id: T.WOOD, name: '木', sw: 'sw-wood', group: 0, desc: '可燃' },
+    { id: T.WATER, name: '水', sw: 'sw-water', group: 0, key: '2', desc: '会流动、灭火' },
+    { id: T.OIL, name: '油', sw: 'sw-oil', group: 0, desc: '浮在水上、易燃' },
+    { id: T.ACID, name: '酸', sw: 'sw-acid', group: 0, desc: '溶穿石木，怕玻璃' },
+    { id: T.ICE, name: '冰', sw: 'sw-ice', group: 0, desc: '遇热融化' },
+    { id: T.SEED, name: '种', sw: 'sw-seed', group: 1, desc: '遇水发芽' },
+    { id: T.FIRE, name: '火', sw: 'sw-fire', group: 1, key: '3', desc: '会蔓延、会熄灭' },
+    { id: T.LAVA, name: '岩浆', sw: 'sw-lava', group: 1, desc: '高热、遇水成石' },
+    { id: T.POWDER, name: '火药', sw: 'sw-powder', group: 1, desc: '遇火爆炸' },
+    { id: T.FWK, name: '烟花', sw: 'sw-fwk', group: 1, desc: '遇火窜上天' },
+    { id: T.LAMP, name: '灯', sw: 'sw-lamp', group: 2, desc: '常亮的暖光' },
+    { id: T.GLASS, name: '玻璃', sw: 'sw-glass', group: 2, desc: '透光、防酸' },
+    { id: T.MIRL, name: '镜/', sw: 'sw-mir-a', group: 2, desc: '反射光束' },
+    { id: T.MIRR, name: '镜\\', sw: 'sw-mir-b', group: 2, desc: '反射光束' },
+    { id: T.PRISM, name: '棱镜', sw: 'sw-prism', group: 2, desc: '把光散成彩虹' },
+    { id: -1, name: '擦除', sw: 'sw-erase', group: 3, erase: true, desc: '抹掉一切' }
+  ];
+  SB.TOOLS = [
+    { tool: 'beam', name: '光束笔', gly: '✨', desc: '拖动瞄准，光束会跟着走' },
+    { tool: 'ball', name: '钢球', gly: '⚪', desc: '点一下放一颗滚球' },
+    { tool: 'stir', name: '星流', gly: '🌀', desc: '在天空划动，搅出极光漩涡' },
+    { tool: 'rope', name: '绳', gly: '🪢', desc: '按住钩一点，垂下会荡的绳' }
+  ];
+
+  /* ---------- 网格数据 ---------- */
+  var ty = SB.ty = new Uint8Array(N);
+  var aux = SB.aux = new Uint8Array(N);
+  var tint = SB.tint = new Uint8Array(N);
+  var moved = new Uint8Array(N);
+  var frameNo = SB.frame = 0;
+  var gravity = 1;
+  SB.gravity = function (v) { if (v !== undefined) gravity = v; return gravity; };
+
+  function at(x, y) {
+    if (x < 0 || x >= W || y < 0 || y >= H) return -2; /* 边界外 */
+    return ty[y * W + x];
+  }
+  SB.get = function (x, y) { return at(x, y); };
+  SB.set = function (x, y, t) {
+    if (x < 0 || x >= W || y < 0 || y >= H) return;
+    var i = y * W + x;
+    ty[i] = t; tint[i] = (Math.random() * 8) | 0; initAux(i, t);
+  };
+  function initAux(i, t) {
+    if (t === T.FIRE) aux[i] = 60 + (Math.random() * 60) | 0;
+    else if (t === T.SMOKE) aux[i] = 70 + (Math.random() * 70) | 0;
+    else if (t === T.STEAM) aux[i] = 90 + (Math.random() * 70) | 0;
+    else if (t === T.VINE) aux[i] = 26;
+    else aux[i] = 0;
+  }
+
+  /* ---------- 密度 / 反应表 ---------- */
+  var DENS = {}; DENS[T.SAND] = 50; DENS[T.SOIL] = 50; DENS[T.SEED] = 24;
+  DENS[T.POWDER] = 42; DENS[T.WATER] = 30; DENS[T.ACID] = 33; DENS[T.OIL] = 20; DENS[T.LAVA] = 82;
+  var FLAM = {}; FLAM[T.WOOD] = 0.075; FLAM[T.OIL] = 0.5; FLAM[T.VINE] = 0.13; FLAM[T.SEED] = 0.08;
+  var DISSOLVE = {}; DISSOLVE[T.STONE] = 0.05; DISSOLVE[T.SAND] = 0.05; DISSOLVE[T.SOIL] = 0.05;
+  DISSOLVE[T.WOOD] = 0.06; DISSOLVE[T.ICE] = 0.05; DISSOLVE[T.VINE] = 0.07; DISSOLVE[T.SEED] = 0.07;
+
+  function isGas(t) { return t === T.SMOKE || t === T.STEAM; }
+  function passable(t) { return t === T.AIR || isGas(t); }
+  function lighterLiquid(t, dens) { return (t === T.WATER && dens > 30) || (t === T.OIL && dens > 20) || (t === T.ACID && dens > 33); }
+  function disp(t, dens) { return passable(t) || lighterLiquid(t, dens); }
+
+  function swap(i, j) {
+    var a = ty[i], b = ty[j], c = aux[i], d = aux[j], e = tint[i], f = tint[j];
+    ty[j] = a; aux[j] = c; tint[j] = e;
+    ty[i] = b; aux[i] = d; tint[i] = f;
+    moved[i] = 1; moved[j] = 1;
+  }
+
+  /* ---------- 主动反应 ---------- */
+  function ignite(i) {
+    ty[i] = T.FIRE; tint[i] = (Math.random() * 8) | 0; aux[i] = 46 + (Math.random() * 60) | 0;
+  }
+  SB.ignite = function (x, y) { if (at(x, y) >= 0) ignite(y * W + x); };
+
+  /* 爆炸：链式点燃火药 / 掀掉脆弱方块；石头镜子灯免疫 */
+  function explode(cx, cy, r) {
+    for (var dy = -r; dy <= r; dy++) {
+      var yy = cy + dy; if (yy < 0 || yy >= H) continue;
+      for (var dx = -r; dx <= r; dx++) {
+        if (dx * dx + dy * dy > r * r + 0.5) continue;
+        var xx = cx + dx; if (xx < 0 || xx >= W) continue;
+        var i = yy * W + xx; var t = ty[i];
+        if (t === T.AIR) continue;
+        if (t === T.POWDER) { ty[i] = T.FIRE; aux[i] = 8 + (Math.random() * 16) | 0; tint[i] = (Math.random() * 8) | 0; }
+        else if (t === T.FWK) { ty[i] = T.SPARK; aux[i] = 200 + 20; tint[i] = (Math.random() * 6) | 0; }
+        else if (t === T.STONE || t === T.MIRL || t === T.MIRR || t === T.LAMP) { /* 免疫 */ }
+        else if (Math.random() < 0.86) {
+          ty[i] = Math.random() < 0.28 ? T.FIRE : T.AIR;
+          if (ty[i] === T.FIRE) aux[i] = 16 + (Math.random() * 20) | 0;
+        }
+      }
+    }
+    if (SB.blast) SB.blast(cx, cy, r);
+  }
+  SB.explode = explode;
+
+  /* ---------- 单格更新（自底向上扫描） ---------- */
+  function upd(x, y, i) {
+    if (moved[i]) return;
+    var t = ty[i];
+    if (!t) return;
+    switch (t) {
+      case T.SAND: case T.SOIL: case T.POWDER: powderStep(i, x, y, DENS[t], t === T.POWDER); break;
+      case T.SEED: seedStep(i, x, y); break;
+      case T.WATER: case T.OIL: case T.LAVA: liquidStep(i, x, y, t); break;
+      case T.ACID: acidStep(i, x, y); break;
+      case T.FIRE: fireStep(i, x, y); break;
+      case T.SMOKE: case T.STEAM: gasStep(i, x, y, t); break;
+      case T.SPARK: sparkStep(i, x, y); break;
+      case T.ICE: iceStep(i, x, y); break;
+      case T.VINE: if (aux[i] > 0) aux[i]--; break;
+      default: break;
+    }
+  }
+
+  /* 粉末：下落 → 斜落（可沉入更轻的液体） */
+  function powderStep(i, x, y, dens, isPowder) {
+    if (y >= H - 1) return;
+    var below = i + W, b = ty[below];
+    if (disp(b, dens)) { swap(i, below); return; }
+    if (!isPowder && b === T.LAVA) return; /* 沙土不沉入岩浆（会烧掉？简化：不沉） */
+    var d0 = ((tint[i] + frameNo) & 1) ? 1 : -1;
+    var d = d0, j = i + W + d, xx = x + d;
+    if (xx >= 0 && xx < W && disp(ty[j], dens)) { swap(i, j); return; }
+    d = -d0; j = i + W + d; xx = x + d;
+    if (xx >= 0 && xx < W && disp(ty[j], dens)) { swap(i, j); return; }
+  }
+
+  /* 种子：下落 + 遇水发芽 */
+  function seedStep(i, x, y) {
+    if (y < H - 1) {
+      var below = i + W;
+      if (disp(ty[below], DENS[T.SEED])) { swap(i, below); return; }
+    }
+    /* 发芽判定（水在四邻 + 上方是空气） */
+    var wet = at(x - 1, y) === T.WATER || at(x + 1, y) === T.WATER ||
+              at(x, y + 1) === T.WATER || at(x, y - 1) === T.WATER;
+    if (wet && at(x, y - 1) === T.AIR && Math.random() < 0.045) {
+      ty[i] = T.VINE; aux[i] = 30; tint[i] = (Math.random() * 8) | 0;
+    }
+  }
+
+  /* 液体：下落 → 找低处的横向扩散（底行也能铺开） */
+  function liquidStep(i, x, y, t) {
+    var dens = DENS[t];
+    if (t === T.LAVA && Math.random() < 0.5) return; /* 岩浆黏稠 */
+    /* 反应 */
+    if (t === T.LAVA) {
+      for (var k = 0; k < 4; k++) {
+        var nx = x + (k === 0 ? -1 : k === 1 ? 1 : 0), ny = y + (k === 2 ? -1 : k === 3 ? 1 : 0);
+        var n = at(nx, ny);
+        if (n === T.WATER) { ty[i] = T.STONE; tint[i] = (Math.random() * 8) | 0; return; }
+        if (n === T.ICE && Math.random() < 0.5) { ty[ny * W + nx] = T.WATER; }
+        if (FLAM[n] !== undefined && Math.random() < 0.5) ignite(ny * W + nx);
+      }
+    }
+    if (y < H - 1) {
+      var below = i + W;
+      if (disp(ty[below], dens)) { swap(i, below); return; }
+    }
+    var d0 = ((tint[i] + frameNo) & 1) ? 1 : -1;
+    for (var s = 0; s < 2; s++) {
+      var d = s === 0 ? d0 : -d0;
+      var xx = x + d; if (xx < 0 || xx >= W) continue;
+      var j = i + d;
+      var tj = ty[j];
+      if (!disp(tj, dens)) continue;
+      /* 扫描前方 5 格找低处；底行有空位即可流过去 */
+      var found = false;
+      for (var kk = 1; kk <= 5; kk++) {
+        var xxx = x + d * kk; if (xxx < 0 || xxx >= W) break;
+        var jj = (y * W) + xxx; var tjj = ty[jj];
+        if (!(tjj === T.AIR || isGas(tjj) || lighterLiquid(tjj, dens) || tjj === t)) break;
+        if (y >= H - 1) { found = true; break; }
+        var tbelow = ty[jj + W];
+        if (tbelow === T.AIR || isGas(tbelow) || lighterLiquid(tbelow, dens)) { found = true; break; }
+      }
+      if (found) { swap(i, j); return; }
+    }
+  }
+
+  /* 酸：溶解 + 流动 */
+  function acidStep(i, x, y) {
+    for (var k = 0; k < 4; k++) {
+      var nx = x + (k === 0 ? -1 : k === 1 ? 1 : 0), ny = y + (k === 2 ? -1 : k === 3 ? 1 : 0);
+      var n = at(nx, ny);
+      if (DISSOLVE[n] !== undefined && Math.random() < DISSOLVE[n]) {
+        var j = ny * W + nx;
+        ty[j] = Math.random() < 0.28 ? T.SMOKE : T.AIR;
+        if (ty[j] === T.SMOKE) aux[j] = 50 + (Math.random() * 40) | 0;
+        if (Math.random() < 0.72) { ty[i] = T.AIR; return; }
+      }
+    }
+    liquidStep(i, x, y, T.ACID);
+  }
+
+  /* 火：寿命 / 引燃 / 遇水熄灭 / 缓慢上飘 */
+  function fireStep(i, x, y) {
+    /* 先看身边有没有燃料或水：有燃料"续着烧"，遇到水就地嘶嘶对峙，都不飘走 */
+    var fuelNear = false;
+    if (y < H - 1) { var bf0 = ty[i + W]; if (FLAM[bf0] !== undefined || bf0 === T.POWDER || bf0 === T.FWK || bf0 === T.WATER || bf0 === T.ICE) fuelNear = true; }
+    if (!fuelNear && x > 0) { var lf0 = ty[i - 1]; if (FLAM[lf0] !== undefined || lf0 === T.POWDER || lf0 === T.FWK || lf0 === T.WATER) fuelNear = true; }
+    if (!fuelNear && x < W - 1) { var rf0 = ty[i + 1]; if (FLAM[rf0] !== undefined || rf0 === T.POWDER || rf0 === T.FWK || rf0 === T.WATER) fuelNear = true; }
+    aux[i]--;
+    var life = aux[i];
+    if (fuelNear && life > 0 && life < 38) { aux[i] = 38; life = 38; } /* 有燃料续烧 */
+    if (life <= 0) {
+      if (Math.random() < 0.5) { ty[i] = T.SMOKE; aux[i] = 60 + (Math.random() * 70) | 0; }
+      else ty[i] = T.AIR;
+      return;
+    }
+    for (var k = 0; k < 4; k++) {
+      var nx = x + (k === 0 ? -1 : k === 1 ? 1 : 0), ny = y + (k === 2 ? -1 : k === 3 ? 1 : 0);
+      var n = at(nx, ny);
+      if (n === T.WATER) {
+        var j = ny * W + nx;
+        if (Math.random() < 0.55) { ty[j] = T.STEAM; aux[j] = 90 + (Math.random() * 60) | 0; }
+        ty[i] = Math.random() < 0.5 ? T.STEAM : T.AIR;
+        if (ty[i] === T.STEAM) aux[i] = 80 + (Math.random() * 50) | 0;
+        return;
+      }
+      if (n === T.ICE && Math.random() < 0.3) { ty[ny * W + nx] = T.WATER; }
+    }
+    for (var k2 = 0; k2 < 8; k2++) {
+      var ax = x + (k2 % 3) - 1, ay = y + ((k2 / 3) | 0) - 1;
+      if (ax === x && ay === y) continue;
+      var nn = at(ax, ay); if (nn < 0) continue;
+      if (SB._dbgk && SB._dbgk.length < 80) SB._dbgk.push([ax, ay, nn]);   /* 调试探针（默认关闭） */
+      if (nn === T.POWDER || nn === T.FWK) {
+        if (nn === T.POWDER) { explode(ax, ay, 6); return; }
+        else { var jj = ay * W + ax; ty[jj] = T.SPARK; aux[jj] = 200 + 45; tint[jj] = (Math.random() * 6) | 0; }
+        continue;
+      }
+      var fl = FLAM[nn];
+      if (fl !== undefined && Math.random() < fl) { ignite(ay * W + ax); }
+    }
+    /* 上飘一点（火焰感）：有燃料可烧时贴着烧，没燃料才飘走 */
+    if (!fuelNear && Math.random() < 0.2 && y > 0) {
+      var up = i - W;
+      if (passable(ty[up])) swap(i, up);
+      else {
+        var d = Math.random() < 0.5 ? -1 : 1, xx2 = x + d;
+        if (xx2 >= 0 && xx2 < W && passable(ty[up + d])) swap(i, up + d);
+      }
+    }
+  }
+
+  /* 烟/蒸汽：上升 + 寿命 */
+  function gasStep(i, x, y, t) {
+    aux[i]--;
+    if (aux[i] <= 0) {
+      ty[i] = (t === T.STEAM && Math.random() < 0.72) ? T.WATER : T.AIR;
+      return;
+    }
+    var rise = t === T.STEAM ? 0.62 : 0.5;
+    if (Math.random() < rise && y > 0) {
+      var up = i - W;
+      if (passable(ty[up])) { swap(i, up); return; }
+      var d = Math.random() < 0.5 ? -1 : 1, xx = x + d;
+      if (xx >= 0 && xx < W && passable(ty[up + d])) { swap(i, up + d); return; }
+      /* 横向漂移 */
+      if (xx >= 0 && xx < W && passable(ty[i + d])) swap(i, i + d);
+    }
+  }
+
+  /* 火花：火箭（aux>=200）与普通粒子 */
+  function sparkStep(i, x, y) {
+    if (aux[i] >= 200) {
+      /* 火箭：上升 + 尾迹；到顶炸开 */
+      aux[i]--;
+      if (aux[i] <= 200) { burst(i, x, y); return; }
+      for (var s = 0; s < 2; s++) {
+        if (y <= 0) break;
+        var up = i - W;
+        if (passable(ty[up])) {
+          if (Math.random() < 0.6 && ty[i - W] === T.AIR) {
+            /* 先留尾迹（在当前位置下方生成小火花） */
+            var below = i + W;
+            if (y < H - 1 && passable(ty[below]) && Math.random() < 0.75) {
+              ty[below] = T.SPARK; aux[below] = 18 + (Math.random() * 22) | 0; tint[below] = tint[i];
+            }
+          }
+          swap(i, up); i = up; y--;
+        } else break;
+      }
+      return;
+    }
+    /* 普通火花 */
+    if (aux[i] > 0) aux[i]--;
+    else { ty[i] = T.AIR; return; }
+    if (Math.random() < 0.55 && y < H - 1) {
+      var dx = (Math.random() * 3 | 0) - 1;
+      var xx = x + dx, below = i + W + dx;
+      if (xx >= 0 && xx < W && passable(ty[below])) swap(i, below);
+    }
+    /* 火花也能点燃 */
+    if (Math.random() < 0.25) {
+      for (var k = 0; k < 4; k++) {
+        var nx = x + (k === 0 ? -1 : k === 1 ? 1 : 0), ny = y + (k === 2 ? -1 : k === 3 ? 1 : 0);
+        var n = at(nx, ny); var f2 = FLAM[n];
+        if (f2 !== undefined && Math.random() < f2 * 0.6) ignite(ny * W + nx);
+      }
+    }
+  }
+  function burst(i, x, y) {
+    ty[i] = T.AIR;
+    var col = tint[i] % 6;
+    for (var k = 0; k < 46; k++) {
+      var ang = Math.random() * 6.2832, rr = Math.random() * 4.2;
+      var px = (x + Math.cos(ang) * rr) | 0, py = (y + Math.sin(ang) * rr * 0.85) | 0;
+      if (px < 0 || px >= W || py < 0 || py >= H) continue;
+      var j = py * W + px;
+      if (!passable(ty[j]) && ty[j] !== T.SPARK) continue;
+      ty[j] = T.SPARK; aux[j] = 40 + (Math.random() * 50) | 0;
+      tint[j] = (k < 30 ? col : (Math.random() * 6) | 0);
+    }
+    if (SB.ach) SB.ach('sandbox.firework');
+  }
+
+  /* 冰：融化 */
+  function iceStep(i, x, y) {
+    for (var k = 0; k < 4; k++) {
+      var nx = x + (k === 0 ? -1 : k === 1 ? 1 : 0), ny = y + (k === 2 ? -1 : k === 3 ? 1 : 0);
+      var n = at(nx, ny);
+      if ((n === T.FIRE || n === T.LAVA) && Math.random() < 0.22) {
+        ty[i] = T.WATER; tint[i] = (Math.random() * 8) | 0; return;
+      }
+    }
+  }
+
+  /* ---------- 藤蔓生长（全局预算：每帧抽 8 个格） ---------- */
+  function vinePass() {
+    for (var k = 0; k < 8; k++) {
+      var i = (Math.random() * N) | 0;
+      if (ty[i] !== T.VINE || aux[i] <= 0) continue;
+      var x = i % W, y = (i / W) | 0;
+      /* 附近有水才长 */
+      var wet = false;
+      for (var dy = -2; dy <= 2 && !wet; dy++) for (var dx = -2; dx <= 2; dx++) {
+        if (at(x + dx, y + dy) === T.WATER) { wet = true; break; }
+      }
+      if (!wet) continue;
+      var dirs = [[0, -1], [0, -1], [-1, -1], [1, -1]];
+      var d = dirs[(tint[i] + frameNo) % 4];
+      var nx = x + d[0], ny = y + d[1];
+      if (nx < 0 || nx >= W || ny < 0) continue;
+      var j = ny * W + nx;
+      if (ty[j] === T.AIR && Math.random() < 0.5) {
+        ty[j] = T.VINE; aux[j] = Math.max(6, aux[i] - 6); tint[j] = (Math.random() * 8) | 0;
+        aux[i] = Math.max(0, aux[i] - 2);
+      }
+    }
+  }
+
+  /* 搅动天空时顺带吹一吹烟/火/蒸汽（风向 = dx,dy） */
+  SB.wind = function (cx, cy, dx, dy, r) {
+    var sgx = dx > 2 ? 1 : dx < -2 ? -1 : 0;
+    var sgy = dy > 2 ? 1 : dy < -2 ? -1 : 0;
+    if (!sgx && !sgy) return;
+    var x0 = Math.max(0, (cx - r) | 0), x1 = Math.min(W - 1, (cx + r) | 0);
+    var y0 = Math.max(0, (cy - r) | 0), y1 = Math.min(H - 1, (cy + r) | 0);
+    for (var y = y0; y <= y1; y++) {
+      for (var x = x0; x <= x1; x++) {
+        var i = y * W + x, t = ty[i];
+        if (t !== T.FIRE && t !== T.SMOKE && t !== T.STEAM && t !== T.SPARK) continue;
+        var nx = x + sgx, ny = y + sgy;
+        if (nx < 0 || nx >= W || ny < 0 || ny >= H) continue;
+        var j = ny * W + nx;
+        if (passable(ty[j])) swap(i, j);
+      }
+    }
+  };
+
+  /* ---------- 模拟步 ---------- */
+  SB.step = function () {
+    frameNo++;
+    moved.fill(0);
+    var parity = frameNo & 1;
+    for (var y = H - 1; y >= 0; y--) {
+      var row = y * W;
+      if (((y + parity) & 1) === 0) {
+        for (var x = 0; x < W; x++) upd(x, y, row + x);
+      } else {
+        for (var x2 = W - 1; x2 >= 0; x2--) upd(x2, y, row + x2);
+      }
+    }
+    vinePass();
+  };
+  SB.stepMany = function (n) { for (var i = 0; i < n; i++) SB.step(); };
+
+  /* ---------- 渲染：颜色表 + AO 软阴影 ---------- */
+  var BASE = {};
+  BASE[T.SAND] = [216, 160, 92]; BASE[T.SOIL] = [138, 90, 62]; BASE[T.STONE] = [96, 108, 126];
+  BASE[T.WOOD] = [139, 90, 43]; BASE[T.OIL] = [60, 66, 44]; BASE[T.WATER] = [47, 127, 214];
+  BASE[T.SMOKE] = [88, 98, 112]; BASE[T.STEAM] = [210, 219, 230]; BASE[T.ICE] = [159, 217, 242];
+  BASE[T.SEED] = [126, 178, 109]; BASE[T.VINE] = [63, 158, 82]; BASE[T.ACID] = [168, 224, 60];
+  BASE[T.GLASS] = [191, 230, 255]; BASE[T.MIRL] = [207, 217, 230]; BASE[T.MIRR] = [207, 217, 230];
+  BASE[T.LAMP] = [255, 212, 126]; BASE[T.POWDER] = [74, 79, 91]; BASE[T.FWK] = [201, 101, 168];
+  BASE[T.PRISM] = [217, 194, 255];
+  var ALPHA = {}; ALPHA[T.WATER] = 234; ALPHA[T.GLASS] = 122; ALPHA[T.STEAM] = 150;
+  ALPHA[T.SMOKE] = 192; ALPHA[T.PRISM] = 152;
+
+  var SHADES = [];
+  var SHADE_F = [0.7, 0.83, 0.94, 1.04];
+  function buildShades() {
+    for (var t = 0; t < NT; t++) {
+      var arr = new Uint32Array(8 * 4);
+      var base = BASE[t]; if (!base) { SHADES[t] = arr; continue; }
+      var alpha = ALPHA[t] === undefined ? 255 : ALPHA[t];
+      for (var tn = 0; tn < 8; tn++) {
+        var dv = ((tn * 37) % 17) - 8; /* -8..8 确定性抖动 */
+        for (var o = 0; o < 4; o++) {
+          var f = SHADE_F[o];
+          var r = Math.max(0, Math.min(255, (base[0] + dv) * f)) | 0;
+          var g = Math.max(0, Math.min(255, (base[1] + dv) * f)) | 0;
+          var b = Math.max(0, Math.min(255, (base[2] + dv) * f)) | 0;
+          arr[tn * 4 + o] = ((alpha << 24) | (b << 16) | (g << 8) | r) >>> 0;
+        }
+      }
+      SHADES[t] = arr;
+    }
+  }
+  buildShades();
+  SB.rebuildShades = buildShades;
+
+  var worldCanvas = SB.worldCanvas = document.createElement('canvas');
+  worldCanvas.width = W; worldCanvas.height = H;
+  var wctx = worldCanvas.getContext('2d');
+  var wimg = wctx.createImageData(W, H);
+  var d32 = new Uint32Array(wimg.data.buffer);
+
+  var SPARK_COLS = [[255, 216, 120], [255, 122, 190], [122, 220, 255], [182, 142, 255], [172, 255, 122], [255, 160, 80]];
+
+  function fireColor(life, i) {
+    var k = life / 118; if (k > 1) k = 1; if (k < 0) k = 0;
+    var fl = ((i * 7 + frameNo * 13) & 15) - 8;
+    var r = (235 + 20 * k) | 0;
+    var g = Math.max(30, Math.min(255, (52 + 198 * k + fl) | 0));
+    var b = (18 + 175 * k * k) | 0;
+    return ((255 << 24) | (b << 16) | (g << 8) | r) >>> 0;
+  }
+  function lavaColor(i) {
+    var n = ((i * 13 + (frameNo >> 1) * 7) & 31) - 16;
+    var r = 255, g = Math.max(60, Math.min(220, (106 + n) | 0)), b = Math.max(18, (34 + (n >> 1)) | 0);
+    return ((255 << 24) | (b << 16) | (g << 8) | r) >>> 0;
+  }
+  function sparkColor(tn, life) {
+    var c = SPARK_COLS[tn % 6];
+    var f = Math.min(1, life / 55) * 0.75 + 0.25;
+    var r = (c[0] * f) | 0, g = (c[1] * f) | 0, b = (c[2] * f) | 0;
+    return ((255 << 24) | (b << 16) | (g << 8) | r) >>> 0;
+  }
+  function lampColor(i) {
+    var n = (Math.sin(frameNo * 0.08 + i * 0.7) * 12) | 0;
+    var r = 255, g = Math.max(160, (212 + n) | 0), b = Math.max(90, (126 + n) | 0);
+    return ((255 << 24) | (b << 16) | (g << 8) | r) >>> 0;
+  }
+
+  SB.renderWorld = function () {
+    for (var y = 0; y < H; y++) {
+      var row = y * W, up = row - W;
+      for (var x = 0; x < W; x++) {
+        var i = row + x, t = ty[i];
+        if (!t) { d32[i] = 0; continue; }
+        var solidAbove = 0;
+        if (y > 0) {
+          if (x > 0 && ty[up + x - 1]) solidAbove++;
+          if (ty[up + x]) solidAbove++;
+          if (x < W - 1 && ty[up + x + 1]) solidAbove++;
+        }
+        var op = 3 - solidAbove;
+        if (t === T.FIRE) { d32[i] = fireColor(aux[i], i); continue; }
+        if (t === T.LAVA) { d32[i] = lavaColor(i); continue; }
+        if (t === T.SPARK) { d32[i] = sparkColor(tint[i], aux[i] >= 200 ? 200 : aux[i]); continue; }
+        if (t === T.LAMP) { d32[i] = lampColor(i); continue; }
+        d32[i] = SHADES[t][(tint[i] & 7) * 4 + op];
+      }
+    }
+    wctx.putImageData(wimg, 0, 0);
+  };
+
+  /* ---------- 绘制工具（供输入与测试调用） ---------- */
+  SB.paint = function (cx, cy, t, brush) {
+    var r = brush || 1;
+    for (var dy = -r; dy <= r; dy++) {
+      for (var dx = -r; dx <= r; dx++) {
+        if (dx * dx + dy * dy > r * r) continue;
+        var x = (cx + dx) | 0, y = (cy + dy) | 0;
+        if (x < 0 || x >= W || y < 0 || y >= H) continue;
+        var i = y * W + x;
+        ty[i] = t < 0 ? T.AIR : t;
+        tint[i] = (Math.random() * 8) | 0;
+        initAux(i, t < 0 ? T.AIR : t);
+      }
+    }
+  };
+  SB.stroke = function (x0, y0, x1, y1, t, brush) {
+    var dx = x1 - x0, dy = y1 - y0;
+    var dist = Math.max(Math.abs(dx), Math.abs(dy));
+    var steps = Math.max(1, Math.ceil(dist / Math.max(1, brush * 0.5)));
+    for (var s = 0; s <= steps; s++) {
+      SB.paint(x0 + dx * s / steps, y0 + dy * s / steps, t, brush);
+    }
+  };
+
+  SB.count = function (t) {
+    var c = 0;
+    for (var i = 0; i < N; i++) if (ty[i] === t) c++;
+    return c;
+  };
+  SB.clear = function () { ty.fill(0); aux.fill(0); tint.fill(0); };
+  SB.frameNo = function () { return frameNo; };
+
+  /* ---------- 初始化已就绪日志 ---------- */
+  SB.ready = true;
+})();
+/* ============================================================
+   j2_sky — 天穹：程序化无限星空 + 流体极光 + 流星
+   分块哈希（同种子同画面）· 3 层视差 · 半拉格朗日流体
+   ============================================================ */
+(function () {
+  'use strict';
+  var SB = window.SBX;
+  var sky = SB.sky = {};
+
+  /* ---------- 确定性哈希（分块用） ---------- */
+  function mixHash(seed, cx, cy) {
+    var h = (seed | 0) ^ 0x9e3779b9;
+    h = Math.imul(h ^ (cx | 0), 0x85ebca6b);
+    h = Math.imul(h ^ (cy | 0), 0xc2b2ae35);
+    h ^= h >>> 16; h = Math.imul(h, 0x45d9f3b);
+    h ^= h >>> 16;
+    return h >>> 0;
+  }
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  sky.hash = mixHash;
+
+  /* ---------- 星空层 ---------- */
+  var CHUNK = 240;
+  var LAYERS = [
+    { n: 44, r0: 0.6, r1: 1.0, a0: 0.28, a1: 0.52, speed: 1.6, twinkle: 0.5 },
+    { n: 26, r0: 0.9, r1: 1.5, a0: 0.4, a1: 0.75, speed: 3.4, twinkle: 1 },
+    { n: 10, r0: 1.2, r1: 2.2, a0: 0.55, a1: 0.95, speed: 6.2, twinkle: 1.6 }
+  ];
+  var NEB_COLS = [[110, 231, 212], [167, 139, 250], [240, 171, 252], [96, 165, 250], [103, 232, 249], [129, 140, 248]];
+  var nebSprites = null;
+
+  function buildNebSprites() {
+    nebSprites = [];
+    for (var k = 0; k < NEB_COLS.length; k++) {
+      var c = document.createElement('canvas'); c.width = c.height = 256;
+      var g = c.getContext('2d');
+      var col = NEB_COLS[k];
+      var rg = g.createRadialGradient(128, 128, 6, 128, 128, 126);
+      rg.addColorStop(0, 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',0.5)');
+      rg.addColorStop(0.45, 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',0.16)');
+      rg.addColorStop(1, 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',0)');
+      g.fillStyle = rg; g.fillRect(0, 0, 256, 256);
+      /* 第二个偏移小团，破一破正圆 */
+      var rg2 = g.createRadialGradient(168, 96, 4, 168, 96, 92);
+      rg2.addColorStop(0, 'rgba(' + Math.min(255, col[0] + 30) + ',' + col[1] + ',' + Math.max(0, col[2] - 10) + ',0.3)');
+      rg2.addColorStop(1, 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',0)');
+      g.fillStyle = rg2; g.fillRect(0, 0, 256, 256);
+      nebSprites.push(c);
+    }
+  }
+
+  var seed = 20261003;
+  sky.seed = function () { return seed; };
+  sky.setSeed = function (s) { seed = s | 0; cache.clear(); };
+
+  var cache = new Map();
+  function getChunk(li, cx, cy) {
+    var key = li + ':' + cx + ':' + cy;
+    var hit = cache.get(key);
+    if (hit) return hit;
+    var rnd = mulberry32(mixHash(seed, cx * 31 + li * 7 + 1, cy * 17 + li * 3 + 5));
+    var L = LAYERS[li];
+    var stars = [];
+    for (var k = 0; k < L.n; k++) {
+      stars.push({
+        x: rnd() * CHUNK, y: rnd() * CHUNK,
+        r: L.r0 + rnd() * (L.r1 - L.r0),
+        a: L.a0 + rnd() * (L.a1 - L.a0),
+        tw: L.twinkle * (0.4 + rnd() * 0.9),
+        ph: rnd() * 6.2832,
+        warm: rnd()
+      });
+    }
+    var neb = null;
+    if (rnd() < 0.16) {
+      neb = { x: rnd() * CHUNK, y: rnd() * CHUNK, s: 0.9 + rnd() * 1.5, a: 0.08 + rnd() * 0.13, k: (rnd() * 6) | 0, rot: rnd() * 6.28 };
+    }
+    var data = { stars: stars, neb: neb };
+    cache.set(key, data);
+    if (cache.size > 500) {
+      var it = cache.keys();
+      for (var d = 0; d < 120; d++) { var kk = it.next(); if (kk.done) break; cache.delete(kk.value); }
+    }
+    return data;
+  }
+  sky.chunk = getChunk;
+
+  /* ---------- 流量极光（96×54 半拉格朗日） ---------- */
+  var FW = 96, FH = 54, FN = FW * FH;
+  var fu = new Float32Array(FN), fv = new Float32Array(FN);
+  var fR = new Float32Array(FN), fG = new Float32Array(FN), fB = new Float32Array(FN);
+  var fu2 = new Float32Array(FN), fv2 = new Float32Array(FN);
+  var fR2 = new Float32Array(FN), fG2 = new Float32Array(FN), fB2 = new Float32Array(FN);
+  var AUR = [[110, 231, 212], [96, 165, 250], [167, 139, 250], [240, 171, 252], [134, 239, 172]];
+
+  function fIdx(x, y) { return (y | 0) * FW + (x | 0); }
+  function clampi(v, a, b) { return v < a ? a : v > b ? b : v; }
+
+  sky.stir = function (px, py, dx, dy, strength) {
+    /* px,py 为 0..1 归一化天空坐标 */
+    var cx = px * FW, cy = py * FH;
+    var R = 9;
+    var st = strength === undefined ? 1 : strength;
+    for (var y = Math.max(0, (cy - R) | 0); y < Math.min(FH, cy + R); y++) {
+      for (var x = Math.max(0, (cx - R) | 0); x < Math.min(FW, cx + R); x++) {
+        var vx = x - cx, vy = y - cy;
+        var d2 = vx * vx + vy * vy;
+        if (d2 > R * R) continue;
+        var fall = 1 - Math.sqrt(d2) / R;
+        var i = fIdx(x, y);
+        fu[i] += (-vy * st - dx * 2.2 * st) * fall * 0.5;
+        fv[i] += (vx * st - dy * 2.2 * st) * fall * 0.5;
+        var col = AUR[((frame10 + x + y) >> 2) % 5];
+        fR[i] = Math.min(1.6, fR[i] + col[0] / 255 * fall * 0.5 * st);
+        fG[i] = Math.min(1.6, fG[i] + col[1] / 255 * fall * 0.5 * st);
+        fB[i] = Math.min(1.6, fB[i] + col[2] / 255 * fall * 0.5 * st);
+      }
+    }
+  };
+
+  var frame10 = 0;
+  sky.fluidAt = function (x, y) {
+    var i = fIdx(x, y);
+    return { u: fu[i], v: fv[i], r: fR[i], g: fG[i], b: fB[i] };
+  };
+  sky.step = function (dt) {
+    frame10++;
+    var t = timeSec;
+    /* 外力：环境风 + 顶部缓流 */
+    for (var y = 0; y < FH; y++) {
+      var ny = y / FH;
+      for (var x = 0; x < FW; x++) {
+        var i = y * FW + x;
+        var nx = x / FW;
+        var f = 0.55 * dt;
+        fu[i] += (Math.sin(ny * 5.1 + t * 0.35) * 0.6 + Math.sin(nx * 7.3 - t * 0.22) * 0.35) * f;
+        fv[i] += (Math.cos(nx * 4.7 + t * 0.3) * 0.25 - 0.18) * f;
+      }
+    }
+    /* 半拉格朗日平流（内联双线性插值） */
+    for (var y2 = 0; y2 < FH; y2++) {
+      for (var x2 = 0; x2 < FW; x2++) {
+        var i2 = y2 * FW + x2;
+        var sx = clampi(x2 - fu[i2] * dt * 6, 0, FW - 1.001);
+        var sy = clampi(y2 - fv[i2] * dt * 6, 0, FH - 1.001);
+        var x0 = sx | 0, y0 = sy | 0, fx = sx - x0, fy = sy - y0;
+        var j00 = y0 * FW + x0, j10 = j00 + 1, j01 = j00 + FW, j11 = j01 + 1;
+        var w00 = (1 - fx) * (1 - fy), w10 = fx * (1 - fy), w01 = (1 - fx) * fy, w11 = fx * fy;
+        fu2[i2] = (fu[j00] * w00 + fu[j10] * w10 + fu[j01] * w01 + fu[j11] * w11) * 0.995;
+        fv2[i2] = (fv[j00] * w00 + fv[j10] * w10 + fv[j01] * w01 + fv[j11] * w11) * 0.995;
+        fR2[i2] = (fR[j00] * w00 + fR[j10] * w10 + fR[j01] * w01 + fR[j11] * w11) * 0.994;
+        fG2[i2] = (fG[j00] * w00 + fG[j10] * w10 + fG[j01] * w01 + fG[j11] * w11) * 0.994;
+        fB2[i2] = (fB[j00] * w00 + fB[j10] * w10 + fB[j01] * w01 + fB[j11] * w11) * 0.994;
+      }
+    }
+    fu.set(fu2); fv.set(fv2); fR.set(fR2); fG.set(fG2); fB.set(fB2);
+
+    /* 顶部注入极光带（低频脉动） */
+    for (var k = 0; k < 5; k++) {
+      var cxp = Math.floor(Math.random() * FW);
+      var bandY = Math.floor((Math.sin(cxp * 0.3 + t * 0.5) * 0.5 + 0.5) * 14) + 1;
+      var idx = bandY * FW + cxp;
+      var col = AUR[Math.floor(t * 0.35 + cxp * 0.05) % 5];
+      var amt = 0.10 + Math.random() * 0.12;
+      fR[idx] = Math.min(1.5, fR[idx] + col[0] / 255 * amt);
+      fG[idx] = Math.min(1.5, fG[idx] + col[1] / 255 * amt);
+      fB[idx] = Math.min(1.5, fB[idx] + col[2] / 255 * amt);
+    }
+  };
+
+  /* 流体渲染到小画布 */
+  var fc = document.createElement('canvas'); fc.width = FW; fc.height = FH;
+  var fctx = fc.getContext('2d');
+  var fimg = fctx.createImageData(FW, FH);
+  var f32 = new Uint32Array(fimg.data.buffer);
+  sky.render = function (ctx, cw, ch) {
+    for (var i = 0; i < FN; i++) {
+      var r = fR[i], g = fG[i], b = fB[i];
+      var m = r > g ? (r > b ? r : b) : (g > b ? g : b);
+      if (m < 0.015) { f32[i] = 0; continue; }
+      /* 加一点饱和增强 */
+      var boost = 1.35;
+      var rr = clampi(r * 255 * boost, 0, 255) | 0;
+      var gg = clampi(g * 255 * boost, 0, 255) | 0;
+      var bb = clampi(b * 255 * boost, 0, 255) | 0;
+      var aa = clampi(m * 255 * 1.5, 0, 255) | 0;
+      f32[i] = ((aa << 24) | (bb << 16) | (gg << 8) | rr) >>> 0;
+    }
+    fctx.putImageData(fimg, 0, 0);
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 0.62;
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(fc, 0, 0, FW, FH, 0, 0, cw, ch);
+    ctx.restore();
+  };
+
+  /* ---------- 综合渲染 ---------- */
+  var timeSec = 0;
+  sky.setTime = function (t) { timeSec = t; };
+  sky.time = function () { return timeSec; };
+
+  var shoot = { on: false, x: 0, y: 0, vx: 0, vy: 0, life: 0, next: 5 };
+
+  sky.update = function (dt) {
+    timeSec += dt;
+    sky.step(dt);
+    /* 流星调度 */
+    shoot.next -= dt;
+    if (!shoot.on && shoot.next <= 0) {
+      shoot.on = true;
+      shoot.life = 1.4;
+      var fromLeft = Math.random() < 0.6;
+      shoot.x = fromLeft ? Math.random() * 0.3 : 0.7 + Math.random() * 0.3;
+      shoot.y = 0.05 + Math.random() * 0.25;
+      var ang = fromLeft ? 0.35 + Math.random() * 0.25 : Math.PI - 0.35 - Math.random() * 0.25;
+      var sp = 0.55 + Math.random() * 0.3;
+      shoot.vx = Math.cos(ang) * sp;
+      shoot.vy = Math.sin(ang) * sp * 0.6;
+      shoot.next = 7 + Math.random() * 9;
+    } else if (shoot.on) {
+      shoot.life -= dt;
+      shoot.x += shoot.vx * dt;
+      shoot.y += shoot.vy * dt;
+      if (shoot.life <= 0 || shoot.x < -0.1 || shoot.x > 1.1) { shoot.on = false; shoot.next = 7 + Math.random() * 9; }
+    }
+  };
+
+  sky.renderSky = function (ctx, cw, ch) {
+    if (!nebSprites) buildNebSprites();
+    /* 底色 */
+    var g = ctx.createLinearGradient(0, 0, 0, ch);
+    g.addColorStop(0, '#060a16');
+    g.addColorStop(0.55, '#0a1020');
+    g.addColorStop(1, '#0d1124');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, cw, ch);
+
+    var t = timeSec;
+    /* 星云（最底层的柔光） */
+    for (var li = LAYERS.length - 1; li >= 0; li--) {
+      var L = LAYERS[li];
+      var offx = t * L.speed, offy = t * L.speed * 0.15;
+      var cx0 = Math.floor((offx - 120) / CHUNK), cx1 = Math.floor((offx + cw + 120) / CHUNK);
+      var cy0 = Math.floor((offy - 120) / CHUNK), cy1 = Math.floor((offy + ch + 120) / CHUNK);
+      /* 星云只画在最远层 */
+      if (li === LAYERS.length - 1) {
+        for (var cy = cy0; cy <= cy1; cy++) for (var cx = cx0; cx <= cx1; cx++) {
+          var d = getChunk(li, cx, cy);
+          if (!d.neb) continue;
+          var sp = nebSprites[d.neb.k];
+          var px = d.neb.x + cx * CHUNK - offx, py = d.neb.y + cy * CHUNK - offy;
+          var sz = 256 * d.neb.s;
+          ctx.save();
+          ctx.globalAlpha = d.neb.a;
+          ctx.translate(px, py);
+          ctx.rotate(d.neb.rot);
+          ctx.drawImage(sp, -sz / 2, -sz / 2, sz, sz);
+          ctx.restore();
+        }
+      }
+      /* 星星 */
+      for (var cy2 = cy0; cy2 <= cy1; cy2++) for (var cx2 = cx0; cx2 <= cx1; cx2++) {
+        var dd = getChunk(li, cx2, cy2);
+        for (var k = 0; k < dd.stars.length; k++) {
+          var s = dd.stars[k];
+          var sx = s.x + cx2 * CHUNK - offx, sy = s.y + cy2 * CHUNK - offy;
+          if (sx < -4 || sx > cw + 4 || sy < -4 || sy > ch + 4) continue;
+          var alpha = s.a;
+          if (L.twinkle > 0) alpha *= 0.62 + 0.38 * Math.sin(t * s.tw * 2.2 + s.ph);
+          ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+          if (s.r <= 1.1) {
+            ctx.fillStyle = s.warm > 0.72 ? '#ffe9c9' : '#dbe6ff';
+            ctx.fillRect(sx - s.r, sy - s.r, s.r * 2, s.r * 2);
+          } else {
+            ctx.fillStyle = s.warm > 0.72 ? '#fff1d6' : '#eef4ff';
+            ctx.beginPath(); ctx.arc(sx, sy, s.r, 0, 6.2832); ctx.fill();
+            ctx.globalAlpha = alpha * 0.25;
+            ctx.beginPath(); ctx.arc(sx, sy, s.r * 2.6, 0, 6.2832); ctx.fill();
+          }
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+
+    /* 极光（叠加） */
+    sky.render(ctx, cw, ch);
+
+    /* 流星 */
+    if (shoot.on) {
+      var px2 = shoot.x * cw, py2 = shoot.y * ch;
+      var tail = 130 * Math.min(1, shoot.life);
+      var gg = ctx.createLinearGradient(px2, py2, px2 - shoot.vx * tail * 2.4, py2 - shoot.vy * tail * 2.4);
+      gg.addColorStop(0, 'rgba(255,255,255,0.95)');
+      gg.addColorStop(0.25, 'rgba(190,225,255,0.5)');
+      gg.addColorStop(1, 'rgba(160,200,255,0)');
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.strokeStyle = gg;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(px2, py2);
+      ctx.lineTo(px2 - shoot.vx * tail * 2.4, py2 - shoot.vy * tail * 2.4);
+      ctx.stroke();
+      ctx.restore();
+    }
+  };
+
+  sky.shootInfo = function () { return shoot; };
+})();
+/* ============================================================
+   j3_fx — 光之系统：光束追踪（反射/折射/色散）+ 彩色泛光
+   光束沿网格行军，遇镜反射、玻璃折射、棱镜分光；逐帧生长（收敛感）
+   ============================================================ */
+(function () {
+  'use strict';
+  var SB = window.SBX, T = SB.T, W = SB.W, H = SB.H;
+  var fx = SB.fx = {};
+
+  /* ---------- 泛光缓冲（1/4 分辨率） ---------- */
+  var LR = 80, LH = 45, LN = LR * LH;
+  var lR = new Float32Array(LN), lG = new Float32Array(LN), lB = new Float32Array(LN);
+  var tR = new Float32Array(LN), tG = new Float32Array(LN), tB = new Float32Array(LN);
+  var lc = document.createElement('canvas'); lc.width = LR; lc.height = LH;
+  var lctx = lc.getContext('2d');
+  var limg = lctx.createImageData(LR, LH);
+  var l32 = new Uint32Array(limg.data.buffer);
+  var lightFrameNo = 0;
+
+  function lIdx(x, y) { return y * LR + x; }
+  function add3(cx, cy, r, g, b, amt) {
+    /* 3×3 软散布 */
+    var x0 = cx | 0, y0 = cy | 0;
+    for (var dy = -1; dy <= 1; dy++) {
+      var yy = y0 + dy; if (yy < 0 || yy >= LH) continue;
+      for (var dx = -1; dx <= 1; dx++) {
+        var xx = x0 + dx; if (xx < 0 || xx >= LR) continue;
+        var w = (dx === 0 && dy === 0) ? 1 : 0.45;
+        var i = yy * LR + xx;
+        lR[i] += r * amt * w; lG[i] += g * amt * w; lB[i] += b * amt * w;
+      }
+    }
+  }
+  fx.lightAddWorld = function (wx, wy, r, g, b, amt) {
+    add3(wx / W * LR, wy / H * LH, r, g, b, amt);
+  };
+
+  var EMIT_RGB = {};
+  EMIT_RGB[T.FIRE] = [255, 138, 40];
+  EMIT_RGB[T.LAVA] = [255, 106, 48];
+  EMIT_RGB[T.LAMP] = [255, 202, 112];
+  var SPARK_RGB = [[255, 216, 120], [255, 122, 190], [122, 220, 255], [182, 142, 255], [172, 255, 122], [255, 160, 80]];
+
+  fx.lightFrame = function () {
+    lightFrameNo++;
+    if (lightFrameNo % 2 !== 0) return; /* 隔帧更新省性能 */
+    lR.fill(0); lG.fill(0); lB.fill(0);
+    /* 扫格找发光体 */
+    var ty = SB.ty, aux = SB.aux, tint = SB.tint;
+    var n = SB.N;
+    var emitters = 0;
+    for (var i = 0; i < n; i++) {
+      var t = ty[i];
+      if (!t) continue;
+      var rgb = null, amt = 0;
+      if (t === T.FIRE) { rgb = EMIT_RGB[T.FIRE]; amt = 0.9; }
+      else if (t === T.LAVA) { rgb = EMIT_RGB[T.LAVA]; amt = 1.1; }
+      else if (t === T.LAMP) { rgb = EMIT_RGB[T.LAMP]; amt = 0.78; }
+      else if (t === T.SPARK) { rgb = SPARK_RGB[tint[i] % 6]; amt = aux[i] >= 200 ? 0.9 : Math.min(1, aux[i] / 60) * 0.55; }
+      if (!rgb) continue;
+      emitters++;
+      if (emitters > 900) { if ((i & 3) !== 0) continue; } /* 过多时抽稀 */
+      var x = i % W, y = (i / W) | 0;
+      add3(x / W * LR, y / H * LH, rgb[0], rgb[1], rgb[2], amt);
+    }
+    /* 光束沿途补光 */
+    for (var b2 = 0; b2 < beams.length; b2++) {
+      var bm = beams[b2];
+      for (var p = 0; p < bm.newPts.length; p += 2) {
+        fx.lightAddWorld(bm.newPts[p], bm.newPts[p + 1], bm.r, bm.g, bm.b, 0.16);
+      }
+    }
+    /* 模糊（横向 + 纵向两遍） */
+    blurH(lR); blurH(lG); blurH(lB);
+    blurV(lR); blurV(lG); blurV(lB);
+    /* 打包 */
+    for (var k = 0; k < LN; k++) {
+      var r = lR[k] * 255, g = lG[k] * 255, b = lB[k] * 255;
+      if (r < 3 && g < 3 && b < 3) { l32[k] = 0; continue; }
+      if (r > 255) r = 255; if (g > 255) g = 255; if (b > 255) b = 255;
+      l32[k] = ((255 << 24) | ((b | 0) << 16) | ((g | 0) << 8) | (r | 0)) >>> 0;
+    }
+    lctx.putImageData(limg, 0, 0);
+  };
+  function blurH(a) {
+    for (var y = 0; y < LH; y++) {
+      var row = y * LR;
+      var prev = a[row];
+      for (var x = 1; x < LR - 1; x++) {
+        var c = a[row + x];
+        a[row + x] = (prev + c * 2 + a[row + x + 1]) / 4;
+        prev = c;
+      }
+    }
+  }
+  function blurV(a) {
+    for (var x = 0; x < LR; x++) {
+      var prev = a[x];
+      for (var y = 1; y < LH - 1; y++) {
+        var i = y * LR + x;
+        var c = a[i];
+        a[i] = (prev + c * 2 + a[i + LR]) / 4;
+        prev = c;
+      }
+    }
+  }
+  fx.renderLight = function (ctx, cw, ch) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 0.62;
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(lc, 0, 0, LR, LH, 0, 0, cw, ch);
+    ctx.restore();
+  };
+
+  /* ---------- 光束 ---------- */
+  var beams = fx.beams = [];
+  var BEAM_COLORS = [
+    [158, 226, 255], [190, 160, 255], [255, 190, 140], [150, 255, 210], [255, 150, 220]
+  ];
+  fx.fireBeam = function (x, y, dx, dy, ci) {
+    var c = BEAM_COLORS[(ci || 0) % BEAM_COLORS.length];
+    var bm = {
+      x: x, y: y, dx: dx, dy: dy,
+      r: c[0], g: c[1], b: c[2], power: 1,
+      pts: [x, y], newPts: [], len: 0, maxLen: 620, done: false, ttl: 170, split: 0
+    };
+    beams.push(bm);
+    if (beams.length > 10) beams.shift();
+    if (SB.ach) SB.ach('sandbox.beam');
+    return bm;
+  };
+
+  function rotate(dx, dy, a) {
+    var c = Math.cos(a), s = Math.sin(a);
+    return [dx * c - dy * s, dx * s + dy * c];
+  }
+
+  fx.update = function () {
+    var ty = SB.ty;
+    for (var b = beams.length - 1; b >= 0; b--) {
+      var bm = beams[b];
+      bm.newPts.length = 0;
+      if (!bm.done) {
+        var prevLen = bm.pts.length;
+        var steps = 42; /* 每帧生长格数（收敛感） */
+        var prevMirror = false;
+        while (steps-- > 0 && !bm.done) {
+          var nx = bm.x + bm.dx, ny = bm.y + bm.dy;
+          bm.x = nx; bm.y = ny; bm.len++;
+          if (nx < 0 || nx >= W || ny < 0 || ny >= H || bm.len > bm.maxLen) { bm.done = true; bm.endX = nx; bm.endY = ny; break; }
+          var gx = nx | 0, gy = ny | 0;
+          var t = ty[gy * W + gx];
+          bm.pts.push(nx, ny);
+          if (bm.pts.length > 4000) { bm.done = true; break; }
+          /* 镜面：只在"刚进入镜体"时反射一次，防止厚镜墙反复反射滑走 */
+          if (t === T.MIRL || t === T.MIRR) {
+            if (!prevMirror) {
+              if (t === T.MIRL) { var t1 = -bm.dy; bm.dy = -bm.dx; bm.dx = t1; }
+              else { var t2 = bm.dy; bm.dy = bm.dx; bm.dx = t2; }
+            }
+            prevMirror = true;
+            continue;
+          }
+          prevMirror = false;
+          if (t === T.AIR || t === T.SMOKE || t === T.STEAM || t === T.SPARK) continue;
+          if (t === T.PRISM && bm.split < 2) {
+            bm.done = true; bm.endX = nx; bm.endY = ny;
+            var cols = [[255, 110, 110], [130, 255, 140], [130, 160, 255]];
+            for (var s2 = 0; s2 < 3; s2++) {
+              var ang = (s2 - 1) * 0.17;
+              var d2 = rotate(bm.dx, bm.dy, ang);
+              var nb = {
+                x: nx, y: ny, dx: d2[0], dy: d2[1],
+                r: cols[s2][0], g: cols[s2][1], b: cols[s2][2], power: bm.power * 0.9,
+                pts: [nx, ny], newPts: [], len: 0, maxLen: 520, done: false, ttl: 150, split: 2
+              };
+              beams.push(nb);
+              if (beams.length > 16) beams.shift();
+            }
+            break;
+          }
+          if (t === T.GLASS) {
+            bm.power *= 0.985;
+            bm.r = bm.r * 0.96 + 180 * 0.04;
+            bm.g = bm.g * 0.96 + 220 * 0.04;
+            bm.b = bm.b * 0.96 + 255 * 0.04;
+            continue;
+          }
+          if (t === T.WATER) {
+            bm.power *= 0.988;
+            if (Math.random() < 0.02) { var rr = rotate(bm.dx, bm.dy, (Math.random() - 0.5) * 0.35); bm.dx = rr[0]; bm.dy = rr[1]; }
+            continue;
+          }
+          if (t === T.LAMP) continue;
+          if (t === T.POWDER) { SB.explode(gx, gy, 5); bm.done = true; bm.endX = nx; bm.endY = ny; break; }
+          if (t === T.FWK) { ty[gy * W + gx] = T.SPARK; SB.aux[gy * W + gx] = 200 + 45; SB.tint[gy * W + gx] = (Math.random() * 6) | 0; bm.done = true; bm.endX = nx; bm.endY = ny; break; }
+          if (t === T.WOOD || t === T.OIL || t === T.VINE || t === T.SEED) {
+            SB.ignite(gx, gy);
+            bm.power *= 0.95;
+            continue;
+          }
+          /* 其它实体（石/沙/冰/镜面已处理…）→ 停下 */
+          bm.done = true; bm.endX = nx; bm.endY = ny;
+          fx.lightAddWorld(nx, ny, bm.r, bm.g, bm.b, 0.9);
+          break;
+        }
+        /* 记录本帧新增点（供补光） */
+        var pn = bm.pts.length;
+        for (var pp = prevLen; pp < pn; pp += 6) bm.newPts.push(bm.pts[pp], bm.pts[pp + 1]);
+        if (bm.done && bm.newPts.length === 0) {
+          bm.newPts.push(bm.endX, bm.endY);
+        }
+      } else {
+        bm.ttl--;
+        if (bm.ttl <= 0) beams.splice(b, 1);
+      }
+    }
+  };
+
+  fx.clear = function () { beams.length = 0; };
+
+  fx.renderBeams = function (ctx, view) {
+    if (!beams.length) return;
+    var s = view.s, ox = view.ox, oy = view.oy;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (var b = 0; b < beams.length; b++) {
+      var bm = beams[b];
+      var a = bm.ttl < 60 ? Math.max(0, bm.ttl / 60) : 1;
+      var pts = bm.pts;
+      if (pts.length < 4) continue;
+      var col = 'rgb(' + (bm.r | 0) + ',' + (bm.g | 0) + ',' + (bm.b | 0) + ')';
+      /* 宽晕 */
+      ctx.globalAlpha = 0.13 * a * bm.power;
+      ctx.strokeStyle = col;
+      ctx.lineWidth = Math.max(5, 9 * s / 4);
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(pts[0] * s + ox, pts[1] * s + oy);
+      for (var p = 2; p < pts.length; p += 2) ctx.lineTo(pts[p] * s + ox, pts[p + 1] * s + oy);
+      ctx.stroke();
+      /* 亮芯 */
+      ctx.globalAlpha = 0.85 * a;
+      ctx.lineWidth = Math.max(1.4, 2.2 * s / 4);
+      ctx.strokeStyle = 'rgb(' + Math.min(255, bm.r + 70) + ',' + Math.min(255, bm.g + 70) + ',' + Math.min(255, bm.b + 70) + ')';
+      ctx.stroke();
+    }
+    ctx.restore();
+  };
+
+  fx.beamCount = function () { return beams.length; };
+  fx.beamInfo = function () {
+    return beams.map(function (b) {
+      var n = b.pts.length;
+      return {
+        x0: b.pts[0], y0: b.pts[1], n: n / 2 | 0,
+        lx: b.pts[n - 2], ly: b.pts[n - 1],
+        dx: b.dx, dy: b.dy, done: b.done, split: b.split, r: b.r
+      };
+    });
+  };
+})();
+/* ============================================================
+   j4_entities — 物理小剧场：钢球（刚体滚动/塌方）、绳（verlet 会荡会烧）、星域来客
+   ============================================================ */
+(function () {
+  'use strict';
+  var SB = window.SBX, T = SB.T, W = SB.W, H = SB.H;
+  var ent = SB.entities = {};
+
+  var boulders = ent.boulders = [];
+  var ropes = ent.ropes = [];
+  var ships = ent.ships = [];
+  var animT = 0;
+
+  function solidAt(x, y) {
+    if (x < 0 || x >= W || y < 0 || y >= H) return y >= H; /* 底边视为地面 */
+    var t = SB.ty[(y | 0) * W + (x | 0)];
+    if (!t) return false;
+    if (t === T.SMOKE || t === T.STEAM || t === T.SPARK) return false;
+    if (t === T.WATER || t === T.OIL || t === T.ACID || t === T.LAVA || t === T.FIRE) return false;
+    return true;
+  }
+  ent.solidAt = solidAt;
+
+  /* ---------- 钢球 ---------- */
+  function addBoulder(x, y) {
+    if (boulders.length >= 12) boulders.shift();
+    boulders.push({ x: x, y: y, vx: (Math.random() - 0.5) * 0.8, vy: 0, r: 4.1, ang: 0 });
+    return boulders[boulders.length - 1];
+  }
+  ent.addBoulder = addBoulder;
+
+  /* 爆炸冲击波（j1 爆炸时调用） */
+  SB.blast = function (cx, cy, r) {
+    for (var i = 0; i < boulders.length; i++) {
+      var b = boulders[i];
+      var dx = b.x - cx, dy = b.y - cy;
+      var d = Math.hypot(dx, dy);
+      if (d < r * 2.4 && d > 0.001) {
+        var f = (1 - d / (r * 2.4)) * 5.2;
+        b.vx += dx / d * f;
+        b.vy += dy / d * f - 2.2;
+      }
+    }
+  };
+
+  var G = 0.34;
+  function stepBoulders() {
+    for (var i = boulders.length - 1; i >= 0; i--) {
+      var b = boulders[i];
+      b.vy += G * (SB.gravity ? SB.gravity() : 1);
+      if (b.vy > 6) b.vy = 6;
+      var nx = b.x + b.vx, ny = b.y + b.vy;
+      /* 环采样碰撞 */
+      var hit = false;
+      for (var a = 0; a < 12; a++) {
+        var ang = a / 12 * 6.2832;
+        var cx = nx + Math.cos(ang) * b.r, cy = ny + Math.sin(ang) * b.r;
+        if (!solidAt(cx, cy)) continue;
+        var nxn = Math.cos(ang), nyn = Math.sin(ang);
+        var vn = b.vx * nxn + b.vy * nyn;
+        if (vn > 0) {
+          b.vx -= nxn * vn * 1.28;
+          b.vy -= nyn * vn * 1.28;
+          /* 滚动：把速度投影到切面 */
+          var tx = -nyn, ty2 = nxn;
+          var vt = b.vx * tx + b.vy * ty2;
+          b.vx = tx * vt * 0.992; b.vy = ty2 * vt * 0.992;
+          b.ang += vt / b.r * 0.5;
+        }
+        nx -= nxn * 0.65; ny -= nyn * 0.65;
+        hit = true;
+      }
+      /* 水面阻力 */
+      var ct = (ny >= 0 && ny < H) ? SB.ty[(ny | 0) * W + (Math.max(0, Math.min(W - 1, nx | 0)))] : 0;
+      if (ct === T.WATER) { b.vx *= 0.94; b.vy *= 0.9; }
+      /* 犁开粉末：把压到的粉末推到两侧 */
+      if (b.vx * b.vx + b.vy * b.vy > 0.15) {
+        for (var k = 0; k < 5; k++) {
+          var ka = Math.random() * 6.2832;
+          var sx = (nx + Math.cos(ka) * b.r * 0.72) | 0, sy = (ny + Math.sin(ka) * b.r * 0.72) | 0;
+          if (sx < 0 || sx >= W || sy < 0 || sy >= H) continue;
+          var si = sy * W + sx, st = SB.ty[si];
+          if (st === T.SAND || st === T.SOIL || st === T.SEED || st === T.POWDER) {
+            var tx2 = (nx + Math.cos(ka) * (b.r + 2.4)) | 0, ty3 = (ny + Math.sin(ka) * (b.r + 2.4)) | 0;
+            if (tx2 >= 0 && tx2 < W && ty3 >= 0 && ty3 < H) {
+              var ti = ty3 * W + tx2;
+              if (SB.ty[ti] === T.AIR) {
+                SB.ty[ti] = st; SB.tint[ti] = SB.tint[si]; SB.aux[ti] = 0;
+                SB.ty[si] = T.AIR;
+              }
+            }
+          }
+        }
+      }
+      b.x = Math.max(b.r, Math.min(W - b.r, nx));
+      b.y = ny;
+      if (b.y > H + 26) { boulders.splice(i, 1); continue; }
+      b.ang += 0.02;
+    }
+  }
+
+  /* ---------- 绳（verlet） ---------- */
+  var ropeBuild = null;
+  ent.ropeStart = function (x, y) {
+    if (ropes.length >= 3) ropes.shift();
+    ropeBuild = { x: x, y: y, ox: x, oy: y, pts: [{ x: x, y: y, ox: x, oy: y }] };
+    ropes.push(ropeBuild);
+  };
+  ent.ropeGrow = function () {
+    var r = ropeBuild;
+    if (!r || r.pts.length >= 52) return;
+    var last = r.pts[r.pts.length - 1];
+    r.pts.push({ x: last.x, y: last.y + 2.4, ox: last.x, oy: last.y });
+  };
+  ent.ropeEnd = function () { ropeBuild = null; };
+  ent.ropeActive = function () { return !!ropeBuild; };
+
+  function stepRopes() {
+    for (var ri = ropes.length - 1; ri >= 0; ri--) {
+      var rope = ropes[ri];
+      var pts = rope.pts;
+      /* 烧断 */
+      var burned = false;
+      for (var k = 0; k < pts.length; k++) {
+        var px = pts[k].x | 0, py = pts[k].y | 0;
+        if (px >= 0 && px < W && py >= 0 && py < H && SB.ty[py * W + px] === T.FIRE) { burned = true; break; }
+      }
+      if (burned) {
+        for (var k2 = 0; k2 < pts.length; k2++) {
+          var x2 = pts[k2].x | 0, y2 = pts[k2].y | 0;
+          if (x2 >= 0 && x2 < W && y2 >= 0 && y2 < H && Math.random() < 0.6) {
+            var i2 = y2 * W + x2;
+            if (SB.ty[i2] === T.AIR) { SB.ty[i2] = T.FIRE; SB.aux[i2] = 30 + (Math.random() * 30) | 0; }
+          }
+        }
+        ropes.splice(ri, 1);
+        continue;
+      }
+      /* verlet */
+      for (var p = 1; p < pts.length; p++) {
+        var pt = pts[p];
+        var vx = (pt.x - pt.ox) * 0.985, vy = (pt.y - pt.oy) * 0.985;
+        pt.ox = pt.x; pt.oy = pt.y;
+        pt.x += vx; pt.y += vy + 0.3 * (SB.gravity ? SB.gravity() : 1);
+      }
+      /* 约束迭代 */
+      var seg = 2.4;
+      for (var it = 0; it < 7; it++) {
+        pts[0].x = rope.x; pts[0].y = rope.y;
+        for (var q = 0; q < pts.length - 1; q++) {
+          var a2 = pts[q], b2 = pts[q + 1];
+          var ddx = b2.x - a2.x, ddy = b2.y - a2.y;
+          var d2 = Math.hypot(ddx, ddy) || 0.001;
+          var diff = (d2 - seg) / d2 * 0.5;
+          var offx = ddx * diff, offy = ddy * diff;
+          if (q > 0) { a2.x += offx; a2.y += offy; }
+          b2.x -= offx; b2.y -= offy;
+        }
+      }
+      /* 与地形碰撞 */
+      for (var c = 1; c < pts.length; c++) {
+        var pc = pts[c];
+        var tries = 0;
+        while (solidAt(pc.x, pc.y) && tries < 6) {
+          pc.y -= 0.9; pc.x += (Math.random() - 0.5) * 0.8;
+          tries++;
+        }
+      }
+    }
+  }
+
+  /* ---------- 星域来客 ---------- */
+  var shipFired = 0;
+  ent.spawnShips = function (n) {
+    n = n || (1 + (Math.random() * 2 | 0));
+    for (var i = 0; i < n; i++) {
+      ships.push({
+        x: -34 - i * 64,
+        y: 22 + Math.random() * 70,
+        vx: 26 + Math.random() * 18,
+        amp: 5 + Math.random() * 7,
+        ph: Math.random() * 6.28,
+        baseY: 0,
+        fireCd: 40 + (Math.random() * 70) | 0,
+        ci: (Math.random() * 5) | 0
+      });
+    }
+    for (var k = 0; k < ships.length; k++) if (!ships[k].baseY) ships[k].baseY = ships[k].y;
+    if (SB.ach) SB.ach('sandbox.star');
+  };
+
+  function stepShips(dt) {
+    for (var i = ships.length - 1; i >= 0; i--) {
+      var s = ships[i];
+      s.x += s.vx * dt;
+      s.y = s.baseY + Math.sin(animT * 1.7 + s.ph) * s.amp;
+      s.fireCd--;
+      if (s.fireCd <= 0) {
+        s.fireCd = 55 + (Math.random() * 90) | 0;
+        var dirx = (Math.random() * 0.6 - 0.3);
+        var dy = 0.55 + Math.random() * 0.4;
+        SB.fx.fireBeam(s.x, s.y + 4, dirx * 0.8, dy, s.ci);
+      }
+      if (s.x > W + 40) ships.splice(i, 1);
+    }
+  }
+
+  /* ---------- 更新 / 渲染 ---------- */
+  ent.update = function (dt) {
+    animT += dt;
+    stepBoulders();
+    stepRopes();
+    stepShips(dt);
+    /* 星域来客偶尔自己出现 */
+    if (!ships.length && Math.random() < 0.00028) ent.spawnShips();
+  };
+
+  ent.render = function (ctx, view) {
+    var s = view.s, ox = view.ox, oy = view.oy;
+    /* 钢球 */
+    for (var i = 0; i < boulders.length; i++) {
+      var b = boulders[i];
+      var px = b.x * s + ox, py = b.y * s + oy, pr = b.r * s;
+      var g = ctx.createRadialGradient(px - pr * 0.35, py - pr * 0.42, pr * 0.15, px, py, pr * 1.02);
+      g.addColorStop(0, '#dde6f2');
+      g.addColorStop(0.45, '#93a1b8');
+      g.addColorStop(1, '#3c4759');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(px, py, pr, 0, 6.2832); ctx.fill();
+      ctx.strokeStyle = 'rgba(10,14,24,.55)';
+      ctx.lineWidth = Math.max(1, pr * 0.14);
+      ctx.stroke();
+      /* 转动的两颗铆钉 */
+      ctx.fillStyle = 'rgba(30,38,54,.8)';
+      for (var k = 0; k < 2; k++) {
+        var a = b.ang + k * 3.1416;
+        ctx.beginPath();
+        ctx.arc(px + Math.cos(a) * pr * 0.45, py + Math.sin(a) * pr * 0.45, Math.max(1, pr * 0.13), 0, 6.2832);
+        ctx.fill();
+      }
+    }
+    /* 绳 */
+    for (var r = 0; r < ropes.length; r++) {
+      var pts = ropes[r].pts;
+      if (pts.length < 2) continue;
+      ctx.strokeStyle = '#c9a06a';
+      ctx.lineWidth = Math.max(2, 2.6 * s / 4);
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x * s + ox, pts[0].y * s + oy);
+      for (var p = 1; p < pts.length; p++) ctx.lineTo(pts[p].x * s + ox, pts[p].y * s + oy);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(90,60,30,.55)';
+      ctx.lineWidth = Math.max(1, 1 * s / 4);
+      ctx.stroke();
+      /* 锚点 */
+      ctx.fillStyle = '#e3c48f';
+      ctx.beginPath(); ctx.arc(pts[0].x * s + ox, pts[0].y * s + oy, Math.max(2, 2.6 * s / 4), 0, 6.2832); ctx.fill();
+    }
+    /* 星域来客 */
+    for (var sh = 0; sh < ships.length; sh++) {
+      var sp = ships[sh];
+      var sx = sp.x * s + ox, sy = sp.y * s + oy;
+      var sc = Math.max(0.5, s / 4);
+      ctx.save();
+      ctx.translate(sx, sy);
+      ctx.rotate(Math.PI / 2);
+      ctx.fillStyle = '#dfe8ff';
+      ctx.beginPath();
+      ctx.moveTo(0, -7 * sc); ctx.lineTo(5.4 * sc, 5 * sc); ctx.lineTo(0, 2.6 * sc); ctx.lineTo(-5.4 * sc, 5 * sc);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = 'rgba(120,220,255,.9)';
+      ctx.beginPath(); ctx.arc(0, -1.4 * sc, 1.9 * sc, 0, 6.2832); ctx.fill();
+      ctx.restore();
+      /* 引擎光 */
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = 0.5;
+      var eg = ctx.createRadialGradient(sx - 6 * sc, sy, 0.5, sx - 6 * sc, sy, 9 * sc);
+      eg.addColorStop(0, 'rgba(160,220,255,.8)');
+      eg.addColorStop(1, 'rgba(160,220,255,0)');
+      ctx.fillStyle = eg;
+      ctx.fillRect(sx - 18 * sc, sy - 10 * sc, 24 * sc, 20 * sc);
+      ctx.restore();
+    }
+  };
+
+  ent.clear = function () { boulders.length = 0; ropes.length = 0; ships.length = 0; ropeBuild = null; };
+})();
+/* ============================================================
+   j5_ui — 主控制：画布/视图/主循环/输入/调色板/世界生成/按钮
+   ============================================================ */
+(function () {
+  'use strict';
+  var SB = window.SBX, T = SB.T, W = SB.W, H = SB.H;
+
+  var cv = document.getElementById('cv');
+  var ctx = cv.getContext('2d');
+  var stage = document.getElementById('stage');
+  var view = SB.view = { s: 1, ox: 0, oy: 0 };
+
+  /* ---------- 尺寸：画布贴合 16:9 舞台 ---------- */
+  function resize() {
+    var rect = stage.getBoundingClientRect();
+    var availW = rect.width, availH = rect.height;
+    var w = Math.min(availW, availH * 16 / 9);
+    var h = w * 9 / 16;
+    if (h > availH) { h = availH; w = h * 16 / 9; }
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.style.width = Math.floor(w) + 'px';
+    cv.style.height = Math.floor(h) + 'px';
+    cv.width = Math.max(320, Math.round(w * dpr));
+    cv.height = Math.max(180, Math.round(h * dpr));
+    view.s = cv.width / W;
+    view.ox = 0;
+    view.oy = 0;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function evWorld(e) {
+    var rect = cv.getBoundingClientRect();
+    var px = (e.clientX - rect.left) * (cv.width / rect.width);
+    var py = (e.clientY - rect.top) * (cv.height / rect.height);
+    return { x: (px - view.ox) / view.s, y: (py - view.oy) / view.s, cx: px / cv.width, cy: py / cv.height };
+  }
+
+  /* ---------- 交互状态 ---------- */
+  var cur = { type: T.SAND, tool: null };   /* tool: beam | ball | stir | rope | null(画画) */
+  var brush = 4;
+  var paused = false;
+  var painting = false, lastPt = null, erased = false;
+  var aiming = false, aimFrom = null, lastBeamAt = -999;
+  var stirLast = null, stirring = false;
+  var hintEl = document.getElementById('hint');
+  var hintHidden = false;
+  function hideHint() {
+    if (hintHidden) return;
+    hintHidden = true;
+    hintEl.classList.add('hide');
+  }
+  setTimeout(hideHint, 9000);
+
+  /* ---------- Toast ---------- */
+  var toastEl = document.getElementById('pToast');
+  var toastTimer = 0;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2800);
+  }
+  SB.toast = toast;
+
+  /* ---------- 指针输入 ---------- */
+  cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  cv.addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+    hideHint();
+    var w = evWorld(e);
+    if (cur.tool === 'beam') {
+      aiming = true; aimFrom = w;
+      fireAim(w);
+      return;
+    }
+    if (cur.tool === 'ball') {
+      SB.entities.addBoulder(w.x, w.y);
+      SB.ach && SB.ach('sandbox.paint');
+      return;
+    }
+    if (cur.tool === 'stir') {
+      stirring = true; stirLast = w;
+      doStir(w, 0, 0);
+      return;
+    }
+    if (cur.tool === 'rope') {
+      SB.entities.ropeStart(w.x, w.y);
+      return;
+    }
+    painting = true;
+    erased = (e.button === 2) || cur.type === -1;
+    lastPt = w;
+    SB._lastPaint = [Math.round(w.x), Math.round(w.y), cur.type, erased ? 1 : 0];
+    SB.paint(w.x, w.y, erased ? -1 : cur.type, brush);
+    SB.ach && SB.ach('sandbox.paint');
+    if (!erased && cur.type === T.FIRE) SB.ach && SB.ach('sandbox.fire');
+  });
+  window.addEventListener('pointermove', function (e) {
+    if (!painting && !aiming && !stirring && !SB.entities.ropeActive()) return;
+    var w = evWorld(e);
+    if (painting && lastPt) {
+      SB.stroke(lastPt.x, lastPt.y, w.x, w.y, erased ? -1 : cur.type, brush);
+      lastPt = w;
+    }
+    if (aiming) fireAim(w);
+    if (stirring) doStir(w, stirLast ? w.x - stirLast.x : 0, stirLast ? w.y - stirLast.y : 0), stirLast = w;
+    if (SB.entities.ropeActive()) SB.entities.ropeGrow();
+  });
+  window.addEventListener('pointerup', function () {
+    painting = false; lastPt = null;
+    aiming = false;
+    stirring = false; stirLast = null;
+    SB.entities.ropeEnd();
+  });
+
+  function fireAim(w) {
+    if (frameCount - lastBeamAt < 20) return;
+    var dx = w.x - aimFrom.x, dy = w.y - aimFrom.y;
+    var d = Math.hypot(dx, dy);
+    if (d < 3) return;
+    lastBeamAt = frameCount;
+    SB.fx.fireBeam(aimFrom.x, aimFrom.y, dx / d, dy / d, 0);
+  }
+  function doStir(w, dx, dy) {
+    SB.sky.stir(Math.max(0, Math.min(1, w.cx)), Math.max(0, Math.min(1, w.cy)), dx * 0.12, dy * 0.12, 1);
+    SB.wind(w.x, w.y, dx, dy, 9);
+    SB.ach && SB.ach('sandbox.aurora');
+  }
+
+  /* ---------- 调色板 ---------- */
+  var pal = document.getElementById('pal');
+  var pelEls = [];
+  function buildPalette() {
+    var groups = [[], [], [], []];
+    SB.ELEMENTS.forEach(function (el) { groups[el.group].push({ kind: 'el', el: el }); });
+    SB.TOOLS.forEach(function (tl) { groups[3].push({ kind: 'tool', tl: tl }); });
+    groups.forEach(function (g) {
+      var gd = document.createElement('div');
+      gd.className = 'pgroup';
+      g.forEach(function (item) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'pel';
+        if (item.kind === 'el') {
+          var el = item.el;
+          b.innerHTML = '<span class="sw ' + el.sw + '"></span><span class="nm">' + el.name + '</span>' + (el.key ? '<span class="key">' + el.key + '</span>' : '');
+          b.title = el.desc || '';
+          b.dataset.el = el.id;
+          b.addEventListener('click', function () {
+            cur.tool = null; cur.type = el.id; syncPal();
+            if (el.erase) toast('橡皮：抹掉画过的一切');
+          });
+        } else {
+          var tl = item.tl;
+          b.innerHTML = '<span class="gly">' + tl.gly + '</span><span class="nm">' + tl.name + '</span>';
+          b.title = tl.desc || '';
+          b.dataset.tool = tl.tool;
+          b.addEventListener('click', function () {
+            cur.tool = tl.tool; syncPal();
+          });
+        }
+        gd.appendChild(b);
+        pelEls.push(b);
+      });
+      pal.appendChild(gd);
+    });
+    syncPal();
+  }
+  function syncPal() {
+    pelEls.forEach(function (b) {
+      var sel = false;
+      if (b.dataset.el !== undefined && !cur.tool) sel = (+b.dataset.el) === cur.type;
+      if (b.dataset.tool !== undefined) sel = cur.tool === b.dataset.tool;
+      b.classList.toggle('sel', sel);
+    });
+  }
+  buildPalette();
+
+  var brushEl = document.getElementById('brush');
+  var brushV = document.getElementById('brushV');
+  brushEl.addEventListener('input', function () {
+    brush = +brushEl.value;
+    brushV.textContent = brush;
+  });
+
+  /* ---------- 世界生成 ---------- */
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function put(x, y, t, rnd) {
+    if (x < 0 || x >= W || y < 0 || y >= H) return;
+    var i = y * W + x;
+    SB.ty[i] = t; SB.tint[i] = (rnd() * 8) | 0; SB.aux[i] = 0;
+  }
+  function genWorld(sd) {
+    SB.clear();
+    SB.fx.clear();
+    SB.entities.clear();
+    var rnd = mulberry32(sd);
+    var p1 = rnd() * 6.28, p2 = rnd() * 6.28, p3 = rnd() * 6.28;
+    function surfAt(x) {
+      return Math.round(114 + Math.sin(x * 0.052 + p1) * 9 + Math.sin(x * 0.017 + p2) * 12 + Math.sin(x * 0.11 + p3) * 2.5);
+    }
+    /* 地表层 */
+    for (var x = 0; x < W; x++) {
+      var s = surfAt(x);
+      for (var y = Math.max(0, s); y < H; y++) {
+        var d = y - s;
+        var t = d < 2 ? T.SAND : d < 7 ? T.SOIL : T.STONE;
+        put(x, y, t, rnd);
+      }
+    }
+    /* 湖 */
+    var lx = 100 + Math.floor(rnd() * 90);
+    for (var lxx = lx - 20; lxx <= lx + 20; lxx++) {
+      if (lxx < 0 || lxx >= W) continue;
+      var shp = 1 - Math.abs(lxx - lx) / 20;
+      var top = surfAt(lxx);
+      var bot = top + 2 + Math.round(shp * 7);
+      for (var ly = top; ly <= bot; ly++) {
+        put(lxx, ly, ly >= top + 2 ? T.WATER : T.AIR, rnd);
+      }
+    }
+    /* 树 */
+    var tx = 34 + Math.floor(rnd() * 42);
+    var ts = surfAt(tx);
+    var th = 15 + Math.floor(rnd() * 6);
+    for (var k = 0; k < th; k++) put(tx, ts - k, T.WOOD, rnd);
+    for (var dy = -11; dy <= -4; dy++) {
+      var half = Math.round(6 * Math.sqrt(Math.max(0, 1 - Math.pow((dy + 8) / 5.4, 2))));
+      for (var dx = -half; dx <= half; dx++) {
+        if (rnd() < 0.82) put(tx + dx, ts - th + 8 + dy, T.VINE, rnd);
+      }
+    }
+    /* 灌木 */
+    var bx = 250 + Math.floor(rnd() * 24), bs = surfAt(bx);
+    for (var bdy = -3; bdy <= 0; bdy++) {
+      for (var bdx = -3; bdx <= 3; bdx++) {
+        if (bdx * bdx + bdy * bdy <= 9 && rnd() < 0.7) put(bx + bdx, bs - 3 + bdy, T.VINE, rnd);
+      }
+    }
+    /* 洞穴 + 岩浆池 */
+    var cx = 225 + Math.floor(rnd() * 40), cy = 150 + Math.floor(rnd() * 8);
+    for (var cdy = -12; cdy <= 12; cdy++) {
+      for (var cdx = -14; cdx <= 14; cdx++) {
+        if ((cdx * cdx) / 196 + (cdy * cdy) / 144 > 1) continue;
+        var gx = cx + cdx, gy = cy + cdy;
+        if (gx < 0 || gx >= W || gy < 0 || gy >= H) continue;
+        if (gy > cy + 4 && (gy - cy) > 4) {
+          if (rnd() < 0.86) put(gx, gy, T.LAVA, rnd);
+        } else if (SB.ty[gy * W + gx] !== T.AIR) {
+          put(gx, gy, T.AIR, rnd);
+        }
+      }
+    }
+    /* 岩层里撒点玻璃矿脉 */
+    for (var g = 0; g < 90; g++) {
+      var gx2 = Math.floor(rnd() * W), gy2 = 130 + Math.floor(rnd() * 40);
+      if (gy2 >= H) continue;
+      if (SB.ty[gy2 * W + gx2] === T.STONE) put(gx2, gy2, T.GLASS, rnd);
+    }
+    /* 地表几颗种子 */
+    for (var s2 = 0; s2 < 7; s2++) {
+      var sx2 = Math.floor(rnd() * W);
+      put(sx2, surfAt(sx2) - 1, T.SEED, rnd);
+    }
+    /* 一颗滚球就当见面礼 */
+    SB.entities.addBoulder(tx + 26, ts - 14);
+  }
+  SB.genWorld = genWorld;
+
+  /* ---------- 按钮 ---------- */
+  var btnPause = document.getElementById('btnPause');
+  var worldSeed = (Math.random() * 1e9) | 0;
+  btnPause.addEventListener('click', function () {
+    paused = !paused;
+    btnPause.classList.toggle('on', paused);
+    btnPause.querySelector('.lbl').textContent = paused ? '继续' : '暂停';
+    toast(paused ? '世界已冻结（还可以画画和瞄准）' : '世界继续演化');
+  });
+  document.getElementById('btnClear').addEventListener('click', function () {
+    SB.clear(); SB.fx.clear(); SB.entities.clear();
+    toast('世界已清空，来画点新的吧');
+  });
+  document.getElementById('btnNew').addEventListener('click', function () {
+    worldSeed = (Math.random() * 1e9) | 0;
+    SB.sky.setSeed(worldSeed);
+    genWorld(worldSeed);
+    toast('新世界已生成 · 种子 ' + worldSeed);
+  });
+  document.getElementById('btnShot').addEventListener('click', function () {
+    renderFrame(true);
+    try {
+      var a = document.createElement('a');
+      var d = new Date();
+      a.download = '万物沙盒-' + d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2) + '-' + ('0' + d.getHours()).slice(-2) + ('0' + d.getMinutes()).slice(-2) + '.png';
+      a.href = cv.toDataURL('image/png');
+      a.click();
+      toast('📷 光之相机：照片已保存');
+      SB.ach && SB.ach('sandbox.paint');
+    } catch (e) { toast('导出失败：' + e.message); }
+  });
+  document.getElementById('btnShips').addEventListener('click', function () {
+    SB.entities.spawnShips(2 + (Math.random() * 2 | 0));
+    toast('🛸 星域来客正在过境……小心它们的光束');
+  });
+  document.getElementById('btnHelp').addEventListener('click', function () { showModal('helpModal'); });
+  document.getElementById('btnAch').addEventListener('click', function () { showModal('achModal'); });
+
+  function showModal(id) { document.getElementById(id).classList.add('show'); }
+  function hideModal(id) { document.getElementById(id).classList.remove('show'); }
+  document.querySelectorAll('[data-close]').forEach(function (el) {
+    el.addEventListener('click', function () { hideModal(el.getAttribute('data-close')); });
+  });
+  window.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { hideModal('helpModal'); hideModal('achModal'); }
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+    if (e.key === '1') { cur.tool = null; cur.type = T.SAND; syncPal(); }
+    else if (e.key === '2') { cur.tool = null; cur.type = T.WATER; syncPal(); }
+    else if (e.key === '3') { cur.tool = null; cur.type = T.FIRE; syncPal(); }
+    else if (e.key === ' ') { e.preventDefault(); btnPause.click(); }
+    else if (e.key === 'r' || e.key === 'R') { cur.tool = 'rope'; syncPal(); }
+    konami(e.key);
+  });
+
+  /* ---------- 重力彩蛋（Konami） ---------- */
+  var konamiSeq = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+  var konamiPos = 0;
+  var gravityTimer = 0;
+  function konami(k) {
+    var want = konamiSeq[konamiPos];
+    if (k === want || (want === 'b' && k === 'B') || (want === 'a' && k === 'A')) {
+      konamiPos++;
+      if (konamiPos >= konamiSeq.length) {
+        konamiPos = 0;
+        SB.gravity(-1);
+        toast('🌌 重力反转！万物开始上升……');
+        SB.ach && SB.ach('sandbox.gravity');
+        clearTimeout(gravityTimer);
+        gravityTimer = setTimeout(function () {
+          SB.gravity(1);
+          toast('重力回来了');
+        }, 7000);
+      }
+    } else {
+      konamiPos = (k === konamiSeq[0]) ? 1 : 0;
+    }
+  }
+
+  /* ---------- 渲染 ---------- */
+  var frameCount = 0;
+  SB.frameCount = function () { return frameCount; };
+  var cursorPt = null;
+  window.addEventListener('pointermove', function (e) { cursorPt = evWorld(e); });
+  window.addEventListener('pointerleave', function () { cursorPt = null; });
+
+  function renderFrame(skipCursor) {
+    var cw = cv.width, ch = cv.height;
+    SB.renderWorld();
+    SB.sky.renderSky(ctx, cw, ch);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(SB.worldCanvas, 0, 0, W, H, view.ox, view.oy, W * view.s, H * view.s);
+    ctx.imageSmoothingEnabled = true;
+    SB.entities.render(ctx, view);
+    SB.fx.lightFrame();
+    SB.fx.renderLight(ctx, cw, ch);
+    SB.fx.renderBeams(ctx, view);
+    if (!skipCursor && cursorPt && cursorPt.x >= 0 && cursorPt.x < W && cursorPt.y >= 0 && cursorPt.y < H) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,255,255,.4)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(cursorPt.x * view.s + view.ox, cursorPt.y * view.s + view.oy, Math.max(3, brush * view.s), 0, 6.2832);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  /* ---------- 主循环 ---------- */
+  var last = performance.now();
+  var fpsEl = document.getElementById('fps');
+  var fpsAcc = 0, fpsN = 0, slowRun = 0, degraded = false;
+  function loop(now) {
+    requestAnimationFrame(loop);
+    var dt = Math.min(0.05, (now - last) / 1000);
+    var rawDt = (now - last) / 1000;
+    last = now;
+    if (rawDt <= 0) return;
+    frameCount++;
+    /* 性能守护 */
+    if (rawDt > 0.034) slowRun++; else if (slowRun > 0) slowRun--;
+    if (!degraded && slowRun > 150) {
+      degraded = true;
+      toast('已开启性能保护：降低部分刷新频率');
+    }
+    if (!paused && !(degraded && (frameCount & 1))) SB.step();
+    SB.fx.update();
+    SB.entities.update(dt);
+    SB.sky.update(dt);
+    renderFrame();
+    /* FPS */
+    fpsAcc += rawDt; fpsN++;
+    if (fpsAcc > 0.5) {
+      var fps = Math.round(fpsN / fpsAcc);
+      fpsEl.textContent = fps + ' FPS';
+      fpsAcc = 0; fpsN = 0;
+    }
+  }
+
+  /* ---------- 启动 ---------- */
+  genWorld(worldSeed);
+  requestAnimationFrame(loop);
+
+  /* ---------- 测试钩子 ---------- */
+  SB.pausedState = { get paused() { return paused; }, set: function (v) { paused = !!v; } };
+  var hooks = {
+    SB: SB,
+    paint: SB.paint, stroke: SB.stroke, step: SB.step, stepMany: SB.stepMany,
+    count: SB.count, get: SB.get, set: SB.set, clear: SB.clear,
+    fireBeam: function (x, y, dx, dy, ci) { return SB.fx.fireBeam(x, y, dx, dy, ci || 0); },
+    beamInfo: function () { return SB.fx.beamInfo(); },
+    stir: function (nx, ny, dx, dy) { SB.sky.stir(nx, ny, dx, dy, 1); },
+    fluidAt: function (x, y) { return SB.sky.fluidAt(x, y); },
+    starChunk: function (li, cx, cy) { var d = SB.sky.chunk(li, cx, cy); return { stars: d.stars.slice(0, 4), neb: d.neb }; },
+    setSkySeed: function (s) { SB.sky.setSeed(s); },
+    setSkyTime: function (t) { SB.sky.setTime(t); },
+    genWorld: genWorld,
+    spawnShips: function (n) { SB.entities.spawnShips(n); },
+    addBoulder: function (x, y) { return SB.entities.addBoulder(x, y); },
+    boulders: SB.entities.boulders,
+    ships: SB.entities.ships,
+    ropes: SB.entities.ropes,
+    renderNow: function () { renderFrame(true); return true; },
+    explode: function (x, y, r) { SB.explode(x, y, r); },
+    setGravity: function (g) { SB.gravity(g); },
+    setBrush: function (b) { brush = b; },
+    setType: function (t) { cur.tool = null; cur.type = t; syncPal(); },
+    setTool: function (t) { cur.tool = t; syncPal(); },
+    aim: function (x0, y0, x1, y1) { aimFrom = { x: x0, y: y0 }; lastBeamAt = -999; fireAim({ x: x1, y: y1 }); },
+    view: view,
+    toast: toast
+  };
+  window.__SBX = hooks;
+})();
+/* ============================================================
+   j6_ach — 跨站成就（STAch，与星恬小站成就柜互通）
+   ============================================================ */
+(function () {
+  'use strict';
+  var SB = window.SBX;
+
+  /* ---------- 跨站成就 SDK（cookie .startian.top + localStorage 兜底） ---------- */
+  var STAch = (function () {
+    var KEY = 'st_ach';
+    function readCookie() {
+      var m = document.cookie.match(/(?:^|;\s*)st_ach=([^;]*)/);
+      if (!m) return null;
+      try { return JSON.parse(decodeURIComponent(m[1])) || []; } catch (e) { return null; }
+    }
+    function writeCookie(list) {
+      try {
+        var v = encodeURIComponent(JSON.stringify(list));
+        if (v.length < 3800) document.cookie = 'st_ach=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+      } catch (e) {}
+    }
+    var list = readCookie();
+    if (!list) { try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { list = []; } }
+    if (!Array.isArray(list)) list = [];
+    function save() {
+      try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+      writeCookie(list);
+    }
+    function unlock(id, name, ico) {
+      if (list.indexOf(id) >= 0) return false;
+      list.push(id);
+      save();
+      try {
+        var el = document.createElement('div');
+        el.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9999;background:rgba(20,30,58,.95);color:#fff;border:1px solid rgba(130,160,255,.45);border-radius:999px;padding:12px 22px;font:700 13.5px/1.4 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:86vw';
+        el.textContent = '🏆 成就解锁：' + (ico ? ico + ' ' : '') + (name || id);
+        document.body.appendChild(el);
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        setTimeout(function () {
+          el.style.opacity = '0';
+          el.style.transform = 'translateX(-50%) translateY(16px)';
+          setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+        }, 3200);
+      } catch (e) {}
+      return true;
+    }
+    return { list: function () { return list.slice(); }, has: function (id) { return list.indexOf(id) >= 0; }, unlock: unlock };
+  })();
+  window.STAch = STAch;
+
+  /* ---------- 成就定义 ---------- */
+  var DEFS = [
+    { id: 'site.sandbox', em: '🏖', name: '沙盒居民', desc: '到访万物沙盒' },
+    { id: 'sandbox.paint', em: '✍️', name: '第一笔', desc: '在沙盒里画下第一笔' },
+    { id: 'sandbox.fire', em: '🔥', name: '玩火者', desc: '点燃第一簇火焰' },
+    { id: 'sandbox.beam', em: '✨', name: '追光者', desc: '射出第一道光束' },
+    { id: 'sandbox.firework', em: '🎆', name: '烟花师', desc: '让烟花在空中炸开' },
+    { id: 'sandbox.aurora', em: '🌀', name: '搅动星海', desc: '亲手把天空搅出漩涡' },
+    { id: 'sandbox.star', em: '🛸', name: '星域来客', desc: '目击星域舰队过境' },
+    { id: 'sandbox.gravity', em: '🙃', name: '重力反转', desc: '触发了藏在沙盒里的老秘技', hidden: true }
+  ];
+  var byId = {};
+  DEFS.forEach(function (d) { byId[d.id] = d; });
+
+  SB.ach = function (id) {
+    var d = byId[id];
+    if (!d) return;
+    if (STAch.has(id)) return;
+    STAch.unlock(id, d.name, d.em);
+    refreshPanel();
+  };
+
+  /* ---------- 成就面板 ---------- */
+  var listEl = document.getElementById('achList');
+  var litEl = document.getElementById('achLit');
+  var totEl = document.getElementById('achTotal');
+  function refreshPanel() {
+    if (!listEl) return;
+    var lit = 0;
+    listEl.innerHTML = DEFS.map(function (d) {
+      var on = STAch.has(d.id);
+      if (on) lit++;
+      var hiddenLocked = d.hidden && !on;
+      return '<div class="ach-item' + (on ? ' lit' : '') + '">' +
+        '<span class="em">' + (hiddenLocked ? '❓' : d.em) + '</span>' +
+        '<span><span class="nm">' + (hiddenLocked ? '？？？' : d.name) + '</span><br>' +
+        '<span class="ds">' + (hiddenLocked ? '隐藏成就 · 自己撞撞看' : d.desc) + '</span></span></div>';
+    }).join('');
+    if (litEl) litEl.textContent = lit;
+    if (totEl) totEl.textContent = DEFS.length;
+  }
+  refreshPanel();
+
+  /* ---------- 到访成就 ---------- */
+  setTimeout(function () { SB.ach('site.sandbox'); }, 600);
+})();
+
+</script>
+<!-- 返回主页（全站统一按钮 · 2026-09-29） -->
+<a class="wb-home" href="https://startian.top/" title="返回星恬的小站主页">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>主页</span>
+</a>
+</body>
+</html>
