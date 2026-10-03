@@ -66,6 +66,12 @@
     .hint{display:none}
     .sp-list{top:auto;bottom:70px}
   }
+
+/* 🔮 ARG · 他留下的种子（可发现的线索） */
+.arg-seed{position:fixed;right:14px;bottom:56px;width:46px;height:46px;display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:6px;border-radius:13px;background:rgba(10,16,32,.6);border:1px solid rgba(130,160,255,.2);opacity:.55;transition:opacity .25s,transform .25s;cursor:help;z-index:6}
+.arg-seed:hover{opacity:1;transform:translateY(-2px)}
+.arg-seed i{border-radius:50%;background:transparent}
+.arg-seed i.on{background:#8fd0ff;box-shadow:0 0 7px rgba(143,208,255,.85)}
 </style>
 </head>
 <body>
@@ -94,6 +100,11 @@
 </div>
 <div class="sp-list" id="spList"></div>
 <a class="home" href="https://startian.top/">← 返回主页</a>
+<div class="arg-seed" id="argSeed" title="他留下的一颗种子（五格，试试照着摆出来）" role="img" aria-label="一颗五格的种子">
+  <i></i><i class="on"></i><i class="on"></i>
+  <i class="on"></i><i class="on"></i><i></i>
+  <i></i><i class="on"></i><i></i>
+</div>
 <div class="hint">拖动平移 · 滚轮缩放 · 按住鼠标画细胞 · 选「种植图案」后点网格放置 · 右键擦除</div>
 <div class="toast" id="toast"></div>
 
@@ -336,30 +347,62 @@
     paintAt(e.clientX, e.clientY);
   });
 
-  /* 🔮 ARG · 五格小种子（R-pentomino：.XX / XX. / .X.）检测 */
+  /* 🔮 ARG · 五格小种子（R-pentomino）检测 v2：
+   棋盘任何"干净的 3×3 窗口"里出现种子形状（8 向旋转/镜像）即触发；
+   不再要求全盘恰好 5 格——棋盘上还有别的细胞也能触发 */
+  var ARG_SEED_SHAPES = (function () {
+    var base = [[1, 0], [2, 0], [0, 1], [1, 1], [1, 2]];
+    var seen = {}, out = [];
+    var t = base;
+    for (var r = 0; r < 4; r++) {
+      [t, t.map(function (p) { return [-p[0], p[1]]; })].forEach(function (v) {
+        var mx = 9, my = 9;
+        v.forEach(function (p) { if (p[0] < mx) mx = p[0]; if (p[1] < my) my = p[1]; });
+        var cells = v.map(function (p) { return [p[0] - mx, p[1] - my]; })
+          .sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+        var key = cells.map(function (p) { return p.join(','); }).join(';');
+        if (seen[key]) return;
+        seen[key] = 1;
+        var aliveSet = {};
+        cells.forEach(function (p) { aliveSet[p[0] + ',' + p[1]] = 1; });
+        var dead = [];
+        for (var x = 0; x < 3; x++) for (var y = 0; y < 3; y++) if (!aliveSet[x + ',' + y]) dead.push([x, y]);
+        out.push({ alive: cells, dead: dead });
+      });
+      t = t.map(function (p) { return [p[1], -p[0]]; });
+    }
+    return out;
+  })();
   var __argSeedT = 0;
+  function __argAlive(x, y) {
+    if (x < 0 || y < 0 || x >= GW || y >= GH) return false;
+    return !!cur[y * GW + x];
+  }
   function argCheckSeed() {
     try {
-      var alive = [];
-      for (var i = 0; i < cur.length; i++) if (cur[i]) alive.push([i % GW, Math.floor(i / GW)]);
-      if (alive.length !== 5) return;
-      function norm(list) {
-        var mx = 1e9, my = 1e9;
-        list.forEach(function (p) { if (p[0] < mx) mx = p[0]; if (p[1] < my) my = p[1]; });
-        return list.map(function (p) { return [p[0] - mx, p[1] - my]; })
-          .sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; })
-          .map(function (p) { return p.join(','); }).join(' ');
+      var found = false;
+      for (var i = 0; i < cur.length && !found; i++) {
+        if (!cur[i]) continue;
+        var ax = i % GW, ay = (i / GW) | 0;
+        for (var sh_i = 0; sh_i < ARG_SEED_SHAPES.length && !found; sh_i++) {
+          var sh = ARG_SEED_SHAPES[sh_i];
+          for (var k = 0; k < 5 && !found; k++) {
+            var bx = ax - sh.alive[k][0], by = ay - sh.alive[k][1];
+            if (bx < 0 || by < 0 || bx + 2 >= GW || by + 2 >= GH) continue;
+            var ok = true;
+            for (var m = 0; m < 5; m++) {
+              if (!__argAlive(bx + sh.alive[m][0], by + sh.alive[m][1])) { ok = false; break; }
+            }
+            if (!ok) continue;
+            for (var d = 0; d < 4; d++) {
+              if (__argAlive(bx + sh.dead[d][0], by + sh.dead[d][1])) { ok = false; break; }
+            }
+            if (ok) found = true;
+          }
+        }
       }
-      var target = [[1, 0], [2, 0], [0, 1], [1, 1], [1, 2]];
-      var wants = [];
-      var t2 = target;
-      for (var r = 0; r < 4; r++) {
-        wants.push(norm(t2));
-        wants.push(norm(t2.map(function (p) { return [-p[0], p[1]]; })));
-        t2 = t2.map(function (p) { return [p[1], -p[0]]; });
-      }
-      if (wants.indexOf(norm(alive)) >= 0 && window.ARG) {
-        if (window.ARG.collect('log7')) window.ARG.toast('📜 一颗小小的种子，它好像活了……（找到一篇日志 · 生命游戏）');
+      if (found && window.ARG && !ARG.has('log7')) {
+        if (ARG.collect('log7')) ARG.toast('📜 一颗小小的种子，它好像活了……（找到一篇日志 · 生命游戏）');
       }
     } catch (e) {}
   }
@@ -454,6 +497,17 @@
   /* 🔮 ARG 测试钩子（闭包内，可访问网格） */
   window.__lifeARG = {
     check: argCheckSeed,
+    setCells: function (list) {
+      var cx = Math.floor(GW / 2), cy = Math.floor(GH / 2);
+      for (var i = 0; i < cur.length; i++) { cur[i] = 0; age[i] = 0; }
+      list.forEach(function (p) {
+        var x = cx + p[0], y = cy + p[1];
+        if (x >= 0 && x < GW && y >= 0 && y < GH) { cur[y * GW + x] = 1; age[y * GW + x] = 1; }
+      });
+      draw(); updateStats();
+      argCheckSeed();
+      return true;
+    },
     placePattern: function (list) {
       var cx = Math.floor(GW / 2), cy = Math.floor(GH / 2);
       for (var i = 0; i < cur.length; i++) { cur[i] = 0; age[i] = 0; }
@@ -471,6 +525,10 @@
       return out;
     }
   };
+  var sBadge = document.getElementById('argSeed');
+  if (sBadge) sBadge.addEventListener('click', function () {
+    try { if (window.ARG) ARG.toast('「他留下的种子」——就是这五个点的样子，照着摆出来'); } catch (e) {}
+  });
 
   document.getElementById('selPattern').addEventListener('change', function () {
     plantMode = this.value;
