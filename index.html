@@ -266,6 +266,74 @@ section{scroll-margin-top:96px}
 .ct .cl{font-size:11px; color:#8fb2d4; letter-spacing:1.2px; font-weight:800}
 .ct .cv{font-size:13.5px; font-weight:800; word-break:break-all; line-height:1.5; margin-top:4px}
 
+/* —— 留言箱（反馈框） —— */
+.fb{
+  padding:24px; border-radius:24px; margin-bottom:12px;
+  background:var(--card); border:1px solid var(--line); box-shadow:var(--sh-sm);
+  position:relative; overflow:hidden;
+}
+.fb::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:3px;
+  background:linear-gradient(90deg,var(--accent),var(--accent-deep),var(--accent));
+  opacity:.75;
+}
+.fb-head{display:flex; align-items:center; gap:13px}
+.fb-ico{
+  width:46px;height:46px;border-radius:15px;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;font-size:21px;
+  background:linear-gradient(150deg,#f7fbff,#e6f3ff);
+  box-shadow:inset 0 0 0 1px #d9ebfc;
+  transition:transform .32s cubic-bezier(.34,1.56,.64,1);
+}
+.fb:hover .fb-ico{transform:scale(1.08) rotate(-6deg)}
+.fb-title{font-size:15.5px; font-weight:800; color:var(--ink)}
+.fb-sub{font-size:12px; color:var(--ink3); margin-top:4px; line-height:1.75}
+.fb-types{display:flex; gap:8px; flex-wrap:wrap; margin-top:16px}
+.fb-type{
+  border:1px solid var(--line); background:var(--tint); color:var(--ink2);
+  padding:7px 15px; border-radius:999px; font-size:12.5px; font-weight:700;
+  cursor:pointer; font-family:inherit;
+  transition:transform .18s var(--ease), border-color .2s ease, color .2s ease, box-shadow .2s ease;
+}
+.fb-type:hover{transform:translateY(-1px); border-color:var(--accent)}
+.fb-type.on{
+  border-color:var(--accent-deep); color:var(--accent-deep);
+  box-shadow:inset 0 0 0 1px var(--accent-deep); background:var(--card);
+}
+.fb-row{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px}
+.fb-input,.fb-area{
+  width:100%; border:1px solid var(--line); background:var(--tint);
+  border-radius:14px; padding:11px 14px; font-size:13px; color:var(--ink);
+  outline:none; font-family:inherit; box-sizing:border-box;
+  transition:border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.fb-input::placeholder,.fb-area::placeholder{color:var(--ink3)}
+.fb-input:focus,.fb-area:focus{border-color:var(--accent-deep); background:var(--card); box-shadow:0 0 0 3px var(--line2)}
+.fb-area{margin-top:10px; min-height:100px; resize:vertical; line-height:1.8}
+.fb-honey{position:absolute; left:-9999px; width:1px; height:1px; opacity:0; overflow:hidden}
+.fb-foot{display:flex; align-items:center; gap:13px; margin-top:15px; flex-wrap:wrap}
+.fb-btn{
+  border:0; border-radius:14px; padding:11px 27px; font-size:13.5px; font-weight:800;
+  cursor:pointer; font-family:inherit; color:#fff;
+  background:linear-gradient(135deg,var(--accent),var(--accent-deep));
+  box-shadow:0 8px 22px rgba(63,134,209,.28);
+  transition:transform .18s var(--ease), box-shadow .18s ease, opacity .2s ease, background .3s ease;
+  display:inline-flex; align-items:center; gap:8px;
+}
+.fb-btn:hover{transform:translateY(-2px); box-shadow:0 12px 28px rgba(63,134,209,.36)}
+.fb-btn:active{transform:translateY(0)}
+.fb-btn:disabled{opacity:.55; cursor:not-allowed; transform:none}
+.fb-btn.done{background:linear-gradient(135deg,#34c98a,#1a9e6b)}
+.fb-status{font-size:12px; color:var(--ink3); line-height:1.6; min-height:18px}
+.fb-status.ok{color:#1a9e6b; font-weight:700}
+.fb-status.err{color:#d0455f; font-weight:700}
+.fb-status a{color:var(--accent-deep); font-weight:700}
+@media (max-width:640px){
+  .fb{padding:19px}
+  .fb-row{grid-template-columns:1fr}
+  .fb-btn{flex:1; justify-content:center}
+}
+
 /* —— 成就馆 —— */
 .ach-showcase{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .ach-app{
@@ -497,7 +565,7 @@ footer a:hover{text-decoration:underline}
 [data-theme="dark"] .aa-count{background:#3a2410;border-color:#5f3d1c;color:#e2b34d}
 [data-theme="dark"] .aa-chips span{background:#2b1a12;border-color:#553722;color:#d8b88a}
 [data-theme="dark"] .ct:hover{border-color:#7d3149}
-[data-theme="dark"] .ct-ico{background:linear-gradient(150deg,#2b131c,#33161f);box-shadow:inset 0 0 0 1px #4b2030}
+[data-theme="dark"] .ct-ico,[data-theme="dark"] .fb-ico{background:linear-gradient(150deg,#2b131c,#33161f);box-shadow:inset 0 0 0 1px #4b2030}
 [data-theme="dark"] .ct:focus-visible{outline-color:#e0566d}
 [data-theme="dark"] .placeholder{border-color:#55233a;color:#a2748a}
 [data-theme="dark"] footer{color:#a2748a;border-top-color:#3a1826}
@@ -570,7 +638,7 @@ footer a:hover{text-decoration:underline}
 [data-theme="purple"] .aa-count{background:#2b2010;border-color:#5f3d1c;color:#e2b34d}
 [data-theme="purple"] .aa-chips span{background:#241a2e;border-color:#4a3560;color:#c9b8e8}
 [data-theme="purple"] .ct:hover{border-color:#6d4db3}
-[data-theme="purple"] .ct-ico{background:linear-gradient(150deg,#251a3e,#2b1f4a);box-shadow:inset 0 0 0 1px #3d2b5e}
+[data-theme="purple"] .ct-ico,[data-theme="purple"] .fb-ico{background:linear-gradient(150deg,#251a3e,#2b1f4a);box-shadow:inset 0 0 0 1px #3d2b5e}
 [data-theme="purple"] .ct:focus-visible{outline-color:#a78bfa}
 [data-theme="purple"] .placeholder{border-color:#3d2b5e;color:#9d88c4}
 [data-theme="purple"] footer{color:#9d88c4;border-top-color:#2f2150}
@@ -636,7 +704,7 @@ footer a:hover{text-decoration:underline}
 [data-theme="fresh"] .chip{background:#f0faf3;border-color:#c9e9d6;color:#3e6b52}
 [data-theme="fresh"] .chip:hover{border-color:#a8d8b8}
 [data-theme="fresh"] .ct:hover{border-color:#a8d8b8}
-[data-theme="fresh"] .ct-ico{background:linear-gradient(150deg,#eaf9f0,#ddf3e6);box-shadow:inset 0 0 0 1px #c9e9d6}
+[data-theme="fresh"] .ct-ico,[data-theme="fresh"] .fb-ico{background:linear-gradient(150deg,#eaf9f0,#ddf3e6);box-shadow:inset 0 0 0 1px #c9e9d6}
 [data-theme="fresh"] .ct:focus-visible{outline-color:#22c55e}
 [data-theme="fresh"] .placeholder{border-color:#bfe6cf;color:#6f987f}
 [data-theme="fresh"] footer{color:#6f987f;border-top-color:#d9f0e2}
@@ -696,7 +764,7 @@ footer a:hover{text-decoration:underline}
 [data-theme="warm"] .chip{background:#fff0f5;border-color:#f9d2e2;color:#8a5a6e}
 [data-theme="warm"] .chip:hover{border-color:#f9a8d4}
 [data-theme="warm"] .ct:hover{border-color:#f9a8d4}
-[data-theme="warm"] .ct-ico{background:linear-gradient(150deg,#fff0f5,#fce7f3);box-shadow:inset 0 0 0 1px #f9d2e2}
+[data-theme="warm"] .ct-ico,[data-theme="warm"] .fb-ico{background:linear-gradient(150deg,#fff0f5,#fce7f3);box-shadow:inset 0 0 0 1px #f9d2e2}
 [data-theme="warm"] .ct:focus-visible{outline-color:#ec4899}
 [data-theme="warm"] .placeholder{border-color:#f9b8d4;color:#b88a9c}
 [data-theme="warm"] footer{color:#b88a9c;border-top-color:#fce0eb}
@@ -756,7 +824,7 @@ footer a:hover{text-decoration:underline}
 [data-theme="colorful"] .chip{background:#272750;border-color:#3d3d70;color:#c0c0ea}
 [data-theme="colorful"] .chip:hover{border-color:#6d5fbf}
 [data-theme="colorful"] .ct:hover{border-color:#6d5fbf}
-[data-theme="colorful"] .ct-ico{background:linear-gradient(150deg,#272750,#2d2d5e);box-shadow:inset 0 0 0 1px #3d3d70}
+[data-theme="colorful"] .ct-ico,[data-theme="colorful"] .fb-ico{background:linear-gradient(150deg,#272750,#2d2d5e);box-shadow:inset 0 0 0 1px #3d3d70}
 [data-theme="colorful"] .ct:focus-visible{outline-color:#22d3ee}
 [data-theme="colorful"] .placeholder{border-color:#3d3d70;color:#8f8fc0}
 [data-theme="colorful"] footer{color:#8f8fc0;border-top-color:#303060}
@@ -827,7 +895,7 @@ footer a:hover{text-decoration:underline}
 [data-theme="starry"] .chip{background:#141d3a;border-color:#243056;color:#aab8e0}
 [data-theme="starry"] .chip:hover{border-color:#4a5fa8}
 [data-theme="starry"] .ct:hover{border-color:#4a5fa8}
-[data-theme="starry"] .ct-ico{background:linear-gradient(150deg,#141d3a,#1a2547);box-shadow:inset 0 0 0 1px #243056}
+[data-theme="starry"] .ct-ico,[data-theme="starry"] .fb-ico{background:linear-gradient(150deg,#141d3a,#1a2547);box-shadow:inset 0 0 0 1px #243056}
 [data-theme="starry"] .ct:focus-visible{outline-color:#7dd3fc}
 [data-theme="starry"] .placeholder{border-color:#37477f;color:#7688b8}
 [data-theme="starry"] footer{color:#7688b8;border-top-color:#1b2444}
@@ -903,7 +971,7 @@ footer a:hover{text-decoration:underline}
 [data-theme="custom"] .chip{background:var(--tint);border-color:var(--line);color:var(--ink2)}
 [data-theme="custom"] .chip:hover{border-color:var(--accent)}
 [data-theme="custom"] .ct:hover{border-color:var(--accent)}
-[data-theme="custom"] .ct-ico{background:linear-gradient(150deg,var(--tint),var(--card));box-shadow:inset 0 0 0 1px var(--line)}
+[data-theme="custom"] .ct-ico,[data-theme="custom"] .fb-ico{background:linear-gradient(150deg,var(--tint),var(--card));box-shadow:inset 0 0 0 1px var(--line)}
 [data-theme="custom"] .placeholder{border-color:var(--line);color:var(--ink3)}
 [data-theme="custom"] footer{color:var(--ink3);border-top-color:var(--line2)}
 [data-theme="custom"] .dock{background:linear-gradient(165deg,var(--card),var(--tint));border-color:var(--line)}
@@ -1433,6 +1501,35 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       <div class="sec-eyebrow">CONTACT</div>
       <div class="sec-title">联系我</div>
     </div>
+
+    <div class="fb reveal" style="--d:.08s" id="fbCard">
+      <div class="fb-head">
+        <span class="fb-ico">💌</span>
+        <div>
+          <div class="fb-title">留言箱</div>
+          <div class="fb-sub">有什么想说的都可以写在这里，会直接送到我的邮箱。建议 / 报错 / 提问 / 随便聊，都欢迎</div>
+        </div>
+      </div>
+      <form id="fbForm" novalidate>
+        <div class="fb-types" id="fbTypes" aria-label="反馈类型">
+          <button type="button" class="fb-type on" data-t="💡 建议" aria-pressed="true">💡 建议</button>
+          <button type="button" class="fb-type" data-t="🐛 报错" aria-pressed="false">🐛 报错</button>
+          <button type="button" class="fb-type" data-t="🤔 提问" aria-pressed="false">🤔 提问</button>
+          <button type="button" class="fb-type" data-t="💬 随便聊" aria-pressed="false">💬 随便聊</button>
+        </div>
+        <div class="fb-row">
+          <input class="fb-input" id="fbNick" type="text" maxlength="40" placeholder="昵称（选填）" autocomplete="nickname">
+          <input class="fb-input" id="fbMail" type="email" maxlength="80" placeholder="邮箱（选填 · 方便我回信）" autocomplete="email">
+        </div>
+        <textarea class="fb-area" id="fbMsg" maxlength="2000" placeholder="写点什么……（Ctrl + Enter 直接发送）" aria-label="留言内容"></textarea>
+        <input class="fb-honey" id="fbSite" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div class="fb-foot">
+          <button class="fb-btn" id="fbBtn" type="submit"><span id="fbBtnT">发送 ✈</span></button>
+          <span class="fb-status" id="fbStatus" aria-live="polite"></span>
+        </div>
+      </form>
+    </div>
+
     <div class="contacts">
 
       <div class="ct reveal" style="--d:.05s" id="ctQQ" role="button" tabindex="0" title="点击复制 QQ 号">
@@ -2508,6 +2605,118 @@ window.__checkSecretZone = checkSecretZone;
         }
       }
     });
+  });
+})();
+</script>
+
+<script>
+/* —— 留言箱：提交到 FormSubmit（免费转发服务），内容直达邮箱 —— */
+(function () {
+  var ENDPOINT = 'https://formsubmit.co/ajax/2433165914@qq.com';
+  var form = document.getElementById('fbForm');
+  if (!form) return;
+  var typesEl = document.getElementById('fbTypes');
+  var nickEl = document.getElementById('fbNick');
+  var mailEl = document.getElementById('fbMail');
+  var msgEl = document.getElementById('fbMsg');
+  var honeyEl = document.getElementById('fbSite');
+  var btn = document.getElementById('fbBtn');
+  var btnT = document.getElementById('fbBtnT');
+  var statusEl = document.getElementById('fbStatus');
+  var busy = false;
+  var curType = '💡 建议';
+
+  /* 类型切换 */
+  var chips = [].slice.call(typesEl.querySelectorAll('.fb-type'));
+  chips.forEach(function (c) {
+    c.addEventListener('click', function () {
+      chips.forEach(function (x) { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); });
+      c.classList.add('on');
+      c.setAttribute('aria-pressed', 'true');
+      curType = c.getAttribute('data-t');
+    });
+  });
+
+  /* 状态提示 */
+  function setStatus(t, cls) {
+    statusEl.className = 'fb-status' + (cls ? ' ' + cls : '');
+    statusEl.innerHTML = t;
+  }
+
+  function finishOk() {
+    btn.classList.add('done');
+    btnT.textContent = '已送达 ✓';
+    setStatus('收到啦，谢谢你 🌙', 'ok');
+    msgEl.value = '';
+    setTimeout(function () {
+      btn.classList.remove('done');
+      btnT.textContent = '发送 ✈';
+    }, 3600);
+  }
+
+  function finishErr(why) {
+    var mail = 'mailto:2433165914@qq.com?subject=' + encodeURIComponent('【星站留言】' + curType) +
+      '&body=' + encodeURIComponent(msgEl.value || '');
+    setStatus('发送失败了（' + why + '）。可以稍后重试，或 <a href="' + mail + '">直接写封邮件</a> 给我', 'err');
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (busy) return;
+    /* 蜜罐：被填则视为机器人，假装成功 */
+    if (honeyEl.value) { finishOk(); return; }
+    var msg = msgEl.value.trim();
+    if (!msg) { setStatus('先写点什么再发送吧', 'err'); msgEl.focus(); return; }
+    if (msg.length < 2) { setStatus('再多写一点点？', 'err'); msgEl.focus(); return; }
+
+    busy = true;
+    btn.disabled = true;
+    btnT.textContent = '发送中…';
+    setStatus('正在穿过星夜……', '');
+
+    var payload = {
+      '类型': curType,
+      '昵称': nickEl.value.trim() || '（未留名）',
+      '内容': msg,
+      '_subject': '💌 星站留言 · ' + curType,
+      '_template': 'box',
+      '_captcha': 'false'
+    };
+    var mail = mailEl.value.trim();
+    if (mail) { payload['邮箱'] = mail; payload['_replyto'] = mail; }
+
+    var ctl = ('AbortController' in window) ? new AbortController() : null;
+    var timer = ctl ? setTimeout(function () { ctl.abort(); }, 20000) : null;
+
+    fetch(ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: ctl ? ctl.signal : undefined
+    }).then(function (r) {
+      if (timer) clearTimeout(timer);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then(function (j) {
+      busy = false; btn.disabled = false;
+      if (j && (j.success === 'true' || j.success === true)) { finishOk(); }
+      else { btnT.textContent = '发送 ✈'; finishErr('服务返回异常'); }
+    }).catch(function (err) {
+      if (timer) clearTimeout(timer);
+      busy = false; btn.disabled = false;
+      btnT.textContent = '发送 ✈';
+      var why = (err && err.name === 'AbortError') ? '网络超时' : '网络不通';
+      finishErr(why);
+    });
+  });
+
+  /* Ctrl + Enter 快捷发送 */
+  msgEl.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      if (typeof form.requestSubmit === 'function') form.requestSubmit();
+      else form.dispatchEvent(new Event('submit', { cancelable: true }));
+    }
   });
 })();
 </script>
