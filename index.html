@@ -3077,9 +3077,14 @@ window.__checkSecretZone = checkSecretZone;
       '等一个名字——你一路攒的那八个字母，拼起来就是它',
       '到那个页面上，用键盘把名字敲给它，它听得见',
       '那个名字（base64）：ZXN0aGVyaWE='
+    ],
+    log10: [
+      '最后一页，它自己会来',
+      '九页在手了——去最贪心的那个地方，它认得你',
+      '去「万物沙盒」，长按左上角那颗星球进 3D。世界完整的那一刻，最后一页会自己翻开'
     ]
   };
-  var BUILT_HINTED = ['log1', 'log2', 'log3', 'log4', 'log5', 'log6', 'log7', 'log8', 'log9'];
+  var BUILT_HINTED = ['log1', 'log2', 'log3', 'log4', 'log5', 'log6', 'log7', 'log8', 'log9', 'log10'];
   var hintFor = null, hintIdx = 0;
   function showHint() {
     var box = document.getElementById('argHintBox');
@@ -3093,7 +3098,7 @@ window.__checkSecretZone = checkSecretZone;
     }
     if (!target) {
       box.style.display = 'block';
-      box.textContent = '能提示的都提示完了，剩下的几篇还锁在小站别的角落（那几站的路还在施工，等等它们）';
+      box.textContent = '十页日记都回来了——去把八个字母交给它吧';
       return;
     }
     if (target !== hintFor) { hintFor = target; hintIdx = 0; }
@@ -3126,6 +3131,7 @@ window.__checkSecretZone = checkSecretZone;
       '能摸到这里的没几个',
       '说正事，我做的小东西每个背后都留了一篇日志，找着就会亮起来，一共十篇，前面八篇里各夹着一个字母，按顺序收好，最后要用',
       '第一页在星空的深处，种子 1818，慢慢拖，有个地方我做了记号',
+      '对了——交答案之前，十篇都要回来，一页都不能少',
       '（卡住了就回来按提示）'
     ];
   }
@@ -3173,7 +3179,12 @@ window.__checkSecretZone = checkSecretZone;
     }
     box.innerHTML = html;
     var all = letters.length === 8;
-    if (hint) hint.textContent = all ? '八个字母都回来了' : '把八个字母交给它（还差 ' + (8 - letters.length) + ' 个）';
+    var missingLogs = 10 - ARG.count();
+    if (hint) {
+      if (!all) hint.textContent = '把八个字母交给它（还差 ' + (8 - letters.length) + ' 个）';
+      else if (missingLogs > 0) hint.textContent = '字母都齐了——但日记还差 ' + missingLogs + ' 页';
+      else hint.textContent = '八个字母，十页日记，都回来了——交答案吧';
+    }
     if (inp) inp.disabled = !all;
     if (go) go.disabled = !all;
   }
@@ -3182,7 +3193,20 @@ window.__checkSecretZone = checkSecretZone;
     var msg = document.getElementById('argMsg');
     if (!inp || collectedLetters().length < 8) return;
     var v = (inp.value || '').trim().toLowerCase().replace(/[^a-z]/g, '');
-    if (v === PASSWORD) { showFinale(); return; }
+    if (v === PASSWORD) {
+      /* 🔮 全收集门槛：十页日记都要回来，才算把故事讲完 */
+      if (ARG.count() < 10) {
+        var missing = [];
+        for (var i = 0; i < LOGS.length; i++) {
+          if (!ARG.has(LOGS[i].id)) missing.push(('0' + (i + 1)).slice(-2));
+        }
+        msg.className = 'arg-msg bad';
+        msg.textContent = '八个字母，一个都没错——但故事还没讲完。还有 ' + missing.length + ' 页日记流落在外（第 ' + missing.join('、') + ' 页）。都找回来，再来交答案';
+        return;
+      }
+      showFinale();
+      return;
+    }
     msg.className = 'arg-msg bad';
     msg.textContent = '不对，再想想';
     inp.value = '';
@@ -3193,7 +3217,7 @@ window.__checkSecretZone = checkSecretZone;
     panel.innerHTML = [
       '<div class="arg-endtitle">🌙 终章</div>',
       '<div class="arg-letter">八个字母，一个都没错\n\n看来这个小站的里子被你翻遍了\n\n这个站没什么大目标，就是想把自己觉得好玩的东西都做一遍，摆在同一个地方\n\n<b>欢迎来到我的宇宙，谢谢你玩到这里</b>\n\n——星恬</div>',
-      '<div class="arg-msg good" style="margin-top:14px">🌌 星夜已为你点亮（在右上角配色面板里）<br>去「万物沙盒」看看世界完整的样子吧<br>最后还有一扇门——地址栏里敲上 <b>estheria</b>，再接上这个小站的名字</div>',
+      '<div class="arg-msg good" style="margin-top:14px">🌌 星夜已为你点亮（在右上角配色面板里）<br>十页日记，一页不少——世界已经是完整的了<br>最后还有一扇门——地址栏里敲上 <b>estheria</b>，再接上这个小站的名字</div>',
       '<button class="arg-go" id="argEndClose" style="margin-top:14px">合上终端</button>'
     ].join('');
     document.getElementById('argEndClose').addEventListener('click', close);
