@@ -938,6 +938,7 @@
       this.toast('📜 找到一篇日志（去主页头像连点 7 下看全文）');
       return true;
     },
+    reset: function () { state = { logs: [] }; save(); },
     toast: function (msg) {
       try {
         var el = document.getElementById('__arg_toast');
