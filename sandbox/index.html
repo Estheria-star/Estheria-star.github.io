@@ -266,7 +266,7 @@ body{
     <div class="tb-actions">
       <button class="tbtn" id="btnPause" title="暂停 / 继续世界演化"><span class="dot"></span><span class="lbl">暂停</span></button>
       <button class="tbtn" id="btnSpeed" title="世界速度倍率（×1 ~ ×16）">⏩<span class="lbl" id="spdLbl">×1</span></button>
-      <button class="tbtn" id="btnDim" title="2D / 立体视角切换（快捷键 V）">🧊<span class="lbl">立体视角</span></button>
+      <button class="tbtn" id="btnDim" title="进入 / 离开 3D 世界（快捷键 V）">🧊<span class="lbl">3D 世界</span></button>
       <button class="tbtn" id="btnClear" title="清空整个世界">🧹<span class="lbl">清空</span></button>
       <button class="tbtn" id="btnNew" title="重新生成地形与星空">🎲<span class="lbl">新世界</span></button>
       <button class="tbtn" id="btnShot" title="把当前世界导出为 PNG 照片">📷<span class="lbl">光之相机</span></button>
@@ -278,7 +278,7 @@ body{
 
   <main class="stage" id="stage">
     <canvas id="cv"></canvas>
-    <div class="stage-hint" id="hint">按住拖动就能玩 · 试试把火丢进油里 · 天空可以被搅动</div>
+    <div class="stage-hint" id="hint">按住拖动就能玩 · V 键潜入 3D 世界 · 天空可以被搅动</div>
     <div id="fps">--</div>
   </main>
 
@@ -308,10 +308,13 @@ body{
       <li><code>方向键 / WASD</code> 平移镜头</li>
       <li>世界向两侧<strong>无限延伸</strong>，走到哪生成到哪，没有边界</li>
     </ul>
-    <h4>二、升维 / 降维（2D ⇄ 立体）</h4>
+    <h4>二、3D 世界（真·第一人称）</h4>
     <ul>
-      <li>点顶部 <code>🧊 立体视角</code>（或按 <code>V</code>）：世界会以过渡动画“立起来”，并带有升维火花</li>
-      <li>再点一次即降维回平面，动画同样完整</li>
+      <li>点顶部 <code>🧊 3D 世界</code>（或按 <code>V</code>）：镜头会以「潜入」过渡动画飞进世界内部，再点一次飞回平面</li>
+      <li><code>W A S D / 方向键</code> 移动，<code>鼠标</code> 转动视角（点一下画面锁定光标；<code>ESC</code> 释放）</li>
+      <li><code>空格 / Shift</code> 升降飞行；不按就贴着地面行走</li>
+      <li><code>滚轮</code> 调整视野远近；<code>点击画面</code> 在准星处放下当前选中的方块（光束笔则沿视线发射光束）</li>
+      <li>整个世界在 3D 里依然「活着」：火焰会烧、水流会流，换个角度看它</li>
     </ul>
     <h4>三、时间倍速</h4>
     <ul>
@@ -1020,6 +1023,7 @@ var SB = SBX;
   BASE[T.PRISM] = [217, 194, 255];
   var ALPHA = {}; ALPHA[T.WATER] = 234; ALPHA[T.GLASS] = 122; ALPHA[T.STEAM] = 150;
   ALPHA[T.SMOKE] = 192; ALPHA[T.PRISM] = 152;
+  SB.BASE = BASE;
 
   var SHADE_MIN = 0.30, SHADE_MAX = 1.10;
   var SHADES = [];
@@ -1503,7 +1507,7 @@ var SB = SBX;
       var yy = y0 + dy; if (yy < 0 || yy >= LH) continue;
       for (var dx = -1; dx <= 1; dx++) {
         var xx = x0 + dx; if (xx < 0 || xx >= LR) continue;
-        var w = (dx === 0 && dy === 0) ? 1 : 0.42;
+        var w = (dx === 0 && dy === 0) ? 1 : 0.30;
         var i = yy * LR + xx;
         lR[i] += r * amt * w; lG[i] += g * amt * w; lB[i] += b * amt * w;
       }
@@ -1540,10 +1544,10 @@ var SB = SBX;
       var t = ty[i];
       if (!t) continue;
       var rgb = null, amt = 0;
-      if (t === T.FIRE) { rgb = EMIT_RGB[T.FIRE]; amt = 0.72; }
-      else if (t === T.LAVA) { rgb = EMIT_RGB[T.LAVA]; amt = 0.95; }
-      else if (t === T.LAMP) { rgb = EMIT_RGB[T.LAMP]; amt = 0.6; }
-      else if (t === T.SPARK) { rgb = SPARK_RGB[tint[i] % 6]; amt = aux[i] >= 200 ? 0.85 : Math.min(1, aux[i] / 60) * 0.5; }
+      if (t === T.FIRE) { rgb = EMIT_RGB[T.FIRE]; amt = 0.42; }
+      else if (t === T.LAVA) { rgb = EMIT_RGB[T.LAVA]; amt = 0.5; }
+      else if (t === T.LAMP) { rgb = EMIT_RGB[T.LAMP]; amt = 0.36; }
+      else if (t === T.SPARK) { rgb = SPARK_RGB[tint[i] % 6]; amt = aux[i] >= 200 ? 0.6 : Math.min(1, aux[i] / 60) * 0.34; }
       if (!rgb) continue;
       emitters++;
       if (emitters > 1200 && (i & 3) !== 0) continue;
@@ -1562,13 +1566,18 @@ var SB = SBX;
       blurH(lR); blurH(lG); blurH(lB);
       blurV(lR); blurV(lG); blurV(lB);
     }
-    /* 打包（软阈值，避免生硬光斑） */
+    /* 打包：保色软滚降——色相不变、亮度收敛，不再积成白雾 */
     for (var k = 0; k < LN; k++) {
       var r = lR[k], g = lG[k], b = lB[k];
       var m = r > g ? (r > b ? r : b) : (g > b ? g : b);
-      if (m < 0.02) { l32[k] = 0; continue; }
-      var rr = Math.min(255, r * 255) | 0, gg = Math.min(255, g * 255) | 0, bb = Math.min(255, b * 255) | 0;
-      var aa = Math.min(235, (m * 255 * 0.92)) | 0;
+      if (m < 0.03) { l32[k] = 0; continue; }
+      /* 软饱和：m_soft = m/(1+1.35m)，再统一缩放三通道（保色） */
+      var ms = m / (1 + m * 1.35) * 1.35;
+      var kk = ms / m;
+      var rr = Math.min(255, r * kk * 255) | 0;
+      var gg = Math.min(255, g * kk * 255) | 0;
+      var bb = Math.min(255, b * kk * 255) | 0;
+      var aa = Math.min(225, (ms * 255 * 0.9)) | 0;
       l32[k] = ((aa << 24) | (bb << 16) | (gg << 8) | rr) >>> 0;
     }
     lctx.putImageData(limg, 0, 0);
@@ -1595,11 +1604,11 @@ var SB = SBX;
       }
     }
   }
-  /* 在「世界坐标变换已设置」的上下文里叠加泛光 */
+  /* 在「世界坐标变换已设置」的上下文里叠加泛光（低透明度，避免白罩） */
   fx.renderLight = function (ctx) {
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    ctx.globalAlpha = 0.5;
+    ctx.globalAlpha = 0.4;
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(lc, 0, 0, LR, LH, SB.winX0, 0, W, H);
     ctx.restore();
@@ -2152,21 +2161,304 @@ var SB = SBX;
   ent.clear = function () { boulders.length = 0; ropes.length = 0; ships.length = 0; parts.length = 0; ropeBuild = null; };
 })();
 /* ============================================================
-   j5_ui — 主控制 v2：自由相机 · 2D↔3D 升维降维 · 倍速 · 渲染管线
+   j7_world3d — 真·3D 世界：体素高度场渲染 + 第一人称飞行
+   WASD 移动 · 鼠标看向（指针锁定）· 空格/Shift 升降 · 点击放置方块
+   渲染：逐列射线行军（体素空间算法）+ 距离雾 + 坡面光照 + 水面波光
    ============================================================ */
 (function () {
   'use strict';
   var SB = window.SBX, T = SB.T, W = SB.W, H = SB.H;
+  var w3 = SB.world3d = {};
+
+  var SHEAR = 0.55;          /* 深度错切：让地形沿纵深也有坡面变化 */
+  var FOG_DIST = 170;        /* 距离雾（远处溶进夜空，不露边界） */
+  var FOG = [9, 13, 30];
+  var EYE = 3.4;             /* 行走进地高 */
+
+  var c = w3.cam = { x: 260, z: 0, y: 70, yaw: 1.05, pitch: -0.10, fov: 1.12, tfov: 1.12 };
+  w3.active = false;
+  w3.locked = false;
+  w3.onAction = null;        /* j5 注入：放置方块 / 发射光束 */
+
+  var BASE = SB.BASE || {};
+
+  /* ---------- 列信息（每帧缓存） ---------- */
+  var colMap = new Map();
+  function colInfo(gx) {
+    var hit = colMap.get(gx);
+    if (hit !== undefined) return hit;
+    var info = null;
+    for (var y = 0; y < H; y++) {
+      var t = SB.get(gx, y);
+      if (t <= 0) continue;
+      if (t === T.SMOKE || t === T.STEAM || t === T.FIRE || t === T.SPARK) continue;
+      info = { h: H - y, top: t, gy: y, hot: t === T.LAVA };
+      if (!info.hot) {
+        for (var k = 1; k <= 4 && y - k >= 0; k++) {
+          var tt = SB.get(gx, y - k);
+          if (tt === T.FIRE || tt === T.LAVA || tt === T.SPARK) { info.hot = true; break; }
+        }
+      }
+      break;
+    }
+    colMap.set(gx, info);
+    return info;
+  }
+  w3.colAt = function (gx) { var i = colInfo(Math.floor(gx)); return i ? i.h : 0; };
+
+  /* ---------- 视角 / 移动 ---------- */
+  w3.lookDelta = function (dx, dy) {
+    c.yaw += dx * 0.0031;
+    c.pitch = Math.max(-1.25, Math.min(1.25, c.pitch - dy * 0.0031));
+  };
+  w3.wheelZoom = function (dy) {
+    c.tfov = Math.max(0.42, Math.min(1.5, c.tfov * (1 + (dy > 0 ? 1 : -1) * 0.08)));
+  };
+  w3.enter = function () {
+    w3.active = true;
+    c.x = SB.cam ? SB.cam.x : 260;
+    c.z = 0;
+    c.y = w3.colAt(c.x + c.z * SHEAR) + 14;
+    c.pitch = -0.14;
+    c.tfov = c.fov;
+    if (SB.ach) SB.ach('sandbox.dim3d');
+  };
+  w3.exit = function () {
+    w3.active = false; w3.locked = false;
+    if (SB.cam) SB.cam.x = c.x;
+  };
+
+  w3.update = function (dt, keys) {
+    c.fov += (c.tfov - c.fov) * Math.min(1, dt * 8);
+    var sp = 42;
+    var fx = Math.sin(c.yaw), fz = Math.cos(c.yaw);
+    var rx = Math.cos(c.yaw), rz = -Math.sin(c.yaw);
+    var mx = 0, mz = 0;
+    if (keys['w'] || keys['W'] || keys['ArrowUp']) { mx += fx; mz += fz; }
+    if (keys['s'] || keys['S'] || keys['ArrowDown']) { mx -= fx; mz -= fz; }
+    if (keys['a'] || keys['A'] || keys['ArrowLeft']) { mx -= rx; mz -= rz; }
+    if (keys['d'] || keys['D'] || keys['ArrowRight']) { mx += rx; mz += rz; }
+    if (mx || mz) {
+      var L = Math.hypot(mx, mz);
+      c.x += mx / L * sp * dt;
+      c.z += mz / L * sp * dt;
+    }
+    var up = !!(keys[' '] || keys['Space']);
+    var dn = !!(keys['Shift'] || keys['shift'] || keys['ShiftLeft'] || keys['shiftLeft']);
+    if (up) c.y += 32 * dt;
+    if (dn) c.y -= 32 * dt;
+    if (!up && !dn) {
+      var target = w3.colAt(c.x + c.z * SHEAR) + EYE;
+      c.y += (target - c.y) * Math.min(1, dt * 5.5);
+      if (c.y < target - 0.3) c.y = target - 0.3;   /* 不穿地 */
+    }
+    c.y = Math.max(3, Math.min(215, c.y));
+    c.z = Math.max(-70, Math.min(70, c.z));
+    SB.ensureWindow(c.x);
+  };
+
+  /* ---------- 供 j5 的指针事件调用 ---------- */
+  w3.requestLock = function (cv) {
+    if (w3.locked) return false;
+    try {
+      if (cv.requestPointerLock) cv.requestPointerLock();
+    } catch (e) {}
+    return true;
+  };
+  w3.pointerDown = function (e, cv) {
+    if (!w3.locked) { w3.requestLock(cv); return 'lock'; }
+    if (e.button === 0 || e.button === 2) {
+      if (w3.onAction) w3.onAction(e.button === 2);
+      return 'act';
+    }
+    return 'none';
+  };
+
+  /* ---------- 准星命中（放置方块 / 标记） ---------- */
+  w3.centerHit = function () {
+    var dx = Math.sin(c.yaw), dz = Math.cos(c.yaw);
+    var tanP = Math.tan(c.pitch);
+    for (var tt = 1.2; tt < 430; tt += Math.max(0.85, tt * 0.03)) {
+      var wxx = c.x + dx * tt, wzz = c.z + dz * tt;
+      var gx = Math.floor(wxx + wzz * SHEAR);
+      var info = colInfo(gx);
+      if (!info) continue;
+      var rayH = c.y + tanP * tt;
+      if (rayH <= info.h) return { t: tt, gx: gx, gy: info.gy, h: info.h };
+    }
+    return null;
+  };
+  w3.paintAtCrosshair = function () {
+    var hit = w3.centerHit();
+    if (!hit) return false;
+    if (w3.onAction) w3.onAction(false, hit);
+    return hit;
+  };
+  w3.fireViewBeam = function (ci) {
+    var dx = Math.sin(c.yaw) * Math.cos(c.pitch);
+    var dy = -Math.sin(c.pitch);
+    var L = Math.hypot(dx, dy) || 1;
+    return SB.fx.fireBeam(c.x, H - c.y, dx / L, dy / L, ci || 0);
+  };
+
+  /* ---------- 3D 投影（光束等世界点 → 屏幕） ---------- */
+  var _cw = 640, _ch = 400;
+  function proj(wx, wy, wz) {
+    var rx = wx - c.x, ry = wy - c.y, rz = wz - c.z;
+    var sy = Math.sin(c.yaw), cy = Math.cos(c.yaw);
+    var sp = Math.sin(c.pitch), cp = Math.cos(c.pitch);
+    var fwd = sy * cp * rx + sp * ry + cy * cp * rz;
+    if (fwd < 0.6) return null;
+    var side = cy * rx - sy * rz;
+    var upv = -sy * sp * rx + cp * ry - cy * sp * rz;
+    var focal = (_cw / 2) / Math.tan(c.fov / 2);
+    return [_cw / 2 + side * focal / fwd, _ch / 2 - upv * focal / fwd, fwd];
+  }
+  w3.proj = proj;
+
+  /* ---------- 渲染 ---------- */
+  var lc = document.createElement('canvas');
+  var lx2 = lc.getContext('2d');
+  var img = null, d32 = null, lw = 0, lh = 0;
+  var hbuf = new Float32Array(4096);
+
+  function ensureBuf(cw2, ch2) {
+    lw = Math.max(200, cw2 >> 1);
+    lh = Math.max(140, ch2 >> 1);
+    if (lc.width !== lw || lc.height !== lh) {
+      lc.width = lw; lc.height = lh;
+      img = lx2.createImageData(lw, lh);
+      d32 = new Uint32Array(img.data.buffer);
+      hbuf = new Float32Array(lw + 2);
+    }
+  }
+  function pack(r, g, b, a) {
+    if (r < 0) r = 0; else if (r > 255) r = 255;
+    if (g < 0) g = 0; else if (g > 255) g = 255;
+    if (b < 0) b = 0; else if (b > 255) b = 255;
+    return ((a << 24) | ((b | 0) << 16) | ((g | 0) << 8) | (r | 0)) >>> 0;
+  }
+
+  w3.render = function (ctx, cw2, ch2, tsec) {
+    _cw = cw2; _ch = ch2;
+    SB.sky.renderSky(ctx, cw2, ch2);
+    ensureBuf(cw2, ch2);
+    colMap.clear();
+    var t = tsec || 0;
+    var focal = (cw2 / 2) / Math.tan(c.fov / 2);
+    var horizon = ch2 / 2 + Math.tan(c.pitch) * focal;
+    for (var i = 0; i < lw; i++) hbuf[i] = lh;
+
+    for (var col = 0; col < lw; col++) {
+      var sxc = col * 2 + 1;
+      var ang = c.yaw + Math.atan2(sxc - cw2 / 2, focal);
+      var dx = Math.sin(ang), dz = Math.cos(ang);
+      var prevH = -999;
+      for (var tt = 1.2; tt < 430; tt += Math.max(0.85, tt * 0.03)) {
+        var wxx = c.x + dx * tt;
+        var wzz = c.z + dz * tt;
+        var info = colInfo(Math.floor(wxx + wzz * SHEAR));
+        if (!info) { prevH = -999; continue; }
+        var hh = info.h;
+        if (info.top === T.WATER) hh += Math.sin(t * 2.2 + wxx * 0.35) * 0.18;
+        var sy = horizon - (hh - c.y) * focal / tt;
+        if (sy >= hbuf[col]) { prevH = info.h; continue; }
+        var yTop = sy | 0; if (yTop < 0) yTop = 0;
+        var yBot = hbuf[col] | 0; if (yBot > lh) yBot = lh;
+        if (yTop < yBot) {
+          /* 颜色：材质 + 热光 + 坡面明暗 + 距离雾 */
+          var bt = BASE[info.top] || [150, 150, 160];
+          var r = bt[0], g = bt[1], b = bt[2];
+          if (info.top === T.WATER) {
+            var sh = 1 + 0.10 * Math.sin(t * 2.6 + wzz * 0.4 + wxx * 0.2);
+            r *= sh; g *= sh; b = Math.min(255, b * sh * 1.05);
+          }
+          if (info.top === T.LAVA) {
+            var sh2 = 1 + 0.12 * Math.sin(t * 3 + wxx * 0.5);
+            r = 255; g = Math.min(220, 122 * sh2); b = 46;
+          } else if (info.hot) {
+            r = Math.min(255, r * 0.6 + 255 * 0.42);
+            g = Math.min(255, g * 0.6 + 140 * 0.42);
+            b = b * 0.6 + 50 * 0.42;
+          }
+          if (prevH > -900) {
+            var dh = info.h - prevH;
+            var sf = 1 + Math.max(-0.35, Math.min(0.35, dh * 0.02));
+            r *= sf; g *= sf; b *= sf;
+          }
+          var fogK = Math.exp(-tt / FOG_DIST);
+          r = r * fogK + FOG[0] * (1 - fogK);
+          g = g * fogK + FOG[1] * (1 - fogK);
+          b = b * fogK + FOG[2] * (1 - fogK);
+          var colr = pack(r, g, b, 255);
+          for (var yy = yTop; yy < yBot; yy++) d32[yy * lw + col] = colr;
+          hbuf[col] = yTop;
+          if (yTop <= 0) break;
+        }
+        prevH = info.h;
+      }
+    }
+    lx2.putImageData(img, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(lc, 0, 0, lw, lh, 0, 0, cw2, ch2);
+    ctx.imageSmoothingEnabled = true;
+    /* 光束投影（世界坐标 → 3D 屏幕） */
+    renderBeams3D(ctx);
+  };
+
+  function renderBeams3D(ctx) {
+    var beams = SB.fx.beams;
+    if (!beams || !beams.length) return;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (var i = 0; i < beams.length; i++) {
+      var bm = beams[i];
+      var pts = bm.pts;
+      if (pts.length < 4) continue;
+      var a = bm.ttl < 60 ? Math.max(0, bm.ttl / 60) : 1;
+      ctx.globalAlpha = 0.85 * a;
+      ctx.strokeStyle = 'rgb(' + Math.min(255, bm.r + 60) + ',' + Math.min(255, bm.g + 60) + ',' + Math.min(255, bm.b + 60) + ')';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      var started = false;
+      for (var p = 0; p < pts.length; p += 2) {
+        var pr = proj(pts[p], H - pts[p + 1], c.z);
+        if (!pr) { started = false; continue; }
+        if (!started) { ctx.moveTo(pr[0], pr[1]); started = true; }
+        else ctx.lineTo(pr[0], pr[1]);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  /* ---------- 测试钩子 ---------- */
+  w3.setCam = function (x, y, z) {
+    if (x !== undefined) c.x = x;
+    if (y !== undefined) c.y = y;
+    if (z !== undefined) c.z = z;
+    return { x: c.x, y: c.y, z: c.z };
+  };
+  w3.setLook = function (yaw, pitch) {
+    if (yaw !== undefined) c.yaw = yaw;
+    if (pitch !== undefined) c.pitch = Math.max(-1.25, Math.min(1.25, pitch));
+    return { yaw: c.yaw, pitch: c.pitch };
+  };
+  w3.camInfo = function () { return { x: c.x, y: c.y, z: c.z, yaw: c.yaw, pitch: c.pitch, fov: c.fov }; };
+})();
+/* ============================================================
+   j5_ui — 主控制 v3：自由相机 · 2D⇄真3D（潜入过渡）· 倍速 · 渲染管线
+   ============================================================ */
+(function () {
+  'use strict';
+  var SB = window.SBX, T = SB.T, W = SB.W, H = SB.H;
+  var w3 = SB.world3d;
 
   var cv = document.getElementById('cv');
   var ctx = cv.getContext('2d');
   var stage = document.getElementById('stage');
-  var view = SB.view = { z: 4, ky: 1, tx: 0, ty: 0 };
+  var view = SB.view = { z: 4, ky: 1, tx: 0, ty: 0, S: 0 };
   var cam = SB.cam = { x: 256, y: 90, z: 4, tz: 4 };
-
-  var darkCanvas = document.createElement('canvas');
-  darkCanvas.width = W; darkCanvas.height = H;
-  var dctx = darkCanvas.getContext('2d');
 
   SB.canvasW = 1000;
   function zMin() {
@@ -2206,20 +2498,14 @@ var SB = SBX;
     g.fillRect(0, 0, vig.width, vig.height);
   }
 
-  /* ---------- 坐标换算（含立体倾斜） ---------- */
+  /* ---------- 坐标换算 ---------- */
   function mapParams() {
-    var z = cam.z, ky = 1 - 0.10 * dim, S = z * 0.16 * dim;
-    return {
-      z: z, ky: ky, S: S,
-      tx: cv.width / 2 - z * cam.x - S * cam.y,
-      ty: cv.height / 2 - z * ky * cam.y
-    };
+    var z = cam.z;
+    return { z: z, ky: 1, S: 0, tx: cv.width / 2 - z * cam.x, ty: cv.height / 2 - z * cam.y };
   }
   function screenToWorld(sx, sy) {
     var p = mapParams();
-    var y = (sy - p.ty) / (p.z * p.ky);
-    var x = (sx - p.tx - p.S * y) / p.z;
-    return { x: x, y: y, cx: sx / cv.width, cy: sy / cv.height };
+    return { x: (sx - p.tx) / p.z, y: (sy - p.ty) / p.z, cx: sx / cv.width, cy: sy / cv.height };
   }
   function evWorld(e) {
     var rect = cv.getBoundingClientRect();
@@ -2228,7 +2514,7 @@ var SB = SBX;
     return screenToWorld(px, py);
   }
 
-  /* ---------- 相机操作 ---------- */
+  /* ---------- 相机操作（2D） ---------- */
   var zoomAnchor = null;
   function zoomAt(sx, sy, factor) {
     var zm = zMin();
@@ -2242,17 +2528,15 @@ var SB = SBX;
       cam.z += (cam.tz - cam.z) * Math.min(1, dt * 9);
       if (zoomAnchor) {
         var p = mapParams();
-        /* 保持锚点世界坐标固定在原屏幕位置：sx = cw/2 + (wx-camx)*z + (wy-camy)*S */
-        cam.y = zoomAnchor.w.y - (zoomAnchor.s[1] - cv.height / 2) / (p.z * p.ky);
-        cam.x = zoomAnchor.w.x - (zoomAnchor.s[0] - cv.width / 2 - (zoomAnchor.w.y - cam.y) * p.S) / p.z;
+        cam.y = zoomAnchor.w.y - (zoomAnchor.s[1] - cv.height / 2) / p.z;
+        cam.x = zoomAnchor.w.x - (zoomAnchor.s[0] - cv.width / 2) / p.z;
         clampCam();
       }
     } else { cam.z = cam.tz; zoomAnchor = null; }
   }
   function panBy(dxPx, dyPx) {
-    var ky = 1 - 0.10 * dim;
     cam.x -= dxPx / cam.z;
-    cam.y -= dyPx / (cam.z * ky);
+    cam.y -= dyPx / cam.z;
     zoomAnchor = null;
     clampCam();
   }
@@ -2262,7 +2546,7 @@ var SB = SBX;
   var brush = 4;
   var paused = false;
   var speed = 1, spdIdx = 0, SPEEDS = [1, 2, 4, 8, 16];
-  var dim = 0, dimT = 0;                 /* 0=2D，1=立体 */
+  var m3Prog = 0, m3Target = 0;          /* 0=2D，1=3D（带过渡动画） */
   var painting = false, lastPt = null, erased = false;
   var aiming = false, aimFrom = null, lastBeamAt = -999;
   var stirLast = null, stirring = false;
@@ -2284,17 +2568,29 @@ var SB = SBX;
     toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2800);
   }
   SB.toast = toast;
+  function in3D() { return !!(w3 && w3.active); }
 
-  /* ---------- 指针输入（含双指捏合 / 平移） ---------- */
+  /* ---------- 指针输入 ---------- */
   var pointers = new Map();
   var pinchBase = null;
+  var lookDrag = null;
   cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 
   cv.addEventListener('pointerdown', function (e) {
     e.preventDefault();
+    hideHint();
+    /* —— 3D 模式：锁定光标 / 放置方块 —— */
+    if (in3D()) {
+      if (w3.locked) { w3.pointerDown(e, cv); }
+      else {
+        w3.requestLock(cv);
+        lookDrag = { id: e.pointerId, x: e.clientX, y: e.clientY };
+        try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+      }
+      return;
+    }
     try { cv.setPointerCapture(e.pointerId); } catch (err) {}
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    hideHint();
     if (pointers.size === 2) {
       painting = false; aiming = false; stirring = false;
       var arr = [].slice.call(pointers.values());
@@ -2321,14 +2617,20 @@ var SB = SBX;
     if (!erased && cur.type === T.FIRE) SB.ach && SB.ach('sandbox.fire');
   });
 
-  var prevPos = null;
   window.addEventListener('pointermove', function (e) {
+    if (in3D()) {
+      if (w3.locked) { w3.lookDelta(e.movementX || 0, e.movementY || 0); return; }
+      if (lookDrag && e.pointerId === lookDrag.id) {
+        w3.lookDelta(e.clientX - lookDrag.x, e.clientY - lookDrag.y);
+        lookDrag.x = e.clientX; lookDrag.y = e.clientY;
+      }
+      return;
+    }
     if (!pointers.has(e.pointerId) && !SB.entities.ropeActive()) return;
     if (pointers.has(e.pointerId)) {
       var p = pointers.get(e.pointerId);
       var pdx = e.clientX - p.x, pdy = e.clientY - p.y;
       p.x = e.clientX; p.y = e.clientY;
-      /* 双指：捏合缩放 + 双指平移 */
       if (pointers.size === 2 && pinchBase) {
         var arr = [].slice.call(pointers.values());
         var d = Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y);
@@ -2340,7 +2642,11 @@ var SB = SBX;
         pinchBase.cx = cx2; pinchBase.cy = cy2;
         return;
       }
-      if (p.pan) { panBy(-(pdx * cv.width / cv.getBoundingClientRect().width), -(pdy * cv.height / cv.getBoundingClientRect().height)); return; }
+      if (p.pan) {
+        var rect = cv.getBoundingClientRect();
+        panBy(-(pdx * cv.width / rect.width), -(pdy * cv.height / rect.height));
+        return;
+      }
     }
     var w = evWorld(e);
     if (painting && lastPt) {
@@ -2350,9 +2656,9 @@ var SB = SBX;
     if (aiming) fireAim(w);
     if (stirring) { doStir(w, stirLast ? w.x - stirLast.x : 0, stirLast ? w.y - stirLast.y : 0); stirLast = w; }
     if (SB.entities.ropeActive()) SB.entities.ropeGrow();
-    prevPos = { x: e.clientX, y: e.clientY };
   });
   window.addEventListener('pointerup', function (e) {
+    if (in3D()) { lookDrag = null; return; }
     pointers.delete(e.pointerId);
     if (pointers.size < 2) pinchBase = null;
     painting = false; lastPt = null;
@@ -2360,15 +2666,19 @@ var SB = SBX;
     stirring = false; stirLast = null;
     SB.entities.ropeEnd();
   });
+  document.addEventListener('pointerlockchange', function () {
+    w3.locked = document.pointerLockElement === cv;
+  });
 
   cv.addEventListener('wheel', function (e) {
     e.preventDefault();
-    var rect = cv.getBoundingClientRect();
-    var px = (e.clientX - rect.left) * (cv.width / rect.width);
-    var py = (e.clientY - rect.top) * (cv.height / rect.height);
     var d = e.deltaY;
     if (e.deltaMode === 1) d *= 16; else if (e.deltaMode === 2) d *= 400;
     d = Math.max(-260, Math.min(260, d));
+    if (in3D()) { w3.wheelZoom(d); return; }
+    var rect = cv.getBoundingClientRect();
+    var px = (e.clientX - rect.left) * (cv.width / rect.width);
+    var py = (e.clientY - rect.top) * (cv.height / rect.height);
     zoomAt(px, py, Math.exp(-d * 0.0011));
   }, { passive: false });
 
@@ -2384,6 +2694,25 @@ var SB = SBX;
     SB.sky.stir(Math.max(0, Math.min(1, w.cx)), Math.max(0, Math.min(1, w.cy)), dx * 0.12, dy * 0.12, 1);
     SB.wind(w.x - SB.winX0, w.y, dx, dy, 9);
     SB.ach && SB.ach('sandbox.aurora');
+  }
+
+  /* 3D 里的「点击放置」：方块 → 画一笔；光束笔 → 朝视线发射 */
+  if (w3) {
+    w3.onAction = function (erase, hit) {
+      if (cur.tool === 'beam') { w3.fireViewBeam(0); return; }
+      if (!hit) hit = w3.centerHit();
+      if (!hit) return;
+      SB.paint(hit.gx, hit.gy, erase || cur.type === -1 ? T.AIR : cur.type, brush);
+      SB.ach && SB.ach('sandbox.block3d');
+      SB.ach && SB.ach('sandbox.paint');
+      var bt = (SB.BASE && SB.BASE[cur.type]) || [200, 200, 200];
+      for (var k = 0; k < 6; k++) {
+        SB.entities.spawnP(hit.gx + (Math.random() - 0.5) * 2, hit.gy - 1, {
+          vx: (Math.random() - 0.5) * 2, vy: -0.6 - Math.random(), life: 0.4 + Math.random() * 0.3,
+          r: bt[0], g: bt[1], b: bt[2], size: 0.7, grav: 0.08
+        });
+      }
+    };
   }
 
   /* ---------- 调色板 ---------- */
@@ -2436,7 +2765,7 @@ var SB = SBX;
   var brushV = document.getElementById('brushV');
   brushEl.addEventListener('input', function () { brush = +brushEl.value; brushV.textContent = brush; });
 
-  /* ---------- 世界生成 / 初始 ---------- */
+  /* ---------- 世界生成 ---------- */
   function genWorld(sd) {
     SB.genWorld(sd);
     SB.fx.clear();
@@ -2449,7 +2778,7 @@ var SB = SBX;
   /* ---------- 按钮 ---------- */
   var btnPause = document.getElementById('btnPause');
   var btnDim = document.getElementById('btnDim');
-  var btnSpeed = document.getElementById('btnSpeed');
+  var btnSpeedEl = document.getElementById('btnSpeed');
   var spdLbl = document.getElementById('spdLbl');
   var worldSeed = 20261003;
 
@@ -2488,13 +2817,11 @@ var SB = SBX;
   document.getElementById('btnHelp').addEventListener('click', function () { showModal('helpModal'); });
   document.getElementById('btnAch').addEventListener('click', function () { showModal('achModal'); });
 
-  /* 立体视角切换（升维 / 降维） */
+  /* 2D ⇄ 3D 切换（带潜入过渡动画） */
   function toggleDim() {
-    dimT = dimT > 0.5 ? 0 : 1;
-    btnDim.classList.toggle('on', dimT === 1);
-    btnDim.querySelector('.lbl').textContent = dimT === 1 ? '回到平面' : '立体视角';
-    if (dimT === 1) { SB.ach && SB.ach('sandbox.dim3d'); toast('🧊 升维——世界立起来了'); }
-    else toast('🗺 降维——回到平面视野');
+    m3Target = m3Target > 0.5 ? 0 : 1;
+    btnDim.classList.toggle('on', m3Target === 1);
+    btnDim.querySelector('.lbl').textContent = m3Target === 1 ? '回到平面' : '3D 世界';
   }
   btnDim.addEventListener('click', toggleDim);
 
@@ -2503,11 +2830,11 @@ var SB = SBX;
     spdIdx = (spdIdx + 1) % SPEEDS.length;
     speed = SPEEDS[spdIdx];
     spdLbl.textContent = '×' + speed;
-    btnSpeed.classList.toggle('on', speed > 1);
+    btnSpeedEl.classList.toggle('on', speed > 1);
     if (speed >= 16) SB.ach && SB.ach('sandbox.speed');
     toast('世界速度 ×' + speed);
   }
-  btnSpeed.addEventListener('click', cycleSpeed);
+  btnSpeedEl.addEventListener('click', cycleSpeed);
 
   function showModal(id) { document.getElementById(id).classList.add('show'); }
   function hideModal(id) { document.getElementById(id).classList.remove('show'); }
@@ -2516,19 +2843,17 @@ var SB = SBX;
   });
   window.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') { hideModal('helpModal'); hideModal('achModal'); }
-    if (e.code === 'Space') { spaceDown = true; e.preventDefault(); }
-    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
     keys[e.key] = true;
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
     if (e.key === '1') { cur.tool = null; cur.type = T.SAND; syncPal(); }
     else if (e.key === '2') { cur.tool = null; cur.type = T.WATER; syncPal(); }
     else if (e.key === '3') { cur.tool = null; cur.type = T.FIRE; syncPal(); }
-    else if (e.key === ' ') { e.preventDefault(); btnPause.click(); }
+    else if (e.key === ' ') { e.preventDefault(); if (!in3D()) btnPause.click(); }
     else if (e.key === 'v' || e.key === 'V') { toggleDim(); }
     else if (e.key === 'r' || e.key === 'R') { cur.tool = 'rope'; syncPal(); }
     konami(e.key);
   });
   window.addEventListener('keyup', function (e) {
-    if (e.code === 'Space') spaceDown = false;
     keys[e.key] = false;
   });
 
@@ -2557,79 +2882,50 @@ var SB = SBX;
   var frameCount = 0;
   SB.frameCount = function () { return frameCount; };
   var cursorPt = null;
-  window.addEventListener('pointermove', function (e) { cursorPt = evWorld(e); });
+  window.addEventListener('pointermove', function (e) { if (!in3D()) cursorPt = evWorld(e); });
   window.addEventListener('pointerleave', function () { cursorPt = null; });
-
-  function buildDark() {
-    dctx.setTransform(1, 0, 0, 1, 0, 0);
-    dctx.globalCompositeOperation = 'source-over';
-    dctx.clearRect(0, 0, W, H);
-    dctx.drawImage(SB.worldCanvas, 0, 0);
-    dctx.globalCompositeOperation = 'source-atop';
-    dctx.fillStyle = 'rgba(9,12,28,0.68)';
-    dctx.fillRect(0, 0, W, H);
-    dctx.globalCompositeOperation = 'source-over';
-  }
 
   function renderFrame(skipCursor) {
     var cw = cv.width, ch = cv.height;
+    /* —— 真 3D 模式 —— */
+    if (in3D()) {
+      var tsec = SB.sky.time();
+      w3.render(ctx, cw, ch, tsec);
+      drawCrosshair(cw, ch);
+      ctx.drawImage(vig, 0, 0, cw, ch);
+      drawTransition(cw, ch);
+      if (shakeT > 0) { shakeT -= 0.045; if (shakeT <= 0) { shakeT = 0; shakeMag = 0; } }
+      return;
+    }
     SB.ensureWindow(cam.x);
     SB.sky.renderSky(ctx, cw, ch);
-    /* 变换参数（含立体倾斜 + 压暗堆叠） */
     var p = mapParams();
-    var z = p.z, ky = p.ky, S = p.S;
+    var z = p.z;
     var shx = 0, shy = 0;
     if (shakeT > 0) {
       var m = shakeMag * shakeT;
       shx = (Math.random() - 0.5) * m; shy = (Math.random() - 0.5) * m;
     }
     var tx = p.tx + shx, ty = p.ty + shy;
-    view.z = z; view.ky = ky; view.tx = tx; view.ty = ty; view.S = S;
-    /* 可见列（含余量） */
+    view.z = z; view.ky = 1; view.tx = tx; view.ty = ty;
     var visX0 = Math.floor(cam.x - cw / (2 * z)) - 8;
     var visX1 = Math.ceil(cam.x + cw / (2 * z)) + 8;
     var rx0 = Math.max(0, visX0 - SB.winX0);
     var rx1 = Math.min(W, visX1 - SB.winX0);
     if (rx1 <= rx0) { rx0 = 0; rx1 = W; }
     SB.renderWorld(rx0, rx1);
-    /* 立体堆叠（升维的“厚度”）：上左方向的暗色切片，读作立体纵深 */
-    if (dim > 0.01) {
-      buildDark();
-      var K = Math.max(3, Math.round(14 * dim));
-      var depthCells = 24 * dim;
-      var stepC = depthCells / K;
-      for (var k = K; k >= 1; k--) {
-        var ox = -0.62 * stepC * k * z;
-        var oy = -1.0 * stepC * k * z * ky;
-        ctx.setTransform(z, 0, S, z * ky, tx + ox, ty + oy);
-        ctx.globalAlpha = (0.16 + 0.58 * (1 - k / (K + 1))) * Math.min(1, dim * 1.5);
-        ctx.drawImage(darkCanvas, rx0, 0, rx1 - rx0, H, SB.winX0 + rx0, 0, rx1 - rx0, H);
-      }
-      ctx.globalAlpha = 1;
-    }
-    /* 主层（正面） */
-    ctx.setTransform(z, 0, S, z * ky, tx, ty);
+    ctx.setTransform(z, 0, 0, z, tx, ty);
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(SB.worldCanvas, rx0, 0, rx1 - rx0, H, SB.winX0 + rx0, 0, rx1 - rx0, H);
     ctx.imageSmoothingEnabled = true;
-    /* 实体 / 光束 / 泛光（同一变换，世界坐标） */
     SB.entities.render(ctx);
     SB.fx.renderBeams(ctx);
     SB.fx.lightFrame();
     SB.fx.renderLight(ctx);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    /* 升维 / 降维过渡的微光扫过 */
-    if (Math.abs(dimT - dim) > 0.02 && dim > 0.01) {
-      var fl = Math.sin(Math.PI * Math.max(0, Math.min(1, dim)));
-      ctx.fillStyle = 'rgba(150,200,255,' + (0.09 * fl).toFixed(3) + ')';
-      ctx.fillRect(0, 0, cw, ch);
-    }
-    /* 暗角 */
     ctx.drawImage(vig, 0, 0, cw, ch);
-    /* 光标 */
     if (!skipCursor && cursorPt) {
-      var sx = cursorPt.x * z + S * cursorPt.y + tx;
-      var sy = cursorPt.y * z * ky + ty;
+      var sx = cursorPt.x * z + tx, sy = cursorPt.y * z + ty;
       if (sx > -40 && sx < cw + 40 && sy > -40 && sy < ch + 40) {
         ctx.save();
         ctx.strokeStyle = 'rgba(255,255,255,.4)';
@@ -2640,8 +2936,53 @@ var SB = SBX;
         ctx.restore();
       }
     }
-    /* 屏幕震动衰减 */
+    drawTransition(cw, ch);
     if (shakeT > 0) { shakeT -= 0.045; if (shakeT <= 0) { shakeT = 0; shakeMag = 0; } }
+  }
+
+  /* 准星 */
+  function drawCrosshair(cw, ch) {
+    if (m3Prog < 0.55) return;
+    var cx2 = cw / 2, cy2 = ch / 2;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,.72)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx2 - 12, cy2); ctx.lineTo(cx2 - 4, cy2);
+    ctx.moveTo(cx2 + 4, cy2); ctx.lineTo(cx2 + 12, cy2);
+    ctx.moveTo(cx2, cy2 - 12); ctx.lineTo(cx2, cy2 - 4);
+    ctx.moveTo(cx2, cy2 + 4); ctx.lineTo(cx2, cy2 + 12);
+    ctx.stroke();
+    if (w3.centerHit()) {
+      ctx.strokeStyle = 'rgba(140,240,220,.85)';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.arc(cx2, cy2, 3.4, 0, 6.2832);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  /* 潜入 / 升出过渡（黑场 + 光环） */
+  function drawTransition(cw, ch) {
+    var oa = Math.sin(Math.max(0, Math.min(1, m3Prog)) * Math.PI);
+    if (oa < 0.015) return;
+    ctx.save();
+    ctx.fillStyle = 'rgba(3,5,12,' + (oa * 0.97).toFixed(3) + ')';
+    ctx.fillRect(0, 0, cw, ch);
+    var rr = oa * Math.max(cw, ch) * 0.62;
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.strokeStyle = 'rgba(150,210,255,' + (0.5 * oa).toFixed(3) + ')';
+    ctx.lineWidth = 2 + 3 * oa;
+    ctx.beginPath();
+    ctx.arc(cw / 2, ch / 2, rr, 0, 6.2832);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(190,160,255,' + (0.35 * oa).toFixed(3) + ')';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.arc(cw / 2, ch / 2, rr * 0.72, 0, 6.2832);
+    ctx.stroke();
+    ctx.restore();
   }
 
   /* ---------- 主循环 ---------- */
@@ -2650,20 +2991,34 @@ var SB = SBX;
   var fpsAcc = 0, fpsN = 0;
   var stepMs = 0.4;
   var farAchDone = false;
+
   function tickCamera(dt) {
     var panSpd = (dt * cv.width / cam.z) * 0.9;
     if (keys['ArrowLeft'] || keys['a']) { cam.x -= panSpd; zoomAnchor = null; }
     if (keys['ArrowRight'] || keys['d']) { cam.x += panSpd; zoomAnchor = null; }
-    if (keys['ArrowUp'] || keys['w']) { cam.y -= panSpd * (1 - 0.10 * dim); zoomAnchor = null; }
-    if (keys['ArrowDown'] || keys['s']) { cam.y += panSpd * (1 - 0.10 * dim); zoomAnchor = null; }
+    if (keys['ArrowUp'] || keys['w']) { cam.y -= panSpd; zoomAnchor = null; }
+    if (keys['ArrowDown'] || keys['s']) { cam.y += panSpd; zoomAnchor = null; }
     clampCam();
     stepZoom(dt);
-    if (Math.abs(dimT - dim) > 0.001) {
-      dim += (dimT - dim) * Math.min(1, dt * 2.4);
-      if (Math.abs(dimT - dim) < 0.008) dim = dimT;
-      SB.entities.dimSparkle(dimT > dim ? 1 : -1, dim);
+  }
+  function updateTransition(dt) {
+    if (m3Prog === m3Target) return;
+    var prev = m3Prog;
+    var dir = m3Target > m3Prog ? 1 : -1;
+    m3Prog = Math.max(0, Math.min(1, m3Prog + dir * dt / 1.1));
+    if (prev < 0.5 && m3Prog >= 0.5 && m3Target === 1 && !in3D()) {
+      w3.enter();
+      toast('🧊 潜入 3D 世界 · WASD 移动 / 鼠标看向 / 点击放置方块');
+    }
+    if (prev > 0.5 && m3Prog <= 0.5 && m3Target === 0 && in3D()) {
+      w3.exit();
+      toast('回到平面视野');
+    }
+    if (!in3D() && m3Prog > 0.06 && m3Prog < 0.5 && (frameCount & 3) === 0) {
+      SB.entities.dimSparkle(1, m3Prog);
     }
   }
+
   function loop(now) {
     requestAnimationFrame(loop);
     var rawDt = (now - last) / 1000;
@@ -2671,14 +3026,20 @@ var SB = SBX;
     if (rawDt <= 0) return;
     var dt = Math.min(0.05, rawDt);
     frameCount++;
-    /* 相机：键盘平移 + 平滑缩放 + 升降维过渡 */
-    tickCamera(dt);
-    /* 探索成就 */
-    if (!farAchDone && Math.abs(cam.x - 256) > 2000) {
-      farAchDone = true;
-      SB.ach && SB.ach('sandbox.far');
+    updateTransition(dt);
+    if (in3D()) {
+      w3.update(dt, keys);
+      if (!farAchDone && Math.abs(w3.cam.x - 256) > 2000) {
+        farAchDone = true;
+        SB.ach && SB.ach('sandbox.far');
+      }
+    } else {
+      tickCamera(dt);
+      if (!farAchDone && Math.abs(cam.x - 256) > 2000) {
+        farAchDone = true;
+        SB.ach && SB.ach('sandbox.far');
+      }
     }
-    /* 世界演化（自适应步进预算） */
     if (!paused) {
       var budget = Math.max(1, Math.min(speed, Math.floor(9 / Math.max(0.1, stepMs))));
       var t0 = performance.now();
@@ -2693,17 +3054,16 @@ var SB = SBX;
     } else {
       SB.entities.update(dt * 0.2);
     }
-    /* 远景钢球回收 */
-    var half = cv.width / (2 * cam.z);
+    var half = cv.width / (2 * (in3D() ? 4 : cam.z));
+    var focusX = in3D() ? w3.cam.x : cam.x;
     for (var i = SB.entities.boulders.length - 1; i >= 0; i--) {
-      if (Math.abs(SB.entities.boulders[i].x - cam.x) > half + 900) SB.entities.boulders.splice(i, 1);
+      if (Math.abs(SB.entities.boulders[i].x - focusX) > half + 900) SB.entities.boulders.splice(i, 1);
     }
     renderFrame();
-    /* FPS / 坐标 */
     fpsAcc += rawDt; fpsN++;
     if (fpsAcc > 0.5) {
       var fps = Math.round(fpsN / fpsAcc);
-      fpsEl.textContent = fps + ' FPS · x ' + Math.round(cam.x) + (speed > 1 ? ' · ×' + speed : '');
+      fpsEl.textContent = fps + ' FPS · x ' + Math.round(in3D() ? w3.cam.x : cam.x) + (in3D() ? ' · 3D' : (speed > 1 ? ' · ×' + speed : ''));
       fpsAcc = 0; fpsN = 0;
     }
   }
@@ -2742,7 +3102,6 @@ var SB = SBX;
     setBrush: function (b) { brush = b; },
     setType: function (t) { cur.tool = null; cur.type = t; syncPal(); },
     setTool: function (t) { cur.tool = t; syncPal(); },
-    /* 相机 / 视角 / 倍速 */
     cam: function () { return { x: cam.x, y: cam.y, z: cam.z, tz: cam.tz }; },
     setCam: function (x, y, z) {
       if (x !== undefined) cam.x = x;
@@ -2756,24 +3115,48 @@ var SB = SBX;
     zoomBy: function (f) { zoomAt(cv.width / 2, cv.height / 2, f); },
     panBy: panBy,
     zoomRange: function () { return { min: zMin(), max: zMin() * 8 }; },
-    dim: function () { return dim; },
-    dimState: function () { return { dim: dim, dimT: dimT }; },
-    /* 手动推进相机/过渡动画（测试用，不依赖 rAF） */
+    dim: function () { return m3Prog; },
+    dimState: function () { return { dim: m3Prog, dimT: m3Target }; },
     advance: function (ms) {
-      var total = Math.min(2, (ms || 160) / 1000);
+      var total = Math.min(2.4, (ms || 160) / 1000);
       var steps = 20;
-      for (var i = 0; i < steps; i++) tickCamera(total / steps);
-      return { dim: dim, dimT: dimT, cam: { x: cam.x, z: cam.z } };
+      for (var i = 0; i < steps; i++) {
+        updateTransition(total / steps);
+        if (!in3D()) tickCamera(total / steps);
+      }
+      return { dim: m3Prog, dimT: m3Target, cam: { x: cam.x, z: cam.z } };
     },
     clearFx: function () { SB.fx.clear(); },
-    setDim: function (v) { dimT = v ? 1 : 0; if (dimT) SB.ach && SB.ach('sandbox.dim3d'); },
+    setDim: function (v) {
+      m3Target = v ? 1 : 0;
+      btnDim.classList.toggle('on', m3Target === 1);
+      btnDim.querySelector('.lbl').textContent = m3Target === 1 ? '回到平面' : '3D 世界';
+    },
     toggleDim: toggleDim,
     speed: function () { return speed; },
-    setSpeed: function (v) { speed = v; spdIdx = Math.max(0, SPEEDS.indexOf(v)); spdLbl.textContent = '×' + speed; if (speed >= 16) SB.ach && SB.ach('sandbox.speed'); },
+    setSpeed: function (v) { speed = v; spdIdx = Math.max(0, SPEEDS.indexOf(v)); spdLbl.textContent = '×' + speed; btnSpeedEl.classList.toggle('on', speed > 1); if (speed >= 16) SB.ach && SB.ach('sandbox.speed'); },
+    /* 3D 世界钩子 */
+    mode3d: function () { return !!(w3 && w3.active); },
+    w3cam: function () { return w3.camInfo(); },
+    w3set: function (x, y, z) { return w3.setCam(x, y, z); },
+    w3look: function (yaw, pitch) { return w3.setLook(yaw, pitch); },
+    w3step: function (dt, kobj) {
+      var kk = {};
+      if (kobj) for (var key in kobj) kk[key] = kobj[key];
+      if (w3.active) w3.update(dt || 1 / 60, kk);
+      return w3.camInfo();
+    },
+    w3hit: function () { return w3.centerHit(); },
+    w3paint: function () { return w3.paintAtCrosshair(); },
+    w3beam: function () { return !!w3.fireViewBeam(0); },
     sampleView: function (x, y) {
       var lx = Math.round(x - SB.winX0), ly = Math.round(y);
       if (lx < 0 || lx >= W || ly < 0 || ly >= H) return null;
       var d = SB.worldCanvas.getContext('2d').getImageData(lx, ly, 1, 1).data;
+      return [d[0], d[1], d[2], d[3]];
+    },
+    sampleCanvas: function (x, y) {
+      var d = ctx.getImageData(Math.round(x), Math.round(y), 1, 1).data;
       return [d[0], d[1], d[2], d[3]];
     },
     view: view,
@@ -2840,7 +3223,8 @@ var SB = SBX;
     { id: 'sandbox.firework', em: '🎆', name: '烟花师', desc: '让烟花在空中炸开' },
     { id: 'sandbox.aurora', em: '🌀', name: '搅动星海', desc: '亲手把天空搅出漩涡' },
     { id: 'sandbox.star', em: '🛸', name: '星域来客', desc: '目击星域舰队过境' },
-    { id: 'sandbox.dim3d', em: '🧊', name: '升维者', desc: '切到立体视角，让世界立起来' },
+    { id: 'sandbox.dim3d', em: '🧊', name: '升维者', desc: '飞进 3D 世界看一看' },
+    { id: 'sandbox.block3d', em: '🧱', name: '空中造物', desc: '在 3D 世界里放置方块' },
     { id: 'sandbox.far', em: '🧭', name: '星海拓荒', desc: '向远方探索超过 2000 格' },
     { id: 'sandbox.speed', em: '⏩', name: '快进人生', desc: '把世界开到 16 倍速' },
     { id: 'sandbox.gravity', em: '🙃', name: '重力反转', desc: '触发了藏在沙盒里的老秘技', hidden: true }
