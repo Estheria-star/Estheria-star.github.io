@@ -554,6 +554,45 @@
     g.globalAlpha = 1;
     g.globalCompositeOperation = 'source-over';
     g.restore();
+    /* —— 🔮 ARG：月光星云（种子 1818 的记号） —— */
+    try {
+      if (seed === 1818) {
+        var agx = -10011, agy = 2845;
+        /* 与页面 worldAt 口径一致：世界 X 的屏幕位置（物理像素） */
+        var dprR = W2 / window.innerWidth;
+        var asx = (agx * dprR - W2 / 2) * s + v.x + W2 / 2;
+        var asy = (agy * dprR - H2 / 2) * s + v.y + H2 / 2;
+        var arad = Math.max(46, 90 * s);
+        if (asx > -arad * 3 && asx < W2 + arad * 3 && asy > -arad * 3 && asy < H2 + arad * 3) {
+          g.save();
+          g.globalCompositeOperation = 'lighter';
+          var ag2 = g.createRadialGradient(asx, asy, 1, asx, asy, arad);
+          ag2.addColorStop(0, 'rgba(238,244,255,.95)');
+          ag2.addColorStop(0.25, 'rgba(198,214,240,.5)');
+          ag2.addColorStop(0.6, 'rgba(150,170,220,.16)');
+          ag2.addColorStop(1, 'rgba(150,170,220,0)');
+          g.fillStyle = ag2;
+          g.fillRect(asx - arad, asy - arad, arad * 2, arad * 2);
+          /* 月相 */
+          var mr = Math.max(5, 11 * Math.min(1.6, Math.max(0.55, s)));
+          g.fillStyle = '#eef4ff';
+          g.beginPath(); g.arc(asx, asy, mr, 0, 6.2832); g.fill();
+          g.fillStyle = '#0a0f26';
+          g.beginPath(); g.arc(asx + mr * 0.42, asy - mr * 0.3, mr * 0.92, 0, 6.2832); g.fill();
+          /* 字母 E */
+          g.fillStyle = 'rgba(238,244,255,.94)';
+          g.font = '800 ' + Math.max(13, Math.min(30, 20 * s)) + 'px system-ui,sans-serif';
+          g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText('E', asx, asy + arad * 0.58);
+          /* 呼吸环 */
+          var apul = 1 + 0.12 * Math.sin(T * 2.2);
+          g.strokeStyle = 'rgba(198,214,240,.5)';
+          g.lineWidth = Math.max(1.2, 1.6 / s);
+          g.beginPath(); g.arc(asx, asy, Math.max(15, 26 * s) * apul, 0, 6.2832); g.stroke();
+          g.restore();
+        }
+      }
+    } catch (eA) {}
     lastStats.drawn = drawn;
     lastStats.ms = performance.now() - t0;
   }
@@ -657,6 +696,21 @@
   var pinchBase = null;
   cv.addEventListener('pointerdown', function (e) {
     e.preventDefault();
+    /* —— 🔮 ARG：点到月光星云即收集日志 1 —— */
+    try {
+      if (curSeed === 1818) {
+        var cwx = (e.clientX - W / 2 - view.x) / view.s + W / 2;
+        var cwy = (e.clientY - H / 2 - view.y) / view.s + H / 2;
+        var cdist = Math.hypot(cwx - (-10011), cwy - 2845) * view.s;
+        if (cdist < Math.max(70, 130 * view.s)) {
+          if (window.ARG && ARG.collect('log1')) {
+            ARG.toast && ARG.toast('📜 找到一篇日志 · 星空（一个字母：E）');
+          } else if (window.ARG) {
+            ARG.toast && ARG.toast('记号还在（这篇日志已经收过了）');
+          }
+        }
+      }
+    } catch (eA) {}
     zt.active = false;   /* 抓取操作打断平滑缩放（符合直觉：手接管） */
     try { cv.setPointerCapture(e.pointerId); } catch (er) {}
     ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -821,6 +875,60 @@
   displaySeed();
   fit();
   if (isFinite(s) && s > 0) toast('复活了星空 #' + String(curSeed).padStart(4, '0'));
+})();
+</script>
+
+<script>
+/* ============================================================
+   🔮 ARG · 精简进度机（星空站）2026-10-03
+   与主页共用 st_arg（cookie .startian.top + localStorage 兜底）
+   ============================================================ */
+(function () {
+  'use strict';
+  var KEY = 'st_arg';
+  if (window.ARG && window.ARG.collect) return;   /* 主页已注入时复用 */
+  function readState() {
+    var raw = null;
+    try { var m = document.cookie.match(/(?:^|;\s*)st_arg=([^;]*)/); if (m) raw = decodeURIComponent(m[1]); } catch (e) {}
+    if (!raw) { try { raw = localStorage.getItem(KEY); } catch (e) {} }
+    try { var d = JSON.parse(raw || '{}'); if (!d || typeof d !== 'object') d = {}; if (!Array.isArray(d.logs)) d.logs = []; return d; }
+    catch (e) { return { logs: [] }; }
+  }
+  var state = readState();
+  function save() {
+    var raw = JSON.stringify(state);
+    try { localStorage.setItem(KEY, raw); } catch (e) {}
+    try {
+      var v = encodeURIComponent(raw);
+      if (v.length < 3800) document.cookie = 'st_arg=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+    } catch (e) {}
+  }
+  var toastTimer = 0;
+  window.ARG = {
+    has: function (id) { return state.logs.indexOf(id) >= 0; },
+    count: function () { return state.logs.length; },
+    collect: function (id) {
+      if (state.logs.indexOf(id) >= 0) return false;
+      state.logs.push(id); save();
+      this.toast('📜 找到一篇日志（去主页头像连点 7 下看全文）');
+      return true;
+    },
+    toast: function (msg) {
+      try {
+        var el = document.getElementById('__arg_toast');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = '__arg_toast';
+          el.style.cssText = 'position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9994;background:rgba(12,17,32,.96);color:#eef4ff;border:1px solid rgba(198,214,240,.4);border-radius:999px;padding:12px 24px;font:700 13px/1.5 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.5);transition:all .45s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:88vw;text-align:center';
+          document.body.appendChild(el);
+        }
+        el.textContent = msg;
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { el.style.opacity = '0'; el.style.transform = 'translateX(-50%) translateY(16px)'; }, 3000);
+      } catch (e) {}
+    }
+  };
 })();
 </script>
 </body>
