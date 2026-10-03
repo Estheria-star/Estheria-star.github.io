@@ -1129,6 +1129,62 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
   .loadbar{display:none}
   .js .reveal{opacity:1; transform:none}
 }
+
+/* ============================================================
+   🔮 ARG · 月光终端（隐藏层）2026-10-03
+   ============================================================ */
+.arg-veil{position:fixed;inset:0;z-index:9990;background:rgba(4,7,15,.84);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;padding:18px}
+.arg-veil.show{display:flex;animation:argIn .45s ease both}
+@keyframes argIn{from{opacity:0}to{opacity:1}}
+.arg-panel{width:min(620px,94vw);max-height:88vh;overflow:auto;border-radius:22px;padding:26px 28px 22px;background:linear-gradient(180deg,rgba(17,21,38,.98),rgba(9,12,24,.99));border:1px solid rgba(198,214,240,.26);box-shadow:0 30px 90px rgba(0,0,0,.62),0 0 70px rgba(170,190,230,.07);color:#dbe4f5;position:relative;animation:argPanel .5s cubic-bezier(.2,.85,.3,1.05) both}
+@keyframes argPanel{from{transform:translateY(14px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+.arg-panel::before{content:"";position:absolute;inset:0 0 auto 0;height:120px;border-radius:22px 22px 0 0;background:radial-gradient(120% 100% at 50% 0%,rgba(198,214,240,.10),transparent 70%);pointer-events:none}
+.arg-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.arg-moon{width:34px;height:34px;flex:0 0 auto;filter:drop-shadow(0 0 8px rgba(198,214,240,.4))}
+.arg-title{font-size:15.5px;font-weight:800;letter-spacing:.6px;color:#eef4ff}
+.arg-sub{font-size:10.5px;color:#7d8cb0;letter-spacing:2.2px;margin-top:2px}
+.arg-close{margin-left:auto;background:transparent;border:1px solid rgba(198,214,240,.22);color:#9fb0d0;width:32px;height:32px;border-radius:10px;cursor:pointer;font-size:14px;font-family:inherit}
+.arg-close:hover{border-color:rgba(198,214,240,.5);color:#eef4ff}
+.arg-intro{font-size:12.5px;line-height:2;color:#aab8d8;border-left:2px solid rgba(198,214,240,.24);padding:2px 0 2px 14px;margin:6px 0 18px}
+.arg-intro div{opacity:0;animation:argLine .5s ease forwards}
+@keyframes argLine{to{opacity:1}}
+.arg-slots{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+@media (max-width:560px){.arg-slots{grid-template-columns:1fr}}
+.arg-slot{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid rgba(198,214,240,.18);border-radius:14px;background:rgba(198,214,240,.03);cursor:default;transition:border-color .2s,transform .2s,background .2s;min-height:44px}
+.arg-slot.on{cursor:pointer}
+.arg-slot.on:hover{border-color:rgba(198,214,240,.5);background:rgba(198,214,240,.07);transform:translateY(-1px)}
+.arg-slot.off{opacity:.42}
+.arg-slotno{font:700 11px/1 ui-monospace,Consolas,monospace;color:#7d8cb0}
+.arg-slott{font-size:12.5px;font-weight:700;color:#dbe4f5}
+.arg-slotL{margin-left:auto;font:800 13px/1 ui-monospace,Consolas,monospace;color:#eef4ff;background:rgba(198,214,240,.12);border:1px solid rgba(198,214,240,.3);border-radius:8px;padding:4px 8px}
+.arg-body{display:none;grid-column:1/-1;font-size:12.5px;line-height:2.05;color:#b8c6e2;border-left:2px solid rgba(198,214,240,.3);padding:4px 0 6px 14px;white-space:pre-line}
+.arg-slot.open + .arg-body{display:block}
+.arg-code{margin-top:20px;border-top:1px dashed rgba(198,214,240,.18);padding-top:16px}
+.arg-codehint{font-size:11.5px;color:#7d8cb0;margin-bottom:10px;letter-spacing:1px}
+.arg-cells{display:flex;gap:7px;margin-bottom:12px}
+.arg-cell{width:38px;height:46px;border-radius:11px;border:1px solid rgba(198,214,240,.2);background:rgba(198,214,240,.03);display:flex;align-items:center;justify-content:center;font:800 17px/1 ui-monospace,Consolas,monospace;color:#eef4ff;transition:all .3s}
+.arg-cell.got{border-color:rgba(198,214,240,.55);box-shadow:0 0 14px rgba(198,214,240,.18);background:rgba(198,214,240,.09)}
+@media (max-width:560px){.arg-cell{width:31px;height:40px;font-size:14px}}
+.arg-io{display:flex;gap:9px}
+.arg-input{flex:1;background:rgba(6,9,18,.8);border:1px solid rgba(198,214,240,.24);border-radius:12px;color:#eef4ff;font:600 13.5px/1 ui-monospace,Consolas,monospace;letter-spacing:4px;padding:12px 14px;outline:none;min-width:0;text-transform:uppercase}
+.arg-input:focus{border-color:rgba(198,214,240,.55)}
+.arg-input::placeholder{letter-spacing:1px;color:#5d6c8f;text-transform:none}
+.arg-go{border:1px solid rgba(198,214,240,.4);background:rgba(198,214,240,.1);color:#eef4ff;font:700 13px/1 inherit;font-family:inherit;border-radius:12px;padding:0 18px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.arg-go:hover{background:rgba(198,214,240,.2)}
+.arg-go:disabled{opacity:.35;cursor:not-allowed}
+.arg-msg{font-size:12px;color:#9fb0d0;margin-top:10px;min-height:17px}
+.arg-msg.bad{color:#ff9d9d}
+.arg-msg.good{color:#bfe8c8}
+.arg-reset{margin-top:16px;background:transparent;border:0;color:#5d6c8f;font:600 11px/1 inherit;font-family:inherit;cursor:pointer;padding:4px 0;text-decoration:underline dotted}
+.arg-reset:hover{color:#9fb0d0}
+/* 终章信 */
+.arg-letter{font-size:13.5px;line-height:2.3;color:#cfd9ee;white-space:pre-line;padding:8px 2px 4px}
+.arg-letter b{color:#eef4ff}
+.arg-endtitle{font-size:18px;font-weight:800;color:#eef4ff;letter-spacing:1px;margin:2px 0 14px;display:flex;align-items:center;gap:10px}
+/* 连点头像的星屑 */
+.arg-spark{position:fixed;width:10px;height:10px;border-radius:50%;pointer-events:none;z-index:9989;background:radial-gradient(circle,#fff,#c6d6f0 60%,transparent 72%);animation:argSpark .7s ease-out forwards}
+@keyframes argSpark{from{transform:translate(-50%,-50%) scale(.4);opacity:1}to{transform:translate(-50%,-140%) scale(1.5);opacity:0}}
+.hero .avatar{cursor:pointer}
 </style>
 </head>
 <body>
@@ -1475,6 +1531,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     <div class="about reveal" style="--d:.1s">
       <p>你好呀，我是星恬 ✨ 喜欢下棋、写点小东西、捣鼓各种有趣的玩意。这个小站里的每一件作品，从会学习的五子棋 AI 到几何教学工作台，都是自己一点点折腾出来的。</p>
       <p>平时也喜欢和 AI 小伙伴一起做实验 —— 有什么好玩的点子，欢迎来聊～</p>
+      <p style="font-size:12.5px;color:var(--ink3,#8896b0);opacity:.85">（对了，头像里有东西，点一下，再点一下，别停）</p>
       <div class="chips">
         <span class="chip">♟ 五子棋重度爱好者</span>
         <span class="chip">📐 数学可视化</span>
@@ -2799,6 +2856,228 @@ window.__checkSecretZone = checkSecretZone;
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
   });
   apply();
+})();
+</script>
+<script>
+/* ============================================================
+   🔮 ARG · 进度机 + 月光终端（2026-10-03）
+   入口：连点头像 7 下 · 密码：八个字母（由日志 1-8 收集）
+   ============================================================ */
+(function () {
+  'use strict';
+  /* ---------- 进度机：st_arg（cookie .startian.top + localStorage 兜底） ---------- */
+  var KEY = 'st_arg';
+  function readState() {
+    var raw = null;
+    try { var m = document.cookie.match(/(?:^|;\s*)st_arg=([^;]*)/); if (m) raw = decodeURIComponent(m[1]); } catch (e) {}
+    if (!raw) { try { raw = localStorage.getItem(KEY); } catch (e) {} }
+    try { var d = JSON.parse(raw || '{}'); if (!d || typeof d !== 'object') d = {}; if (!Array.isArray(d.logs)) d.logs = []; return d; }
+    catch (e) { return { logs: [] }; }
+  }
+  var state = readState();
+  function save() {
+    var raw = JSON.stringify(state);
+    try { localStorage.setItem(KEY, raw); } catch (e) {}
+    try {
+      var v = encodeURIComponent(raw);
+      if (v.length < 3800) document.cookie = 'st_arg=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+    } catch (e) {}
+  }
+
+  /* ---------- 文案 ---------- */
+  var LOGS = [
+    { id: 'log1', t: '星空', L: 'E', lines: '星空是我做得最上头的\n本来只想当个背景，写着写着就贪心了，干脆做成无限的，往哪拖都有新星星\n半夜验证「拖不到头」的时候，一直拖一直有新东西，挺开心的\n给你个 E，先攒着\n对了，星图上有十五颗星，我只公开了十四颗' },
+    { id: 'log2', t: '地图', L: 'S', lines: '地图是给这堆东西做的目录\n工具一多，我自己都找不到（笑）\n星星连线那个功能我挺喜欢的，谁跟谁是一路的，一眼就能看出来\nS，给你\n下一站在棋盘，棋路是照着星星画的' },
+    { id: 'log3', t: '五子棋', L: 'T', lines: '五子棋是站里最沉的家伙，引擎比我会下\n它叫灵拙，有时候会说怪话，别慌\n要是它在不该停的地方停下来……那不是 bug，是我留的话\nT\n接下来去几何工坊，有个式子，画出来你会懂' },
+    { id: 'log4', t: '几何工坊', L: 'H', lines: '几何工坊是我最不敢马虎的，数学这东西骗不了人\n支持极坐标那天，我随手画了 r=1-sinθ，出来是个心形，盯着看了半天\nH\n去听听函数的声音' },
+    { id: 'log5', t: '函数音乐', L: 'E', lines: '函数音乐是突然冒出来的点子，函数能画图，那能不能出声\n真的可以\n正弦是纯音，方波一股游戏机味儿，我拿它当过一阵铃声\n第二个 E，答案里本来就有俩\n去配色实验室，深夜的蓝配月光，那组我挺满意' },
+    { id: 'log6', t: '配色实验室', L: 'R', lines: '配色实验室是熬夜熬出来的，眼睛先受不了了才写的它\n现在别的项目都从这儿拿颜色，星空的深蓝就是这儿挑的\nR\n去生命游戏，养一缸安静的小细胞' },
+    { id: 'log7', t: '生命游戏', L: 'I', lines: '生命游戏玩了一下午\n撒几个点，看它自己长，长着长着炸开，过会儿又活过来\n像养了一缸看不见的鱼\nI\n去错题本，它本来是给我自己做的' },
+    { id: 'log8', t: '错题本', L: 'A', lines: '错题本是真给自己做的，后来发现大家都在用\n学习这事没捷径，就是记下来反复看\n最后一片，A\n八个字母齐了吗，齐了就去最开始的地方交答案\n还没齐的话，有个地方一直卡在 99%，它在等人' },
+    { id: 'log9', t: '假加载页', L: '', lines: '做假加载页，是因为以前真有个页面卡在 99%，我盯着它看了一分钟，气笑了，就纪念它一下（笑）\n谢谢你陪它把话说完\n最后去沙盒，它是我最贪心的一个，想做的都塞进去了\n（对了，左上角那颗星球，按久一点）' },
+    { id: 'log10', t: '万物沙盒', L: '', lines: '万物沙盒，最新的一件\n我把这几年想到的都塞进去了，还是觉得不够\n你看到这里的时候，它应该已经完整了\n做完没人玩的话，大概会瘪掉吧（笑）\n谢谢你把它拼好' }
+  ];
+  var PASSWORD = 'estheria';
+
+  var ARG = window.ARG = {
+    has: function (id) { return state.logs.indexOf(id) >= 0; },
+    count: function () { return state.logs.length; },
+    done: function () { return !!state.done; },
+    collect: function (id) {
+      if (state.logs.indexOf(id) >= 0) return false;
+      state.logs.push(id); save(); banner(id);
+      return true;
+    },
+    setDone: function () { state.done = 1; save(); },
+    reset: function () { state = { logs: [] }; save(); },
+    logs: function () { return state.logs.slice(); }
+  };
+  window.__ARG = ARG;
+  function logById(id) { for (var i = 0; i < LOGS.length; i++) if (LOGS[i].id === id) return LOGS[i]; return null; }
+
+  /* ---------- 收集横幅 ---------- */
+  function banner(id) {
+    var lg = logById(id);
+    try {
+      var el = document.createElement('div');
+      el.style.cssText = 'position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9994;background:rgba(12,17,32,.96);color:#eef4ff;border:1px solid rgba(198,214,240,.4);border-radius:999px;padding:12px 24px;font:700 13px/1.5 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.5),0 0 30px rgba(198,214,240,.12);transition:all .45s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:88vw;text-align:center';
+      el.innerHTML = '📜 找到一篇日志' + (lg ? ' · ' + lg.t + (lg.L ? ' <b style="color:#fff">（一个字母：' + lg.L + '）</b>' : '') : '');
+      document.body.appendChild(el);
+      requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+      setTimeout(function () {
+        el.style.opacity = '0'; el.style.transform = 'translateX(-50%) translateY(16px)';
+        setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 600);
+      }, 3200);
+    } catch (e) {}
+  }
+
+  /* ---------- 月光终端 ---------- */
+  var veil = null, introDone = false;
+  function build() {
+    if (veil) return;
+    veil = document.createElement('div');
+    veil.className = 'arg-veil';
+    veil.innerHTML = [
+      '<div class="arg-panel">',
+      '<div class="arg-head">',
+      '<svg class="arg-moon" viewBox="0 0 44 44"><circle cx="22" cy="22" r="17" fill="none" stroke="rgba(198,214,240,.5)" stroke-width="1.4"/><path d="M27 8a17 17 0 1 0 8 19 13 13 0 1 1-8-19z" fill="#dbe4f5" opacity=".92"/></svg>',
+      '<div><div class="arg-title">星恬的终端</div><div class="arg-sub">STARTIAN TERMINAL</div></div>',
+      '<button class="arg-close" id="argClose" aria-label="关闭">✕</button>',
+      '</div>',
+      '<div class="arg-intro" id="argIntro"></div>',
+      '<div class="arg-slots" id="argSlots"></div>',
+      '<div class="arg-code">',
+      '<div class="arg-codehint" id="argCodeHint">把八个字母交给它</div>',
+      '<div class="arg-cells" id="argCells"></div>',
+      '<div class="arg-io"><input class="arg-input" id="argInput" maxlength="8" autocomplete="off" spellcheck="false" placeholder="输入密码…"><button class="arg-go" id="argGo">交付</button></div>',
+      '<div class="arg-msg" id="argMsg"></div>',
+      '</div>',
+      '<button class="arg-reset" id="argReset">重启终端（进度会清零，真的吗）</button>',
+      '</div>'
+    ].join('');
+    document.body.appendChild(veil);
+    veil.addEventListener('click', function (e) { if (e.target === veil) close(); });
+    document.getElementById('argClose').addEventListener('click', close);
+    document.getElementById('argSlots').addEventListener('click', function (e) {
+      var slot = e.target.closest ? e.target.closest('.arg-slot') : null;
+      if (!slot || !slot.classList.contains('on')) return;
+      slot.classList.toggle('open');
+    });
+    document.getElementById('argGo').addEventListener('click', trySubmit);
+    document.getElementById('argInput').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') trySubmit();
+    });
+    document.getElementById('argReset').addEventListener('click', function () {
+      ARG.reset();
+      var msg = document.getElementById('argMsg');
+      msg.className = 'arg-msg'; msg.textContent = '终端已重启';
+      renderSlots(); renderCells();
+    });
+  }
+  var INTRO_LINES = ['哦，是你', '能摸到这里的没几个', '说正事，我做的小东西每个背后都留了一篇日志，找着就会亮起来，一共十篇，前面八篇里各夹着一个字母，按顺序收好，最后要用', '第一篇在星空里，种子 1818，慢慢拖，有个地方我做了记号', '（卡住了就回来按提示）'];
+  function renderIntro() {
+    var box = document.getElementById('argIntro');
+    if (!box) return;
+    if (introDone) { box.innerHTML = ''; box.style.display = 'none'; return; }
+    box.innerHTML = INTRO_LINES.map(function (t, i) {
+      return '<div style="animation-delay:' + (i * 0.55 + 0.2) + 's">' + t + '</div>';
+    }).join('');
+    setTimeout(function () { introDone = true; try { localStorage.setItem('st_arg_seen', '1'); } catch (e) {} }, INTRO_LINES.length * 550 + 2200);
+  }
+  function renderSlots() {
+    var box = document.getElementById('argSlots');
+    if (!box) return;
+    var html = '';
+    for (var i = 0; i < LOGS.length; i++) {
+      var lg = LOGS[i], has = ARG.has(lg.id);
+      html += '<div class="arg-slot' + (has ? ' on' : ' off') + '" data-log="' + lg.id + '">' +
+        '<span class="arg-slotno">' + ('0' + (i + 1)).slice(-2) + '</span>' +
+        '<span class="arg-slott">' + (has ? lg.t : '— 信号缺失 —') + '</span>' +
+        (has && lg.L ? '<span class="arg-slotL">' + lg.L + '</span>' : '') +
+        '</div><div class="arg-body">' + (has ? lg.lines : '') + '</div>';
+    }
+    box.innerHTML = html;
+  }
+  function collectedLetters() {
+    var out = '';
+    for (var i = 0; i < 8; i++) if (ARG.has('log' + (i + 1))) out += LOGS[i].L;
+    return out;
+  }
+  function renderCells() {
+    var box = document.getElementById('argCells');
+    var hint = document.getElementById('argCodeHint');
+    var inp = document.getElementById('argInput');
+    var go = document.getElementById('argGo');
+    if (!box) return;
+    var letters = collectedLetters();
+    var html = '';
+    for (var i = 0; i < 8; i++) {
+      var got = i < letters.length;
+      html += '<div class="arg-cell' + (got ? ' got' : '') + '">' + (got ? letters[i] : '·') + '</div>';
+    }
+    box.innerHTML = html;
+    var all = letters.length === 8;
+    if (hint) hint.textContent = all ? '八个字母都回来了' : '把八个字母交给它（还差 ' + (8 - letters.length) + ' 个）';
+    if (inp) inp.disabled = !all;
+    if (go) go.disabled = !all;
+  }
+  function trySubmit() {
+    var inp = document.getElementById('argInput');
+    var msg = document.getElementById('argMsg');
+    if (!inp || collectedLetters().length < 8) return;
+    var v = (inp.value || '').trim().toLowerCase().replace(/[^a-z]/g, '');
+    if (v === PASSWORD) { showFinale(); return; }
+    msg.className = 'arg-msg bad';
+    msg.textContent = '不对，再想想';
+    inp.value = '';
+  }
+  function showFinale() {
+    ARG.setDone();
+    var panel = veil.querySelector('.arg-panel');
+    panel.innerHTML = [
+      '<div class="arg-endtitle">🌙 终章</div>',
+      '<div class="arg-letter">八个字母，一个都没错\n\n看来这个小站的里子被你翻遍了\n\n这个站没什么大目标，就是想把自己觉得好玩的东西都做一遍，摆在同一个地方\n\n<b>欢迎来到我的宇宙，谢谢你玩到这里</b>\n\n——星恬</div>',
+      '<div class="arg-msg good" style="margin-top:14px">🌌 星夜已为你点亮（在右上角配色面板里）· 去「万物沙盒」看看世界完整的样子吧</div>',
+      '<button class="arg-go" id="argEndClose" style="margin-top:14px">合上终端</button>'
+    ].join('');
+    document.getElementById('argEndClose').addEventListener('click', close);
+    try { unlockStarry(); } catch (e) {}
+    setTimeout(function () {
+      try { var b = document.getElementById('tkStarryBtn'); if (b) b.click(); } catch (e) {}
+    }, 900);
+  }
+  function open() {
+    build();
+    renderIntro(); renderSlots(); renderCells();
+    veil.classList.add('show');
+    var inp = document.getElementById('argInput');
+    if (inp && !inp.disabled) setTimeout(function () { inp.focus(); }, 350);
+  }
+  function close() { if (veil) veil.classList.remove('show'); }
+
+  /* ---------- 连点头像 7 下 ---------- */
+  var taps = 0, tapT = 0;
+  var av = document.querySelector('.hero .avatar');
+  if (av) {
+    av.setAttribute('title', '');
+    av.addEventListener('click', function (e) {
+      var now = Date.now();
+      if (now - tapT > 1500) taps = 0;
+      tapT = now; taps++;
+      spark(e.clientX, e.clientY);
+      if (taps >= 7) { taps = 0; open(); }
+    });
+  }
+  function spark(x, y) {
+    var s = document.createElement('div');
+    s.className = 'arg-spark';
+    s.style.left = x + 'px'; s.style.top = y + 'px';
+    document.body.appendChild(s);
+    setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 720);
+  }
+
+  /* ---------- 测试钩子 ---------- */
+  window.__ARGT = { open: open, close: close, render: function () { renderSlots(); renderCells(); }, collect: ARG.collect };
 })();
 </script>
 </body>
