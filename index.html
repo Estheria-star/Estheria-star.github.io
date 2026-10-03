@@ -2610,9 +2610,12 @@ window.__checkSecretZone = checkSecretZone;
 </script>
 
 <script>
-/* —— 留言箱：提交到 FormSubmit（免费转发服务），内容直达邮箱 —— */
+/* —— 留言箱：提交到 FormSubmit（免费转发服务），内容直达邮箱 ——
+   注：地址用 FormSubmit 下发的随机字符串马甲（非裸邮箱），
+       避免邮箱出现在页面源码里被垃圾机器人采集；马甲与
+       2433165914@qq.com 指向同一表单，效果完全一致 */
 (function () {
-  var ENDPOINT = 'https://formsubmit.co/ajax/2433165914@qq.com';
+  var ENDPOINT = 'https://formsubmit.co/ajax/edc8a3cb852fe46dc4bdabaa56b0f18d';
   var form = document.getElementById('fbForm');
   if (!form) return;
   var typesEl = document.getElementById('fbTypes');
@@ -2700,6 +2703,13 @@ window.__checkSecretZone = checkSecretZone;
     }).then(function (j) {
       busy = false; btn.disabled = false;
       if (j && (j.success === 'true' || j.success === true)) { finishOk(); }
+      else if (j && typeof j.message === 'string' && /activat/i.test(j.message)) {
+        /* 留言箱首次启用：激活邮件已发给站长，对访客保持温和提示 */
+        btn.classList.add('done'); btnT.textContent = '已提交 ✓';
+        setStatus('留言已提交 ✓ 这是留言箱首次启用，正在等待站长确认，很快就能直达啦。谢谢你 🌙', 'ok');
+        msgEl.value = '';
+        setTimeout(function () { btn.classList.remove('done'); btnT.textContent = '发送 ✈'; }, 3600);
+      }
       else { btnT.textContent = '发送 ✈'; finishErr('服务返回异常'); }
     }).catch(function (err) {
       if (timer) clearTimeout(timer);
