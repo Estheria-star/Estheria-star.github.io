@@ -57,7 +57,16 @@ body{
   backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
   position:relative; z-index:30;
 }
-.tb-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;min-width:0}
+.tb-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;min-width:0;-webkit-touch-callout:none;user-select:none;touch-action:manipulation}
+/* 长按蓄力（隐藏入口的仪式感）：星球随着按住时间长大、发光 */
+.tb-logo.charging .tb-planet{animation:planetCharge 1.6s ease-in forwards}
+@keyframes planetCharge{
+  0%{transform:scale(1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.18), 0 4px 14px rgba(126,87,194,.4)}
+  60%{transform:scale(1.14);box-shadow:inset 0 0 0 1px rgba(255,255,255,.4), 0 0 20px rgba(167,139,250,.75)}
+  100%{transform:scale(1.26);box-shadow:inset 0 0 0 1px rgba(255,255,255,.55), 0 0 34px rgba(190,160,255,.95)}
+}
+.tb-logo.charging{filter:brightness(1.18)}
+.tb-logo.charging .tb-title{color:#cfe0ff}
 .tb-planet{
   width:34px;height:34px;border-radius:12px;flex:0 0 auto;position:relative;overflow:hidden;
   background:radial-gradient(circle at 32% 30%, #fff2c9 0 10%, #f0b45c 11% 22%, #7e57c2 23% 60%, #2b1e50 61% 100%);
@@ -256,7 +265,7 @@ body{
 <body>
 <div class="app">
   <header class="topbar">
-    <a class="tb-logo" href="https://startian.top/" title="返回星恬的小站">
+    <a class="tb-logo" href="https://startian.top/" title="返回星恬的小站" draggable="false">
       <span class="tb-planet"></span>
       <span>
         <span class="tb-title">万物沙盒</span>
@@ -266,7 +275,6 @@ body{
     <div class="tb-actions">
       <button class="tbtn" id="btnPause" title="暂停 / 继续世界演化"><span class="dot"></span><span class="lbl">暂停</span></button>
       <button class="tbtn" id="btnSpeed" title="世界速度倍率（×1 ~ ×16）">⏩<span class="lbl" id="spdLbl">×1</span></button>
-      <button class="tbtn" id="btnDim" title="进入 / 离开 3D 世界（快捷键 V）">🧊<span class="lbl">3D 世界</span></button>
       <button class="tbtn" id="btnClear" title="清空整个世界">🧹<span class="lbl">清空</span></button>
       <button class="tbtn" id="btnNew" title="重新生成地形与星空">🎲<span class="lbl">新世界</span></button>
       <button class="tbtn" id="btnShot" title="把当前世界导出为 PNG 照片">📷<span class="lbl">光之相机</span></button>
@@ -278,7 +286,7 @@ body{
 
   <main class="stage" id="stage">
     <canvas id="cv"></canvas>
-    <div class="stage-hint" id="hint">按住拖动就能玩 · V 键潜入 3D 世界 · 天空可以被搅动</div>
+    <div class="stage-hint" id="hint">按住拖动就能玩 · 天空可以被搅动 · 左上那颗星球……多按一会儿看看？</div>
     <div id="fps">--</div>
   </main>
 
@@ -308,13 +316,14 @@ body{
       <li><code>方向键 / WASD</code> 平移镜头</li>
       <li>世界向两侧<strong>无限延伸</strong>，走到哪生成到哪，没有边界</li>
     </ul>
-    <h4>二、3D 世界（真·第一人称）</h4>
+    <h4>二、沙盒底下还藏着另一层世界（神秘入口）</h4>
     <ul>
-      <li>点顶部 <code>🧊 3D 世界</code>（或按 <code>V</code>）：镜头会以「潜入」过渡动画飞进世界内部，再点一次飞回平面</li>
-      <li>进入后<strong>鼠标自动锁定</strong>（像我的世界那样），<code>W A S D / 方向键</code> 移动、鼠标转视角、<code>ESC</code> 解锁</li>
-      <li><code>空格 / Shift</code> 升降飞行；高空悬停不会自己掉，贴地时会自动行走并带步伐起伏</li>
-      <li><code>滚轮</code> 调整视野远近；<code>点击画面</code> 在准星处放下方块（光束笔则沿视线发射光束）</li>
-      <li>🦆 <strong>整活</strong>：水面上有橡皮鸭鸭舰队，准星对准点一下会「嘎！！」跳起来（还有成就）；天上飘着鲸鱼和月亮，偶尔有飞碟过境</li>
+      <li>左上角那颗小星球，不只是回主页的按钮——<strong>按住它别松手</strong>，多按一会儿，世界会「翻个面」</li>
+      <li>翻面之后是另一个世界：<code>W A S D / 方向键</code> 移动、<code>鼠标</code> 转视角（自动锁定，<code>ESC</code> 解锁）</li>
+      <li><code>空格 / Shift</code> 升降飞行；不按就贴地行走；<code>滚轮</code> 调整视野</li>
+      <li><code>点击画面</code> 在准星处放下方块；选光束笔则沿视线发射光束</li>
+      <li>想回来：按 <code>V</code>，或先按 ESC 解锁鼠标、再长按那颗星球</li>
+      <li>那一层里还有别的住客：水面上会「嘎」的鸭子、天上慢慢游过的鲸鱼……自己去看</li>
     </ul>
     <h4>三、时间倍速</h4>
     <ul>
@@ -344,6 +353,7 @@ body{
     <h4>七、隐藏起来的小事</h4>
     <ul>
       <li>试试老派游戏秘技（↑↑↓↓←→←→ B A）</li>
+      <li>左上角那颗星球按得够久，据说会翻出世界的另一面……（先别急着松手）</li>
       <li>走远一点，也许会有成就悄悄亮起来</li>
       <li>更多等你慢慢撞见</li>
     </ul>
@@ -3275,10 +3285,16 @@ var SB = SBX;
 
   /* ---------- 按钮 ---------- */
   var btnPause = document.getElementById('btnPause');
-  var btnDim = document.getElementById('btnDim');
+  var btnDim = document.getElementById('btnDim');   /* 隐藏入口后为 null（兼容保留） */
   var btnSpeedEl = document.getElementById('btnSpeed');
   var spdLbl = document.getElementById('spdLbl');
   var worldSeed = 20261003;
+  function syncDimUI() {
+    if (!btnDim) return;
+    btnDim.classList.toggle('on', m3Target === 1);
+    var lbl = btnDim.querySelector('.lbl');
+    if (lbl) lbl.textContent = m3Target === 1 ? '回到平面' : '3D 世界';
+  }
 
   btnPause.addEventListener('click', function () {
     paused = !paused;
@@ -3316,16 +3332,51 @@ var SB = SBX;
   document.getElementById('btnHelp').addEventListener('click', function () { showModal('helpModal'); });
   document.getElementById('btnAch').addEventListener('click', function () { showModal('achModal'); });
 
-  /* 2D ⇄ 3D 切换（带潜入过渡动画；进入时顺手锁定鼠标） */
+  /* 2D ⇄ 3D 切换（带潜入过渡动画；进入时顺手锁定鼠标）
+     —— 隐藏入口：长按左上角星球 1.6 秒 / 3D 内按 V 退出 —— */
   function toggleDim() {
     var turningOn = m3Target <= 0.5;
     m3Target = turningOn ? 1 : 0;
-    btnDim.classList.toggle('on', m3Target === 1);
-    btnDim.querySelector('.lbl').textContent = m3Target === 1 ? '回到平面' : '3D 世界';
+    syncDimUI();
     /* 在用户手势里请求指针锁定（像 MC 那样点进去就能用鼠标转视角） */
     if (turningOn && w3 && !w3.locked) { try { w3.requestLock(cv); } catch (e) {} }
   }
-  btnDim.addEventListener('click', toggleDim);
+
+  /* ---------- 隐藏入口：长按左上角星球 1.6 秒 ---------- */
+  var logoEl = document.querySelector('.tb-logo');
+  var holdTimer = 0, holdFired = false;
+  function holdBegin(e) {
+    if (holdTimer || m3Prog !== m3Target) return;       /* 过渡中忽略 */
+    holdFired = false;
+    if (logoEl) {
+      logoEl.classList.add('charging');
+      try { logoEl.setPointerCapture(e.pointerId); } catch (err) {}
+    }
+    holdTimer = setTimeout(function () {
+      holdTimer = 0;
+      holdFired = true;
+      if (logoEl) logoEl.classList.remove('charging');
+      toggleDim();
+      toast(m3Target === 1
+        ? '🌌 世界翻了个面 · WASD 移动 / 鼠标看向 / 左键放置 · 离开按 V'
+        : '回到平面视野');
+    }, 1600);
+  }
+  function holdEnd() {
+    if (holdTimer) { clearTimeout(holdTimer); holdTimer = 0; }
+    if (logoEl) logoEl.classList.remove('charging');
+  }
+  if (logoEl) {
+    logoEl.addEventListener('pointerdown', holdBegin);
+    logoEl.addEventListener('pointerup', holdEnd);
+    logoEl.addEventListener('pointerleave', holdEnd);
+    logoEl.addEventListener('pointercancel', holdEnd);
+    logoEl.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+    /* 长按完成后抑制那次 click（避免误跳主页） */
+    logoEl.addEventListener('click', function (e) {
+      if (holdFired) { holdFired = false; e.preventDefault(); e.stopPropagation(); }
+    });
+  }
 
   /* 倍速 */
   function cycleSpeed() {
@@ -3351,7 +3402,7 @@ var SB = SBX;
     else if (e.key === '2') { cur.tool = null; cur.type = T.WATER; syncPal(); }
     else if (e.key === '3') { cur.tool = null; cur.type = T.FIRE; syncPal(); }
     else if (e.key === ' ') { e.preventDefault(); if (!in3D()) btnPause.click(); }
-    else if (e.key === 'v' || e.key === 'V') { toggleDim(); }
+    else if (e.key === 'v' || e.key === 'V') { if (in3D()) toggleDim(); }   /* 隐藏入口：V 仅在 3D 内作为离开快捷键 */
     else if (e.key === 'r' || e.key === 'R') { cur.tool = 'rope'; syncPal(); }
     konami(e.key);
   });
@@ -3657,8 +3708,7 @@ var SB = SBX;
     setDim: function (v) {
       var turningOn = v && m3Target <= 0.5;
       m3Target = v ? 1 : 0;
-      btnDim.classList.toggle('on', m3Target === 1);
-      btnDim.querySelector('.lbl').textContent = m3Target === 1 ? '回到平面' : '3D 世界';
+      syncDimUI();
       if (turningOn && w3 && !w3.locked) { try { w3.requestLock(cv); } catch (e) {} }
     },
     toggleDim: toggleDim,
