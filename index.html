@@ -1430,7 +1430,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
         <div class="tile-body">
           <span class="ptag">整活 · 旗舰</span>
           <h3>万物沙盒</h3>
-          <p>一块向两侧无限延伸的星海像素大陆：22 种元素自己会反应，光束会拐弯、棱镜会下彩虹；一键升维成 2.5D 立体世界，还有 ×16 倍速时间。走到哪，世界长到哪。</p>
+          <p>一块向两侧无限延伸的星海像素大陆：22 种元素自己会反应，光束会拐弯、棱镜会下彩虹；一键潜入真 3D 世界（WASD + 鼠标自由飞行、点哪造哪），还有 ×16 倍速时间。走到哪，世界长到哪。</p>
           <span class="cta">去探索 <i>→</i></span>
         </div>
       </a>
@@ -1509,7 +1509,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     <div class="ach-cross reveal collapsed" style="--d:.16s" id="achCard">
       <div class="acx-head" id="acxHead" role="button" tabindex="0" aria-expanded="false" aria-controls="acxBody" title="点击展开 / 收起成就柜">
         <span class="acx-title">🏆 跨站成就柜</span>
-        <span class="acx-prog">已点亮 <b id="achLit">0</b> / <span id="achTotal">46</span></span>
+        <span class="acx-prog">已点亮 <b id="achLit">0</b> / <span id="achTotal">47</span></span>
         <span class="acx-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
       </div>
       <div class="acx-body" id="acxBody">
@@ -1739,7 +1739,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     sandbox: {
       img: 'demos/sandbox.jpg',
       title: '🏖️ 万物沙盒 · 像素世界',
-      desc: '一块向两侧无限延伸的星海像素大陆：撒沙、放水、点火、种藤蔓，22 种元素互相反应；光束笔照出镜面反射与棱镜彩虹，钢球滚过山丘扬起尘土；🆕 可以一键「升维」切换成立体视角（带过渡动画）、自由平移缩放探索无限世界、还能开 ×16 倍速看天地变化。纯前端单文件，零依赖，打开就停不下来。'
+      desc: '一块向两侧无限延伸的星海像素大陆：撒沙、放水、点火、种藤蔓，22 种元素互相反应；光束笔照出镜面反射与棱镜彩虹，钢球滚过山丘扬起尘土；🆕 可以「潜入」真 3D 世界：WASD 飞行 + 鼠标看向（像我的世界那样），点击在准星处放置方块；2D 平面也支持自由平移缩放探索无限世界、×16 倍速看天地变化。纯前端单文件，零依赖，打开就停不下来。'
     }
   };
   var dock = document.getElementById('demoDock');
@@ -2397,7 +2397,8 @@ var ACH_DEFS = [
   { id: 'site.sandbox', ico: '🏖', name: '沙盒居民', desc: '到访万物沙盒' },
   { id: 'sandbox.paint', ico: '✍️', name: '第一笔', desc: '在沙盒里画下第一笔' },
   { id: 'sandbox.sprout', ico: '🌱', name: '播种者', desc: '让第一颗种子发芽' },
-  { id: 'sandbox.dim3d', ico: '🧊', name: '升维者', desc: '切到立体视角，让世界立起来' },
+  { id: 'sandbox.dim3d', ico: '🧊', name: '升维者', desc: '飞进 3D 世界看一看' },
+  { id: 'sandbox.block3d', ico: '🧱', name: '空中造物', desc: '在 3D 世界里放置方块' },
   { id: 'sandbox.far', ico: '🧭', name: '星海拓荒', desc: '向远方探索超过 2000 格' },
   { id: 'sandbox.speed', ico: '⏩', name: '快进人生', desc: '把世界开到 16 倍速' },
   { id: 'sandbox.fire', ico: '🔥', name: '玩火者', desc: '在沙盒里点燃第一簇火焰' },
