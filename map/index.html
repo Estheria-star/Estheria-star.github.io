@@ -235,6 +235,17 @@
   .wb-home:active{transform:translateY(0)}
   .wb-home svg{width:13px;height:13px;flex:0 0 auto}
   @media (max-width:620px){ .wb-home{left:10px;bottom:10px;padding:7px 11px 7px 9px;font-size:12px} }
+
+/* ============ 🔮 ARG：第十五颗星 + 星座 ============ */
+#argLayer{pointer-events:none}
+#argStar{pointer-events:auto;cursor:pointer;animation:argTw 2.8s ease-in-out infinite}
+#argStar .argCore{fill:#dfe9ff;filter:drop-shadow(0 0 5px rgba(198,214,240,.8))}
+@keyframes argTw{0%,100%{opacity:.28}50%{opacity:.85}}
+#argStar:hover{opacity:1 !important;animation-play-state:paused}
+#argStar.found{animation:none;opacity:1}
+.argLine{fill:none;stroke:rgba(198,214,240,.5);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:5 6;animation:argDash 40s linear infinite;filter:drop-shadow(0 0 6px rgba(198,214,240,.45))}
+@keyframes argDash{to{stroke-dashoffset:-440}}
+.argDot{fill:#eef4ff;opacity:.85}
 </style>
 </head>
 <body>
@@ -495,7 +506,7 @@
         st.x += (f.x - st.x) * k;
         st.y += (f.y - st.y) * k;
         if (Math.hypot(f.x - st.x, f.y - st.y) < 0.6) { st.x = f.x; st.y = f.y; st.flyTo = null; }
-      } else if (!st.frozen && !relLock) {
+      } else if (!st.frozen && !st.argLock && !relLock) {
         /* 不规则漂移：三频正弦（方向缓慢变化、轨迹不循环） + 锚点回拉 */
         var vx = st.amp * (0.5 * Math.sin(T * st.w1 + st.p1) + 0.32 * Math.sin(T * st.w2 + st.p2) + 0.18 * Math.sin(T * st.w3 + st.p3));
         var vy = st.amp * (0.5 * Math.cos(T * st.w2 + st.p4) + 0.32 * Math.cos(T * st.w3 + st.p5) + 0.18 * Math.cos(T * st.w1 + st.p6));
@@ -676,6 +687,9 @@
     });
     s += '</g>';
 
+    /* 🔮 ARG：第十五颗星层（在所有星之上） */
+    s += '<g id="argLayer"></g>';
+
     svg.innerHTML = s;
 
     [].forEach.call(svg.querySelectorAll('.node'), function (el) {
@@ -687,6 +701,7 @@
     hoverId = null;
     initMotion();
     bindNodes();
+    buildArgLayer();
     updateHeader();
 
     if (view.mode === 'rel' && view.center && nodesIndex[view.center]) {
@@ -694,6 +709,55 @@
     }
     refreshInfo();
   }
+
+  /* ============ 🔮 ARG：第十五颗星 + 星座（2026-10-03） ============ */
+  var ARG_SEQ = ['site.star', '@SELF@', 'site.gomoku', 'site.geometry', 'site.music', 'site.colorlab', 'site.life', 'site.cuoti'];
+  var ARG_LOCK_IDS = ['site.star', 'site.gomoku', 'site.geometry', 'site.music', 'site.colorlab', 'site.life', 'site.cuoti'];
+  function argPos() { return mob ? { x: 52, y: 645 } : { x: 168, y: 592 }; }
+  function argSolved() { try { return !!(window.ARG && ARG.has('log2')); } catch (e) { return false; } }
+  function argFreeze() {
+    STARS.forEach(function (st) { if (ARG_LOCK_IDS.indexOf(st.id) >= 0) st.argLock = true; });
+  }
+  function buildArgLayer() {
+    var layer = document.getElementById('argLayer');
+    if (!layer) return;
+    var P = argPos();
+    var solved = argSolved();
+    var h = '';
+    h += '<defs><radialGradient id="argGlowGrad"><stop offset="0" stop-color="#eef4ff" stop-opacity=".5"/><stop offset=".5" stop-color="#c6d6f0" stop-opacity=".14"/><stop offset="1" stop-color="#c6d6f0" stop-opacity="0"/></radialGradient></defs>';
+    if (solved) {
+      argFreeze();
+      var pts = [];
+      ARG_SEQ.forEach(function (id) {
+        if (id === '@SELF@') { pts.push({ x: P.x, y: P.y }); return; }
+        var st = starMap[id];
+        if (st) pts.push({ x: st.x, y: st.y });
+      });
+      if (pts.length >= 2) {
+        var d = pts.map(function (p, i) { return (i ? 'L' : 'M') + p.x.toFixed(1) + ' ' + p.y.toFixed(1); }).join(' ');
+        h += '<path class="argLine" d="' + d + '"/>';
+        pts.forEach(function (p) { h += '<circle class="argDot" cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="2.2"/>'; });
+      }
+    }
+    h += '<g id="argStar" class="argStar' + (solved ? ' found' : '') + '" transform="translate(' + P.x + ' ' + P.y + ')" role="button" aria-label="一颗没有名字的星">';
+    h += '<circle class="argGlow" r="30" fill="url(#argGlowGrad)"/>';
+    h += '<circle class="argCore" r="3.4"/>';
+    h += '<circle class="argHit" r="40" fill="transparent"/>';
+    h += '</g>';
+    layer.innerHTML = h;
+    var star = document.getElementById('argStar');
+    if (star) star.addEventListener('click', argSolve);
+  }
+  function argSolve(e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    if (argSolved()) { toast('✨ 这颗星已经在你手心亮着了'); return; }
+    var ok = false;
+    try { ok = !!(window.ARG && ARG.collect('log2')); } catch (er) {}
+    if (ok) toast('✨ 原来第十五颗星，一直在这儿等你');
+    buildArgLayer();
+  }
+  window.__mapARG = { solve: argSolve, solved: argSolved, pos: argPos, rebuild: buildArgLayer,
+    seq: ARG_SEQ, locks: function () { return STARS.filter(function (st) { return st.argLock; }).map(function (st) { return st.id; }); } };
 
   /* ============ 关系视图（飞行目标由运动系统缓动）============ */
   function applyRelLayout(centerId, immediate) {
@@ -997,6 +1061,58 @@
         shownLinks: PAIRS.filter(function (p) { return p.shown; }).length,
         frozenStars: STARS.filter(function (st) { return st.frozen; }).length
       };
+    }
+  };
+})();
+</script>
+
+<script>
+/* 🔮 ARG · 精简进度机（地图站）与主页共用 st_arg */
+(function () {
+  'use strict';
+  var KEY = 'st_arg';
+  if (window.ARG && window.ARG.collect) return;
+  function readState() {
+    var raw = null;
+    try { var m = document.cookie.match(/(?:^|;\s*)st_arg=([^;]*)/); if (m) raw = decodeURIComponent(m[1]); } catch (e) {}
+    if (!raw) { try { raw = localStorage.getItem(KEY); } catch (e) {} }
+    try { var d = JSON.parse(raw || '{}'); if (!d || typeof d !== 'object') d = {}; if (!Array.isArray(d.logs)) d.logs = []; return d; }
+    catch (e) { return { logs: [] }; }
+  }
+  var state = readState();
+  function save() {
+    var raw = JSON.stringify(state);
+    try { localStorage.setItem(KEY, raw); } catch (e) {}
+    try {
+      var v = encodeURIComponent(raw);
+      if (v.length < 3800) document.cookie = 'st_arg=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+    } catch (e) {}
+  }
+  var toastTimer = 0;
+  window.ARG = {
+    has: function (id) { return state.logs.indexOf(id) >= 0; },
+    count: function () { return state.logs.length; },
+    collect: function (id) {
+      if (state.logs.indexOf(id) >= 0) return false;
+      state.logs.push(id); save();
+      this.toast('📜 找到一篇日志（去主页头像连点 7 下看全文）');
+      return true;
+    },
+    reset: function () { state = { logs: [] }; save(); },
+    toast: function (msg) {
+      try {
+        var el = document.getElementById('__arg_toast');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = '__arg_toast';
+          el.style.cssText = 'position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9994;background:rgba(12,17,32,.96);color:#eef4ff;border:1px solid rgba(198,214,240,.4);border-radius:999px;padding:12px 24px;font:700 13px/1.5 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.5);transition:all .45s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:88vw;text-align:center';
+          document.body.appendChild(el);
+        }
+        el.textContent = msg;
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { el.style.opacity = '0'; el.style.transform = 'translateX(-50%) translateY(16px)'; }, 3000);
+      } catch (e) {}
     }
   };
 })();
