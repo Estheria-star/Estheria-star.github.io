@@ -1176,6 +1176,17 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
 .arg-msg.bad{color:#ff9d9d}
 .arg-msg.good{color:#bfe8c8}
 
+
+.arg-dec{margin-top:14px;border-top:1px dashed rgba(198,214,240,.18);padding-top:12px}
+.arg-decrow{display:flex;gap:8px}
+.arg-decin{flex:1;background:rgba(6,9,18,.8);border:1px solid rgba(198,214,240,.24);border-radius:10px;color:#cfd9ee;font:600 12px/1.5 ui-monospace,Consolas,monospace;padding:8px 11px;outline:none;min-width:0}
+.arg-decin:focus{border-color:rgba(198,214,240,.55)}
+.arg-decin::placeholder{color:#5d6c8f}
+.arg-decbtn{border:1px solid rgba(198,214,240,.4);background:rgba(198,214,240,.08);color:#dbe4f5;font:700 12px/1 inherit;font-family:inherit;border-radius:999px;padding:8px 14px;cursor:pointer;white-space:nowrap}
+.arg-decbtn:hover{background:rgba(198,214,240,.16)}
+.arg-decout{font-size:12px;color:#bfe8c8;margin-top:9px;word-break:break-all;line-height:1.8}
+.arg-decout:empty{display:none}
+.arg-decout.bad{color:#ff9d9d}
 .arg-hintrow{display:flex;align-items:center;gap:14px;margin-top:16px;flex-wrap:wrap}
 .arg-hintbtn{border:1px solid rgba(198,214,240,.4);background:rgba(198,214,240,.08);color:#dbe4f5;font:700 12px/1 inherit;font-family:inherit;border-radius:999px;padding:8px 16px;cursor:pointer;transition:all .2s}
 .arg-hintbtn:hover{background:rgba(198,214,240,.18);border-color:rgba(198,214,240,.6)}
@@ -2959,6 +2970,7 @@ window.__checkSecretZone = checkSecretZone;
       '</div>',
       '<div class="arg-hintrow"><button class="arg-hintbtn" id="argHint">💡 提示</button><button class="arg-reset" id="argReset">重启终端（进度会清零，真的吗）</button></div>',
       '<div class="arg-hintbox" id="argHintBox"></div>',
+      '<div class="arg-dec"><div class="arg-decrow"><input class="arg-decin" id="argDecIn" placeholder="📎 粘贴 base64 密文，我帮你解" spellcheck="false" autocomplete="off"><button class="arg-decbtn" id="argDecBtn">解码</button></div><div class="arg-decout" id="argDecOut"></div></div>',
       '</div>'
     ].join('');
     document.body.appendChild(veil);
@@ -2980,6 +2992,30 @@ window.__checkSecretZone = checkSecretZone;
       renderSlots(); renderCells();
     });
     document.getElementById('argHint').addEventListener('click', showHint);
+    /* —— 内置 base64 解码器 —— */
+    function decodeB64() {
+      var inp = document.getElementById('argDecIn'), out = document.getElementById('argDecOut');
+      if (!inp || !out) return;
+      var v = (inp.value || '').trim().replace(/\s+/g, '');
+      if (!v) { out.className = 'arg-decout bad'; out.textContent = '先粘一段密文进来 ✂'; return; }
+      try {
+        var b = v.replace(/-/g, '+').replace(/_/g, '/');
+        while (b.length % 4) b += '=';
+        var bin = atob(b);
+        var bytes = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        var txt = new TextDecoder('utf-8').decode(bytes);
+        out.className = 'arg-decout';
+        out.textContent = '🔓 ' + txt;
+      } catch (e) {
+        out.className = 'arg-decout bad';
+        out.textContent = '解不开，检查一下有没有粘全';
+      }
+    }
+    document.getElementById('argDecBtn').addEventListener('click', decodeB64);
+    document.getElementById('argDecIn').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.stopPropagation(); decodeB64(); }
+    });
   }
 
   /* ---------- 提示系统（三段式：从温柔到直白） ---------- */
@@ -2987,7 +3023,8 @@ window.__checkSecretZone = checkSecretZone;
     tjy: [
       '先别急',
       '这个故事有个开头，比终端还早',
-      '在地址栏里敲：tjy.startian.top —— 手动输进去，它会为你开门'
+      '在地址栏里敲：tjy.startian.top —— 手动输进去，它会为你开门',
+      '懒得打字的话，把这串解出来（base64，终端底部有解码器）：aHR0cHM6Ly90ankuc3RhcnRpYW4udG9wLw=='
     ],
     log2: [
       '地图上的星，不止你看到的那几颗',
@@ -3002,22 +3039,26 @@ window.__checkSecretZone = checkSecretZone;
     log4: [
       '数学比我会表达',
       '有一个式子，画出来是一颗心',
-      '去几何工坊，输入极坐标方程：r = 1 - sin(θ)'
+      '去几何工坊，输入极坐标方程：r = 1 - sin(θ)',
+      '写不出这个式子就解它（base64）：cj0xLXNpbijOuCk='
     ],
     log1: [
       '先别急',
       '第一篇在星空里，我把种子定在了 1818',
-      '打开星空页，把网址换成 ?seed=1818&v=10811,-2395,1，或者朝那枚小月牙的方向慢慢拖——有一团月光在等你'
+      '打开星空页，点「星空 #xxxx」把种子改成 1818，再朝小月牙的方向拖——它旁边写着距离，越小越近',
+      '直达坐标（base64）：aHR0cHM6Ly9zdGFydGlhbi50b3Avc3Rhci8/c2VlZD0xODE4JnY9MTA4MTEsLTIzOTUsMQ=='
     ],
     log5: [
       '去听听函数的声音',
       '不用敲代码，用下面那排琴键试试',
-      '弹《小星星》的开头：A A G G H H G（哆 哆 唆 唆 啦 啦 唆）'
+      '弹《小星星》的开头：A A G G H H G（哆 哆 唆 唆 啦 啦 唆）',
+      '键位加密版（base64）：QSBBIEcgRyBIIEggRw=='
     ],
     log6: [
       '去实验室，深夜的蓝配月光，那组我挺满意',
       '底色挑深深的夜蓝，主色挑月光的白',
-      '底色 #0a0f26、主色 #eef4ff —— 就是星空的颜色'
+      '底色 #0a0f26、主色 #eef4ff —— 就是星空的颜色',
+      '两个色号打包在这（base64）：IzBhMGYyNiArICNlZWY0ZmY='
     ],
     log7: [
       '养一缸安静的小细胞',
@@ -3027,7 +3068,8 @@ window.__checkSecretZone = checkSecretZone;
     log8: [
       '去错题本，它本来是给我自己做的',
       '有一句话，背下来不如记下来',
-      '把这句录进错题本：「月亮从不缺席，只是偶尔被云挡住」'
+      '把这句录进错题本：「月亮从不缺席，只是偶尔被云挡住」',
+      '原句在这（base64，解出来直接复制）：5pyI5Lqu5LuO5LiN57y65bit77yM5Y+q5piv5YG25bCU6KKr5LqR5oyh5L2P'
     ],
     log9: [
       '那个卡在 99% 的页面，它在等人',
