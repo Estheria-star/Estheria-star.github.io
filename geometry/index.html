@@ -861,6 +861,40 @@ body.pure .fold-tab{display:flex}
 .ai-deep{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;color:var(--t3);cursor:pointer;user-select:none;line-height:1.5}
 .ai-deep input{accent-color:#6366f1;cursor:pointer;margin:0;flex:0 0 auto}
 .ai-deep input:checked + span{color:var(--brand-2,#06b6d4);font-weight:700}
+
+/* ===== 语音输入（AI 面板） ===== */
+.ai-voice-row{display:flex;gap:6px;margin-top:8px;align-items:center}
+.ai-voice-btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;background:var(--glass-2);color:var(--t1);cursor:pointer;font-family:inherit;transition:border-color .2s ease,background .2s ease,color .2s ease;position:relative;overflow:hidden}
+.ai-voice-btn:hover{border-color:var(--brand)}
+.ai-voice-btn .ic{width:14px;height:14px;flex:0 0 auto}
+.ai-voice-btn .ic-stop{display:none}
+.ai-voice-btn .veq{display:none;align-items:flex-end;gap:2px;height:12px}
+.ai-voice-btn .veq i{width:2.5px;background:currentColor;border-radius:2px;animation:voiceEq .9s ease-in-out infinite}
+.ai-voice-btn .veq i:nth-child(1){height:5px;animation-delay:0s}
+.ai-voice-btn .veq i:nth-child(2){height:11px;animation-delay:.15s}
+.ai-voice-btn .veq i:nth-child(3){height:7px;animation-delay:.3s}
+.ai-voice-btn .veq i:nth-child(4){height:9px;animation-delay:.45s}
+@keyframes voiceEq{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.15)}}
+.ai-voice-btn.listening{border-color:#ef4444;background:rgba(239,68,68,.12);color:#ef4444}
+.ai-voice-btn.listening .ic-mic{display:none}
+.ai-voice-btn.listening .ic-stop{display:block}
+.ai-voice-btn.listening .veq{display:inline-flex}
+.ai-voice-btn.busy{opacity:.75;cursor:progress}
+.ai-voice-btn.disabled{opacity:.45;cursor:not-allowed}
+.ai-voice-retry,.ai-voice-undo{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:11.5px;font-weight:700;background:transparent;color:var(--t2);cursor:pointer;font-family:inherit;white-space:nowrap;transition:border-color .2s ease,color .2s ease}
+.ai-voice-retry:hover,.ai-voice-undo:hover{border-color:var(--brand);color:var(--t1)}
+.ai-voice-retry .ic{width:12px;height:12px}
+.ai-voice-live{font-size:11.5px;color:var(--t3);margin-top:7px;line-height:1.6;min-height:0;font-style:italic;display:none;word-break:break-all}
+.ai-voice-live.show{display:block}
+.ai-voice-live .vv{color:var(--brand,#89C2FF);font-style:normal}
+.ai-voice-note{font-size:11px;margin-top:6px;line-height:1.65;display:none;word-break:break-all}
+.ai-voice-note.show{display:block}
+.ai-voice-note.ok{color:#22c55e}
+.ai-voice-note.warn{color:#f59e0b}
+.ai-voice-note.err{color:#ef4444}
+.ai-voice-note .conv{color:var(--t3)}
+.ai-voice-note b{font-weight:800}
+@media (max-width:640px){ .ai-voice-btn .vtxt{font-size:11.5px} }
 /* 解析卡步骤高亮（ok=答案行） */
 .result-card .step.ok{color:#22c55e;font-weight:700}
 .result-card .step.warn{color:#f59e0b}
@@ -919,6 +953,9 @@ body.pure .fold-tab{display:flex}
     <symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
     <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
     <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+    <symbol id="i-retry" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 2.64-6.36"/><path d="M3 4v5h5"/></symbol>
     <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.06 12.35a1 1 0 0 1 0-.7C3.7 7.6 7.6 5 12 5s8.3 2.6 9.94 6.65a1 1 0 0 1 0 .7C20.3 16.4 16.4 19 12 19s-8.3-2.6-9.94-6.65Z"/><circle cx="12" cy="12" r="3"/></symbol>
     <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M10.73 5.08A10.4 10.4 0 0 1 12 5c4.4 0 8.3 2.6 9.94 6.65a1 1 0 0 1 0 .7 13.2 13.2 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.5 13.5 0 0 0 2.06 11.65a1 1 0 0 0 0 .7C3.7 16.4 7.6 19 12 19a9.7 9.7 0 0 0 5.39-1.61"/><path d="m2 2 20 20"/><path d="M9.9 9.9a3 3 0 1 0 4.2 4.2"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6M14 11v6"/></symbol>
@@ -1133,7 +1170,7 @@ body.pure .fold-tab{display:flex}
               </div>
               <div class="sym-strip" id="sym-func"></div>
               <div class="chips" id="func-chips"></div>
-              <p class="hint" id="func-hint">支持 <code>y=f(x)</code>、<code>x=g(y)</code>、隐式方程 <code>F(x,y)=0</code>、极坐标 <code>r=f(θ)</code>、参数方程 <code>x=cos(t), y=sin(t)</code></p>
+              <p class="hint" id="func-hint">支持 <code>y=f(x)</code>、<code>x=g(y)</code>、隐式方程 <code>F(x,y)=0</code>、极坐标 <code>r=f(θ)</code>、参数方程 <code>x=cos(t), y=sin(t)</code>、虚数模式 <code>e^(i*t)</code></p>
             </div>
             <div class="panel-pane hidden" id="pane-pt">
               <div class="field-label"><span>点（平面 A(1, 2) / 空间 P(1, 2, 3)）</span></div>
@@ -1444,8 +1481,9 @@ body.pure .fold-tab{display:flex}
         <tr><td>其它函数</td><td class="mono">abs、min、max、sign、exp、round、atan2</td></tr>
         <tr><td>不等式</td><td class="mono">y &gt; x^2、x^2 + y^2 ≤ 4（画区域）；x^2 - a &gt; 0（求一元解集）；支持 &lt; &gt; ≤ ≥ ≠ 与 &lt;= &gt;= !=</td></tr>
         <tr><td>参数</td><td class="mono">a b c d f g h k 共 8 个，出现即生成滑块（e 已保留给自然常数）</td></tr>
-        <tr><td>省略乘号</td><td class="mono">2x、3sin(x)、πr、2√3、2|x| 都会自动补上乘号</td></tr>
-        <tr><td>输入示例</td><td class="mono">y = sin(x)；|x| + |y| = 1；x^2/4 + y^2/9 = 1；r = 2*cos(θ)；x = cos(t), y = sin(t)</td></tr>
+        <tr><td>🌀 虚数模式</td><td class="mono">含 <b>i</b> 的表达式自动进入复平面（实部作 x 轴、虚部作 y 轴）：<b>e^(i*t)</b> 画曲线（如欧拉公式的单位圆）；<b>e^(i*π)</b> 得复数点 −1；<b>e^(i*π) + 1 = 0</b> 验证恒等式。可用函数 sin cos tan sinh cosh tanh exp ln lg sqrt abs pow，参数 a~k 照常联动；t 范围默认可写 <b>t ∈ [0, 4π]</b> 自定义</td></tr>
+        <tr><td>省略乘号</td><td class="mono">2x、3sin(x)、πr、2√3、2|x| 都会自动补上乘号；2i、e^(iπ) 同样适用</td></tr>
+        <tr><td>输入示例</td><td class="mono">y = sin(x)；|x| + |y| = 1；x^2/4 + y^2/9 = 1；r = 2*cos(θ)；x = cos(t), y = sin(t)；z = e^(i*t)</td></tr>
         <tr><td>立体曲面</td><td class="mono">立体模式下含 x 与 y 的表达式如 z = sin(x)*cos(y) 自动切为曲面</td></tr>
       </table>
       <h4>三、图形与交互</h4>
@@ -1462,6 +1500,8 @@ body.pure .fold-tab{display:flex}
         <tr><td>预设导出 / 导入</td><td>「导出预设」存成 JSON 文件，<b>可自定义文件名</b>（如 二面角-正方体-日期），<b>涂鸦批注与解析卡一并保存</b>；「导入预设」会替换当前场景（有确认提醒，建议先导出备份当前内容）</td></tr>
         <tr><td>选择与多选</td><td><b>依次点选对象即可多选</b>（最多 99 个，无需按任何键），再点一次取消、点空白处清空；连选两个平面求二面角、选中两点连线、三点定平面（立体模式）</td></tr>
         <tr><td>导数与圆锥曲线</td><td>选中函数曲线可<b>求导 f′(x)</b>（可一键把导函数画到画布）、分析<b>极值与单调性</b>（可标注极值点）、作<b>切线</b>（指定 x 或选中曲线上的点）；隐式方程可做<b>圆锥曲线分析</b>，自动识别椭圆 / 双曲线 / 抛物线并给出中心、半轴、焦点、离心率、准线、渐近线等；直线与曲线选中后可求<b>弦长</b></td></tr>
+        <tr><td>🎤 语音输入</td><td>AI 出图面板里有「<b>语音输入</b>」按钮：点一下说出题目（如「已知正方体棱长二，求体对角线长」）。<b>想说多久说多久</b>，识别跟着你的语速走，说完停顿约 4 秒自动结束（也可以随时点按钮立刻结束），单次最长 90 秒；面板上实时显示<b>已听秒数</b>。识别结果自动填入输入框，<b>可直接编辑</b>；会自动做<b>数学口述转换</b>（艾克斯→x、的平方→^2、根号→√、三分之一→(1/3)、大于等于→≥、九十度→90° 等），并显示转换明细与<b>原始识别文本</b>，可一键<b>用原文</b>或<b>重试</b>；输入框里已有你改过的内容时，新识别会<b>追加</b>而不是覆盖。首次使用需在浏览器弹窗里<b>允许麦克风</b>；识别依赖浏览器厂商的语音服务（需联网），连不上、没听清或权限被拒时会给出对应提示，<b>手动打字始终不受影响</b></td></tr>
+        <tr><td>语音注意项</td><td>嘈杂环境下建议靠近麦克风、放慢语速；方言口音识别率取决于系统语音服务（本项目指定普通话 zh-CN，不能切换方言）；数学符号以<b>读法</b>为准（说「根号二」「三分之一」而不是「根号符号」）；本地文件（file://）方式打开时语音可能受限，建议用在线版</td></tr>
       </table>
       <h4>四、默认约束（明确设定）</h4>
       <table>
@@ -1469,7 +1509,7 @@ body.pure .fold-tab{display:flex}
         <tr><td>数值精度</td><td>默认 3 位小数，可切 2 / 4 / 6 位；内部计算使用双精度</td></tr>
         <tr><td>可绘制范围</td><td>平面视图半宽 0.2 至 500 之间自由缩放，超出会被限制</td></tr>
         <tr><td>采样密度</td><td>显式函数逐像素采样；隐式方程为自适应网格（约每 6px 一格，上限 260×260，拖动时自动降密）；极坐标 1800 点；参数方程 2400 点</td></tr>
-        <tr><td>曲线参数范围</td><td>极坐标 θ ∈ [0, 2π]；参数方程 t ∈ [-2π, 2π]</td></tr>
+        <tr><td>曲线参数范围</td><td>极坐标 θ ∈ [0, 2π]；参数方程 t ∈ [-2π, 2π]；复数曲线 t ∈ [0, 2π]；均可用「, t ∈ [a, b]」自定义（如 <span class="mono">x = cos(t), y = sin(t), t ∈ [0, 4π]</span>）</td></tr>
         <tr><td>曲面网格</td><td>48×48（拖动中 32×32），仅立体模式支持</td></tr>
         <tr><td>交点范围</td><td>显式×显式、显式×隐式、直线×任意曲线；隐式×隐式暂不支持</td></tr>
         <tr><td>对象上限</td><td>曲线 12 条、点 60 个、图形 40 个、几何体 8 个（软上限，超出会提示）</td></tr>
@@ -1494,6 +1534,20 @@ body.pure .fold-tab{display:flex}
     <div class="ai-input-line">
       <textarea id="aiInput" rows="2" placeholder="输入题目，AI 自动建图并给解析，如：正方体棱长 2，求体对角线长" spellcheck="false"></textarea>
     </div>
+    <div class="ai-voice-row">
+      <button class="ai-voice-btn" id="aiVoiceBtn" type="button" title="语音输入：说出题目，自动转成文字填进输入框">
+        <svg class="ic ic-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-mic"/></svg>
+        <svg class="ic ic-stop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-stop"/></svg>
+        <span class="vtxt">语音输入</span>
+        <span class="veq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </button>
+      <button class="ai-voice-retry" id="aiVoiceRetry" type="button" title="重新说一遍" style="display:none">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-retry"/></svg><span>重试</span>
+      </button>
+      <button class="ai-voice-undo" id="aiVoiceUndo" type="button" title="改用识别原文（不经过数学转换）" style="display:none"><span>用原文</span></button>
+    </div>
+    <div class="ai-voice-live" id="aiVoiceLive" role="status" aria-live="polite"></div>
+    <div class="ai-voice-note" id="aiVoiceNote"></div>
     <div class="ai-actions">
       <button class="btn btn-primary ai-go" id="aiGo" type="button">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-spark"/></svg><span>AI 分析并建造</span>
@@ -1901,6 +1955,197 @@ G.compileExpr = function (src) {
   return o;
 };
 
+/* ============================================================
+   2.5 虚数模式（复数引擎）
+   复用同一套词法 / 语法分析，仅替换「编译到 JS」这一层：
+   每个节点产出 [实部, 虚部]，运行时库 CLX 提供复数运算
+   输入 e^(i*t) 画复平面曲线；e^(i*π) 得复数点；
+   e^(i*π)+1=0 验证恒等式
+   ============================================================ */
+var CLX_I = [0, 1];
+var CLX = {
+  add: function (a, b) { return [a[0] + b[0], a[1] + b[1]]; },
+  sub: function (a, b) { return [a[0] - b[0], a[1] - b[1]]; },
+  mul: function (a, b) { return [a[0] * b[0] - a[1] * b[1], a[0] * b[1] + a[1] * b[0]]; },
+  div: function (a, b) {
+    var d = b[0] * b[0] + b[1] * b[1];
+    if (d < 1e-300) return [NaN, NaN];
+    return [(a[0] * b[0] + a[1] * b[1]) / d, (a[1] * b[0] - a[0] * b[1]) / d];
+  },
+  exp: function (a) { var m = Math.exp(a[0]); return [m * Math.cos(a[1]), m * Math.sin(a[1])]; },
+  ln: function (a) { return [Math.log(Math.hypot(a[0], a[1])), Math.atan2(a[1], a[0])]; },
+  pow: function (a, b) {
+    /* 整数幂用快速幂（更精确）；一般情形走 e^(b·ln a) */
+    if (b[1] === 0 && Math.abs(b[0] - Math.round(b[0])) < 1e-12 && Math.abs(b[0]) <= 64) {
+      var n = Math.round(b[0]);
+      var base = (n < 0) ? CLX.div([1, 0], a) : a;
+      var e = Math.abs(n), r = [1, 0], p = base;
+      while (e > 0) { if (e & 1) r = CLX.mul(r, p); p = CLX.mul(p, p); e >>= 1; }
+      return r;
+    }
+    if (a[0] === 0 && a[1] === 0) return b[0] > 0 ? [0, 0] : [NaN, NaN];
+    return CLX.exp(CLX.mul(b, CLX.ln(a)));
+  },
+  sqrt: function (a) { return CLX.pow(a, [0.5, 0]); },
+  sin: function (a) { return [Math.sin(a[0]) * Math.cosh(a[1]), Math.cos(a[0]) * Math.sinh(a[1])]; },
+  cos: function (a) { return [Math.cos(a[0]) * Math.cosh(a[1]), -Math.sin(a[0]) * Math.sinh(a[1])]; },
+  tan: function (a) { return CLX.div(CLX.sin(a), CLX.cos(a)); },
+  sinh: function (a) { return [Math.sinh(a[0]) * Math.cos(a[1]), Math.cosh(a[0]) * Math.sin(a[1])]; },
+  cosh: function (a) { return [Math.cosh(a[0]) * Math.cos(a[1]), Math.sinh(a[0]) * Math.sin(a[1])]; },
+  abs: function (a) { return [Math.hypot(a[0], a[1]), 0]; }
+};
+/* 复数函数名 → 代码发生器 */
+var CFN = {
+  sin: function (a) { return '__C.sin(' + a[0] + ')'; },
+  cos: function (a) { return '__C.cos(' + a[0] + ')'; },
+  tan: function (a) { return '__C.tan(' + a[0] + ')'; },
+  sinh: function (a) { return '__C.sinh(' + a[0] + ')'; },
+  cosh: function (a) { return '__C.cosh(' + a[0] + ')'; },
+  tanh: function (a) { return '__C.div(__C.sinh(' + a[0] + '),__C.cosh(' + a[0] + '))'; },
+  exp: function (a) { return '__C.exp(' + a[0] + ')'; },
+  ln: function (a) { return '__C.ln(' + a[0] + ')'; },
+  lg: function (a) { return '__C.div(__C.ln(' + a[0] + '),[' + Math.LN10 + ',0])'; },
+  sqrt: function (a) { return '__C.sqrt(' + a[0] + ')'; },
+  cbrt: function (a) { return '__C.pow(' + a[0] + ',[1/3,0])'; },
+  abs: function (a) { return '__C.abs(' + a[0] + ')'; },
+  pow: function (a) { return '__C.pow(' + a[0] + ',' + a[1] + ')'; }
+};
+var C_BUILTIN = ['pi', 'π', 'e', 'E', '∞'];
+/* 复数编译：AST → 产出 [re, im] 的 JS 代码 */
+function emitC(node, info) {
+  switch (node.t) {
+    case 'num': return '[' + node.v + ',0]';
+    case 'var': {
+      var nm = node.name;
+      var low = nm.toLowerCase();
+      if (low === 'i') return 'CI';
+      if (nm === 't' || nm === 'θ' || low === 'theta') { info.vars['t'] = true; return '[t,0]'; }
+      if (C_BUILTIN.indexOf(nm) >= 0 || C_BUILTIN.indexOf(low) >= 0) {
+        return '[' + (BUILTIN[nm] !== undefined ? BUILTIN[nm] : BUILTIN[low]) + ',0]';
+      }
+      if (PARAM_NAMES.indexOf(nm) >= 0) { info.params[nm] = true; return '[P.' + nm + ',0]'; }
+      if (nm === 'x' || nm === 'y' || nm === 'z') {
+        throw new Error('虚数模式里没有「' + nm + '」：变量请用 t（如 e^(i*t)），实部虚部会自动成为 x、y 轴');
+      }
+      throw new Error('虚数模式：不支持的符号「' + nm + '」（变量请用 t，常数 i π e，参数 a~k）');
+    }
+    case 'op': {
+      if (node.op === '^') return '__C.pow(' + emitC(node.l, info) + ',' + emitC(node.r, info) + ')';
+      if (node.op === '+') return '__C.add(' + emitC(node.l, info) + ',' + emitC(node.r, info) + ')';
+      if (node.op === '-') return '__C.sub(' + emitC(node.l, info) + ',' + emitC(node.r, info) + ')';
+      if (node.op === '*') return '__C.mul(' + emitC(node.l, info) + ',' + emitC(node.r, info) + ')';
+      if (node.op === '/') return '__C.div(' + emitC(node.l, info) + ',' + emitC(node.r, info) + ')';
+      throw new Error('虚数模式：不支持运算符「' + node.op + '」');
+    }
+    case 'fn': {
+      var gen = CFN[node.name];
+      if (!gen) {
+        throw new Error('虚数模式暂不支持「' + node.name + '()」（可用：sin cos tan sinh cosh tanh exp ln lg sqrt abs pow）');
+      }
+      var args = node.args.map(function (x) { return emitC(x, info); });
+      return gen(args);
+    }
+  }
+  throw new Error('虚数表达式编译失败');
+}
+/* 编译复数表达式 → 可求值对象（eval(t, P) 返回 [实部, 虚部]） */
+G.compileComplexExpr = function (src) {
+  var toks = insertImplicitMul(tokenize(preprocess(src)));
+  var ast = parseTokens(toks);
+  var info = { vars: {}, params: {} };
+  var code = emitC(ast, info);
+  var fn = new Function('t', 'P', '__C', 'CI', 'return (' + code + ');');
+  return {
+    src: src, code: code,
+    vars: Object.keys(info.vars),
+    params: Object.keys(info.params),
+    eval: function (t, P) {
+      var z = fn(t || 0, P || {}, CLX, CLX_I);
+      if (!isFinite(z[0])) z[0] = NaN;
+      if (!isFinite(z[1])) z[1] = NaN;
+      return z;
+    }
+  };
+};
+/* 复数格式化：[-1, 1.2e-16] → '-1'；[0,1] → 'i'（近零截断） */
+G.fmtComplex = function (z, digits) {
+  var d = (digits == null) ? 6 : digits;
+  function n(v) { if (Math.abs(v) < 1e-10) return 0; return parseFloat(v.toFixed(d)); }
+  var re = n(z[0]), im = n(z[1]);
+  if (im === 0) return String(re);
+  var imPart = (Math.abs(im) === 1 ? '' : String(im)) + 'i';
+  if (re === 0) return (im === -1 ? '-' : '') + imPart;
+  return re + (im < 0 ? ' - ' : ' + ') + (Math.abs(im) === 1 ? '' : String(Math.abs(im))) + 'i';
+};
+/* 检测表达式是否含虚数单位 i（独立标识符） */
+function hasI(s) {
+  try {
+    var toks = tokenize(preprocess(s));
+    for (var i = 0; i < toks.length; i++) {
+      if (toks[i].type === 'ident' && toks[i].v.toLowerCase() === 'i') return true;
+    }
+  } catch (e) {}
+  return false;
+}
+/* 提取可选的 t 范围后缀：', t ∈ [a, b]'（参数方程 / 复数曲线通用）
+   返回 { src: 去掉后缀的式子, raw: 原后缀文本, t0, t1 } 或 null */
+function extractTRange(s) {
+  var m = s.match(/[,;，；]\s*t\s*(?:∈|in)\s*[\[\(]?\s*([^,，;；\]\)]+?)\s*[,，]\s*([^,，;；\]\)]+?)\s*[\]\)]?\s*$/i);
+  if (!m) return null;
+  var srcNoRange = s.slice(0, m.index).trim();
+  if (!srcNoRange) return null;
+  var c0, c1;
+  try { c0 = G.compileExpr(m[1]); c1 = G.compileExpr(m[2]); } catch (e) {
+    throw new Error('t 范围解析失败：' + e.message);
+  }
+  var CONST_OK = ['π', 'pi', 'e', 'E', '∞'];
+  var bad0 = c0.vars.filter(function (v) { return CONST_OK.indexOf(v) < 0; });
+  var bad1 = c1.vars.filter(function (v) { return CONST_OK.indexOf(v) < 0; });
+  if (bad0.length || bad1.length) throw new Error('t 范围必须是常数（如 t ∈ [0, 2π]）');
+  var t0 = c0.eval(0, 0, 0, 0, 0, {});
+  var t1 = c1.eval(0, 0, 0, 0, 0, {});
+  if (!isFinite(t0) || !isFinite(t1)) throw new Error('t 范围数值无效');
+  return { src: srcNoRange, raw: s.slice(m.index), t0: t0, t1: t1 };
+}
+/* 复数表达式解析：曲线（含 t）/ 点（无 t）/ 恒等式（关系等式） */
+function parseComplex(s, mode, tr) {
+  if (mode !== 'plane') throw new Error('虚数模式仅在平面几何可用，请先切到平面模式');
+  if (/[<>≤≥≠]|!=/.test(s)) throw new Error('复数不能比较大小（不支持 < > ≤ ≥ ≠）');
+  var rel = findTopRelation(s);
+  if (rel && rel.op !== '=') throw new Error('复数不能比较大小（不支持 < > ≤ ≥ ≠）');
+  /* 定义式：z = ... / w = ... */
+  var exprSrc = s, defName = null;
+  if (rel) {
+    var lc = rel.l.trim();
+    if (/^[a-zA-Z]$/.test(lc) && !hasI(lc)) { exprSrc = (rel.r || '').trim(); defName = lc; }
+    else if (!rel.l.trim()) throw new Error('等号左边不能为空');
+    else return parseComplexIdentity(rel.l, rel.r, s, mode);
+  }
+  if (!exprSrc) throw new Error('请输入复数表达式，例如 e^(i*t)');
+  var c = G.compileComplexExpr(exprSrc);
+  var t0 = tr ? tr.t0 : 0, t1 = tr ? tr.t1 : 2 * Math.PI;
+  if (c.vars.indexOf('t') >= 0) {
+    if (t1 <= t0) throw new Error('t 范围需要满足终点大于起点');
+    var disp = (defName ? defName + ' = ' : '') + exprSrc + (tr ? tr.raw : '');
+    return {
+      kind: 'complexCurve', tFn: c, t0: t0, t1: t1,
+      params: c.params, display: disp,
+      tip: 'z(t) 复平面曲线，t ∈ [' + G.fmt(t0, 3) + ', ' + G.fmt(t1, 3) + ']'
+    };
+  }
+  return { kind: 'complexPoint', cFn: c, params: c.params, display: s };
+}
+function parseComplexIdentity(lSrc, rSrc, display, mode) {
+  var cL = G.compileComplexExpr(lSrc.trim());
+  var cR = G.compileComplexExpr((rSrc || '').trim());
+  if (cL.vars.indexOf('t') >= 0 || cR.vars.indexOf('t') >= 0) {
+    throw new Error('恒等式两端不能含 t；画复平面曲线请写成 z = e^(i*t)');
+  }
+  return { kind: 'complexIdentity', cL: cL, cR: cR, params: uniq(cL.params.concat(cR.params)), display: display };
+}
+G.hasI = hasI;
+G.extractTRange = extractTRange;
+
 /* 顶层分割（忽略括号内），返回 [L, R] 或 [null, src] */
 function splitEq(s) {
   var depth = 0;
@@ -1963,6 +2208,13 @@ G.parseEquation = function (src, mode) {
   var s = String(src).trim().replace(/[；;]/g, ',').replace(/[（]/g, '(').replace(/[）]/g, ')');
   if (!s) throw new Error('请输入表达式');
 
+  /* 提取可选的 t 范围后缀（参数方程 / 复数曲线通用）：..., t ∈ [a, b] */
+  var tr = extractTRange(s);
+  if (tr) s = tr.src;
+
+  /* 虚数模式：含虚数单位 i 的表达式走复数分支（曲线 / 点 / 恒等式） */
+  if (hasI(s)) return parseComplex(s, mode, tr);
+
   /* 参数方程：两段，形如 x=cos(t), y=sin(t) */
   var segs = splitTop(s, [',']);
   if (segs.length === 2 && segs[0].indexOf('=') >= 0 && segs[1].indexOf('=') >= 0) {
@@ -1977,8 +2229,12 @@ G.parseEquation = function (src, mode) {
         if (v !== 't') throw new Error('参数方程只能包含变量 t，出现了「' + v + '」');
       });
       if (vars.indexOf('t') < 0) throw new Error('参数方程需要包含变量 t，例如 x=cos(t)');
-      return { kind: 'param', xFn: fx, yFn: fy, params: uniq(fx.params.concat(fy.params)), display: 'x=' + xSrc + ', y=' + ySrc,
-        tip: 't ∈ [-2π, 2π]' };
+      var pt0 = tr ? tr.t0 : -2 * Math.PI, pt1 = tr ? tr.t1 : 2 * Math.PI;
+      if (pt1 <= pt0) throw new Error('t 范围需要满足终点大于起点');
+      return { kind: 'param', xFn: fx, yFn: fy, params: uniq(fx.params.concat(fy.params)),
+        display: 'x=' + xSrc + ', y=' + ySrc + (tr ? tr.raw : ''),
+        t0: pt0, t1: pt1,
+        tip: 't ∈ [' + G.fmt(pt0, 3) + ', ' + G.fmt(pt1, 3) + ']' };
     }
     throw new Error('若要输入参数方程请写成 x=(...), y=(...) 的形式');
   }
@@ -2560,10 +2816,16 @@ G.recolorAll = function () {
   var p = PALETTE[G.theme()];
   G.Scene.objs.forEach(function (o) { if (o.colorIdx !== undefined) o.color = p[o.colorIdx % 8]; });
 };
-/* 含参点 / 向量：参数变化后用表达式重算坐标（拖动后自动解除绑定） */
+/* 含参点 / 向量：参数变化后用表达式重算坐标（拖动后自动解除绑定）
+   含参复数点（_cxpr）同样在此联动 */
 G.refreshParametric = function () {
   var P = G.paramMap();
   G.Scene.objs.forEach(function (o) {
+    if (o._cxpr) {
+      var z = o._cxpr.eval(0, P);
+      if (isFinite(z[0]) && isFinite(z[1]) && o.type === 'point') { o.x = z[0]; o.y = z[1]; }
+      return;
+    }
     if (!o._expr) return;
     var v = o._expr.map(function (c) { return c.eval(0, 0, 0, 0, 0, P); });
     if (!v.every(isFinite)) return;
@@ -3129,8 +3391,8 @@ function curveImplicit(o, P) {
 function curveParametric(o, P) {
   var N = G.quality === 'fast' ? 900 : 2000;
   var isPolar = (o.kind === 'polar');
-  var t0 = isPolar ? 0 : -2 * Math.PI;
-  var t1 = isPolar ? 2 * Math.PI : 2 * Math.PI;
+  var t0 = isPolar ? 0 : (o.t0 === undefined ? -2 * Math.PI : o.t0);
+  var t1 = isPolar ? 2 * Math.PI : (o.t1 === undefined ? 2 * Math.PI : o.t1);
   var prev = null, k;
   ctx.beginPath();
   for (k = 0; k <= N; k++) {
@@ -3153,6 +3415,27 @@ function curveParametric(o, P) {
   ctx.stroke();
 }
 
+/* 复数曲线：z(t) = 实部 + 虚部·i，实部作 x、虚部作 y，画在复平面 */
+function curveComplex(o, P) {
+  var N = G.quality === 'fast' ? 600 : 1500;
+  var t0 = (o.t0 === undefined) ? 0 : o.t0;
+  var t1 = (o.t1 === undefined) ? 2 * Math.PI : o.t1;
+  var prev = null, k;
+  ctx.beginPath();
+  for (k = 0; k <= N; k++) {
+    var t = t0 + (t1 - t0) * k / N;
+    var z = o.tFn.eval(t, P);
+    var x = z[0], y = z[1];
+    if (!isFinite(x) || !isFinite(y)) { prev = null; continue; }
+    var sp = w2s(x, y);
+    if (Math.abs(sp.x) > 3e5 || Math.abs(sp.y) > 3e5) { prev = null; continue; }
+    if (!prev) ctx.moveTo(sp.x, sp.y);
+    else ctx.lineTo(sp.x, sp.y);
+    prev = sp;
+  }
+  ctx.stroke();
+}
+
 function drawCurve(o, P) {
   ctx.save();
   ctx.strokeStyle = o.color;
@@ -3162,6 +3445,7 @@ function drawCurve(o, P) {
   if (o.kind === 'explicitY') curveExplicitY(o, P);
   else if (o.kind === 'explicitX') curveExplicitX(o, P);
   else if (o.kind === 'implicit') curveImplicit(o, P);
+  else if (o.kind === 'complexCurve') curveComplex(o, P);
   else curveParametric(o, P);
   ctx.restore();
 }
@@ -3587,7 +3871,8 @@ function paramOf(o, P) {
     if (o.kind === 'explicitY') return { f: function (t) { return { x: t, y: o.fn.eval(t, 0, 0, 0, 0, P) }; }, t0: b.x0, t1: b.x1 };
     if (o.kind === 'explicitX') return { f: function (t) { return { x: o.fn.eval(0, t, 0, 0, 0, P), y: t }; }, t0: b.y0, t1: b.y1 };
     if (o.kind === 'polar') return { f: function (th) { var r = o.fn.eval(0, 0, 0, 0, th, P); return { x: r * Math.cos(th), y: r * Math.sin(th) }; }, t0: 0, t1: 2 * Math.PI };
-    if (o.kind === 'param') return { f: function (t) { return { x: o.xFn.eval(0, 0, 0, t, 0, P), y: o.yFn.eval(0, 0, 0, t, 0, P) }; }, t0: -2 * Math.PI, t1: 2 * Math.PI };
+    if (o.kind === 'param') return { f: function (t) { return { x: o.xFn.eval(0, 0, 0, t, 0, P), y: o.yFn.eval(0, 0, 0, t, 0, P) }; }, t0: (o.t0 === undefined ? -2 * Math.PI : o.t0), t1: (o.t1 === undefined ? 2 * Math.PI : o.t1) };
+    if (o.kind === 'complexCurve') return { f: function (t) { var z = o.tFn.eval(t, P); return { x: z[0], y: z[1] }; }, t0: (o.t0 === undefined ? 0 : o.t0), t1: (o.t1 === undefined ? 2 * Math.PI : o.t1) };
   }
   if (o.type === 'segment' || o.type === 'line') {
     var pts = ptsOf(o);
@@ -4079,9 +4364,19 @@ canvas.addEventListener('pointerdown', function (e) {
 function canDragObject(o) {
   return ['point', 'vector', 'segment', 'line', 'poly', 'circle', 'ellipse', 'sector'].indexOf(o.type) >= 0;
 }
-/* 拖动含参对象时解除参数绑定（否则拖了会被参数弹回） */
+/* 拖动含参对象时解除参数绑定（否则拖了会被参数弹回）；复数点同理 */
 function unbindExpr(o) {
-  if (!o || !o._expr) return;
+  if (!o) return;
+  if (o._cxpr) {
+    o._cxpr = null;
+    if (!G._unbindNotice) {
+      G._unbindNotice = true;
+      setTimeout(function () { G._unbindNotice = false; }, 3200);
+      if (G.toast) G.toast('已解除参数绑定，该对象现在可以自由拖动', 'info');
+    }
+    return;
+  }
+  if (!o._expr) return;
   o._expr = null;
   if (!G._unbindNotice) {
     G._unbindNotice = true;
@@ -6352,7 +6647,7 @@ function setMode(m) {
     : '拖拽旋转 · 滚轮缩放 · 点选函数/几何体后拖动可移动（Ctrl 调高度）';
   $('input-func').placeholder = m === 'plane' ? 'y = a*sin(b*x)' : 'z = a*sin(x)*cos(y)';
   $('func-hint').innerHTML = m === 'plane'
-    ? '支持 <code>y=f(x)</code>、<code>x=g(y)</code>、隐式方程 <code>F(x,y)=0</code>、极坐标 <code>r=f(θ)</code>、参数方程 <code>x=cos(t), y=sin(t)</code>'
+    ? '支持 <code>y=f(x)</code>、<code>x=g(y)</code>、隐式方程 <code>F(x,y)=0</code>、极坐标 <code>r=f(θ)</code>、参数方程 <code>x=cos(t), y=sin(t)</code>、虚数模式 <code>e^(i*t)</code>'
     : '输入含 x 与 y 的表达式自动绘制曲面（z=0 平面上的曲线同样支持），例如 <code>z = a*sin(x)*cos(y)</code>';
   var tab3 = document.querySelector('#input-tabs button[data-pane="pane-shape"]');
   if (tab3) tab3.textContent = m === 'plane' ? '图形' : '几何体';
@@ -6398,15 +6693,72 @@ function addFuncStr(str, quiet) {
   limitCheck('curve');
   var parsed = G.parseEquation(str, Scene.mode);
   var o;
+  /* 虚数模式：复数点 / 恒等式验证 → 生成点对象 + 结果卡 */
+  if (parsed.kind === 'complexPoint' || parsed.kind === 'complexIdentity') {
+    return addComplexPoint(parsed, quiet);
+  }
   if (parsed.kind === 'surfaceZ') {
     o = { type: 'surface', mode: Scene.mode, name: G.nameOf('曲面', 'surf'), fn: parsed.fn, params: parsed.params, display: parsed.display };
     if (!parsed.fn.vars.length) throw new Error('曲面表达式需要包含 x 或 y');
   } else {
     o = { type: 'func', mode: Scene.mode, kind: parsed.kind, name: G.nameOf('f', 'func'), params: parsed.params, display: parsed.display };
-    ['fn', 'xFn', 'yFn', 'eval', 'tip', 'op', 'truth'].forEach(function (k) { if (parsed[k] !== undefined) o[k] = parsed[k]; });
+    ['fn', 'xFn', 'yFn', 'eval', 'tip', 'op', 'truth', 'tFn', 't0', 't1'].forEach(function (k) { if (parsed[k] !== undefined) o[k] = parsed[k]; });
+    if (parsed.kind === 'complexCurve') o.name = G.nameOf('z', 'func');
   }
   Scene.add(o);
   if (!quiet) toast('已添加 ' + parsed.display, 'ok');
+  return o;
+}
+/* 复数点 / 恒等式：计算值、生成点对象、弹结果卡；含参时随滑块联动 */
+function addComplexPoint(parsed, quiet) {
+  limitCheck('point');
+  parsed.params.forEach(function (pn) {
+    if (!Scene.params[pn]) Scene.params[pn] = { value: 1, min: -10, max: 10, step: 0.05 };
+  });
+  var P = G.paramMap();
+  var name = parsed.display.length > 16 ? parsed.display.slice(0, 15) + '…' : parsed.display;
+  var o;
+  if (parsed.kind === 'complexIdentity') {
+    var lv = parsed.cL.eval(0, P), rv = parsed.cR.eval(0, P);
+    var diff = Math.hypot(lv[0] - rv[0], lv[1] - rv[1]);
+    var ok = diff < 1e-6;
+    o = { type: 'point', mode: 'plane', name: name, x: lv[0], y: lv[1], z: 0, params: parsed.params };
+    Scene.add(o);
+    var Ls = G.fmtComplex(lv), Rs = G.fmtComplex(rv);
+    G.showResult({
+      title: '复数恒等式验证',
+      value: NaN,
+      steps: [
+        { text: '恒等式：' + parsed.display },
+        { text: '左边 = ' + Ls + '　（实部 ' + G.fmt(lv[0], 6) + '，虚部 ' + G.fmt(lv[1], 6) + '）' },
+        { text: '右边 = ' + Rs + '　（实部 ' + G.fmt(rv[0], 6) + '，虚部 ' + G.fmt(rv[1], 6) + '）' },
+        { text: ok ? '✓ 恒等式成立，两边之差为 ' + diff.toExponential(2) + '（浮点误差级）'
+                   : '✗ 两边不相等，差 = ' + G.fmtComplex([lv[0] - rv[0], lv[1] - rv[1]]), cls: ok ? 'ok' : 'warn' },
+        { text: '蓝点标出了左边的值在复平面上的位置', cls: 'dim' }
+      ]
+    });
+    if (!quiet) toast('✓ ' + (ok ? '恒等式成立' : '两边不相等'), ok ? 'ok' : 'warn');
+    return o;
+  }
+  /* complexPoint */
+  var v = parsed.cFn.eval(0, P);
+  if (!isFinite(v[0]) || !isFinite(v[1])) throw new Error('复数求值失败（可能超出数值范围）');
+  o = { type: 'point', mode: 'plane', name: name, x: v[0], y: v[1], z: 0, params: parsed.params };
+  if (parsed.params.length) o._cxpr = parsed.cFn;
+  Scene.add(o);
+  var mod = Math.hypot(v[0], v[1]);
+  var arg = Math.atan2(v[1], v[0]);
+  G.showResult({
+    title: '复数点',
+    value: NaN,
+    steps: [
+      { text: parsed.display + ' = ' + G.fmtComplex(v) },
+      { text: '实部 ' + G.fmt(v[0], 6) + '，虚部 ' + G.fmt(v[1], 6) },
+      { text: '模 |z| = ' + G.fmt(mod, 6) + '，辐角 arg z = ' + G.fmt(arg, 6) + ' rad（' + G.fmt(arg * 180 / Math.PI, 2) + '°）' },
+      { text: '已作为点画在复平面上（实部作 x 轴、虚部作 y 轴）', cls: 'dim' }
+    ]
+  });
+  if (!quiet) toast('已添加复数点 ' + G.fmtComplex(v), 'ok');
   return o;
 }
 function addPointStr(str, name, quiet) {
@@ -7909,7 +8261,17 @@ var SAMPLES = {
     { id: 'p-ineq', name: '不等式区域：y ≥ x² - a', build: function () { addFuncStr('y ≥ x^2 - a'); } },
     { id: 'p-ineq1', name: '一元不等式解集：x² - a > 0', build: function () { addFuncStr('x^2 - a > 0'); } },
     { id: 'p-vec', name: '向量关系实验室', build: function () { addVecStr('u = (a, b)'); addVecStr('v = (c, 2)'); } },
-    { id: 'p-liss', name: '参数方程：李萨如曲线', build: function () { addFuncStr('x = sin(3t), y = sin(4t)'); } }
+    { id: 'p-liss', name: '参数方程：李萨如曲线', build: function () { addFuncStr('x = sin(3t), y = sin(4t)'); } },
+    { id: 'p-euler', name: '🌀 欧拉公式：e^(iθ) 单位圆', build: function () {
+      addFuncStr('z = e^(i*t)', true);
+      addFuncStr('e^(i*π)', true);
+      G.view2.cx = 0; G.view2.cy = 0; G.view2.scale = Math.min(140, G.view2.scale * 3);
+      toast('欧拉公式：e^(iθ) = cos θ + i·sin θ，复平面上的单位圆', 'ok');
+    } },
+    { id: 'p-eulerid', name: '🌀 欧拉恒等式：e^(iπ) + 1 = 0', build: function () {
+      addFuncStr('e^(i*π) + 1 = 0');
+      G.view2.cx = 0; G.view2.cy = 0; G.view2.scale = Math.min(140, G.view2.scale * 3);
+    } }
   ],
   solid: [
     { id: 's-cube', name: '正方体与体对角线', build: function () {
@@ -8149,6 +8511,7 @@ function serializeScene() {
     } else if (o.type === 'point') {
       rec = { t: 'point', name: o.name, x: o.x, y: o.y, z: o.z || 0, mode: o.mode };
       if (o._expr) rec.expr = o._expr.map(function (c) { return c.src; });
+      if (o._cxpr) rec.cexpr = o._cxpr.src;
     } else if (o.type === 'vector') {
       rec = { t: 'vector', name: o.name, ox: o.ox, oy: o.oy, oz: o.oz || 0, dx: o.dx, dy: o.dy, dz: o.dz || 0, mode: o.mode };
       if (o._expr) rec.expr = o._expr.map(function (c) { return c.src; });
@@ -8198,12 +8561,13 @@ function deserializeScene(data) {
           o = { type: 'surface', mode: rec.mode || 'plane', name: rec.name, fn: parsed.fn, params: parsed.params, display: parsed.display };
         } else {
           o = { type: 'func', mode: rec.mode || 'plane', kind: parsed.kind, name: rec.name, params: parsed.params, display: parsed.display };
-          ['fn', 'xFn', 'yFn', 'eval', 'tip', 'op', 'truth'].forEach(function (k) { if (parsed[k] !== undefined) o[k] = parsed[k]; });
+          ['fn', 'xFn', 'yFn', 'eval', 'tip', 'op', 'truth', 'tFn', 't0', 't1'].forEach(function (k) { if (parsed[k] !== undefined) o[k] = parsed[k]; });
         }
         if (rec.t3) o.t3 = { tx: +rec.t3.tx || 0, ty: +rec.t3.ty || 0, tz: +rec.t3.tz || 0, rx: +rec.t3.rx || 0, ry: +rec.t3.ry || 0, rz: +rec.t3.rz || 0 };
       } else if (rec.t === 'point') {
         o = { type: 'point', mode: rec.mode, name: rec.name, x: rec.x, y: rec.y, z: rec.z || 0, params: [] };
         if (rec.expr && rec.expr.length) o._expr = rec.expr.map(function (s) { return G.compileExpr(s); });
+        if (rec.cexpr) { var cc = G.compileComplexExpr(rec.cexpr); o._cxpr = cc; o.params = cc.params; }
       } else if (rec.t === 'vector') {
         o = { type: 'vector', mode: rec.mode, name: rec.name, ox: rec.ox, oy: rec.oy, oz: rec.oz || 0, dx: rec.dx, dy: rec.dy, dz: rec.dz || 0, params: [] };
         if (rec.expr && rec.expr.length) o._expr = rec.expr.map(function (s) { return G.compileExpr(s); });
@@ -9946,6 +10310,486 @@ console.log('[GeoStudio] 落地页交互已就绪');
   setTimeout(function () { STAch.unlock('site.geometry', '几何学徒', '📐'); }, 800);
 
   console.log('[GeoStudio] AI 出图模块已就绪');
+})();
+/* ============================================================
+   js7_voice：AI 出题 · 语音输入
+   一、数学口述规范化器（纯函数，把语音识别文本转成更接近数学写法的文本）
+   二、语音识别控制器（Web Speech API：权限 / 超时 / 错误分类 / 降级）
+   三、UI 绑定（麦克风按钮 / 实时字幕 / 重试 / 用原文）
+   设计原则：保守转换（宁可保留原文也不转错），全部转换可撤销
+   ============================================================ */
+(function () {
+  'use strict';
+  var G = window.__Geo;
+
+  /* ============================================================
+     一、数学口述规范化器
+     ============================================================ */
+  var CN_DIGIT = { '零': 0, '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9 };
+  var NUM_CHARS = '[零一二三四五六七八九十百千]';
+
+  /* 中文数字串 → 数值（支持 十二 / 二十三 / 一百二十三 / 零） */
+  function cnToNum(m) {
+    var total = 0, num = 0;
+    for (var i = 0; i < m.length; i++) {
+      var c = m[i];
+      if (CN_DIGIT[c] !== undefined) num = CN_DIGIT[c];
+      else if (c === '十') { total += (num === 0 ? 1 : num) * 10; num = 0; }
+      else if (c === '百') { total += (num === 0 ? 1 : num) * 100; num = 0; }
+      else if (c === '千') { total += (num === 0 ? 1 : num) * 1000; num = 0; }
+    }
+    return total + num;
+  }
+  /* 任意数字片段（中文或阿拉伯）→ 数值 */
+  function anyNum(s) {
+    if (/^[0-9]+$/.test(s)) return parseInt(s, 10);
+    return cnToNum(s);
+  }
+
+  /* 术语保护：数字后面紧跟这些字时不转换（三角形 / 二次 / 三视图 / 三棱柱 …） */
+  var TERM_TAIL = /[角边面棱次维项元视垂形体柱锥球线函象]|视图/;
+  /* 概数保护：前面是这些字时不转换（几十 / 数十年 / 多个） */
+  var APPROX_HEAD = /[几数多]/;
+
+  function convertNumbers(s) {
+    return s.replace(new RegExp(NUM_CHARS + '+', 'g'), function (m, off, full) {
+      var before = off > 0 ? full[off - 1] : '';
+      var after = off + m.length < full.length ? full[off + m.length] : '';
+      if (TERM_TAIL.test(after)) return m;          /* 三角形 / 二次… */
+      if (APPROX_HEAD.test(before)) return m;       /* 几十 / 数十年… */
+      var n = cnToNum(m);
+      return String(n);
+    });
+  }
+
+  /* 转换日志收集器 */
+  function makeLogger() {
+    var items = [];
+    return {
+      items: items,
+      add: function (label) { if (items.indexOf(label) < 0) items.push(label); }
+    };
+  }
+  function rep(log, s, re, to, label) {
+    if (typeof to === 'function') {
+      return s.replace(re, function () {
+        if (label) log.add(label);
+        return to.apply(null, arguments);
+      });
+    }
+    /* 字符串模式：直接交给 replace（保证 $1 占位符正常展开），比较前后差异记日志 */
+    var after = s.replace(re, to);
+    if (label && after !== s) log.add(label);
+    return after;
+  }
+
+  /* 主函数：规范化（返回 { text, changes[] }） */
+  function normalizeSpeech(input) {
+    var log = makeLogger();
+    var s = String(input || '').replace(/\s+/g, ' ').trim();
+    if (!s) return { text: '', changes: [] };
+
+    /* 1) 希腊字母与常见谐音 */
+    s = rep(log, s, /阿尔法|阿尔发/g, 'α', '阿尔法→α');
+    s = rep(log, s, /贝塔|贝它|北塔/g, 'β', '贝塔→β');
+    s = rep(log, s, /伽马|伽玛|嘎马/g, 'γ', '伽马→γ');
+    s = rep(log, s, /德尔塔|得尔塔|戴尔塔/g, 'δ', '德尔塔→δ');
+    s = rep(log, s, /艾普西龙|艾普西隆/g, 'ε', '艾普西龙→ε');
+    s = rep(log, s, /兰姆达|拉姆达|兰布达/g, 'λ', '拉姆达→λ');
+    s = rep(log, s, /西格玛|西格马/g, 'σ', '西格玛→σ');
+    s = rep(log, s, /欧米伽|欧米加|欧米嘎/g, 'ω', '欧米伽→ω');
+    s = rep(log, s, /西塔|斯塔|希塔/g, 'θ', '西塔→θ');
+    s = rep(log, s, /圆周率/g, 'π', '圆周率→π');
+    s = rep(log, s, /艾克斯/g, 'x', '艾克斯→x');
+
+    /* 2) 分数（百分之优先，再 X分之Y） */
+    s = rep(log, s, new RegExp('百分之\\s*(' + NUM_CHARS + '+|[0-9]+)'), function (m, a) {
+      return anyNum(a) + '%';
+    }, '百分之→%');
+    s = rep(log, s, new RegExp('(' + NUM_CHARS + '+|[0-9]+)\\s*分之\\s*(' + NUM_CHARS + '+|[0-9]+)', 'g'), function (m, a, b) {
+      return '(' + anyNum(b) + '/' + anyNum(a) + ')';
+    }, 'X分之Y→(Y/X)');
+
+    /* 3) 幂：平方 / 立方 / N 次方 */
+    s = rep(log, s, /的\s*平方/g, '^2', '的平方→^2');
+    s = rep(log, s, /的\s*立方/g, '^3', '的立方→^3');
+    s = rep(log, s, /的\s*二次方/g, '^2', '的二次方→^2');
+    s = rep(log, s, /的\s*三次方/g, '^3', '的三次方→^3');
+    s = rep(log, s, /的\s*四次方/g, '^4', '的四次方→^4');
+    s = rep(log, s, new RegExp('的\\s*(' + NUM_CHARS + '|[0-9]+)\\s*次方', 'g'), function (m, n) {
+      return '^' + anyNum(n);
+    }, '的N次方→^N');
+    s = rep(log, s, /的\s*([0-9a-zA-Z]+)\s*次方/g, '^$1', '的N次方→^N');
+
+    /* 4) 根号 */
+    s = rep(log, s, /根号下|根号|开平方|开根/g, '√', '根号→√');
+
+    /* 5) 数字（最后统一转，前面已把术语结构处理完） */
+    var beforeN = s;
+    s = convertNumbers(s);
+    if (s !== beforeN) log.add('中文数字→阿拉伯数字');
+    /* 小数点："三点五" 已在上一行转成 3点5 */
+    s = rep(log, s, /([0-9]+)\s*点\s*([0-9]+)/g, '$1.$2', '小数点');
+    /* 负号 */
+    s = rep(log, s, /负\s*([0-9])/g, '-$1', '负→-');
+
+    /* 6) 度 */
+    s = rep(log, s, /([0-9]+)\s*度(?![数])/g, '$1°', '度→°');
+
+    /* 7) 运算符（长词优先；加/减需要上下文判断，避免"增加/减少"误伤） */
+    var M = '[0-9a-zA-Z\\)）π°αβγδθλμσω√]';
+    var Ml = '[0-9a-zA-Z\\(（π√αβγδθλμσω]';
+    s = rep(log, s, /大于等于/g, '≥', '大于等于→≥');
+    s = rep(log, s, /小于等于/g, '≤', '小于等于→≤');
+    s = rep(log, s, /不等于/g, '≠', '不等于→≠');
+    s = rep(log, s, /大于/g, '>', '大于→>');
+    s = rep(log, s, /小于/g, '<', '小于→<');
+    s = rep(log, s, /等于/g, '=', '等于→=');
+    s = rep(log, s, /乘以|乗以/g, '*', '乘以→*');
+    s = rep(log, s, /除以/g, '/', '除以→/');
+    s = rep(log, s, new RegExp('(' + M + ')\\s*(加上|加)\\s*(' + Ml + ')', 'g'), '$1+$3', '加→+');
+    s = rep(log, s, new RegExp('(' + M + ')\\s*(减去|减)\\s*(' + Ml + ')', 'g'), '$1-$3', '减→-');
+    s = rep(log, s, new RegExp('(' + M + ')\\s*(乘以|乘)\\s*(' + Ml + ')', 'g'), '$1*$3', '乘→*');
+
+    /* 8) 规整 */
+    s = s.replace(/\s*([+\-*/=≥≤≠<>])\s*/g, '$1').replace(/\s{2,}/g, ' ').trim();
+
+    return { text: s, changes: log.items };
+  }
+  G.normalizeSpeech = normalizeSpeech;
+
+  /* ============================================================
+     二、语音识别控制器
+     ============================================================ */
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var ERR_MSG = {
+    'not-allowed': '麦克风权限被拒绝。点浏览器地址栏左侧的锁形图标 → 站点权限 → 把「麦克风」改为「允许」，再点一次语音输入。也可以直接手动打字，功能不受影响。',
+    'service-not-allowed': '浏览器拒绝了语音服务（站点权限或平台策略）。请在浏览器设置里允许麦克风，或直接手动输入。',
+    'network': '语音识别服务连不上（网络波动，或本地文件方式打开受限）。可直接手动输入；若常用此功能，建议用在线版 geometry.startian.top。',
+    'audio-capture': '没有检测到可用的麦克风。请检查耳麦连接，以及系统「设置 → 声音 → 输入」里的默认设备。',
+    'no-speech': '没听见声音。靠近麦克风再说一次？也可以直接打字。',
+    'aborted': '已取消语音输入。',
+    'language-not-supported': '当前浏览器不支持中文语音识别。'
+  };
+
+  /* 会话节奏（说话时长自适应）：
+     silenceMs   有过识别活动后，静音这么久 → 视为「说完了」自动收尾
+     firstMs     还没有任何活动（还没开口）→ 最多等这么久
+     maxMs       单次会话总上限（超长题目的兜底，不打断说话）
+     startMs     语音服务启动无响应判定（file:// 等受限环境）
+     tickMs      心跳检测间隔 */
+  var TUNE = {
+    silenceMs: 4000,
+    firstMs: 20000,
+    maxMs: 90000,
+    startMs: 12000,
+    tickMs: 250
+  };
+
+  var V = {
+    state: 'idle',              /* idle | starting | listening | finalizing */
+    rec: null,
+    supported: !!SR,
+    rawText: '',                /* 识别原文（累积） */
+    finalText: '',              /* 规范化后 */
+    interimText: '',            /* 最近一次实时字幕 */
+    timeoutId: null,
+    startupCheckId: null,
+    tickId: null,
+    sessionStart: 0,            /* 本次会话开始时间 */
+    lastActivity: 0,            /* 最后一次识别活动（interim 或 final） */
+    hadActivity: false,
+    lastFilled: '',             /* 上次语音填入的输入框值（用于判断用户是否改过） */
+    lastError: null,
+    sawResult: false,
+    warnedFile: false,
+    els: {}
+  };
+  V.TUNE = TUNE;
+  G.voice = V;
+
+  function $(id) { return document.getElementById(id); }
+
+  function setNote(msg, cls) {
+    var el = V.els.note;
+    if (!el) return;
+    if (!msg) { el.className = 'ai-voice-note'; el.innerHTML = ''; return; }
+    el.className = 'ai-voice-note show' + (cls ? ' ' + cls : '');
+    el.innerHTML = msg;
+  }
+  function setLive(msg, sec) {
+    var el = V.els.live;
+    if (!el) return;
+    if (!msg) { el.className = 'ai-voice-live'; el.innerHTML = ''; return; }
+    el.className = 'ai-voice-live show';
+    el.innerHTML = '🎤 正在听' + (sec != null ? ' <b>' + sec + 's</b>' : '') + '：<span class="vv"></span>';
+    el.querySelector('.vv').textContent = msg;
+  }
+  function setBtn(state) {
+    var b = V.els.btn;
+    if (!b) return;
+    b.classList.toggle('listening', state === 'listening');
+    b.classList.toggle('busy', state === 'starting' || state === 'finalizing');
+    b.classList.toggle('disabled', state === 'unsupported');
+    var t = b.querySelector('.vtxt');
+    if (t) t.textContent =
+      state === 'starting' ? '启动中…' :
+      state === 'listening' ? '正在听…点我停下' :
+      state === 'finalizing' ? '识别中…' :
+      state === 'unsupported' ? '浏览器不支持' : '语音输入';
+  }
+  function showExtra(showRetry, showUndo) {
+    if (V.els.retry) V.els.retry.style.display = showRetry ? '' : 'none';
+    if (V.els.undo) V.els.undo.style.display = showUndo ? '' : 'none';
+  }
+
+  function cleanup() {
+    if (V.timeoutId) { clearTimeout(V.timeoutId); V.timeoutId = null; }
+    if (V.startupCheckId) { clearTimeout(V.startupCheckId); V.startupCheckId = null; }
+    if (V.tickId) { clearInterval(V.tickId); V.tickId = null; }
+    if (V.rec) {
+      try { V.rec.onresult = V.rec.onerror = V.rec.onend = V.rec.onstart = null; V.rec.abort(); } catch (e) {}
+      V.rec = null;
+    }
+    V.state = 'idle';
+    setBtn('idle');
+    setLive('');
+  }
+
+  /* 心跳：说话时长自适应的核心
+     - 说过话：静音 silenceMs 秒视为说完 → 自动收尾
+     - 还没开口：等 firstMs 仍无任何活动 → 收尾
+     - 总时长：maxMs 兜底（不打断正常说话，只防忘记点停） */
+  function tickCheck() {
+    if (V.state !== 'listening') return;
+    var now = Date.now();
+    /* 计时显示（每秒刷新一次，不闪） */
+    var sec = Math.floor((now - V.sessionStart) / 1000);
+    if (sec !== V._shownSec) {
+      V._shownSec = sec;
+      setLive(V.interimText || (V.hadActivity ? '（继续听你说…）' : '（请说题目…）'), sec);
+    }
+    if (V.hadActivity) {
+      if (now - V.lastActivity > TUNE.silenceMs) {
+        V.lastError = 'silence';
+        try { if (V.rec) V.rec.stop(); } catch (e) {}
+      }
+    } else if (now - V.sessionStart > TUNE.firstMs) {
+      V.lastError = 'no-input';
+      try { if (V.rec) V.rec.stop(); } catch (e) {}
+    }
+    if (now - V.sessionStart > TUNE.maxMs) {
+      V.lastError = 'maxlen';
+      try { if (V.rec) V.rec.stop(); } catch (e) {}
+    }
+  }
+  V._tickCheck = tickCheck;
+
+  function start() {
+    if (!V.supported) {
+      setNote('当前浏览器不支持语音识别（Web Speech API）。建议使用最新版 Edge / Chrome，或直接手动输入。', 'err');
+      return;
+    }
+    if (V.state === 'listening' || V.state === 'starting') { stopByUser(); return; }
+    if (V.state === 'finalizing') return;
+
+    /* 本地文件打开方式：实测 file:// 下语音服务常完全无响应，提前告知 */
+    if (location.protocol === 'file:' && !V.warnedFile) {
+      V.warnedFile = true;
+      setNote('提示：本地文件方式打开的页面，语音识别可能受限。正在尝试启动，若 ' + Math.round(TUNE.startMs / 1000) + ' 秒内没有反应，请改用在线版 geometry.startian.top。', 'warn');
+    }
+
+    V.rawText = ''; V.finalText = ''; V.interimText = ''; V.sawResult = false; V.lastError = null;
+    V.hadActivity = false; V.lastActivity = 0; V.sessionStart = Date.now(); V._shownSec = -1;
+    showExtra(false, false);
+    if (location.protocol !== 'file:') setNote('');
+
+    var rec;
+    try { rec = new SR(); } catch (e) {
+      setNote('语音识别初始化失败：' + (e && e.message || e), 'err');
+      return;
+    }
+    V.rec = rec;
+    rec.lang = 'zh-CN';
+    rec.continuous = true;          /* 连续模式：说话多久听多久，自动停 */
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+
+    V.state = 'starting';
+    setBtn('starting');
+
+    rec.onstart = function () {
+      if (V.startupCheckId) { clearTimeout(V.startupCheckId); V.startupCheckId = null; }
+      V.state = 'listening';
+      V.sessionStart = Date.now();
+      setBtn('listening');
+      setLive('（请说题目…）', 0);
+      if (V.tickId) clearInterval(V.tickId);
+      V.tickId = setInterval(tickCheck, TUNE.tickMs);
+    };
+    rec.onresult = function (ev) {
+      var interim = '', fin = '';
+      for (var i = ev.resultIndex; i < ev.results.length; i++) {
+        var r = ev.results[i];
+        if (r.isFinal) fin += r[0].transcript;
+        else interim += r[0].transcript;
+      }
+      /* 任何结果（含 interim）都算「还在说话」的活动 */
+      V.lastActivity = Date.now();
+      V.hadActivity = true;
+      if (interim) {
+        V.interimText = interim;
+        setLive(interim, V._shownSec < 0 ? 0 : V._shownSec);
+      }
+      if (fin) {
+        V.sawResult = true;
+        V.rawText += fin;
+        V.interimText = '';
+      }
+    };
+    rec.onerror = function (ev) {
+      V.lastError = ev.error || 'unknown';
+      if (ev.error === 'aborted') return;    /* 主动取消，静默 */
+      /* no-speech：已收到的内容照样收尾（不丢字）；完全没听到时 finish 里给提示 */
+      if (ev.error === 'no-speech') { finish(); return; }
+      finish();
+      var msg = ERR_MSG[ev.error] || ('识别出错（' + ev.error + '）。可以直接手动输入。');
+      setNote(msg, 'err');
+      showExtra(true, false);
+    };
+    rec.onend = function () {
+      /* 自然结束 / 用户 stop / 心跳 stop：都走 finish 收尾 */
+      if (V.state === 'listening' || V.state === 'starting' || V.state === 'finalizing') finish();
+    };
+
+    try {
+      rec.start();
+      /* 启动无响应检测：慢启动实测可到 7 秒，给足 12 秒余量再判定 */
+      V.startupCheckId = setTimeout(function () {
+        if (V.state === 'starting' && V.rec === rec) {
+          var wasFile = location.protocol === 'file:';
+          cleanup();
+          setNote(wasFile
+            ? '语音服务没有响应（本地文件方式打开时常见）。建议改用在线版 geometry.startian.top，或直接手动输入。'
+            : '语音服务没有响应。可能是网络或系统语音服务问题，请稍后重试，或直接手动输入。', 'err');
+          showExtra(true, false);
+        }
+      }, TUNE.startMs);
+    } catch (e) {
+      cleanup();
+      setNote('无法启动语音识别：' + (e && e.message || e) + '。可以直接手动输入。', 'err');
+    }
+  }
+
+  function stopByUser() {
+    if (V.rec && (V.state === 'listening' || V.state === 'starting')) {
+      V.state = 'finalizing';
+      setBtn('finalizing');
+      setLive('');
+      try { V.rec.stop(); } catch (e) {}
+    }
+  }
+
+  /* 收尾：把识别结果规范化 → 填入输入框（幂等，事件先解绑防递归）
+     填入规则：输入框为空、或仍是上次语音填入的原文（没改过）→ 替换；
+               用户改过 / 已有手打内容 → 追加（不丢用户的东西） */
+  function finish() {
+    var rec = V.rec;
+    V.rec = null;
+    if (rec) {
+      rec.onresult = rec.onerror = rec.onend = rec.onstart = null;
+      try { rec.abort(); } catch (e) {}
+    }
+    if (V.timeoutId) { clearTimeout(V.timeoutId); V.timeoutId = null; }
+    if (V.tickId) { clearInterval(V.tickId); V.tickId = null; }
+
+    var used = V.sessionStart ? Math.max(1, Math.round((Date.now() - V.sessionStart) / 1000)) : 0;
+    var raw = (V.rawText || '').trim();
+    if (!raw) {
+      V.state = 'idle'; setBtn('idle'); setLive('');
+      if (V.lastError === 'silence') setNote('没听清内容（可能声音太小或太远）。再点一次语音输入试试，或直接打字。', 'warn');
+      else if (V.lastError === 'no-input') setNote('等了一会儿没听到声音，已停止。可以再试一次，或直接打字。', 'warn');
+      else if (V.lastError === 'maxlen') setNote('单次语音最长为 ' + Math.round(TUNE.maxMs / 1000) + ' 秒，已自动收尾。可以分几次说，或直接打字。', 'warn');
+      else if (V.lastError === 'aborted') { /* 用户主动取消，静默 */ }
+      else setNote('没听清内容。再点一次语音输入试试，或直接打字。', 'warn');
+      showExtra(true, false);
+      return;
+    }
+
+    var res = normalizeSpeech(raw);
+    V.finalText = res.text;
+
+    var inp = $('aiInput');
+    var appended = false;
+    if (inp) {
+      var cur = inp.value;
+      var base = V.lastFilled || '';
+      if (cur && cur !== base) {
+        /* 用户改过 / 已有别的内容 → 追加，保留用户的东西 */
+        inp.value = cur.replace(/\s+$/, '') + '\n' + res.text;
+        appended = true;
+      } else {
+        inp.value = res.text;
+      }
+      V.lastFilled = inp.value;
+      inp.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    V.state = 'idle';
+    setBtn('idle');
+    setLive('');
+
+    var conv = res.changes.length ? '<br><span class="conv">已自动转换：' + res.changes.join('、') + '</span>' : '';
+    setNote('✓ 已' + (appended ? '追加到' : '填入') + '输入框（识别 ' + used + ' 秒），可以直接编辑。' +
+      (res.text !== raw ? '<br><span class="conv">识别原文：' + escapeHtml(raw) + '</span>' : '') + conv, 'ok');
+    showExtra(true, res.text !== raw);
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  /* ============================================================
+     三、UI 绑定
+     ============================================================ */
+  function init() {
+    V.els.btn = $('aiVoiceBtn');
+    V.els.retry = $('aiVoiceRetry');
+    V.els.undo = $('aiVoiceUndo');
+    V.els.live = $('aiVoiceLive');
+    V.els.note = $('aiVoiceNote');
+    if (!V.els.btn) return;
+
+    V.els.btn.addEventListener('click', function () { start(); });
+    if (V.els.retry) V.els.retry.addEventListener('click', function () { start(); });
+    if (V.els.undo) V.els.undo.addEventListener('click', function () {
+      var inp = $('aiInput');
+      if (inp && V.rawText) {
+        inp.value = V.rawText;
+        inp.dispatchEvent(new Event('input', { bubbles: true }));
+        setNote('已改用识别原文（未做数学转换），可直接编辑。', 'ok');
+        showExtra(true, false);
+      }
+    });
+
+    if (!V.supported) {
+      setBtn('unsupported');
+      V.els.btn.title = '当前浏览器不支持语音识别';
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+
+  /* 测试钩子 */
+  V._testFinish = finish;
+  V._setRaw = function (t) { V.rawText = t; V.sawResult = true; V.hadActivity = !!t; V.lastActivity = Date.now(); };
+  V._errMsg = ERR_MSG;
+  V._ERR_TYPES = Object.keys(ERR_MSG);
+  /* 公开接口（按钮点击用的同一份实现） */
+  V.start = start;
+  V.stop = stopByUser;
+  V.normalize = normalizeSpeech;
 })();
 
 </script>
