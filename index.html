@@ -2984,6 +2984,26 @@ window.__checkSecretZone = checkSecretZone;
 
   /* ---------- 提示系统（三段式：从温柔到直白） ---------- */
   var HINTS = {
+    tjy: [
+      '先别急',
+      '这个故事有个开头，比终端还早',
+      '在地址栏里敲：tjy.startian.top —— 手动输进去，它会为你开门'
+    ],
+    log2: [
+      '地图上的星，不止你看到的那几颗',
+      '我说过：我做了十五颗星，只公开了十四颗',
+      '去「宇宙地图」，找到那颗忽明忽暗、谁也不属于的星，点一下'
+    ],
+    log3: [
+      '棋盘比你想的会说话',
+      '有时候不用赢，摆出一个形状就够了',
+      '用你的五颗子，在棋盘上摆一个字母 T'
+    ],
+    log4: [
+      '数学比我会表达',
+      '有一个式子，画出来是一颗心',
+      '去几何工坊，输入极坐标方程：r = 1 - sin(θ)'
+    ],
     log1: [
       '先别急',
       '第一篇在星空里，我把种子定在了 1818',
@@ -3015,14 +3035,17 @@ window.__checkSecretZone = checkSecretZone;
       '在 99% 的页面上直接敲键盘，打出那个名字（八个字母）'
     ]
   };
-  var BUILT_HINTED = ['log1', 'log5', 'log6', 'log7', 'log8', 'log9'];
+  var BUILT_HINTED = ['log1', 'log2', 'log3', 'log4', 'log5', 'log6', 'log7', 'log8', 'log9'];
   var hintFor = null, hintIdx = 0;
   function showHint() {
     var box = document.getElementById('argHintBox');
     if (!box) return;
     var target = null;
-    for (var i = 0; i < BUILT_HINTED.length; i++) {
-      if (!ARG.has(BUILT_HINTED[i])) { target = BUILT_HINTED[i]; break; }
+    if (!tjyVisited()) target = 'tjy';
+    else {
+      for (var i = 0; i < BUILT_HINTED.length; i++) {
+        if (!ARG.has(BUILT_HINTED[i])) { target = BUILT_HINTED[i]; break; }
+      }
     }
     if (!target) {
       box.style.display = 'block';
@@ -3037,15 +3060,41 @@ window.__checkSecretZone = checkSecretZone;
     box.textContent = msg + (hintIdx < tips.length ? '（再按一次，给更多）' : '（这是最后一条了）');
   }
 
-  var INTRO_LINES = ['哦，是你', '能摸到这里的没几个', '说正事，我做的小东西每个背后都留了一篇日志，找着就会亮起来，一共十篇，前面八篇里各夹着一个字母，按顺序收好，最后要用', '第一篇在星空里，种子 1818，慢慢拖，有个地方我做了记号', '（卡住了就回来按提示）'];
+  function tjyVisited() {
+    try { if (localStorage.getItem('st_arg_tjy') === '1') return true; } catch (e) {}
+    try { if (/(?:^|;\s*)st_arg_tjy=1/.test(document.cookie)) return true; } catch (e) {}
+    return false;
+  }
+  function buildIntro() {
+    if (!tjyVisited()) {
+      return [
+        '哦，是你',
+        '能摸到这里的没几个',
+        '不过……你来得比故事的开头还早',
+        '真正的第一页，不在这个终端里',
+        '去地址栏，敲上 t j y，再接上这个小站的名字',
+        '从那里读完，再回来',
+        '（卡住了就按提示）'
+      ];
+    }
+    return [
+      '哦，是你',
+      '能摸到这里的没几个',
+      '说正事，我做的小东西每个背后都留了一篇日志，找着就会亮起来，一共十篇，前面八篇里各夹着一个字母，按顺序收好，最后要用',
+      '第一页在星空的深处，种子 1818，慢慢拖，有个地方我做了记号',
+      '（卡住了就回来按提示）'
+    ];
+  }
+  var INTRO_LINES = ['哦，是你'];
   function renderIntro() {
     var box = document.getElementById('argIntro');
     if (!box) return;
     if (introDone) { box.innerHTML = ''; box.style.display = 'none'; return; }
-    box.innerHTML = INTRO_LINES.map(function (t, i) {
+    var lines = buildIntro();
+    box.innerHTML = lines.map(function (t, i) {
       return '<div style="animation-delay:' + (i * 0.55 + 0.2) + 's">' + t + '</div>';
     }).join('');
-    setTimeout(function () { introDone = true; try { localStorage.setItem('st_arg_seen', '1'); } catch (e) {} }, INTRO_LINES.length * 550 + 2200);
+    setTimeout(function () { introDone = true; try { localStorage.setItem('st_arg_seen', '1'); } catch (e) {} }, lines.length * 550 + 2200);
   }
   function renderSlots() {
     var box = document.getElementById('argSlots');
@@ -3100,7 +3149,7 @@ window.__checkSecretZone = checkSecretZone;
     panel.innerHTML = [
       '<div class="arg-endtitle">🌙 终章</div>',
       '<div class="arg-letter">八个字母，一个都没错\n\n看来这个小站的里子被你翻遍了\n\n这个站没什么大目标，就是想把自己觉得好玩的东西都做一遍，摆在同一个地方\n\n<b>欢迎来到我的宇宙，谢谢你玩到这里</b>\n\n——星恬</div>',
-      '<div class="arg-msg good" style="margin-top:14px">🌌 星夜已为你点亮（在右上角配色面板里）· 去「万物沙盒」看看世界完整的样子吧</div>',
+      '<div class="arg-msg good" style="margin-top:14px">🌌 星夜已为你点亮（在右上角配色面板里）<br>去「万物沙盒」看看世界完整的样子吧<br>最后还有一扇门——地址栏里敲上 <b>estheria</b>，再接上这个小站的名字</div>',
       '<button class="arg-go" id="argEndClose" style="margin-top:14px">合上终端</button>'
     ].join('');
     document.getElementById('argEndClose').addEventListener('click', close);
