@@ -311,10 +311,10 @@ body{
     <h4>二、3D 世界（真·第一人称）</h4>
     <ul>
       <li>点顶部 <code>🧊 3D 世界</code>（或按 <code>V</code>）：镜头会以「潜入」过渡动画飞进世界内部，再点一次飞回平面</li>
-      <li><code>W A S D / 方向键</code> 移动，<code>鼠标</code> 转动视角（点一下画面锁定光标；<code>ESC</code> 释放）</li>
-      <li><code>空格 / Shift</code> 升降飞行；不按就贴着地面行走</li>
-      <li><code>滚轮</code> 调整视野远近；<code>点击画面</code> 在准星处放下当前选中的方块（光束笔则沿视线发射光束）</li>
-      <li>整个世界在 3D 里依然「活着」：火焰会烧、水流会流，换个角度看它</li>
+      <li>进入后<strong>鼠标自动锁定</strong>（像我的世界那样），<code>W A S D / 方向键</code> 移动、鼠标转视角、<code>ESC</code> 解锁</li>
+      <li><code>空格 / Shift</code> 升降飞行；高空悬停不会自己掉，贴地时会自动行走并带步伐起伏</li>
+      <li><code>滚轮</code> 调整视野远近；<code>点击画面</code> 在准星处放下方块（光束笔则沿视线发射光束）</li>
+      <li>🦆 <strong>整活</strong>：水面上有橡皮鸭鸭舰队，准星对准点一下会「嘎！！」跳起来（还有成就）；天上飘着鲸鱼和月亮，偶尔有飞碟过境</li>
     </ul>
     <h4>三、时间倍速</h4>
     <ul>
@@ -2161,28 +2161,31 @@ var SB = SBX;
   ent.clear = function () { boulders.length = 0; ropes.length = 0; ships.length = 0; parts.length = 0; ropeBuild = null; };
 })();
 /* ============================================================
-   j7_world3d — 真·3D 世界：体素高度场渲染 + 第一人称飞行
-   WASD 移动 · 鼠标看向（指针锁定）· 空格/Shift 升降 · 点击放置方块
-   渲染：逐列射线行军（体素空间算法）+ 距离雾 + 坡面光照 + 水面波光
+   j7_world3d — 真·3D 世界 v2
+   高分渲染（自适应 0.55~1.0 + 抖动去色带）· 手感重做（自动锁鼠标/加速/悬停/贴地）
+   · 整活（橡皮鸭鸭舰队 + 天空鲸 + 飞碟 + 月亮）
    ============================================================ */
 (function () {
   'use strict';
   var SB = window.SBX, T = SB.T, W = SB.W, H = SB.H;
   var w3 = SB.world3d = {};
 
-  var SHEAR = 0.55;          /* 深度错切：让地形沿纵深也有坡面变化 */
-  var FOG_DIST = 170;        /* 距离雾（远处溶进夜空，不露边界） */
-  var FOG = [9, 13, 30];
-  var EYE = 3.4;             /* 行走进地高 */
+  var SHEAR = 0.55;
+  var FOG = [13, 17, 36];
+  var EYE = 3.4;
+  var SPEED = 58;
 
-  var c = w3.cam = { x: 260, z: 0, y: 70, yaw: 1.05, pitch: -0.10, fov: 1.12, tfov: 1.12 };
+  var c = w3.cam = {
+    x: 300, z: 0, y: 70, yaw: 1.0, pitch: -0.10,
+    fov: 1.12, tfov: 1.12, bob: 0, bobPh: 0, vx: 0, vz: 0
+  };
   w3.active = false;
   w3.locked = false;
-  w3.onAction = null;        /* j5 注入：放置方块 / 发射光束 */
+  w3.lockTried = false;
+  w3.onAction = null;
+  w3.clock = 0;
 
-  var BASE = SB.BASE || {};
-
-  /* ---------- 列信息（每帧缓存） ---------- */
+  /* ---------- 列信息 ---------- */
   var colMap = new Map();
   function colInfo(gx) {
     var hit = colMap.get(gx);
@@ -2205,32 +2208,52 @@ var SB = SBX;
     return info;
   }
   w3.colAt = function (gx) { var i = colInfo(Math.floor(gx)); return i ? i.h : 0; };
+  /* 地形被改动后手动失效缓存（渲染每帧自动清，但编辑与读取之间的瞬间需要它） */
+  w3.invalidate = function (gx) {
+    if (gx === undefined) colMap.clear();
+    else colMap.delete(Math.floor(gx));
+  };
 
-  /* ---------- 视角 / 移动 ---------- */
+  /* ---------- 视角 ---------- */
   w3.lookDelta = function (dx, dy) {
-    c.yaw += dx * 0.0031;
-    c.pitch = Math.max(-1.25, Math.min(1.25, c.pitch - dy * 0.0031));
+    if (dx > 140) dx = 140; else if (dx < -140) dx = -140;
+    if (dy > 140) dy = 140; else if (dy < -140) dy = -140;
+    c.yaw += dx * 0.0022;
+    c.pitch = Math.max(-1.25, Math.min(1.25, c.pitch - dy * 0.0022));
   };
   w3.wheelZoom = function (dy) {
     c.tfov = Math.max(0.42, Math.min(1.5, c.tfov * (1 + (dy > 0 ? 1 : -1) * 0.08)));
   };
+  w3.requestLock = function (cv) {
+    w3.lockTried = true;
+    try {
+      var p = cv.requestPointerLock && cv.requestPointerLock();
+      if (p && p.catch) p.catch(function () {});
+    } catch (e) {}
+    return true;
+  };
   w3.enter = function () {
     w3.active = true;
-    c.x = SB.cam ? SB.cam.x : 260;
+    c.x = SB.cam ? SB.cam.x : 300;
     c.z = 0;
     c.y = w3.colAt(c.x + c.z * SHEAR) + 14;
     c.pitch = -0.14;
     c.tfov = c.fov;
+    c.vx = 0; c.vz = 0;
+    ensureDucks(true);
     if (SB.ach) SB.ach('sandbox.dim3d');
   };
   w3.exit = function () {
     w3.active = false; w3.locked = false;
+    try { if (document.exitPointerLock) document.exitPointerLock(); } catch (e) {}
     if (SB.cam) SB.cam.x = c.x;
   };
 
+  /* ---------- 移动 / 手感 ---------- */
+  function eyeY() { return c.y + c.bob; }
   w3.update = function (dt, keys) {
+    w3.clock += dt;
     c.fov += (c.tfov - c.fov) * Math.min(1, dt * 8);
-    var sp = 42;
     var fx = Math.sin(c.yaw), fz = Math.cos(c.yaw);
     var rx = Math.cos(c.yaw), rz = -Math.sin(c.yaw);
     var mx = 0, mz = 0;
@@ -2238,33 +2261,50 @@ var SB = SBX;
     if (keys['s'] || keys['S'] || keys['ArrowDown']) { mx -= fx; mz -= fz; }
     if (keys['a'] || keys['A'] || keys['ArrowLeft']) { mx -= rx; mz -= rz; }
     if (keys['d'] || keys['D'] || keys['ArrowRight']) { mx += rx; mz += rz; }
-    if (mx || mz) {
-      var L = Math.hypot(mx, mz);
-      c.x += mx / L * sp * dt;
-      c.z += mz / L * sp * dt;
-    }
+    var moving = (mx || mz) ? 1 : 0;
+    if (moving) { var L = Math.hypot(mx, mz); mx /= L; mz /= L; }
+    /* 加速度平滑（不再瞬间启停） */
+    var k = Math.min(1, dt * 7);
+    c.vx += (mx * SPEED - c.vx) * k;
+    c.vz += (mz * SPEED - c.vz) * k;
+    c.x += c.vx * dt;
+    c.z += c.vz * dt;
+
     var up = !!(keys[' '] || keys['Space']);
-    var dn = !!(keys['Shift'] || keys['shift'] || keys['ShiftLeft'] || keys['shiftLeft']);
-    if (up) c.y += 32 * dt;
-    if (dn) c.y -= 32 * dt;
+    var dn = !!(keys['Shift'] || keys['shift']);
+    if (up) c.y += 34 * dt;
+    if (dn) c.y -= 34 * dt;
+
+    var ground = w3.colAt(c.x + c.z * SHEAR);
     if (!up && !dn) {
-      var target = w3.colAt(c.x + c.z * SHEAR) + EYE;
-      c.y += (target - c.y) * Math.min(1, dt * 5.5);
-      if (c.y < target - 0.3) c.y = target - 0.3;   /* 不穿地 */
-    }
-    c.y = Math.max(3, Math.min(215, c.y));
-    c.z = Math.max(-70, Math.min(70, c.z));
+      if (c.y > ground + EYE + 2.5) {
+        /* 高空悬停：保持高度（不自动下沉） */
+        c.bob = 0;
+      } else {
+        /* 贴地行走：吸附 + 步伐起伏 */
+        var target = ground + EYE;
+        c.y += (target - c.y) * Math.min(1, dt * 6.5);
+        if (c.y < target - 0.4) c.y = target - 0.4;
+        var spd2 = Math.hypot(c.vx, c.vz);
+        if (spd2 > 6) { c.bobPh += dt * spd2 * 0.22; c.bob = Math.sin(c.bobPh) * 0.28; }
+        else c.bob *= 0.9;
+      }
+    } else c.bob = 0;
+    /* 下降着陆 */
+    if (dn && c.y < ground + EYE) { c.y = ground + EYE; c.bob = 0; }
+    if (c.y < 2.2) c.y = 2.2;
+    if (c.y > 225) c.y = 225;
+    c.z = Math.max(-4000, Math.min(4000, c.z));
+    c.x = Math.max(-1e6, Math.min(1e6, c.x));
     SB.ensureWindow(c.x);
+
+    /* 鸭鸭 / 鲸鱼 / 气泡维护 */
+    streamDucks(dt);
+    updatePopups(dt);
+    whaleFollow(dt);
   };
 
-  /* ---------- 供 j5 的指针事件调用 ---------- */
-  w3.requestLock = function (cv) {
-    if (w3.locked) return false;
-    try {
-      if (cv.requestPointerLock) cv.requestPointerLock();
-    } catch (e) {}
-    return true;
-  };
+  /* ---------- 指针 ---------- */
   w3.pointerDown = function (e, cv) {
     if (!w3.locked) { w3.requestLock(cv); return 'lock'; }
     if (e.button === 0 || e.button === 2) {
@@ -2274,16 +2314,17 @@ var SB = SBX;
     return 'none';
   };
 
-  /* ---------- 准星命中（放置方块 / 标记） ---------- */
+  /* ---------- 准星命中 ---------- */
   w3.centerHit = function () {
     var dx = Math.sin(c.yaw), dz = Math.cos(c.yaw);
     var tanP = Math.tan(c.pitch);
-    for (var tt = 1.2; tt < 430; tt += Math.max(0.85, tt * 0.03)) {
+    var ey = eyeY();
+    for (var tt = 1.2; tt < 360; tt += Math.max(0.9, tt * 0.03)) {
       var wxx = c.x + dx * tt, wzz = c.z + dz * tt;
       var gx = Math.floor(wxx + wzz * SHEAR);
       var info = colInfo(gx);
       if (!info) continue;
-      var rayH = c.y + tanP * tt;
+      var rayH = ey + tanP * tt;
       if (rayH <= info.h) return { t: tt, gx: gx, gy: info.gy, h: info.h };
     }
     return null;
@@ -2295,41 +2336,270 @@ var SB = SBX;
     return hit;
   };
   w3.fireViewBeam = function (ci) {
-    var dx = Math.sin(c.yaw) * Math.cos(c.pitch);
-    var dy = -Math.sin(c.pitch);
-    var L = Math.hypot(dx, dy) || 1;
-    return SB.fx.fireBeam(c.x, H - c.y, dx / L, dy / L, ci || 0);
+    /* 光束在「列空间」模拟：起点 = 玩家所在列，方向 = 视线的列空间方向 */
+    var sinY = Math.sin(c.yaw), cosY = Math.cos(c.yaw);
+    var dCol = sinY + cosY * SHEAR;
+    var dRow = -Math.tan(c.pitch);
+    var L = Math.hypot(dCol, dRow) || 1;
+    return SB.fx.fireBeam(c.x + c.z * SHEAR, H - eyeY(), dCol / L, dRow / L, ci || 0);
   };
 
-  /* ---------- 3D 投影（光束等世界点 → 屏幕） ---------- */
+  /* ---------- 投影 ---------- */
   var _cw = 640, _ch = 400;
   function proj(wx, wy, wz) {
-    var rx = wx - c.x, ry = wy - c.y, rz = wz - c.z;
-    var sy = Math.sin(c.yaw), cy = Math.cos(c.yaw);
+    var rx = wx - c.x, ry = wy - eyeY(), rz = wz - c.z;
+    var sy = Math.sin(c.yaw), cy2 = Math.cos(c.yaw);
     var sp = Math.sin(c.pitch), cp = Math.cos(c.pitch);
-    var fwd = sy * cp * rx + sp * ry + cy * cp * rz;
+    var fwd = sy * cp * rx + sp * ry + cy2 * cp * rz;
     if (fwd < 0.6) return null;
-    var side = cy * rx - sy * rz;
-    var upv = -sy * sp * rx + cp * ry - cy * sp * rz;
+    var side = cy2 * rx - sy * rz;
+    var upv = -sy * sp * rx + cp * ry - cy2 * sp * rz;
     var focal = (_cw / 2) / Math.tan(c.fov / 2);
     return [_cw / 2 + side * focal / fwd, _ch / 2 - upv * focal / fwd, fwd];
   }
   w3.proj = proj;
 
-  /* ---------- 渲染 ---------- */
+  /* ============================================================
+     整活：橡皮鸭鸭 · 天空鲸 · 飞碟 · 月亮
+     ============================================================ */
+  function mkCanvas(w, h) { var cc = document.createElement('canvas'); cc.width = w; cc.height = h; return cc; }
+
+  /* 橡皮鸭鸭 */
+  var duckImg = (function () {
+    var cc = mkCanvas(48, 40), g = cc.getContext('2d');
+    g.lineJoin = 'round';
+    g.fillStyle = '#ffd23f';
+    g.strokeStyle = 'rgba(120,80,10,.55)'; g.lineWidth = 2;
+    g.beginPath(); g.ellipse(21, 26, 15, 10, -0.06, 0, 6.2832); g.fill(); g.stroke();
+    g.beginPath(); g.moveTo(33, 21); g.lineTo(44, 12); g.lineTo(36, 27); g.closePath(); g.fill(); g.stroke();
+    g.beginPath(); g.arc(32, 14, 9, 0, 6.2832); g.fill(); g.stroke();
+    g.fillStyle = '#ff8c42';
+    g.beginPath(); g.moveTo(39, 12); g.lineTo(48, 14.5); g.lineTo(39, 17.5); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = '#2a2a2a';
+    g.beginPath(); g.arc(35, 12, 1.7, 0, 6.2832); g.fill();
+    g.fillStyle = '#fff';
+    g.beginPath(); g.arc(35.6, 11.4, 0.6, 0, 6.2832); g.fill();
+    g.strokeStyle = 'rgba(190,140,20,.9)'; g.lineWidth = 2;
+    g.beginPath(); g.arc(17, 26, 9, 0.5, 2.3); g.stroke();
+    return cc;
+  })();
+
+  /* 天空鲸 */
+  var whaleImg = (function () {
+    var cc = mkCanvas(240, 130), g = cc.getContext('2d');
+    g.fillStyle = '#4a6ea8';
+    g.beginPath();
+    g.moveTo(20, 74);
+    g.quadraticCurveTo(40, 34, 108, 32);
+    g.quadraticCurveTo(180, 30, 208, 52);
+    g.quadraticCurveTo(224, 64, 208, 78);
+    g.quadraticCurveTo(180, 98, 108, 98);
+    g.quadraticCurveTo(40, 98, 20, 74);
+    g.closePath();
+    g.fill();
+    /* 尾 */
+    g.beginPath();
+    g.moveTo(24, 70); g.quadraticCurveTo(6, 52, 2, 40); g.quadraticCurveTo(16, 52, 30, 60); g.closePath(); g.fill();
+    g.beginPath();
+    g.moveTo(24, 78); g.quadraticCurveTo(8, 94, 4, 108); g.quadraticCurveTo(18, 94, 32, 86); g.closePath(); g.fill();
+    /* 肚子 */
+    g.fillStyle = '#cfe3f7';
+    g.beginPath();
+    g.moveTo(60, 88);
+    g.quadraticCurveTo(120, 104, 186, 86);
+    g.quadraticCurveTo(150, 96, 100, 94);
+    g.quadraticCurveTo(76, 92, 60, 88);
+    g.closePath(); g.fill();
+    /* 鳍 */
+    g.fillStyle = '#3d5d8f';
+    g.beginPath(); g.moveTo(96, 78); g.quadraticCurveTo(104, 100, 84, 106); g.quadraticCurveTo(90, 88, 96, 78); g.closePath(); g.fill();
+    /* 眼 */
+    g.fillStyle = '#fff';
+    g.beginPath(); g.arc(172, 58, 6.4, 0, 6.2832); g.fill();
+    g.fillStyle = '#16233c';
+    g.beginPath(); g.arc(174, 58, 3.1, 0, 6.2832); g.fill();
+    /* 微笑 */
+    g.strokeStyle = 'rgba(20,32,58,.75)'; g.lineWidth = 2;
+    g.beginPath(); g.arc(160, 70, 14, 0.35, 1.35); g.stroke();
+    /* 喷水小气泡 */
+    g.fillStyle = 'rgba(200,235,255,.85)';
+    g.beginPath(); g.arc(150, 22, 4, 0, 6.2832); g.fill();
+    g.beginPath(); g.arc(162, 14, 2.6, 0, 6.2832); g.fill();
+    g.beginPath(); g.arc(140, 12, 2, 0, 6.2832); g.fill();
+    return cc;
+  })();
+
+  /* 飞碟（预渲染，光晕动态画） */
+  var saucerImg = (function () {
+    var cc = mkCanvas(112, 56), g = cc.getContext('2d');
+    g.fillStyle = '#cdd7f2';
+    g.beginPath(); g.ellipse(56, 36, 46, 12, 0, 0, 6.2832); g.fill();
+    g.fillStyle = '#9fb0d8';
+    g.beginPath(); g.ellipse(56, 40, 46, 8, 0, 0, 6.2832); g.fill();
+    g.fillStyle = 'rgba(140,230,255,.95)';
+    g.beginPath(); g.arc(56, 22, 17, 3.1416, 0); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.5)';
+    g.beginPath(); g.arc(50, 16, 5, 0, 6.2832); g.fill();
+    return cc;
+  })();
+
+  /* 月亮 */
+  var moonImg = (function () {
+    var cc = mkCanvas(360, 360), g = cc.getContext('2d');
+    var rg = g.createRadialGradient(180, 180, 40, 180, 180, 180);
+    rg.addColorStop(0, 'rgba(255,246,225,.95)');
+    rg.addColorStop(0.32, 'rgba(255,240,214,.55)');
+    rg.addColorStop(0.6, 'rgba(210,220,255,.16)');
+    rg.addColorStop(1, 'rgba(190,205,255,0)');
+    g.fillStyle = rg; g.fillRect(0, 0, 360, 360);
+    g.fillStyle = '#fdf6e3';
+    g.beginPath(); g.arc(180, 180, 78, 0, 6.2832); g.fill();
+    g.fillStyle = 'rgba(214,205,182,.75)';
+    g.beginPath(); g.arc(158, 152, 12, 0, 6.2832); g.fill();
+    g.beginPath(); g.arc(200, 196, 9, 0, 6.2832); g.fill();
+    g.beginPath(); g.arc(186, 142, 6, 0, 6.2832); g.fill();
+    g.beginPath(); g.arc(150, 202, 5, 0, 6.2832); g.fill();
+    /* 阴影让月亮有立体感 */
+    var sg = g.createRadialGradient(206, 170, 70, 186, 186, 100);
+    sg.addColorStop(0, 'rgba(120,120,150,.28)');
+    sg.addColorStop(1, 'rgba(120,120,150,0)');
+    g.fillStyle = sg;
+    g.beginPath(); g.arc(180, 180, 78, 0, 6.2832); g.fill();
+    return cc;
+  })();
+
+  /* ---------- 鸭鸭舰队 ---------- */
+  var ducks = w3.ducks = [];
+  var duckTimer = 0, quackTimer = 3 + Math.random() * 5;
+  function addDuck(gx, z, force) {
+    colMap.delete(Math.floor(gx));
+    var info = colInfo(Math.floor(gx));
+    if (!info) return null;
+    if (!force && info.top !== T.WATER) return null;
+    var zz = z === undefined ? (Math.random() - 0.5) * 90 : z;
+    var d = {
+      x: gx - zz * SHEAR, z: zz,
+      baseY: info.h + 1.0,
+      y: info.h + 1.0,
+      ph: Math.random() * 6.28,
+      hopY: 0, hopV: 0, quackT: 0,
+      size: 4.4,
+      aspect: 48 / 40
+    };
+    ducks.push(d);
+    if (ducks.length > 10) ducks.shift();
+    return d;
+  }
+  w3.addDuck = addDuck;
+  function ensureDucks(initial) {
+    var want = initial ? 3 : 5;
+    for (var i = 0; i < 14 && ducks.length < want; i++) {
+      var z = (Math.random() - 0.5) * (initial ? 70 : 150);
+      var gx = Math.round(c.x + c.z * SHEAR + (Math.random() - 0.5) * (initial ? 130 : 220));
+      addDuck(gx, z, false);
+    }
+  }
+  function streamDucks(dt) {
+    duckTimer -= dt;
+    if (duckTimer <= 0) { duckTimer = 1.4; ensureDucks(false); }
+    var t = w3.clock;
+    for (var i = ducks.length - 1; i >= 0; i--) {
+      var d = ducks[i];
+      if (Math.abs(d.x - c.x) > 400 || Math.abs(d.z - c.z) > 300) { ducks.splice(i, 1); continue; }
+      d.y = d.baseY + Math.sin(t * 1.6 + d.ph) * 0.4 + d.hopY;
+      if (d.hopV !== 0 || d.hopY > 0) {
+        d.hopY += d.hopV * dt;
+        d.hopV -= 26 * dt;
+        if (d.hopY <= 0) { d.hopY = 0; d.hopV = 0; }
+      }
+      if (d.quackT > 0) d.quackT -= dt;
+    }
+    /* 偶尔自己嘎一声 */
+    quackTimer -= dt;
+    if (quackTimer <= 0 && ducks.length) {
+      quackTimer = 9 + Math.random() * 10;
+      var dq = ducks[(Math.random() * ducks.length) | 0];
+      if (Math.abs(dq.x - c.x) < 130 && dq.quackT <= 0) {
+        dq.quackT = 1.4; dq.hopV = 1.6;
+        popup(dq.x, dq.baseY + 6, dq.z, Math.random() < 0.5 ? '嘎！' : '嘎嘎！', '#ffd23f');
+      }
+    }
+  }
+  w3.tryDuckClick = function () {
+    var best = null, bestD = 1e9;
+    for (var i = 0; i < ducks.length; i++) {
+      var d = ducks[i];
+      var pr = proj(d.x, d.y + d.size * 0.45, d.z);
+      if (!pr) continue;
+      var focal = (_cw / 2) / Math.tan(c.fov / 2);
+      var hpx = focal * d.size / pr[2];
+      var wpx = hpx * d.aspect;
+      var dx = pr[0] - _cw / 2, dy = pr[1] - _ch / 2;
+      if (Math.abs(dx) < wpx * 0.75 && Math.abs(dy) < hpx * 0.85 && pr[2] < 140) {
+        if (pr[2] < bestD) { bestD = pr[2]; best = d; }
+      }
+    }
+    if (!best) return null;
+    best.hopV = 3.4; best.quackT = 1.6;
+    popup(best.x, best.y + 7, best.z, '嘎！！', '#ffd23f');
+    /* 金色小火花 */
+    for (var k = 0; k < 8; k++) {
+      SB.entities.spawnP(best.x, best.baseY + best.size, {
+        vx: (Math.random() - 0.5) * 3, vy: 0.5 + Math.random() * 1.6,
+        life: 0.5 + Math.random() * 0.4, r: 255, g: 214, b: 90, size: 0.8, grav: 0.12
+      });
+    }
+    if (SB.ach) SB.ach('sandbox.duck');
+    return best;
+  };
+
+  /* ---------- 天空鲸 ---------- */
+  var whale = w3.whale = { x: 300, y: 108, z: -120, size: 26, aspect: 240 / 130 };
+  function whaleFollow(dt) {
+    var t = w3.clock;
+    whale.x = c.x + Math.sin(t * 0.055) * 230;
+    whale.z = c.z - 130 + Math.sin(t * 0.037) * 150;
+    whale.y = 105 + Math.sin(t * 0.11) * 12;
+  }
+  whaleFollow(0);
+
+  /* ---------- 弹窗（嘎！） ---------- */
+  var popups = w3.popups = [];
+  function popup(x, y, z, txt, color) {
+    popups.push({ x: x, y: y, z: z, txt: txt, t: 0, color: color || '#fff' });
+    if (popups.length > 8) popups.shift();
+  }
+  w3.popup = popup;
+  function updatePopups(dt) {
+    for (var i = popups.length - 1; i >= 0; i--) {
+      popups[i].t += dt;
+      popups[i].y += dt * 3.4;
+      if (popups[i].t > 1.6) popups.splice(i, 1);
+    }
+  }
+
+  /* ============================================================
+     渲染
+     ============================================================ */
   var lc = document.createElement('canvas');
   var lx2 = lc.getContext('2d');
   var img = null, d32 = null, lw = 0, lh = 0;
   var hbuf = new Float32Array(4096);
+  var dTop = new Float32Array(4096);
+  var QUAL = [0.55, 0.65, 0.75, 0.85, 1.0];
+  var qi = 3, scale = QUAL[qi];
+  var ema = 8, manualHold = 0;
 
   function ensureBuf(cw2, ch2) {
-    lw = Math.max(200, cw2 >> 1);
-    lh = Math.max(140, ch2 >> 1);
-    if (lc.width !== lw || lc.height !== lh) {
+    var nw = Math.max(240, Math.round(cw2 * scale));
+    var nh = Math.max(160, Math.round(nw * ch2 / cw2));
+    if (lc.width !== nw || lc.height !== nh) {
+      lw = nw; lh = nh;
       lc.width = lw; lc.height = lh;
       img = lx2.createImageData(lw, lh);
       d32 = new Uint32Array(img.data.buffer);
       hbuf = new Float32Array(lw + 2);
+      dTop = new Float32Array(lw + 2);
     }
   }
   function pack(r, g, b, a) {
@@ -2338,36 +2608,70 @@ var SB = SBX;
     if (b < 0) b = 0; else if (b > 255) b = 255;
     return ((a << 24) | ((b | 0) << 16) | ((g | 0) << 8) | (r | 0)) >>> 0;
   }
+  function adapt(ms) {
+    ema = ema * 0.88 + ms * 0.12;
+    if (manualHold > 0) { manualHold--; return; }
+    if (ema > 12.5 && qi > 0) { qi--; scale = QUAL[qi]; ema = 8; }
+    else if (ema < 6.5 && qi < QUAL.length - 1) { qi++; scale = QUAL[qi]; ema = 7; }
+  }
+  w3.quality = function () { return { scale: scale, lw: lw, lh: lh, ema: +ema.toFixed(1) }; };
+  w3.setQuality = function (s) {
+    var best = 0;
+    for (var i = 0; i < QUAL.length; i++) if (Math.abs(QUAL[i] - s) < Math.abs(QUAL[best] - s)) best = i;
+    qi = best; scale = QUAL[qi];
+    manualHold = 120;   /* 手动选择保留 ~2 秒，不被自适应立刻收回 */
+    ema = 9;
+  };
+  /* 兼容旧钩子 */
+  w3.setCam = function (x, y, z) {
+    if (x !== undefined) c.x = x;
+    if (y !== undefined) c.y = y;
+    if (z !== undefined) c.z = z;
+    return { x: c.x, y: c.y, z: c.z };
+  };
+  w3.setLook = function (yaw, pitch) {
+    if (yaw !== undefined) c.yaw = yaw;
+    if (pitch !== undefined) c.pitch = Math.max(-1.25, Math.min(1.25, pitch));
+    return { yaw: c.yaw, pitch: c.pitch };
+  };
+  w3.camInfo = function () {
+    return { x: c.x, y: c.y, z: c.z, yaw: c.yaw, pitch: c.pitch, fov: c.fov, bob: c.bob };
+  };
 
-  w3.render = function (ctx, cw2, ch2, tsec) {
+  /* 单帧 3D 渲染 */
+  w3.render = function (ctx2, cw2, ch2, tsec) {
     _cw = cw2; _ch = ch2;
-    SB.sky.renderSky(ctx, cw2, ch2);
+    var t0 = performance.now();
+    SB.sky.renderSky(ctx2, cw2, ch2);
     ensureBuf(cw2, ch2);
     colMap.clear();
     var t = tsec || 0;
     var focal = (cw2 / 2) / Math.tan(c.fov / 2);
+    var ey = eyeY();
     var horizon = ch2 / 2 + Math.tan(c.pitch) * focal;
-    for (var i = 0; i < lw; i++) hbuf[i] = lh;
+    for (var i = 0; i < lw; i++) { hbuf[i] = lh; dTop[i] = -1; }
 
+    /* —— 地形（逐列射线行军） —— */
     for (var col = 0; col < lw; col++) {
-      var sxc = col * 2 + 1;
+      var sxc = col * cw2 / lw;
       var ang = c.yaw + Math.atan2(sxc - cw2 / 2, focal);
       var dx = Math.sin(ang), dz = Math.cos(ang);
       var prevH = -999;
-      for (var tt = 1.2; tt < 430; tt += Math.max(0.85, tt * 0.03)) {
+      for (var tt = 1.2; tt < 360; tt += Math.max(0.9, tt * 0.03)) {
         var wxx = c.x + dx * tt;
         var wzz = c.z + dz * tt;
-        var info = colInfo(Math.floor(wxx + wzz * SHEAR));
+        var gx = Math.floor(wxx + wzz * SHEAR);
+        var info = colInfo(gx);
         if (!info) { prevH = -999; continue; }
         var hh = info.h;
         if (info.top === T.WATER) hh += Math.sin(t * 2.2 + wxx * 0.35) * 0.18;
-        var sy = horizon - (hh - c.y) * focal / tt;
+        var sy = horizon - (hh - ey) * focal / tt;
         if (sy >= hbuf[col]) { prevH = info.h; continue; }
         var yTop = sy | 0; if (yTop < 0) yTop = 0;
         var yBot = hbuf[col] | 0; if (yBot > lh) yBot = lh;
         if (yTop < yBot) {
-          /* 颜色：材质 + 热光 + 坡面明暗 + 距离雾 */
-          var bt = BASE[info.top] || [150, 150, 160];
+          if (dTop[col] < 0) dTop[col] = tt;
+          var bt = (SB.BASE && SB.BASE[info.top]) || [150, 150, 160];
           var r = bt[0], g = bt[1], b = bt[2];
           if (info.top === T.WATER) {
             var sh = 1 + 0.10 * Math.sin(t * 2.6 + wzz * 0.4 + wxx * 0.2);
@@ -2381,15 +2685,22 @@ var SB = SBX;
             g = Math.min(255, g * 0.6 + 140 * 0.42);
             b = b * 0.6 + 50 * 0.42;
           }
+          /* 坡面明暗：横向坡度 + 沿线坡度 */
+          var info2 = colInfo(gx + 1);
+          var dhx = info2 ? (info2.h - info.h) : 0;
+          var sf = 1 + Math.max(-0.24, Math.min(0.26, dhx * 0.013));
           if (prevH > -900) {
             var dh = info.h - prevH;
-            var sf = 1 + Math.max(-0.35, Math.min(0.35, dh * 0.02));
-            r *= sf; g *= sf; b *= sf;
+            sf *= 1 + Math.max(-0.2, Math.min(0.2, dh * 0.012));
           }
-          var fogK = Math.exp(-tt / FOG_DIST);
+          r *= sf; g *= sf; b *= sf;
+          var fogK = Math.exp(-tt / 150);
           r = r * fogK + FOG[0] * (1 - fogK);
           g = g * fogK + FOG[1] * (1 - fogK);
           b = b * fogK + FOG[2] * (1 - fogK);
+          /* 抖动去色带（邻列反相） */
+          var dth = ((col + yTop) & 1) ? 1.1 : -1.1;
+          r += dth; g += dth; b += dth;
           var colr = pack(r, g, b, 255);
           for (var yy = yTop; yy < yBot; yy++) d32[yy * lw + col] = colr;
           hbuf[col] = yTop;
@@ -2399,52 +2710,156 @@ var SB = SBX;
       }
     }
     lx2.putImageData(img, 0, 0);
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(lc, 0, 0, lw, lh, 0, 0, cw2, ch2);
-    ctx.imageSmoothingEnabled = true;
-    /* 光束投影（世界坐标 → 3D 屏幕） */
-    renderBeams3D(ctx);
+
+    /* —— 精灵：按视线遮挡分两组（远组先画，被地形盖；近组后画，盖地形） —— */
+    drawMoon(ctx2, focal);
+    drawSprites(ctx2, focal, false);
+
+    /* —— 地形上屏 —— */
+    ctx2.imageSmoothingEnabled = true;
+    ctx2.drawImage(lc, 0, 0, lw, lh, 0, 0, cw2, ch2);
+
+    /* —— 近组精灵（视线无遮挡，画在地形之上） —— */
+    drawSprites(ctx2, focal, true);
+
+    /* —— 光束 —— */
+    renderBeams3D(ctx2);
+
+    /* —— 嘎！弹窗 —— */
+    drawPopups(ctx2, focal);
+
+    adapt(performance.now() - t0);
   };
 
-  function renderBeams3D(ctx) {
+  /* 视线遮挡检测：相机 → 目标点 的直线有没有被地形挡住 */
+  function losClear(x, y, z) {
+    var dx = x - c.x, dz = z - c.z;
+    var dist = Math.hypot(dx, dz);
+    if (dist < 1.5) return true;
+    var steps = Math.min(80, Math.max(8, Math.round(dist / 2)));
+    var ey = eyeY();
+    for (var i = 1; i <= steps; i++) {
+      var f = i / steps;
+      var wx = c.x + dx * f, wz = c.z + dz * f;
+      var colH = w3.colAt(wx + wz * SHEAR);
+      var rayH = ey + (y - ey) * f;
+      if (colH > rayH + 0.25) return false;
+    }
+    return true;
+  }
+
+  function drawMoon(ctx2, focal) {
+    var mx = c.x + Math.cos(2.35) * 2600;
+    var mz = c.z + Math.sin(2.35) * 2600;
+    var pr = proj(mx, 900, mz);
+    if (!pr) return;
+    var size = focal * 700 / pr[2];
+    ctx2.drawImage(moonImg, pr[0] - size / 2, pr[1] - size / 2, size, size);
+  }
+
+  function drawSprites(ctx2, focal, wantNear) {
+    /* 鲸鱼 */
+    (function () {
+      var near = losClear(whale.x, whale.y, whale.z);
+      if (near !== wantNear) return;
+      var pr = proj(whale.x, whale.y, whale.z);
+      if (!pr) return;
+      var hpx = focal * whale.size / pr[2];
+      var wpx = hpx * whale.aspect;
+      if (hpx > 3) {
+        ctx2.save();
+        ctx2.globalAlpha = 0.96;
+        ctx2.drawImage(whaleImg, pr[0] - wpx / 2, pr[1] - hpx / 2, wpx, hpx);
+        ctx2.restore();
+      }
+    })();
+    /* 鸭鸭 */
+    for (var i = 0; i < ducks.length; i++) {
+      var d = ducks[i];
+      var nearD = losClear(d.x, d.y + d.size * 0.5, d.z);
+      if (nearD !== wantNear) continue;
+      var pd = proj(d.x, d.y + d.size * 0.45, d.z);
+      if (!pd) continue;
+      var h2 = focal * d.size / pd[2];
+      if (h2 < 2.5) continue;
+      var w2 = h2 * d.aspect;
+      ctx2.drawImage(duckImg, pd[0] - w2 / 2, pd[1] - h2 * 0.85, w2, h2);
+    }
+    /* 飞碟 */
+    var ships = SB.entities.ships;
+    for (var s = 0; s < ships.length; s++) {
+      var sh = ships[s];
+      var sy2 = H - sh.y;
+      var nearS = losClear(sh.x, sy2, 0);
+      if (nearS !== wantNear) continue;
+      var ps = proj(sh.x, sy2, 0);
+      if (!ps) continue;
+      var hs = focal * 5.4 / ps[2];
+      if (hs < 2) continue;
+      var ws = hs * 2;
+      ctx2.save();
+      ctx2.globalCompositeOperation = 'lighter';
+      var gcol = ['130,240,220', '170,150,255', '255,190,120', '140,255,180', '255,150,220'][sh.ci % 5];
+      var gl = ctx2.createRadialGradient(ps[0], ps[1], 1, ps[0], ps[1], ws * 1.4);
+      gl.addColorStop(0, 'rgba(' + gcol + ',.55)');
+      gl.addColorStop(1, 'rgba(' + gcol + ',0)');
+      ctx2.fillStyle = gl;
+      ctx2.fillRect(ps[0] - ws * 1.4, ps[1] - ws * 1.4, ws * 2.8, ws * 2.8);
+      ctx2.restore();
+      ctx2.drawImage(saucerImg, ps[0] - ws / 2, ps[1] - hs / 2, ws, hs);
+    }
+  }
+
+  function drawPopups(ctx2, focal) {
+    for (var i = 0; i < popups.length; i++) {
+      var p = popups[i];
+      var pr = proj(p.x, p.y, p.z);
+      if (!pr) continue;
+      var a = Math.min(1, (1.6 - p.t) / 0.5);
+      var fs = Math.max(14, Math.min(46, focal * 2.6 / pr[2]));
+      ctx2.save();
+      ctx2.globalAlpha = a;
+      ctx2.font = '800 ' + fs + 'px system-ui, sans-serif';
+      ctx2.textAlign = 'center';
+      ctx2.lineWidth = Math.max(2, fs * 0.12);
+      ctx2.strokeStyle = 'rgba(10,14,26,.85)';
+      ctx2.strokeText(p.txt, pr[0], pr[1]);
+      ctx2.fillStyle = p.color;
+      ctx2.fillText(p.txt, pr[0], pr[1]);
+      ctx2.restore();
+    }
+  }
+
+  function renderBeams3D(ctx2) {
     var beams = SB.fx.beams;
     if (!beams || !beams.length) return;
-    ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
+    ctx2.save();
+    ctx2.globalCompositeOperation = 'lighter';
     for (var i = 0; i < beams.length; i++) {
       var bm = beams[i];
       var pts = bm.pts;
       if (pts.length < 4) continue;
       var a = bm.ttl < 60 ? Math.max(0, bm.ttl / 60) : 1;
-      ctx.globalAlpha = 0.85 * a;
-      ctx.strokeStyle = 'rgb(' + Math.min(255, bm.r + 60) + ',' + Math.min(255, bm.g + 60) + ',' + Math.min(255, bm.b + 60) + ')';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
+      ctx2.globalAlpha = 0.85 * a;
+      ctx2.strokeStyle = 'rgb(' + Math.min(255, bm.r + 60) + ',' + Math.min(255, bm.g + 60) + ',' + Math.min(255, bm.b + 60) + ')';
+      ctx2.lineWidth = 2;
+      ctx2.beginPath();
       var started = false;
       for (var p = 0; p < pts.length; p += 2) {
-        var pr = proj(pts[p], H - pts[p + 1], c.z);
+        /* 列空间 → 世界：假定在相机的 z 深度平面上（列位置保持一致） */
+        var pr = proj(pts[p] - c.z * SHEAR, H - pts[p + 1], c.z);
         if (!pr) { started = false; continue; }
-        if (!started) { ctx.moveTo(pr[0], pr[1]); started = true; }
-        else ctx.lineTo(pr[0], pr[1]);
+        if (!started) { ctx2.moveTo(pr[0], pr[1]); started = true; }
+        else ctx2.lineTo(pr[0], pr[1]);
       }
-      ctx.stroke();
+      ctx2.stroke();
     }
-    ctx.restore();
+    ctx2.restore();
   }
 
-  /* ---------- 测试钩子 ---------- */
-  w3.setCam = function (x, y, z) {
-    if (x !== undefined) c.x = x;
-    if (y !== undefined) c.y = y;
-    if (z !== undefined) c.z = z;
-    return { x: c.x, y: c.y, z: c.z };
+  w3.stats = function () {
+    return { ducks: ducks.length, whales: 1, popups: popups.length, saucers: SB.entities.ships.length };
   };
-  w3.setLook = function (yaw, pitch) {
-    if (yaw !== undefined) c.yaw = yaw;
-    if (pitch !== undefined) c.pitch = Math.max(-1.25, Math.min(1.25, pitch));
-    return { yaw: c.yaw, pitch: c.pitch };
-  };
-  w3.camInfo = function () { return { x: c.x, y: c.y, z: c.z, yaw: c.yaw, pitch: c.pitch, fov: c.fov }; };
 })();
 /* ============================================================
    j5_ui — 主控制 v3：自由相机 · 2D⇄真3D（潜入过渡）· 倍速 · 渲染管线
@@ -2696,9 +3111,11 @@ var SB = SBX;
     SB.ach && SB.ach('sandbox.aurora');
   }
 
-  /* 3D 里的「点击放置」：方块 → 画一笔；光束笔 → 朝视线发射 */
+  /* 3D 里的「点击放置」：先看有没有鸭鸭可撸；方块 → 画一笔；光束笔 → 朝视线发射 */
   if (w3) {
     w3.onAction = function (erase, hit) {
+      var duck = w3.tryDuckClick && w3.tryDuckClick();
+      if (duck) { toast('🦆 嘎！！'); return; }
       if (cur.tool === 'beam') { w3.fireViewBeam(0); return; }
       if (!hit) hit = w3.centerHit();
       if (!hit) return;
@@ -2817,11 +3234,14 @@ var SB = SBX;
   document.getElementById('btnHelp').addEventListener('click', function () { showModal('helpModal'); });
   document.getElementById('btnAch').addEventListener('click', function () { showModal('achModal'); });
 
-  /* 2D ⇄ 3D 切换（带潜入过渡动画） */
+  /* 2D ⇄ 3D 切换（带潜入过渡动画；进入时顺手锁定鼠标） */
   function toggleDim() {
-    m3Target = m3Target > 0.5 ? 0 : 1;
+    var turningOn = m3Target <= 0.5;
+    m3Target = turningOn ? 1 : 0;
     btnDim.classList.toggle('on', m3Target === 1);
     btnDim.querySelector('.lbl').textContent = m3Target === 1 ? '回到平面' : '3D 世界';
+    /* 在用户手势里请求指针锁定（像 MC 那样点进去就能用鼠标转视角） */
+    if (turningOn && w3 && !w3.locked) { try { w3.requestLock(cv); } catch (e) {} }
   }
   btnDim.addEventListener('click', toggleDim);
 
@@ -2892,6 +3312,7 @@ var SB = SBX;
       var tsec = SB.sky.time();
       w3.render(ctx, cw, ch, tsec);
       drawCrosshair(cw, ch);
+      drawLockHint(cw, ch);
       ctx.drawImage(vig, 0, 0, cw, ch);
       drawTransition(cw, ch);
       if (shakeT > 0) { shakeT -= 0.045; if (shakeT <= 0) { shakeT = 0; shakeMag = 0; } }
@@ -2938,6 +3359,30 @@ var SB = SBX;
     }
     drawTransition(cw, ch);
     if (shakeT > 0) { shakeT -= 0.045; if (shakeT <= 0) { shakeT = 0; shakeMag = 0; } }
+  }
+
+  /* 未锁定鼠标时的提示（像网页版 FPS 那样） */
+  function drawLockHint(cw, ch) {
+    if (!in3D() || w3.locked || m3Prog < 0.6) return;
+    var txt = '点击画面锁定鼠标 · WASD 移动 · 空格/Shift 升降 · ESC 解锁';
+    ctx.save();
+    ctx.font = '700 13px system-ui, -apple-system, sans-serif';
+    var tw = ctx.measureText(txt).width;
+    var bx = cw / 2 - tw / 2 - 16, by = ch - 84;
+    ctx.fillStyle = 'rgba(8,12,24,.74)';
+    ctx.beginPath();
+    var r = 10, bw = tw + 32, bh = 34;
+    ctx.moveTo(bx + r, by);
+    ctx.arcTo(bx + bw, by, bx + bw, by + bh, r);
+    ctx.arcTo(bx + bw, by + bh, bx, by + bh, r);
+    ctx.arcTo(bx, by + bh, bx, by, r);
+    ctx.arcTo(bx, by, bx + bw, by, r);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.9)';
+    ctx.textAlign = 'center';
+    ctx.fillText(txt, cw / 2, by + 22);
+    ctx.restore();
   }
 
   /* 准星 */
@@ -3128,9 +3573,11 @@ var SB = SBX;
     },
     clearFx: function () { SB.fx.clear(); },
     setDim: function (v) {
+      var turningOn = v && m3Target <= 0.5;
       m3Target = v ? 1 : 0;
       btnDim.classList.toggle('on', m3Target === 1);
       btnDim.querySelector('.lbl').textContent = m3Target === 1 ? '回到平面' : '3D 世界';
+      if (turningOn && w3 && !w3.locked) { try { w3.requestLock(cv); } catch (e) {} }
     },
     toggleDim: toggleDim,
     speed: function () { return speed; },
@@ -3149,6 +3596,16 @@ var SB = SBX;
     w3hit: function () { return w3.centerHit(); },
     w3paint: function () { return w3.paintAtCrosshair(); },
     w3beam: function () { return !!w3.fireViewBeam(0); },
+    w3quality: function () { return w3.quality(); },
+    w3setQuality: function (s) { w3.setQuality(s); return w3.quality(); },
+    w3ducks: function () { return w3.ducks; },
+    w3addDuck: function (gx, z) { return !!w3.addDuck(gx, z, true); },
+    w3tryDuck: function () { return w3.tryDuckClick(); },
+    w3invalidate: function (gx) { w3.invalidate(gx); },
+    w3locked: function () { return w3.locked; },
+    w3lockTried: function () { return w3.lockTried; },
+    w3stats: function () { return w3.stats(); },
+    w3popups: function () { return w3.popups; },
     sampleView: function (x, y) {
       var lx = Math.round(x - SB.winX0), ly = Math.round(y);
       if (lx < 0 || lx >= W || ly < 0 || ly >= H) return null;
@@ -3225,6 +3682,7 @@ var SB = SBX;
     { id: 'sandbox.star', em: '🛸', name: '星域来客', desc: '目击星域舰队过境' },
     { id: 'sandbox.dim3d', em: '🧊', name: '升维者', desc: '飞进 3D 世界看一看' },
     { id: 'sandbox.block3d', em: '🧱', name: '空中造物', desc: '在 3D 世界里放置方块' },
+    { id: 'sandbox.duck', em: '🦆', name: '鸭鸭好朋友', desc: '在 3D 世界里撸一把鸭鸭' },
     { id: 'sandbox.far', em: '🧭', name: '星海拓荒', desc: '向远方探索超过 2000 格' },
     { id: 'sandbox.speed', em: '⏩', name: '快进人生', desc: '把世界开到 16 倍速' },
     { id: 'sandbox.gravity', em: '🙃', name: '重力反转', desc: '触发了藏在沙盒里的老秘技', hidden: true }
