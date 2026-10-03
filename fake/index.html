@@ -207,6 +207,8 @@ body.arg-wait #status::after{content:'▍';margin-left:3px;color:#7ba6cf;animati
     if (/为什么|为啥|怎么会|咋/.test(t)) return pick(CHAT_REPLIES.why);
     if (/可爱|喜欢|爱你|厉害|牛|赞|棒/.test(t)) return pick(CHAT_REPLIES.love);
     if (/等什么|等谁|名字|密码|怎么开|开门/.test(t)) return '它在等一个名字。八个字母……你一路攒的那些，拼起来就是。';
+    /* 纯字母的猜测（5~12 个字母，不是那个名字）→ 温和提示 */
+    if (/^[a-zA-Z]{5,12}$/.test(String(t).trim())) return '唔……这个词它没反应。再想想？八个字母哦。';
     return pick(CHAT_REPLIES.other);
   }
   function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
@@ -253,6 +255,20 @@ body.arg-wait #status::after{content:'▍';margin-left:3px;color:#7ba6cf;animati
     askCount++;
     addMsg('me', txt);
     $('opts').innerHTML = '';
+    /* 🔮 ARG：在聊天框里打出那个名字，也开门（比盲敲键盘更自然的路） */
+    if (String(txt).replace(/\s+/g, '').toLowerCase().indexOf('estheria') >= 0) {
+      setTimeout(function () {
+        var A = window.__fakeARG || {};
+        if (A.stuckNow && A.stuckNow()) {
+          addMsg('sys', '……你在叫我？');
+          setTimeout(function () { if (A.gate) A.gate(); }, 1100);
+        } else {
+          addMsg('sys', '……不是现在。等它卡住的时候，再说这个名字。');
+          renderOpts([['好吧', '好吧']]);
+        }
+      }, 520);
+      return;
+    }
     setTimeout(function () {
       addMsg('sys', matchReply(txt));
       if (askCount >= 2 && !stuckDone) endShow();
@@ -417,7 +433,7 @@ body.arg-wait #status::after{content:'▍';margin-left:3px;color:#7ba6cf;animati
     setInterval(sync, 800);
     sync();
   })();
-  window.__fakeARG = { force: openGate };
+  window.__fakeARG = { force: openGate, gate: openGate, stuckNow: stuckNow };
 })();
 </script>
 </body>
