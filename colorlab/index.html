@@ -71,6 +71,7 @@
   }
   .btn-g:hover{border-color:var(--accent)}
   .btn-row{display:flex;gap:10px;margin-top:4px}
+  .arg-moonchip{margin-top:10px;font-size:12.5px;font-weight:700;color:#aebef5;background:rgba(120,140,220,.1);border:1px dashed rgba(130,160,255,.35);border-radius:10px;padding:8px 12px;letter-spacing:.4px}
   .tip{font-size:11.5px;line-height:1.7;color:var(--ink3);margin-top:12px}
   /* —— 预览样板间 —— */
   .pv-nav{
@@ -142,6 +143,7 @@
         <button class="btn btn-g" id="btnReset" type="button">↺ 重置</button>
         <button class="btn btn-g" id="argMoon" type="button" title="……某个很深很深的夜里调出来的">🌙 深夜的灵感</button>
       </div>
+      <div class="arg-moonchip" id="argMoonChip" style="display:none"></div>
       <p class="tip">文字黑白会根据底色明暗自动判定；卡片、线条、按钮、阴影、玻璃导航全部由这两色派生。深色底也能玩。</p>
     </section>
     <section class="panel">
@@ -421,28 +423,49 @@ setTimeout(function () { STAch.unlock('site.colorlab', '调色师', '🎨'); }, 
 </script>
 
 <script>
-/* 🔮 ARG · 配色实验室：深夜的蓝配月光 */
+/* 🔮 ARG · 配色实验室：深夜的蓝配月光（感知判定 v2：不再死抠色号） */
 (function () {
   'use strict';
-  var BLUE = '#0a0f26', MOON = '#eef4ff', TOL = 24;
   function hex2rgb(h) {
-    h = (h || '').replace('#', '');
+    h = String(h || '').replace('#', '');
     if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
     return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
   }
-  function near(a, b) {
-    var A = hex2rgb(a), B = hex2rgb(b);
-    if (isNaN(A[0]) || isNaN(B[0])) return false;
-    return Math.abs(A[0] - B[0]) <= TOL && Math.abs(A[1] - B[1]) <= TOL && Math.abs(A[2] - B[2]) <= TOL;
+  /* 深夜的蓝：深 + 偏蓝（人眼说了算：#0a0f26 ~ #1c2c50 这一带都算） */
+  function isBlue(c) {
+    if (isNaN(c[0])) return false;
+    var sum = c[0] + c[1] + c[2];
+    return c[0] <= 55 && c[1] <= 70 && c[2] <= 110 && c[2] > c[0] && sum < 200;
   }
+  /* 月光：很浅、接近中性的白（#fff、#f0f0f0、#eef4ff、#e0e6f0 都算） */
+  function isMoon(c) {
+    if (isNaN(c[0])) return false;
+    var mn = Math.min(c[0], c[1], c[2]), mx = Math.max(c[0], c[1], c[2]);
+    return mn >= 195 && (mx - mn) <= 60;
+  }
+  var chip = document.getElementById('argMoonChip');
   function check() {
     var bEl = document.getElementById('cBg'), aEl = document.getElementById('cAc');
     if (!bEl || !aEl) return;
     var bg = bEl.value, ac = aEl.value;
-    var okBlue = near(bg, BLUE) || near(ac, BLUE);
-    var okMoon = near(ac, MOON) || near(bg, MOON);
+    var B = hex2rgb(bg), A = hex2rgb(ac);
+    var okBlue = isBlue(B) || isBlue(A);
+    var okMoon = isMoon(A) || isMoon(B);
+    /* 实时提示：只有"做到一半"才出现（保持谜题感） */
+    if (chip) {
+      var txt = '';
+      if (okBlue && !okMoon) {
+        var mnBest = Math.max(Math.min(A[0], A[1], A[2]), Math.min(B[0], B[1], B[2]));
+        txt = mnBest >= 150 ? '🌙 就差一点点，再浅一些…' : '🌙 还差一抹月光';
+      } else if (!okBlue && okMoon) {
+        txt = '🌙 月光有了……还差一片夜色';
+      }
+      if (chip.textContent !== txt) chip.textContent = txt;
+      chip.style.display = txt ? '' : 'none';
+    }
     if (okBlue && okMoon) {
       if (window.ARG.collect('log6')) window.ARG.toast('📜 深夜的蓝，月光的光……（找到一篇日志 · 配色实验室）');
+      if (chip) { chip.textContent = '✓ 就是这组颜色'; chip.style.display = ''; }
     }
   }
   ['cBg', 'cAc'].forEach(function (id) {
@@ -456,8 +479,8 @@ setTimeout(function () { STAch.unlock('site.colorlab', '调色师', '🎨'); }, 
     b.value = '#0a0f26';
     b.dispatchEvent(new Event('input', { bubbles: true }));
     setTimeout(function () {
-      if (ARG.has('log6')) return;
-      ARG.toast('夜空铺好了……还差一抹月光');
+      if (window.ARG.has('log6')) return;
+      window.ARG.toast('夜空铺好了……还差一抹月光（调浅「主色」试试）');
     }, 80);
   });
   window.__colorlabARG = {
