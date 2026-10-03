@@ -1175,7 +1175,12 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
 .arg-msg{font-size:12px;color:#9fb0d0;margin-top:10px;min-height:17px}
 .arg-msg.bad{color:#ff9d9d}
 .arg-msg.good{color:#bfe8c8}
-.arg-reset{margin-top:16px;background:transparent;border:0;color:#5d6c8f;font:600 11px/1 inherit;font-family:inherit;cursor:pointer;padding:4px 0;text-decoration:underline dotted}
+
+.arg-hintrow{display:flex;align-items:center;gap:14px;margin-top:16px;flex-wrap:wrap}
+.arg-hintbtn{border:1px solid rgba(198,214,240,.4);background:rgba(198,214,240,.08);color:#dbe4f5;font:700 12px/1 inherit;font-family:inherit;border-radius:999px;padding:8px 16px;cursor:pointer;transition:all .2s}
+.arg-hintbtn:hover{background:rgba(198,214,240,.18);border-color:rgba(198,214,240,.6)}
+.arg-hintbox{display:none;margin-top:12px;font-size:12.5px;line-height:1.9;color:#cfd9ee;background:rgba(198,214,240,.06);border:1px dashed rgba(198,214,240,.3);border-radius:12px;padding:11px 14px}
+.arg-reset{margin-top:0;background:transparent;border:0;color:#5d6c8f;font:600 11px/1 inherit;font-family:inherit;cursor:pointer;padding:4px 0;text-decoration:underline dotted}
 .arg-reset:hover{color:#9fb0d0}
 /* 终章信 */
 .arg-letter{font-size:13.5px;line-height:2.3;color:#cfd9ee;white-space:pre-line;padding:8px 2px 4px}
@@ -1265,7 +1270,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       <span>🏖 万物沙盒</span><span><em>·</em></span>
       <span>🗓️ 打卡日程</span><span><em>·</em></span>
       <span>🧠 mix9 神经网络</span><span><em>·</em></span>
-      <span>✨ 无限星空</span><span><em>·</em></span>
+      <span>✨ 无限星空 #1818</span><span><em>·</em></span>
       <span>🦠 生命花园</span><span><em>·</em></span>
       <span>🎵 函数音乐</span><span><em>·</em></span>
       <span>🎭 假加载页</span><span><em>·</em></span>
@@ -2952,7 +2957,8 @@ window.__checkSecretZone = checkSecretZone;
       '<div class="arg-io"><input class="arg-input" id="argInput" maxlength="8" autocomplete="off" spellcheck="false" placeholder="输入密码…"><button class="arg-go" id="argGo">交付</button></div>',
       '<div class="arg-msg" id="argMsg"></div>',
       '</div>',
-      '<button class="arg-reset" id="argReset">重启终端（进度会清零，真的吗）</button>',
+      '<div class="arg-hintrow"><button class="arg-hintbtn" id="argHint">💡 提示</button><button class="arg-reset" id="argReset">重启终端（进度会清零，真的吗）</button></div>',
+      '<div class="arg-hintbox" id="argHintBox"></div>',
       '</div>'
     ].join('');
     document.body.appendChild(veil);
@@ -2973,7 +2979,64 @@ window.__checkSecretZone = checkSecretZone;
       msg.className = 'arg-msg'; msg.textContent = '终端已重启';
       renderSlots(); renderCells();
     });
+    document.getElementById('argHint').addEventListener('click', showHint);
   }
+
+  /* ---------- 提示系统（三段式：从温柔到直白） ---------- */
+  var HINTS = {
+    log1: [
+      '先别急',
+      '第一篇在星空里，我把种子定在了 1818',
+      '打开星空页，把网址换成 ?seed=1818&v=10811,-2395,1，或者朝那枚小月牙的方向慢慢拖——有一团月光在等你'
+    ],
+    log5: [
+      '去听听函数的声音',
+      '不用敲代码，用下面那排琴键试试',
+      '弹《小星星》的开头：A A G G H H G（哆 哆 唆 唆 啦 啦 唆）'
+    ],
+    log6: [
+      '去实验室，深夜的蓝配月光，那组我挺满意',
+      '底色挑深深的夜蓝，主色挑月光的白',
+      '底色 #0a0f26、主色 #eef4ff —— 就是星空的颜色'
+    ],
+    log7: [
+      '养一缸安静的小细胞',
+      '不用多，五格就够了——像一颗小小的种子',
+      '摆成这个形状（X 是活的）：第一行 .XX，第二行 XX.，第三行 .X.'
+    ],
+    log8: [
+      '去错题本，它本来是给我自己做的',
+      '有一句话，背下来不如记下来',
+      '把这句录进错题本：「月亮从不缺席，只是偶尔被云挡住」'
+    ],
+    log9: [
+      '那个卡在 99% 的页面，它在等人',
+      '它等的不是答案，是一个名字',
+      '在 99% 的页面上直接敲键盘，打出那个名字（八个字母）'
+    ]
+  };
+  var BUILT_HINTED = ['log1', 'log5', 'log6', 'log7', 'log8', 'log9'];
+  var hintFor = null, hintIdx = 0;
+  function showHint() {
+    var box = document.getElementById('argHintBox');
+    if (!box) return;
+    var target = null;
+    for (var i = 0; i < BUILT_HINTED.length; i++) {
+      if (!ARG.has(BUILT_HINTED[i])) { target = BUILT_HINTED[i]; break; }
+    }
+    if (!target) {
+      box.style.display = 'block';
+      box.textContent = '能提示的都提示完了，剩下的几篇还锁在小站别的角落（那几站的路还在施工，等等它们）';
+      return;
+    }
+    if (target !== hintFor) { hintFor = target; hintIdx = 0; }
+    var tips = HINTS[target];
+    var msg = tips[Math.min(hintIdx, tips.length - 1)];
+    hintIdx++;
+    box.style.display = 'block';
+    box.textContent = msg + (hintIdx < tips.length ? '（再按一次，给更多）' : '（这是最后一条了）');
+  }
+
   var INTRO_LINES = ['哦，是你', '能摸到这里的没几个', '说正事，我做的小东西每个背后都留了一篇日志，找着就会亮起来，一共十篇，前面八篇里各夹着一个字母，按顺序收好，最后要用', '第一篇在星空里，种子 1818，慢慢拖，有个地方我做了记号', '（卡住了就回来按提示）'];
   function renderIntro() {
     var box = document.getElementById('argIntro');
