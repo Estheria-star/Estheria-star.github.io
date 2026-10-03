@@ -22,7 +22,9 @@
     font-family:ui-monospace,Consolas,monospace;font-size:13px;font-weight:700;color:#cdd8ff;
     letter-spacing:.6px;padding:0 6px;white-space:nowrap;
   }
-  .seed b{color:#8fd0ff}
+  .seed b{color:#8fd0ff;cursor:pointer;border-bottom:1px dashed rgba(143,208,255,.45);padding-bottom:1px;transition:color .2s}
+  .seed b:hover{color:#c9e6ff}
+  .seed input{width:74px;background:rgba(6,10,22,.9);border:1px solid rgba(130,160,255,.55);border-radius:8px;color:#8fd0ff;font:inherit;font-weight:700;padding:2px 6px;outline:none;text-align:center}
   button{
     border:1px solid rgba(130,160,255,.35);border-radius:999px;padding:9px 16px;
     font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;color:#e8eeff;
@@ -78,7 +80,7 @@
   <button id="btnHome" type="button" title="回到原点">⌖</button>
 </div>
 <a class="home" href="https://startian.top/">← 返回主页</a>
-<div class="hint">∞ 无限星空：往任意方向拖动都有新的星 · 滚轮缩放 · 「分享这颗」连视角一起发</div>
+<div class="hint">∞ 无限星空：往任意方向拖动都有新的星 · 滚轮缩放 · 点种子号可改 · 「分享这颗」连视角一起发</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -592,7 +594,7 @@
           g.restore();
         } else {
           /* 记号在屏幕外：贴边一枚小月牙，朝它慢慢拖 */
-          var mg2 = 44;
+          var mg2 = Math.round(64 * (W2 / window.innerWidth));
           var onScr = asx > mg2 && asx < W2 - mg2 && asy > mg2 && asy < H2 - mg2;
           if (!onScr) {
             var ccx = W2 / 2, ccy = H2 / 2;
@@ -600,19 +602,44 @@
             var kk2 = Math.min((W2 / 2 - mg2) / Math.max(1, Math.abs(ddx)), (H2 / 2 - mg2) / Math.max(1, Math.abs(ddy)));
             var tx2 = ccx + ddx * kk2, ty2 = ccy + ddy * kk2;
             var pp2 = 0.5 + 0.5 * Math.abs(Math.sin((typeof T !== 'undefined' ? T : 0) * 1.4));
+            var rr = Math.max(13, 17 * (W2 / window.innerWidth));   /* 按 CSS 像素定半径，任何屏幕都够醒目 */
             g.save();
-            g.globalAlpha = 0.62 + 0.38 * pp2;
             g.globalCompositeOperation = 'lighter';
-            var hg2 = g.createRadialGradient(tx2, ty2, 2, tx2, ty2, 26);
-            hg2.addColorStop(0, 'rgba(198,214,240,.5)');
+            g.globalAlpha = 0.5 + 0.3 * pp2;
+            var hg2 = g.createRadialGradient(tx2, ty2, 2, tx2, ty2, rr * 4.2);
+            hg2.addColorStop(0, 'rgba(214,228,255,.85)');
+            hg2.addColorStop(0.35, 'rgba(198,214,240,.4)');
             hg2.addColorStop(1, 'rgba(198,214,240,0)');
             g.fillStyle = hg2;
-            g.fillRect(tx2 - 26, ty2 - 26, 52, 52);
+            g.fillRect(tx2 - rr * 4.2, ty2 - rr * 4.2, rr * 8.4, rr * 8.4);
+            /* 呼吸环 */
+            g.globalAlpha = 0.35 + 0.4 * pp2;
+            g.strokeStyle = 'rgba(214,228,255,.85)';
+            g.lineWidth = 2;
+            g.beginPath(); g.arc(tx2, ty2, rr * 1.9 * (1 + 0.14 * pp2), 0, 6.2832); g.stroke();
+            g.globalAlpha = 1;
             g.globalCompositeOperation = 'source-over';
-            g.fillStyle = '#eef4ff';
-            g.beginPath(); g.arc(tx2, ty2, 8.5, 0, 6.2832); g.fill();
-            g.fillStyle = 'rgba(10,15,38,.98)';
-            g.beginPath(); g.arc(tx2 + 3.8, ty2 - 2.4, 7.6, 0, 6.2832); g.fill();
+            /* 小月牙 */
+            g.fillStyle = '#f2f7ff';
+            g.beginPath(); g.arc(tx2, ty2, rr, 0, 6.2832); g.fill();
+            g.fillStyle = 'rgba(8,12,28,.99)';
+            g.beginPath(); g.arc(tx2 + rr * 0.5, ty2 - rr * 0.28, rr * 0.88, 0, 6.2832); g.fill();
+            /* 距离提示 */
+            var cxw = (-v.x / (W2 / window.innerWidth)) / s + (W2 / (W2 / window.innerWidth)) / 2;
+            var cyw = (-v.y / (W2 / window.innerWidth)) / s + (H2 / (W2 / window.innerWidth)) / 2;
+            var dw = Math.hypot(cxw - (-10011), cyw - 2845);
+            var dtxt = dw < 260 ? '就在附近！' : (dw >= 1000 ? '还有 ≈ ' + (dw / 1000).toFixed(1) + 'k' : '还有 ≈ ' + Math.round(dw));
+            var fs = Math.max(12, 12.5 * (W2 / window.innerWidth));
+            g.font = '800 ' + fs + 'px system-ui,sans-serif';
+            g.textAlign = 'center';
+            g.fillStyle = 'rgba(233,240,255,.95)';
+            g.shadowColor = 'rgba(8,12,28,.9)';
+            g.shadowBlur = 6;
+            var lx = Math.max(56 * (W2 / window.innerWidth), Math.min(W2 - 56 * (W2 / window.innerWidth), tx2));
+            var ly = ty2 + rr + fs * 1.35;
+            if (ly > H2 - fs * 1.4) ly = ty2 - rr - fs * 1.2;
+            g.fillText(dtxt, lx, ly);
+            g.shadowBlur = 0;
             g.restore();
           }
         }
@@ -813,6 +840,47 @@
     newSky();
     toast('✨ 星空 #' + String(curSeed).padStart(4, '0'));
   });
+
+  /* —— 点星空编号就地改种子（也能输入别人分享的编号） —— */
+  (function () {
+    var el = document.getElementById('seedNo');
+    el.title = '点一下，输入星空编号';
+    el.addEventListener('click', function () {
+      if (el.querySelector('input')) return;
+      var inp = document.createElement('input');
+      inp.value = String(curSeed);
+      inp.maxLength = 5;
+      inp.setAttribute('inputmode', 'numeric');
+      el.textContent = '';
+      el.appendChild(inp);
+      inp.focus(); inp.select();
+      var done = false;
+      function finish(apply) {
+        if (done) return;
+        done = true;
+        var v = apply ? parseInt(inp.value, 10) : NaN;
+        if (isFinite(v) && v > 0) {
+          curSeed = v % 100000;
+          view.x = 0; view.y = 0; view.s = 1;
+          clearChunks();
+          refreshPalette();
+          displaySeed();
+          fit();
+          saveUrl();
+          toast('✨ 星空 #' + String(curSeed).padStart(4, '0') + ' 已就位');
+        } else {
+          displaySeed();
+        }
+      }
+      inp.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') finish(true);
+        else if (e.key === 'Escape') finish(false);
+        e.stopPropagation();
+      });
+      inp.addEventListener('blur', function () { finish(true); });
+      inp.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
+    });
+  })();
 
   document.getElementById('btnWall').addEventListener('click', function () {
     var w = 1920, h = 1080;
