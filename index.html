@@ -181,12 +181,20 @@ section{scroll-margin-top:96px}
 
 /* —— 作品瓷砖 —— */
 /* 🏆 跨站成就柜 */
-.ach-cross{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px 22px;box-shadow:var(--sh-sm)}
-.acx-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
-.acx-title{font-size:15px;font-weight:800;color:var(--ink)}
+.ach-cross{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px 22px;box-shadow:var(--sh-sm);transition:padding .28s ease}
+.ach-cross.collapsed{padding:14px 22px}
+.acx-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;cursor:pointer;user-select:none;border-radius:12px;outline-offset:4px}
+.acx-head:focus-visible{outline:2px solid #66a9f0}
+.acx-head:hover .acx-title{color:var(--accent-deep)}
+.acx-title{font-size:15px;font-weight:800;color:var(--ink);transition:color .2s ease}
 .acx-prog{margin-left:auto;font-size:12px;font-weight:700;color:var(--ink3)}
 .acx-prog b{color:var(--accent-deep);font-size:16px}
-.acx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.acx-chev{display:flex;color:var(--ink3);transition:transform .3s ease;flex:0 0 auto}
+.ach-cross:not(.collapsed) .acx-chev{transform:rotate(180deg)}
+.acx-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows .3s ease}
+.ach-cross.collapsed .acx-body{grid-template-rows:0fr}
+.acx-clip{overflow:hidden;min-height:0}
+.acx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:14px}
 .acx-item{display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--tint);opacity:.42;filter:grayscale(1);transition:opacity .35s ease,filter .35s ease,border-color .35s ease,transform .35s ease}
 .acx-item.lit{opacity:1;filter:none;border-color:var(--accent);transform:translateY(-1px)}
 .acx-item .em{font-size:19px;flex:0 0 auto}
@@ -1488,10 +1496,18 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
         <span class="cta">去打卡 <i>→</i></span>
       </a>
     </div>
-    <div class="ach-cross reveal" style="--d:.16s">
-      <div class="acx-head"><span class="acx-title">🏆 跨站成就柜</span><span class="acx-prog">已点亮 <b id="achLit">0</b> / <span id="achTotal">34</span></span></div>
-      <div class="acx-grid" id="achGrid"></div>
-      <div class="acx-tip">游玩任意小站会自动点亮 · 记录只存本机（全站共享），不上传任何地方</div>
+    <div class="ach-cross reveal collapsed" style="--d:.16s" id="achCard">
+      <div class="acx-head" id="acxHead" role="button" tabindex="0" aria-expanded="false" aria-controls="acxBody" title="点击展开 / 收起成就柜">
+        <span class="acx-title">🏆 跨站成就柜</span>
+        <span class="acx-prog">已点亮 <b id="achLit">0</b> / <span id="achTotal">34</span></span>
+        <span class="acx-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+      </div>
+      <div class="acx-body" id="acxBody">
+        <div class="acx-clip">
+          <div class="acx-grid" id="achGrid"></div>
+          <div class="acx-tip">游玩任意小站会自动点亮 · 记录只存本机（全站共享），不上传任何地方</div>
+        </div>
+      </div>
     </div>
 
   </section>
@@ -2728,6 +2744,32 @@ window.__checkSecretZone = checkSecretZone;
       else form.dispatchEvent(new Event('submit', { cancelable: true }));
     }
   });
+})();
+</script>
+
+<script>
+/* —— 🏆 成就柜折叠：默认收起（一行），点击展开；选择记在本机 —— */
+(function () {
+  var box = document.getElementById('achCard');
+  var head = document.getElementById('acxHead');
+  if (!box || !head) return;
+  var KEY = 'startian_ach_open_v1';
+  var open = false;
+  try { open = localStorage.getItem(KEY) === '1'; } catch (e) {}
+  function apply() {
+    box.classList.toggle('collapsed', !open);
+    head.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  function toggle() {
+    open = !open;
+    try { localStorage.setItem(KEY, open ? '1' : '0'); } catch (e) {}
+    apply();
+  }
+  head.addEventListener('click', toggle);
+  head.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+  });
+  apply();
 })();
 </script>
 </body>
