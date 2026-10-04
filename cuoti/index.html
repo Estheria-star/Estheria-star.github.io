@@ -311,6 +311,381 @@
 </a>
 
 <script>
+/* ==== i18n-kit v1.2 begin ==== */
+/* ══════════════════════════════════════════════════════════
+   🌐 多语言 i18n Kit（startian.top 全站共享 · v1.2 · 2026-10-04）
+   · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
+   · 自动识别：首次访问按 navigator.language（zh 开头 → 中文，其余 → English）
+   · 两种接入模式（可混用）：
+     ① 短语表模式（推荐，低侵入）：I18N.phrase({ '中文原文': 'English', ... })
+        自动扫描文本节点 / title / placeholder / aria-label / alt，动态插入的文本也自动翻译
+     ② 标注模式：data-i18n / data-i18n-html / data-i18n-title / data-i18n-aria / data-i18n-ph / data-i18n-alt
+   · 子树上加 data-i18n-skip 可整体跳过（用户输入内容、ARG 谜题原文等）
+   · API：I18N.t(k[,vars]) · I18N.tOr(k,fb) · I18N.tr(原文) · I18N.set(lang) · I18N.lang()
+          · I18N.phrase(map) · I18N.scan(root) · I18N.apply(root) · I18N.onChange(fn)
+          · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n)
+   · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
+   ══════════════════════════════════════════════════════════ */
+var I18N = (function () {
+  'use strict';
+  var LS = 'st_lang';
+  var FALLBACK = 'zh';
+  var lang = FALLBACK;
+  var dict = { zh: {}, en: {} };
+  var phrase = {};      /* 短语表：中文原文（归一化）→ 译文 */
+  var listeners = [];
+  var bd = {};          /* boot data：原文快照等 */
+
+  /* ---- 基础词典（全站通用词条） ---- */
+  dict.zh['common.home'] = '主页';
+  dict.en['common.home'] = 'Home';
+  dict.zh['common.homeTitle'] = '返回星恬的小站主页';
+  dict.en['common.homeTitle'] = "Back to Startian's homepage";
+  dict.zh['common.close'] = '关闭';
+  dict.en['common.close'] = 'Close';
+  dict.zh['common.cancel'] = '取消';
+  dict.en['common.cancel'] = 'Cancel';
+
+  /* ---- 存储与识别 ---- */
+  function norm(v) {
+    v = String(v || '').toLowerCase();
+    if (v.indexOf('zh') === 0) return 'zh';
+    if (v.indexOf('en') === 0) return 'en';
+    return null;
+  }
+  function readCookie() {
+    try { var m = document.cookie.match(/(?:^|;\s*)st_lang=([^;]*)/); return m ? decodeURIComponent(m[1]) : null; }
+    catch (e) { return null; }
+  }
+  function readLS() { try { return localStorage.getItem(LS); } catch (e) { return null; } }
+  function persist(v) {
+    try { localStorage.setItem(LS, v); } catch (e) {}
+    try { document.cookie = 'st_lang=' + encodeURIComponent(v) + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax'; } catch (e) {}
+  }
+  function detect() {
+    var s = norm(readCookie()) || norm(readLS());
+    if (s) return s;
+    var n = norm(navigator.language || navigator.userLanguage);
+    return n || FALLBACK;
+  }
+
+  /* ---- 文案 ---- */
+  /* tRaw：查词典（当前语言 → zh 兜底），查不到返回 null（= 保持原文） */
+  function tRaw(key) {
+    var v = (dict[lang] && dict[lang][key] != null) ? dict[lang][key] : null;
+    if (v == null) v = (dict[FALLBACK] && dict[FALLBACK][key] != null) ? dict[FALLBACK][key] : null;
+    return v;
+  }
+  function t(key, vars) {
+    var v = tRaw(key);
+    if (v == null) return key;
+    if (vars) v = String(v).replace(/\{(\w+)\}/g, function (m, k) { return (vars[k] != null) ? vars[k] : m; });
+    return v;
+  }
+  /* tOr：查不到时用传入的兜底值（页面 JS 动态文案用这个） */
+  function tOr(key, fallback) {
+    var v = tRaw(key);
+    return (v == null) ? fallback : v;
+  }
+  function add(obj) {
+    if (!obj) return;
+    ['zh', 'en'].forEach(function (k) {
+      if (obj[k]) for (var key in obj[k]) dict[k][key] = obj[k][key];
+    });
+  }
+  /* tr：短语表直译（原文进，译文出；zh 侧原样返回）-JS 动态文案直接用 */
+  function tr(s) {
+    if (lang === 'zh') return s;
+    var v = lookup(normText(s));
+    return (v == null) ? s : v;
+  }
+  function addPhrase(map) {
+    if (!map) return;
+    for (var k in map) { if (map[k] != null) phrase[normText(k)] = String(map[k]); }
+  }
+  /* 规则表：[[/正则/, '替换（可用 $1）'], ...] - 处理「已复习 3」「12 天有记录」这类数字拼接 */
+  var rules = [];
+  function addRules(list) {
+    if (!list) return;
+    for (var i = 0; i < list.length; i++) {
+      try {
+        var re = (list[i][0] instanceof RegExp) ? list[i][0] : new RegExp(list[i][0]);
+        rules.push([re, String(list[i][1])]);
+      } catch (e) {}
+    }
+  }
+  function lookup(t) {
+    var v = phrase[t];
+    if (v != null) return v;
+    for (var i = 0; i < rules.length; i++) {
+      try { if (rules[i][0].test(t)) return t.replace(rules[i][0], rules[i][1]); } catch (e) {}
+    }
+    return null;
+  }
+
+  /* ---- 短语表扫描（静态 + 动态） ---- */
+  function normText(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
+  var PTAGS = ['title', 'placeholder', 'aria-label', 'alt'];
+  function translText(node) {
+    var raw = node.nodeValue;
+    if (!raw) return;
+    var rec = node.__i18nR;
+    if (rec) {
+      if (lang === 'zh') {
+        if (raw === rec.en) { node.nodeValue = rec.orig; delete node.__i18nR; }
+        else if (raw !== rec.orig) { delete node.__i18nR; }
+        return;
+      }
+      if (raw === rec.en) return;
+      if (raw === rec.orig) { node.nodeValue = rec.en; return; }
+      delete node.__i18nR;
+    }
+    var out = lookup(normText(raw));
+    if (out == null) return;
+    if (lang === 'en') { if (raw !== out) { node.__i18nR = { orig: raw, en: out }; node.nodeValue = out; } }
+  }
+  function translAttrs(el) {
+    if (!el.getAttribute) return;
+    for (var i = 0; i < PTAGS.length; i++) {
+      var a = PTAGS[i], v = el.getAttribute(a);
+      if (v == null || v === '') continue;
+      var rec = el.__i18nA && el.__i18nA[a];
+      if (rec) {
+        if (lang === 'zh') {
+          if (v === rec.en) { el.setAttribute(a, rec.orig); delete el.__i18nA[a]; }
+          else if (v !== rec.orig) { delete el.__i18nA[a]; }
+          continue;
+        }
+        if (v === rec.en) continue;
+        if (v === rec.orig) { el.setAttribute(a, rec.en); continue; }
+        delete el.__i18nA[a];
+      }
+      var out = lookup(normText(v));
+      if (out == null) continue;
+      if (lang === 'en') {
+        if (v !== out) { if (!el.__i18nA) el.__i18nA = {}; el.__i18nA[a] = { orig: v, en: out }; el.setAttribute(a, out); }
+      }
+    }
+  }
+  function scanNode(node) {
+    if (!node) return;
+    if (node.nodeType === 9) node = node.documentElement || node.body;   /* 文档节点 → 转元素 */
+    if (!node) return;
+    if (node.nodeType === 3) { translText(node); return; }
+    if (node.nodeType !== 1) return;
+    var tag = node.tagName;
+    if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'NOSCRIPT') return;
+    if (node.hasAttribute('data-i18n-skip')) return;
+    translAttrs(node);
+    for (var c = node.firstChild; c; c = c.nextSibling) scanNode(c);
+  }
+  function scan(root) { try { scanNode(root || document.body || document.documentElement); } catch (e) {} }
+  /* 动态内容自动翻译（MutationObserver，逐节点增量，无重扫） */
+  var moOn = false;
+  function auto(root) {
+    if (moOn || typeof MutationObserver === 'undefined') return;
+    var target = root || document.body;
+    if (!target) {   /* head 提前注入时 body 还没解析出来，等 DOM ready */
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { auto(root); });
+      return;
+    }
+    moOn = true;
+    try {
+      var mo = new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          var m = muts[i];
+          try {
+            if (m.type === 'characterData') translText(m.target);
+            else if (m.type === 'attributes') translAttrs(m.target);
+            else if (m.type === 'childList') {
+              for (var j = 0; j < m.addedNodes.length; j++) scanNode(m.addedNodes[j]);
+            }
+          } catch (e) {}
+        }
+      });
+      mo.observe(target, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: PTAGS });
+    } catch (e) {}
+  }
+
+  /* ---- 日期 / 数字 ---- */
+  var MN_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var WD_ZH = '日一二三四五六';
+  var WD_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  function fmtDate(d, opt) {
+    if (typeof d === 'string') { var a = d.split('-'); d = new Date(+a[0], (+a[1] || 1) - 1, +a[2] || 1); }
+    if (!(d instanceof Date) || isNaN(d.getTime())) return '';
+    opt = opt || {};
+    var s;
+    if (lang === 'zh') {
+      s = d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日';
+      if (opt.weekday) s += ' · 星期' + WD_ZH.charAt(d.getDay());
+    } else {
+      s = MN_EN[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+      if (opt.weekday) s += ' · ' + WD_EN[d.getDay()];
+    }
+    return s;
+  }
+  function fmtNum(n) {
+    try { return Number(n).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US'); }
+    catch (e) { return String(n); }
+  }
+
+  /* ---- DOM 标注应用（标注模式；词条缺失时恢复原文 - 保证切回中文能还原） ---- */
+  function apply(root) {
+    root = root || document;
+    try {
+      var i, list, v, el;
+      list = root.querySelectorAll('[data-i18n]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrig == null) el.__i18nOrig = el.textContent;
+        v = tRaw(el.getAttribute('data-i18n'));
+        el.textContent = (v != null) ? v : el.__i18nOrig;
+      }
+      list = root.querySelectorAll('[data-i18n-html]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigHTML == null) el.__i18nOrigHTML = el.innerHTML;
+        v = tRaw(el.getAttribute('data-i18n-html'));
+        el.innerHTML = (v != null) ? v : el.__i18nOrigHTML;
+      }
+      list = root.querySelectorAll('[data-i18n-title]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigTitle == null) el.__i18nOrigTitle = el.title;
+        v = tRaw(el.getAttribute('data-i18n-title'));
+        el.title = (v != null) ? v : el.__i18nOrigTitle;
+      }
+      list = root.querySelectorAll('[data-i18n-aria]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAria == null) el.__i18nOrigAria = el.getAttribute('aria-label') || '';
+        v = tRaw(el.getAttribute('data-i18n-aria'));
+        el.setAttribute('aria-label', (v != null) ? v : el.__i18nOrigAria);
+      }
+      list = root.querySelectorAll('[data-i18n-ph]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigPh == null) el.__i18nOrigPh = el.placeholder || '';
+        v = tRaw(el.getAttribute('data-i18n-ph'));
+        el.placeholder = (v != null) ? v : el.__i18nOrigPh;
+      }
+      list = root.querySelectorAll('[data-i18n-alt]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAlt == null) el.__i18nOrigAlt = el.getAttribute('alt') || '';
+        v = tRaw(el.getAttribute('data-i18n-alt'));
+        el.setAttribute('alt', (v != null) ? v : el.__i18nOrigAlt);
+      }
+      /* 标题（短语表优先，其次 page.title 词条） */
+      if (!bd.__origTitle) bd.__origTitle = document.title;
+      var tv = lookup(normText(bd.__origTitle));
+      if (tv == null) tv = tRaw('page.title');
+      if (tv != null) { document.title = (lang === 'en') ? tv : bd.__origTitle; bd.__titleTouched = true; }
+      else if (bd.__titleTouched) { document.title = bd.__origTitle; }
+      document.documentElement.lang = (lang === 'zh') ? 'zh-CN' : 'en';
+      syncSwitch();
+    } catch (e) {}
+  }
+
+  function set(v) {
+    v = norm(v);
+    if (!v) return;
+    if (v === lang) { apply(document); scan(document); return; }
+    lang = v;
+    persist(v);
+    apply(document);
+    scan(document);
+    for (var i = 0; i < listeners.length; i++) { try { listeners[i](lang); } catch (e) {} }
+    try {
+      var live = document.getElementById('i18n-live');
+      if (live) live.textContent = (lang === 'zh') ? '已切换到中文' : 'Switched to English';
+    } catch (e) {}
+  }
+  function onChange(fn) { if (typeof fn === 'function') listeners.push(fn); }
+  function getLang() { return lang; }
+
+  /* ---- 切换入口（右下角胶囊，自动注入） ---- */
+  var SW_CSS = '.i18n-sw{position:fixed;right:14px;bottom:14px;z-index:9992;display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:rgba(17,24,39,.6);-webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);border:1px solid rgba(255,255,255,.16);box-shadow:0 6px 18px rgba(0,0,0,.2);font-family:inherit}' +
+    '.i18n-sw button{border:0;background:transparent;color:rgba(255,255,255,.72);font-size:12px;font-weight:700;letter-spacing:.4px;padding:6px 11px;border-radius:999px;cursor:pointer;font-family:inherit;transition:all .18s ease;line-height:1}' +
+    '.i18n-sw button:hover{color:#fff;background:rgba(255,255,255,.12)}' +
+    '.i18n-sw button:focus-visible{outline:2px solid #7dd3fc;outline-offset:1px}' +
+    '.i18n-sw button.on{background:rgba(255,255,255,.92);color:#1f2937;box-shadow:0 2px 8px rgba(0,0,0,.25)}' +
+    '.i18n-sw button:active{transform:translateY(1px)}' +
+    '.i18n-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}' +
+    '@media (max-width:620px){.i18n-sw{right:10px;bottom:10px}.i18n-sw button{padding:5px 9px;font-size:11.5px}}';
+
+  var swEl = null;
+  function buildSwitch() {
+    try {
+      if (!document.body) return;
+      var exist = document.querySelector('.i18n-sw');
+      if (exist) { swEl = exist; syncSwitch(); return; }
+      var st = document.createElement('style');
+      st.textContent = SW_CSS;
+      (document.head || document.documentElement).appendChild(st);
+      var wrap = document.createElement('div');
+      wrap.className = 'i18n-sw';
+      wrap.setAttribute('role', 'group');
+      wrap.setAttribute('aria-label', '切换语言 / Switch language');
+      [['zh', '中文'], ['en', 'English']].forEach(function (p) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('data-lang', p[0]);
+        b.textContent = p[1];
+        b.addEventListener('click', function () { set(p[0]); });
+        wrap.appendChild(b);
+      });
+      var live = document.createElement('span');
+      live.id = 'i18n-live';
+      live.className = 'i18n-sr';
+      live.setAttribute('aria-live', 'polite');
+      wrap.appendChild(live);
+      document.body.appendChild(wrap);
+      swEl = wrap;
+      syncSwitch();
+    } catch (e) {}
+  }
+  function syncSwitch() {
+    try {
+      if (!swEl) return;
+      var bs = swEl.querySelectorAll('button[data-lang]');
+      for (var i = 0; i < bs.length; i++) {
+        var on = bs[i].getAttribute('data-lang') === lang;
+        bs[i].classList.toggle('on', on);
+        bs[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    } catch (e) {}
+  }
+
+  /* ---- 启动 ---- */
+  lang = detect();
+  function boot() {
+    buildSwitch();
+    apply(document);
+    scan(document);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+
+  return {
+    t: t, tOr: tOr, tr: tr, set: set, apply: apply, scan: scan, auto: auto,
+    phrase: addPhrase, rules: addRules, add: add, lang: getLang, onChange: onChange,
+    fmtDate: fmtDate, fmtNum: fmtNum
+  };
+})();
+
+/* ---- 短语表（中文原文 → English）---- */
+I18N.phrase({"错题本 · 间隔重复 · startian.top": "Mistake Notebook · Spaced Repetition · startian.top","📕 错题本": "📕 Mistake Notebook","间隔重复 · 让时间帮你记住": "Spaced repetition · Let time help you remember","📌 今日待复习": "📌 Due today","· 共": " · ","题": " questions","← 返回主页": "← Back to home","🔁 今日复习": "🔁 Today's review","✍️ 录入错题": "✍️ Log a mistake","📚 全部错题": "📚 All mistakes","📊 统计": "📊 Stats","题目": "Question","正确答案 / 正解思路": "Correct answer / solution approach","我当时的错因 / 备注": "My mistake cause / notes","科目": "Subject","数学": "Math","语文": "Chinese","英语": "English","物理": "Physics","化学": "Chemistry","生物": "Biology","政治": "Politics","历史": "History","地理": "Geography","其他": "Other","知识点标签": "Knowledge tags","难度": "Difficulty","基础": "Basic","中等": "Medium","压轴": "Hard","💾 保存这道题": "💾 Save this question","取消编辑": "Cancel edit","清空表单": "Clear form","全部科目": "All subjects","全部状态": "All statuses","新题": "New","学习中": "Learning","已掌握": "Mastered","今日待复习": "Due today","主页": "Home","把题干记下来（可含条件、图形描述）…": "Write the question down (conditions and figure descriptions are fine)…","标准答案或正确的解题步骤…": "The standard answer or the correct solution steps…","当时错在哪？下次要注意什么？": "What went wrong? What should I watch next time?","逗号分隔，如：三角函数, 恒等变换": "Comma-separated, e.g. Trigonometry, Identity transformation","🔍 搜索题干 / 答案 / 标签…": "🔍 Search question / answer / tag…","返回星恬的小站主页": "Back to Startian's homepage","🏆 成就解锁：": "🏆 Achievement unlocked: ","错题整理者": "Mistake Organizer","今天到期": "Due today","已逾期": "Overdue by ","天": " days","明天到期": "Due tomorrow","天后": " days from now","⚠️ 保存失败：浏览器存储空间不足": "⚠️ Save failed: not enough browser storage","已知 sinθ + cosθ = ½，求 sinθ·cosθ 的值。": "Given sinθ + cosθ = ½, find sinθ·cosθ.","(sinθ + cosθ)² = 1 + 2sinθcosθ = ¼，\\n所以 sinθcosθ = −3/8。": "(sinθ + cosθ)² = 1 + 2sinθcosθ = ¼,\\nso sinθcosθ = −3/8.","两边平方后忘记先减去 1，直接写成了 1/4。": "Squared both sides but forgot to subtract 1 first — wrote 1/4.","三角函数": "Trigonometry","恒等变换": "Identity transformation","求函数 f(x) = x² − 2x 在区间 [−1, 2] 上的值域。": "Find the range of f(x) = x² − 2x on the interval [−1, 2].","f(x) = (x − 1)² − 1，对称轴 x = 1 ∈ [−1, 2]，\\n最小值 f(1) = −1；端点 f(−1) = 3，f(2) = 0，最大值 3。\\n值域为 [−1, 3]。": "f(x) = (x − 1)² − 1, axis of symmetry x = 1 ∈ [−1, 2],\\nminimum f(1) = −1; endpoints f(−1) = 3, f(2) = 0, maximum 3.\\nSo the range is [−1, 3].","只代了两个端点，漏了对称轴处的顶点。": "Plugged in only the two endpoints — missed the vertex at the axis of symmetry.","二次函数": "Quadratic function","值域": "Range","were —— 与现在事实相反的虚拟语气，be 动词一律用 were。": "were — the subjunctive for a present counterfactual; the verb “be” is always “were”.","惯性写了 was，忘记虚拟语气的固定用法。": "Wrote “was” out of habit — forgot the fixed subjunctive usage.","虚拟语气": "Subjunctive","语法": "Grammar","今天再来": "Again today","明天": "Tomorrow","真的学会了": "Truly Learned","今天复习了 <b style=\"color:var(--red)\">": "Reviewed <b style=\"color:var(--red)\">","</b> 次 · 连续": "</b> times · streak ","天 🔥": " days 🔥","今天没有到期的题，休息也是学习的一部分": "Nothing due today — resting is part of learning too","全部清空，漂亮！": "All clear — nice!","要不要提前加练几题？": "Want to practice a few extra?","<h3>今日复习完成</h3>": "<h3>Today's review complete</h3>","<button class=\"ink pri\" id=\"btnExtra\" type=\"button\">🎲 随机加练 3 题</button>": "<button class=\"ink pri\" id=\"btnExtra\" type=\"button\">🎲 Practice 3 random</button>","<button class=\"ink\" id=\"btnGoAdd\" type=\"button\">✍️ 录一道新题</button>": "<button class=\"ink\" id=\"btnGoAdd\" type=\"button\">✍️ Log a new one</button>","<button class=\"ink\" id=\"btnGoList\" type=\"button\">📚 看看错题</button>": "<button class=\"ink\" id=\"btnGoList\" type=\"button\">📚 See mistakes</button>","<span class=\"chip new\">✨ 新题</span>": "<span class=\"chip new\">✨ New</span>","<div class=\"revprogress\"><span>已复习": "<div class=\"revprogress\"><span>Reviewed","<span>待复习": "<span>To review","<div class=\"stamp\">已批改</div>": "<div class=\"stamp\">Graded</div>","<div class=\"lab\">✅ 正确答案 / 正解</div>": "<div class=\"lab\">✅ Correct answer / solution</div>","（没记答案，凭感觉回忆一遍也行）": "(No answer saved — recalling it by feel is fine too)","<div class=\"wtext\">📌 当时的错因：": "<div class=\"wtext\">📌 What went wrong: ","<button class=\"gr gr0\" data-g=\"0\" type=\"button\">🫠 忘了<small>": "<button class=\"gr gr0\" data-g=\"0\" type=\"button\">🫠 Forgot<small>","<button class=\"gr gr1\" data-g=\"1\" type=\"button\">🤔 模糊<small>下次": "<button class=\"gr gr1\" data-g=\"1\" type=\"button\">🤔 Fuzzy<small>Next ","<button class=\"gr gr2\" data-g=\"2\" type=\"button\">😌 记得<small>下次": "<button class=\"gr gr2\" data-g=\"2\" type=\"button\">😌 Remembered<small>Next ","<button class=\"gr gr3\" data-g=\"3\" type=\"button\">⚡ 简单<small>下次": "<button class=\"gr gr3\" data-g=\"3\" type=\"button\">⚡ Easy<small>Next ","<div class=\"kbhint\">键盘 1 / 2 / 3 / 4 可以直接评分，空格翻面</div>": "<div class=\"kbhint\">Keys 1 / 2 / 3 / 4 grade directly, Space flips the card</div>","<button class=\"showbtn\" id=\"btnShow\" type=\"button\">👀 显示答案</button>": "<button class=\"showbtn\" id=\"btnShow\" type=\"button\">👀 Show answer</button>","复习打卡": "Review Check-in","🫠 没关系，它稍后还会再出现": "🫠 No worries — it'll come back later","⚡ 这题已被你拿捏": "⚡ You've got this one down","错题本还是空的，先录一题吧": "The notebook is still empty — log one first","🎲 加练 3 题，加油": "🎲 3 extra questions — go for it","先把题目写下来吧 ✍️": "Write the question down first ✍️","✅ 已更新这道题": "✅ Question updated","✅ 已加入错题本，今天就会排进复习": "✅ Added to the notebook — it'll be scheduled for review today","第一次记错题": "First Mistake","表单已清空": "Form cleared","已取消编辑": "Edit cancelled","💾 保存修改": "💾 Save changes","<option value=\"\">全部科目</option>": "<option value=\"\">All subjects</option>","<div class=\"paper empty\"><div class=\"big\">🗂️</div><h3>这里还没有错题</h3><p>换个筛选条件，或者去录一道新题吧</p><div class=\"rowbtns\"><button class=\"ink pri\" id=\"btnL2Add\" type=\"button\">✍️ 录入错题</button></div></div>": "<div class=\"paper empty\"><div class=\"big\">🗂️</div><h3>No mistakes here yet</h3><p>Try another filter, or go log a new one</p><div class=\"rowbtns\"><button class=\"ink pri\" id=\"btnL2Add\" type=\"button\">✍️ Log a mistake</button></div></div>","<span class=\"badge b-master\">已掌握</span>": "<span class=\"badge b-master\">Mastered</span>","<span class=\"badge b-new\">新题</span>": "<span class=\"badge b-new\">New</span>","<span class=\"badge b-learn\">学习中</span>": "<span class=\"badge b-learn\">Learning</span>","今天复习": "Review today","<div class=\"lab\">✅ 正确答案</div><div class=\"t\">": "<div class=\"lab\">✅ Correct answer</div><div class=\"t\">","（未填）": "(Not filled)","<div class=\"lab\">📌 当时的错因</div><div class=\"wtext\">": "<div class=\"lab\">📌 What went wrong</div><div class=\"wtext\">","<div class=\"stat\"><span>🔁 已复习": "<div class=\"stat\"><span>🔁 Reviewed","次</span><span>😵 遗忘": " times</span><span>😵 Lapses","次</span><span>📅": " times</span><span>📅","</span><span>⚙️ 记忆系数": "</span><span>⚙️ Memory factor","<button class=\"act pri\" data-act=\"now\" type=\"button\">🔁 立即复习</button>": "<button class=\"act pri\" data-act=\"now\" type=\"button\">🔁 Review now</button>","<button class=\"act\" data-act=\"edit\" type=\"button\">✏️ 编辑</button>": "<button class=\"act\" data-act=\"edit\" type=\"button\">✏️ Edit</button>","<button class=\"act danger\" data-act=\"del\" type=\"button\">🗑️ 删除</button>": "<button class=\"act danger\" data-act=\"del\" type=\"button\">🗑️ Delete</button>","确定删除这道题吗？删除后无法恢复。": "Delete this question? This can't be undone.","🗑️ 已删除": "🗑️ Deleted","🔁 立即复习这道题": "🔁 Review this question now","</div><div class=\"l\">全部错题</div></div>": "</div><div class=\"l\">All mistakes</div></div>","</div><div class=\"l\">今日待复习</div></div>": "</div><div class=\"l\">Due today</div></div>","</div><div class=\"l\">学习中</div></div>": "</div><div class=\"l\">Learning</div></div>","</div><div class=\"l\">已掌握</div></div>": "</div><div class=\"l\">Mastered</div></div>","</div><div class=\"l\">连续复习（天）</div></div>": "</div><div class=\"l\">Review streak (days)</div></div>","<div class=\"panel paper\"><h3>📈 掌握进度</h3><div class=\"progwrap\" style=\"margin-top:0\">": "<div class=\"panel paper\"><h3>📈 Mastery progress</h3><div class=\"progwrap\" style=\"margin-top:0\">","<div class=\"cap\"><span>已掌握": "<div class=\"cap\"><span>Mastered","题</span><span>": " questions</span><span>","<div style=\"font-size:12px;color:var(--ink2);margin-top:8px\">还有": "<div style=\"font-size:12px;color:var(--ink2);margin-top:8px\">There are still ","道新题没开始复习</div>": " new questions not started</div>","<div class=\"panel paper\"><h3>🗓️ 最近 7 天复习量</h3><div class=\"days\">": "<div class=\"panel paper\"><h3>🗓️ Reviews in the last 7 days</h3><div class=\"days\">","<div class=\"panel paper\"><h3>📚 科目分布</h3>": "<div class=\"panel paper\"><h3>📚 Subject breakdown</h3>","<button class=\"ink pri\" id=\"btnExport\" type=\"button\">⬇️ 导出备份（JSON）</button>": "<button class=\"ink pri\" id=\"btnExport\" type=\"button\">⬇️ Export backup (JSON)</button>","<button class=\"ink\" id=\"btnImport\" type=\"button\">⬆️ 导入备份</button>": "<button class=\"ink\" id=\"btnImport\" type=\"button\">⬆️ Import backup</button>","<button class=\"ink\" id=\"btnWipe\" type=\"button\" style=\"color:var(--red);border-color:#eccfcb\">🧹 清空全部</button>": "<button class=\"ink\" id=\"btnWipe\" type=\"button\" style=\"color:var(--red);border-color:#eccfcb\">🧹 Clear all</button>","⬇️ 备份已导出": "⬇️ Backup exported","格式不对": "Invalid format","⬆️ 导入完成：新增": "⬆️ Import complete: added ","，跳过重复": ", skipped duplicates ","⚠️ 导入失败：不是有效的备份文件": "⚠️ Import failed: not a valid backup file","清空全部错题和复习记录？此操作不可恢复（建议先导出备份）。": "Clear all mistakes and review history? This can't be undone (export a backup first).","再确认一次：真的要清空吗？": "Confirm once more — really clear everything?","🧹 已清空": "🧹 Cleared","📕 已放入 3 道示例题，体验完可直接删除": "📕 Added 3 sample questions — delete them once you're done","今天复习了": "Reviewed ","次 · 连续": " times · streak ","今日复习完成": "Today's review complete","🎲 随机加练 3 题": "🎲 Practice 3 random","✍️ 录一道新题": "✍️ Log a new one","📚 看看错题": "📚 See mistakes","✨ 新题": "✨ New","已复习": "Reviewed","待复习": "To review","已批改": "Graded","✅ 正确答案 / 正解": "✅ Correct answer / solution","📌 当时的错因：": "📌 What went wrong: ","🫠 忘了": "🫠 Forgot","🤔 模糊": "🤔 Fuzzy","下次": "Next ","😌 记得": "😌 Remembered","⚡ 简单": "⚡ Easy","键盘 1 / 2 / 3 / 4 可以直接评分，空格翻面": "Keys 1 / 2 / 3 / 4 grade directly, Space flips the card","👀 显示答案": "👀 Show answer","这里还没有错题": "No mistakes here yet","换个筛选条件，或者去录一道新题吧": "Try another filter, or go log a new one","✅ 正确答案": "✅ Correct answer","📌 当时的错因": "📌 What went wrong","🔁 已复习": "🔁 Reviewed","次": " times","😵 遗忘": "😵 Lapses","⚙️ 记忆系数": "⚙️ Memory factor","🔁 立即复习": "🔁 Review now","✏️ 编辑": "✏️ Edit","🗑️ 删除": "🗑️ Delete","全部错题": "All mistakes","连续复习（天）": "Review streak (days)","📈 掌握进度": "📈 Mastery progress","还有": "There are still ","道新题没开始复习": " new questions not started","🗓️ 最近 7 天复习量": "🗓️ Reviews in the last 7 days","📚 科目分布": "📚 Subject breakdown","⬇️ 导出备份（JSON）": "⬇️ Export backup (JSON)","⬆️ 导入备份": "⬆️ Import backup","🧹 清空全部": "🧹 Clear all"});
+/* ---- 数字/日期拼接规则 ---- */
+I18N.rules([["^已复习 (\\d+)$", "Reviewed $1"], ["^待复习 (\\d+)$", "To review $1"], ["^下次 今天再来$", "Next: later today"], ["^下次 明天$", "Next: tomorrow"], ["^下次 (\\d+) 天后$", "Next: in $1 days"]]);
+I18N.auto();
+/* ==== i18n-kit v1.2 end ==== */
+</script>
+<script>
 (function () {
   'use strict';
 
@@ -556,7 +931,7 @@
       '<div class="ansbox">' +
       '<div class="lab">✅ 正确答案 / 正解</div>' +
       '<div class="atext">' + esc(card.a || '（没记答案，凭感觉回忆一遍也行）') + '</div>' +
-      (card.w ? '<div class="wtext">📌 当时的错因：' + esc(card.w) + '</div>' : '') +
+      (card.w ? '<div class="wtext">' + I18N.tr('📌 当时的错因：') + ' ' + esc(card.w) + '</div>' : '') +
       '<div class="gradebtns">' +
       '<button class="gr gr0" data-g="0" type="button">🫠 忘了<small>' + sim(card, 0).txt + '</small></button>' +
       '<button class="gr gr1" data-g="1" type="button">🤔 模糊<small>下次 ' + g1.txt + '</small></button>' +
