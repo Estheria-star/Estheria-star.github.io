@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>心情日历 · 给每天贴一张猫耳心情 · 星恬</title>
-<meta name="description" content="用 43 张猫耳少女表情记录每天的心情：点一个日子、贴一张心情，翻一翻就是这个月的样子。数据只存在浏览器本地，可离线使用，支持导出备份。">
-<meta name="keywords" content="心情日历,情绪记录,心情日记,猫耳表情,表情包日历,在线心情日历">
+<meta name="description" content="用 43 张猫耳少女表情记录每天的心情，点一个日子就能写下当天日记（天气 / 心情 / 正文）。数据只存在浏览器本地，可离线使用，支持导出备份。">
+<meta name="keywords" content="心情日历,心情日记,情绪记录,日记本,猫耳表情,在线日记">
 <link rel="canonical" href="https://startian.top/mood/">
 <meta property="og:title" content="心情日历 · 给每天贴一张猫耳心情">
-<meta property="og:description" content="43 张猫耳表情，记录每天的心情。翻一翻，就是这个月的样子。">
+<meta property="og:description" content="43 张猫耳表情 + 每日心情日记。点一天记一笔，翻一翻就是这个月的样子。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://startian.top/mood/">
 <meta property="og:image" content="https://startian.top/demos/mood.jpg">
@@ -19,7 +19,7 @@
   "@type": "WebApplication",
   "name": "心情日历",
   "url": "https://startian.top/mood/",
-  "description": "用 43 张猫耳少女表情记录每天的心情：点一个日子、贴一张心情，翻一翻就是这个月的样子。",
+  "description": "用 43 张猫耳少女表情记录每天的心情，点一个日子就能写下当天日记。",
   "applicationCategory": "LifestyleApplication",
   "operatingSystem": "Web",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" },
@@ -33,7 +33,6 @@
   --line:#d7e8f8; --line2:#e6f2fb;
   --ink:#25405c; --ink2:#587392; --ink3:#89a3bd;
   --accent:#4f93d6; --accent-deep:#3f7fd6; --accent-soft:#e8f4ff;
-  --gold:#d9a441;
   --sh-sm:0 1px 2px rgba(70,120,180,.06), 0 10px 26px rgba(70,120,180,.10);
   --sh-lg:0 2px 4px rgba(70,120,180,.08), 0 24px 48px rgba(70,120,180,.16);
 }
@@ -114,8 +113,10 @@ body{
   filter:drop-shadow(0 3px 5px rgba(70,120,180,.18)); transition:transform .2s ease}
 .day.has .stk{display:block}
 .day:hover.has .stk{transform:scale(1.06) rotate(-2deg)}
-.day .hintplus{display:none; margin-top:14px; font-size:19px; font-weight:800; color:#c3d8ec}
+.day .hintplus{display:none; margin-top:16px; font-size:19px; font-weight:800; color:#c3d8ec}
 .day:not(.has):not(.future):hover .hintplus{display:block}
+.day .wxb{position:absolute; right:5px; bottom:4px; font-size:11px; line-height:1; display:none; filter:drop-shadow(0 1px 2px rgba(70,120,180,.25))}
+.day .wxb.on{display:block}
 .day.future{opacity:.42; cursor:not-allowed}
 .day.future:hover{border-color:transparent; transform:none; background:var(--tint)}
 .day.other{opacity:.3; cursor:default; background:transparent}
@@ -129,6 +130,80 @@ body{
 .day.today.has .spark{display:block}
 @keyframes pop{0%{transform:scale(.3); opacity:0} 60%{transform:scale(1.15)} 100%{transform:scale(1); opacity:1}}
 .day .stk.pop{animation:pop .38s cubic-bezier(.34,1.56,.64,1) both}
+.day.sel{border-color:var(--accent-deep); background:#eef7ff; box-shadow:0 0 0 3px rgba(79,147,214,.16)}
+
+/* ─── 日记面板（选中日期后展开） ─── */
+.diary-wrap{display:grid; grid-template-rows:0fr; transition:grid-template-rows .5s cubic-bezier(.2,.85,.3,1.1); margin-top:0}
+.diary-wrap.open{grid-template-rows:1fr; margin-top:16px}
+.diary-inner{overflow:hidden; min-height:0}
+.diary{
+  position:relative; border:1.5px solid var(--line); border-radius:22px; background:linear-gradient(180deg,#fbfdff,#f4faff);
+  padding:20px 20px 16px; box-shadow:var(--sh-sm);
+}
+.diary-x{
+  position:absolute; top:12px; right:12px; width:30px; height:30px; border-radius:50%; border:0;
+  background:var(--tint); color:var(--ink3); font-size:13px; cursor:pointer; font-family:inherit; transition:all .18s ease;
+}
+.diary-x:hover{background:#ffe9ec; color:#c0576b}
+/* 表情大图（在日记内容上方） */
+.diary-sticker{display:flex; justify-content:center; margin-bottom:10px}
+.diary-sticker .ph{
+  width:92px; height:92px; border-radius:50%; border:2px dashed #c3d8ec; display:flex; align-items:center; justify-content:center;
+  font-size:30px; color:#c3d8ec; background:#ffffffaa;
+}
+.diary-sticker img{width:104px; height:104px; object-fit:contain; display:none; filter:drop-shadow(0 8px 16px rgba(70,120,180,.22));
+  animation:pop .4s cubic-bezier(.34,1.56,.64,1) both}
+.diary-sticker.chosen .ph{display:none}
+.diary-sticker.chosen img{display:block}
+
+.diary-date{text-align:center; font-size:16.5px; font-weight:800; letter-spacing:1px; margin-bottom:14px}
+.diary-date .dt-badge{
+  display:inline-block; margin-left:8px; font-size:11px; font-weight:800; color:#fff; background:linear-gradient(180deg,#6aabf2,#4f93d6);
+  border-radius:999px; padding:3px 10px; vertical-align:2px;
+}
+.diary-row{display:flex; align-items:flex-start; gap:10px; margin-bottom:12px}
+.row-lbl{flex:0 0 42px; font-size:13px; font-weight:800; color:var(--ink2); padding-top:6px; letter-spacing:1px}
+.wx-chips{display:flex; flex-wrap:wrap; gap:7px; flex:1}
+.wx-chip{
+  border:1.5px solid var(--line2); background:#fff; border-radius:999px; padding:6px 13px; cursor:pointer;
+  font-family:inherit; font-size:13px; font-weight:700; color:var(--ink2); transition:all .15s ease; display:inline-flex; align-items:center; gap:5px;
+}
+.wx-chip:hover{border-color:var(--accent); background:var(--accent-soft); transform:translateY(-1px)}
+.wx-chip.on{border-color:var(--accent-deep); background:var(--accent-soft); color:var(--accent-deep); box-shadow:0 0 0 3px rgba(79,147,214,.14)}
+
+.mood-slot{
+  flex:1; display:inline-flex; align-items:center; gap:9px; border:1.5px dashed var(--line); background:#fff;
+  border-radius:14px; padding:7px 14px 7px 9px; cursor:pointer; font-family:inherit; font-size:13.5px; font-weight:700; color:var(--ink2);
+  transition:all .15s ease; text-align:left;
+}
+.mood-slot:hover{border-color:var(--accent); background:var(--accent-soft); color:var(--accent-deep)}
+.mood-slot img{width:34px; height:34px; object-fit:contain; display:none}
+.mood-slot.has{border-style:solid; border-color:var(--accent); background:#fbfdff; color:var(--ink)}
+.mood-slot.has img{display:block}
+.mood-slot .chg{margin-left:auto; font-size:11.5px; font-weight:800; color:var(--accent-deep); opacity:.85; white-space:nowrap}
+
+.diary-divider{height:1px; margin:2px 0 12px; background:linear-gradient(90deg,transparent,var(--line),transparent)}
+.diary-text{
+  width:100%; min-height:120px; resize:vertical; border:1.5px solid var(--line2); border-radius:16px; background:#fff;
+  padding:13px 15px; font-family:inherit; font-size:14px; line-height:2; color:var(--ink); outline:none; transition:border-color .2s ease;
+}
+.diary-text:focus{border-color:var(--accent); box-shadow:0 0 0 3px rgba(79,147,214,.12)}
+.diary-text::placeholder{color:#b5c9de}
+.diary-actions{display:flex; align-items:center; gap:10px; margin-top:12px}
+.diary-actions .spacer{flex:1}
+.btn-clear2{
+  border:1.5px solid #f5d4da; background:#fff0f2; color:#c0576b; border-radius:12px; padding:9px 14px; cursor:pointer;
+  font-family:inherit; font-size:12.5px; font-weight:800; transition:all .15s ease;
+}
+.btn-clear2:hover{background:#ffe4e8}
+.btn-clear2.hide{display:none}
+.btn-done{
+  border:0; background:linear-gradient(180deg,#6aabf2,#4f93d6); color:#fff; border-radius:12px; padding:10px 22px; cursor:pointer;
+  font-family:inherit; font-size:13.5px; font-weight:800; box-shadow:0 4px 12px rgba(79,147,214,.32); transition:all .15s ease;
+}
+.btn-done:hover{transform:translateY(-1px); box-shadow:0 7px 16px rgba(79,147,214,.4)}
+.saved-tip{font-size:11.5px; color:var(--ink3); font-weight:700; opacity:0; transition:opacity .3s ease}
+.saved-tip.on{opacity:1}
 
 /* ─── 统计条 ─── */
 .stats{
@@ -222,6 +297,10 @@ body{
   .today-cta button{padding:9px 14px}
   .grp .g-grid{grid-template-columns:repeat(auto-fill, minmax(64px,1fr)); gap:7px}
   .mood-btn img{width:44px; height:44px}
+  .diary{padding:16px 13px 13px; border-radius:18px}
+  .diary-sticker img{width:84px; height:84px}
+  .diary-sticker .ph{width:74px; height:74px; font-size:24px}
+  .row-lbl{flex-basis:36px; font-size:12px}
 }
 </style>
 </head>
@@ -229,11 +308,11 @@ body{
 <div class="wrap">
   <div class="hero">
     <h1><span class="paw">🐱</span> 心情日历</h1>
-    <div class="sub">给每天贴一张猫耳心情 · 翻一翻就是这个月的样子</div>
+    <div class="sub">点一天 · 贴一张心情 · 写一段日记 —— 翻一翻就是这个月的样子</div>
     <div class="today-cta" id="todayCta">
       <span class="lbl" id="todayLbl">今天 10 月 4 日</span>
       <img class="mini" id="todayMini" alt="" style="display:none">
-      <button type="button" id="todayBtn">贴一张 🐾</button>
+      <button type="button" id="todayBtn">写日记 🖊</button>
     </div>
   </div>
 
@@ -250,22 +329,56 @@ body{
     </div>
     <div class="cal-grid" id="calGrid"></div>
 
+    <!-- 日记面板：选中日期后展开 -->
+    <div class="diary-wrap" id="diaryWrap">
+      <div class="diary-inner">
+        <div class="diary" id="diaryPanel">
+          <button class="diary-x" id="diaryClose" type="button" aria-label="收起">✕</button>
+          <div class="diary-sticker" id="diarySticker">
+            <span class="ph">🐾</span>
+            <img id="diaryStickerImg" alt="心情表情">
+          </div>
+          <div class="diary-date" id="diaryDate">2026 年 10 月 4 日 · 星期六 <span class="dt-badge" id="diaryTodayBadge" style="display:none">今天</span></div>
+          <div class="diary-row">
+            <span class="row-lbl">天气</span>
+            <div class="wx-chips" id="wxChips"></div>
+          </div>
+          <div class="diary-row">
+            <span class="row-lbl">心情</span>
+            <button class="mood-slot" id="moodSlot" type="button">
+              <img id="moodSlotImg" alt="">
+              <span id="moodSlotTxt">挑一张心情</span>
+              <span class="chg" id="moodSlotChg"></span>
+            </button>
+          </div>
+          <div class="diary-divider"></div>
+          <textarea class="diary-text" id="diaryText" placeholder="今天发生了什么？开心的、委屈的、突然想到的……都可以写在这里"></textarea>
+          <div class="diary-actions">
+            <button class="btn-clear2" id="diaryClear" type="button">🧹 清除这天</button>
+            <span class="spacer"></span>
+            <span class="saved-tip" id="savedTip">已自动保存 ✓</span>
+            <button class="btn-done" id="diaryDone" type="button">完成</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="stats" id="stats"></div>
   </div>
 
   <div class="foot">
-    <div class="hint">💾 心情只存在你自己的浏览器里（localStorage），不会上传；换设备可先导出、再导入。</div>
+    <div class="hint">💾 心情和日记只存在你自己的浏览器里（localStorage），不会上传；换设备可先导出、再导入。</div>
     <button type="button" id="exportBtn">⤓ 导出备份</button>
     <button type="button" id="importBtn">⤒ 导入备份</button>
     <input type="file" id="importFile" accept=".json,application/json" style="display:none">
   </div>
 </div>
 
-<!-- 选择器 -->
+<!-- 心情选择器（43 张猫耳表情） -->
 <div class="mask" id="pickMask">
   <div class="sheet" id="pickSheet">
     <div class="sheet-head">
-      <h2 id="pickTitle">挑一张贴上</h2>
+      <h2 id="pickTitle">挑一张心情</h2>
       <button class="x-btn" id="pickClose" type="button" aria-label="关闭">✕</button>
     </div>
     <div id="pickBody"></div>
@@ -332,10 +445,12 @@ window.STAch = STAch;
 setTimeout(function () { STAch.unlock('site.mood', '猫耳心情', '🐱'); }, 600);
 
 /* ══════════════════════════════════════════════════════════
-   🐱 心情日历核心
+   🐱 心情日记核心
    ══════════════════════════════════════════════════════════ */
-var STORE_KEY = 'startian_mood_v1';
-/* 43 张猫耳表情（名字由星恬命名；文件 = 名字.webp） */
+var STORE_DIARY = 'startian_mood_diary_v1';   /* { date: { w, m, t, u } } */
+var STORE_LEGACY = 'startian_mood_v1';        /* 旧版：{ date: moodName }（只读迁移） */
+
+/* ── 43 张猫耳表情（名字由星恬命名；文件 = 名字.webp） ── */
 var GROUPS = [
   { name: '开心雀跃', list: ['开心','快乐','喜欢','爱你','心生爱慕','期待','很帅','调皮','害羞','乖巧','好的','招手','hello','求投喂','贪吃'] },
   { name: '低落难过', list: ['伤心','委屈','委屈2','委屈伤心','重伤倒地'] },
@@ -347,31 +462,65 @@ var GROUPS = [
 var ALL = GROUPS.reduce(function (a, g) { return a.concat(g.list); }, []);
 function stickerSrc(name) { return 'stickers/' + encodeURIComponent(name) + '.webp'; }
 
+/* ── 天气预设（8 种） ── */
+var WEATHERS = [
+  { n: '晴', e: '☀️' }, { n: '多云', e: '⛅' }, { n: '阴', e: '☁️' }, { n: '小雨', e: '🌧️' },
+  { n: '雷雨', e: '⛈️' }, { n: '雪', e: '❄️' }, { n: '风', e: '🌬️' }, { n: '雾', e: '🌫️' }
+];
+function wxOf(n) { for (var i = 0; i < WEATHERS.length; i++) if (WEATHERS[i].n === n) return WEATHERS[i]; return null; }
+
 /* ── 数据 ── */
-var DATA = {};
+var DIARY = {};
 try {
-  var raw = localStorage.getItem(STORE_KEY);
-  if (raw) { var p = JSON.parse(raw); if (p && typeof p === 'object') DATA = p; }
+  var raw = localStorage.getItem(STORE_DIARY);
+  if (raw) { var p = JSON.parse(raw); if (p && typeof p === 'object') DIARY = p; }
 } catch (e) {}
-function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(DATA)); } catch (e) {} }
+/* 旧版数据迁移（startian_mood_v1 → diary.m，保留旧键不删） */
+(function () {
+  try {
+    var legacy = JSON.parse(localStorage.getItem(STORE_LEGACY) || '{}');
+    var changed = false;
+    for (var k in legacy) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(k)) continue;
+      if (!DIARY[k] && ALL.indexOf(legacy[k]) >= 0) {
+        DIARY[k] = { m: legacy[k], u: Date.now() };
+        changed = true;
+      }
+    }
+    if (changed) saveDiary();
+  } catch (e) {}
+})();
+function saveDiary() { try { localStorage.setItem(STORE_DIARY, JSON.stringify(DIARY)); } catch (e) {} }
+function entryOf(ds) { return DIARY[ds] || null; }
+function moodOf(ds) { var d = DIARY[ds]; return (d && ALL.indexOf(d.m) >= 0) ? d.m : null; }
+function hasContent(ds) {
+  var d = DIARY[ds];
+  return !!(d && ((ALL.indexOf(d.m) >= 0) || (d.w && wxOf(d.w)) || (d.t && d.t.trim())));
+}
 
 /* ── 日期工具（本地时区） ── */
 function pad(n) { return (n < 10 ? '0' : '') + n; }
 function fmt(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
 var NOW = new Date();
 var TODAY = fmt(NOW);
+var WD = ['日', '一', '二', '三', '四', '五', '六'];
 function parseD(str) {
   var a = str.split('-');
   return new Date(+a[0], +a[1] - 1, +a[2]);
 }
+function dateLabel(ds) {
+  var d = parseD(ds);
+  return d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日 · 星期' + WD[d.getDay()];
+}
 
-/* ── 视图 ── */
+/* ── 视图状态 ── */
 var viewY = NOW.getFullYear(), viewM = NOW.getMonth();
+var selected = null;        /* 当前选中日期 */
 var $ = function (id) { return document.getElementById(id); };
 
+/* ── 渲染日历 ── */
 function renderMonth(popDate) {
-  var title = $('calTitle');
-  title.childNodes[0].nodeValue = viewY + ' 年 ' + (viewM + 1) + ' 月 ';
+  $('calTitle').childNodes[0].nodeValue = viewY + ' 年 ' + (viewM + 1) + ' 月 ';
   var isCur = (viewY === NOW.getFullYear() && viewM === NOW.getMonth());
   $('calSub').textContent = isCur ? '本月' : '';
   $('nextBtn').disabled = isCur;
@@ -381,7 +530,6 @@ function renderMonth(popDate) {
   var daysInMonth = new Date(viewY, viewM + 1, 0).getDate();
   var grid = $('calGrid');
   var html = '';
-  /* 前置空位（上月淡影） */
   var prevDays = new Date(viewY, viewM, 0).getDate();
   for (var i = 0; i < startCol; i++) {
     var dN = prevDays - startCol + 1 + i;
@@ -392,19 +540,21 @@ function renderMonth(popDate) {
     var cls = 'day';
     if (ds === TODAY) cls += ' today';
     if (ds > TODAY) cls += ' future';
-    var mood = DATA[ds];
-    if (mood && ALL.indexOf(mood) >= 0) cls += ' has';
+    if (ds === selected) cls += ' sel';
+    var mood = moodOf(ds);
+    if (mood) cls += ' has';
     var inner = '<span class="num">' + d + '</span>';
-    if (mood && ALL.indexOf(mood) >= 0) {
+    if (mood) {
       inner += '<img class="stk' + (popDate === ds ? ' pop' : '') + '" src="' + stickerSrc(mood) + '" alt="' + mood + '" draggable="false">';
     }
+    var wx = entryOf(ds) && entryOf(ds).w ? wxOf(entryOf(ds).w) : null;
+    inner += '<span class="wxb' + (wx ? ' on' : '') + '">' + (wx ? wx.e : '') + '</span>';
     inner += '<span class="hintplus">＋</span><span class="spark">✦</span>';
     html += '<div class="' + cls + '" data-date="' + ds + '">' + inner + '</div>';
   }
-  /* 尾部补齐 42 格（6 行） */
   var used = startCol + daysInMonth;
   var tail = Math.max((Math.ceil(used / 7) * 7) - used, 0);
-  if (used <= 35) tail = 42 - used;   /* 尽量 6 行稳定高度 */
+  if (used <= 35) tail = 42 - used;
   for (var j = 1; j <= tail; j++) html += '<div class="day other"><span class="num">' + j + '</span></div>';
   grid.innerHTML = html;
   renderStats();
@@ -414,94 +564,217 @@ function renderMonth(popDate) {
 /* ── 统计 ── */
 function monthStats(y, m) {
   var prefix = y + '-' + pad(m + 1) + '-';
-  var cnt = {}, total = 0;
-  for (var k in DATA) {
-    if (k.indexOf(prefix) === 0 && ALL.indexOf(DATA[k]) >= 0) {
-      total++;
-      cnt[DATA[k]] = (cnt[DATA[k]] || 0) + 1;
-    }
+  var cnt = {}, total = 0, essays = 0;
+  for (var k in DIARY) {
+    if (k.indexOf(prefix) !== 0) continue;
+    var e = DIARY[k];
+    var hasMood = e && ALL.indexOf(e.m) >= 0;
+    var hasText = e && e.t && e.t.trim();
+    if (hasMood || hasText || (e && e.w)) total++;
+    if (hasMood) cnt[e.m] = (cnt[e.m] || 0) + 1;
+    if (hasText) essays++;
   }
   var top = null, topN = 0;
   for (var name in cnt) { if (cnt[name] > topN) { topN = cnt[name]; top = name; } }
-  return { total: total, top: top, topN: topN };
+  return { total: total, top: top, topN: topN, essays: essays };
 }
 function streakDays() {
-  /* 连续记录天数：从今天（或昨天）往回数 */
   var n = 0;
   var probe = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate());
-  if (!DATA[fmt(probe)]) probe.setDate(probe.getDate() - 1);   /* 今天还没贴：从昨天算 */
-  while (DATA[fmt(probe)]) { n++; probe.setDate(probe.getDate() - 1); }
+  if (!hasContent(fmt(probe))) probe.setDate(probe.getDate() - 1);
+  while (hasContent(fmt(probe))) { n++; probe.setDate(probe.getDate() - 1); }
   return n;
 }
 function totalDays() {
   var n = 0;
-  for (var k in DATA) if (ALL.indexOf(DATA[k]) >= 0) n++;
+  for (var k in DIARY) if (hasContent(k)) n++;
   return n;
 }
 function renderStats() {
   var ms = monthStats(viewY, viewM);
   var st = streakDays();
-  var html = '<span>📅 本月已贴 <b>' + ms.total + '</b> 天</span><span>🔥 连续 <b>' + st + '</b> 天</span>';
+  var html = '<span>📅 本月 <b>' + ms.total + '</b> 天有记录</span>' +
+             '<span>📖 本月日记 <b>' + ms.essays + '</b> 篇</span>' +
+             '<span>🔥 连续 <b>' + st + '</b> 天</span>';
   if (ms.top) {
     html += '<span class="chip"><img src="' + stickerSrc(ms.top) + '" alt=""> 最常出现：<b>' + ms.top + '</b> ×' + ms.topN + '</span>';
   } else {
-    html += '<span style="color:var(--ink3)">这个月还空着，点一天贴上第一张吧</span>';
+    html += '<span style="color:var(--ink3)">这个月还空着，点一天记一笔吧</span>';
   }
   $('stats').innerHTML = html;
 }
 function renderTodayCta() {
-  var mood = DATA[TODAY];
+  var mood = moodOf(TODAY);
   var lbl = $('todayLbl'), mini = $('todayMini'), btn = $('todayBtn');
   var md = (NOW.getMonth() + 1) + ' 月 ' + NOW.getDate() + ' 日';
-  if (mood && ALL.indexOf(mood) >= 0) {
-    lbl.textContent = '今天 ' + md + ' · 已贴';
+  var has = hasContent(TODAY);
+  if (mood) {
+    lbl.textContent = '今天 ' + md + ' · 已记录';
     mini.src = stickerSrc(mood);
     mini.style.display = '';
-    btn.textContent = '换一张 🐾';
   } else {
-    lbl.textContent = '今天 ' + md;
+    lbl.textContent = '今天 ' + md + (has ? ' · 已记录' : '');
     mini.style.display = 'none';
-    btn.textContent = '贴一张 🐾';
+  }
+  btn.textContent = has ? '继续写 🖊' : '写日记 🖊';
+}
+
+/* ══════════ 日记面板 ══════════ */
+var saveTimer = null, savedTipTimer = null;
+function flushSave() {
+  if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+  saveDiary();
+}
+function debouncedSave() {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(function () {
+    saveTimer = null;
+    saveDiary();
+    var tip = $('savedTip');
+    tip.classList.add('on');
+    if (savedTipTimer) clearTimeout(savedTipTimer);
+    savedTipTimer = setTimeout(function () { tip.classList.remove('on'); }, 1400);
+  }, 500);
+}
+function renderWxChips() {
+  var cur = selected && entryOf(selected) ? entryOf(selected).w : null;
+  $('wxChips').innerHTML = WEATHERS.map(function (w) {
+    return '<button type="button" class="wx-chip' + (cur === w.n ? ' on' : '') + '" data-w="' + w.n + '">' + w.e + ' ' + w.n + '</button>';
+  }).join('');
+}
+function renderMoodSlot() {
+  var m = selected ? moodOf(selected) : null;
+  var slot = $('moodSlot'), img = $('moodSlotImg'), txt = $('moodSlotTxt'), chg = $('moodSlotChg');
+  if (m) {
+    slot.classList.add('has');
+    img.src = stickerSrc(m);
+    txt.textContent = m;
+    chg.textContent = '换一个 ↺';
+  } else {
+    slot.classList.remove('has');
+    img.removeAttribute('src');
+    txt.textContent = '挑一张心情';
+    chg.textContent = '';
   }
 }
-
-/* ── 成就检查 ── */
-function hasRun(len) {
-  var dates = Object.keys(DATA).filter(function (k) { return ALL.indexOf(DATA[k]) >= 0; }).sort();
-  var run = 1;
-  for (var i = 1; i < dates.length; i++) {
-    var diff = (parseD(dates[i]) - parseD(dates[i - 1])) / 86400000;
-    run = (diff === 1) ? run + 1 : 1;
-    if (run >= len) return true;
+function renderSticker() {
+  var m = selected ? moodOf(selected) : null;
+  var box = $('diarySticker'), img = $('diaryStickerImg');
+  if (m) {
+    box.classList.add('chosen');
+    img.src = stickerSrc(m);
+    img.alt = m;
+  } else {
+    box.classList.remove('chosen');
+    img.removeAttribute('src');
   }
-  return dates.length >= len && run >= len;
 }
-function checkAch() {
-  var n = totalDays();
-  if (n >= 1) STAch.unlock('mood.record', '第一笔心情', '📔');
-  if (n >= 30) STAch.unlock('mood.total30', '心情收藏家', '🌈');
-  if (hasRun(7)) STAch.unlock('mood.week', '一周好心情', '🔥');
+function fillDiary() {
+  if (!selected) return;
+  var e = entryOf(selected);
+  $('diaryDate').childNodes[0].nodeValue = dateLabel(selected) + ' ';
+  $('diaryTodayBadge').style.display = (selected === TODAY) ? '' : 'none';
+  $('diaryText').value = (e && e.t) || '';
+  renderWxChips();
+  renderMoodSlot();
+  renderSticker();
+  $('diaryClear').classList.toggle('hide', !hasContent(selected));
 }
-
-/* ── toast ── */
-var toastT = null;
-function toast(msg) {
-  var el = $('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toastT);
-  toastT = setTimeout(function () { el.classList.remove('show'); }, 2200);
-}
-
-/* ── 选择器 ── */
-var pickDate = null;
-function openPick(ds) {
-  pickDate = ds;
+function openDiary(ds, opts) {
+  opts = opts || {};
+  selected = ds;
   var d = parseD(ds);
-  var isToday = ds === TODAY;
-  $('pickTitle').innerHTML = (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日 · 挑一张贴上' +
-    (isToday ? '<small>今天</small>' : '');
-  var cur = DATA[ds];
+  if (d.getFullYear() !== viewY || d.getMonth() !== viewM) {
+    viewY = d.getFullYear(); viewM = d.getMonth();
+  }
+  renderMonth();
+  fillDiary();
+  var wrap = $('diaryWrap');
+  if (!wrap.classList.contains('open')) {
+    wrap.classList.add('open');
+  }
+  /* 自动定位：稍等展开动画，然后把面板滚动到视野 */
+  if (opts.scroll !== false) {
+    setTimeout(function () {
+      try { $('diaryPanel').scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+    }, 260);
+  }
+  try { history.replaceState(null, '', '#' + ds); } catch (e) {}
+}
+function closeDiary() {
+  flushSave();
+  selected = null;
+  $('diaryWrap').classList.remove('open');
+  renderMonth();
+  try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+}
+
+/* ══════════ 点击日期 ══════════ */
+$('calGrid').addEventListener('click', function (ev) {
+  var cell = ev.target.closest ? ev.target.closest('.day') : null;
+  if (!cell) return;
+  var ds = cell.getAttribute('data-date');
+  if (!ds) return;
+  if (cell.classList.contains('future')) { toast('还没到那一天哦～'); return; }
+  if (ds === selected) { closeDiary(); return; }   /* 再点一次收起 */
+  flushSave();
+  openDiary(ds);
+});
+$('diaryClose').addEventListener('click', closeDiary);
+$('diaryDone').addEventListener('click', function () {
+  flushSave();
+  toast('已保存 🐾');
+  closeDiary();
+});
+$('diaryClear').addEventListener('click', function () {
+  if (!selected) return;
+  if (!window.confirm('清除 ' + selected + ' 的心情、天气和日记吗？')) return;
+  delete DIARY[selected];
+  saveDiary();
+  fillDiary();
+  renderMonth();
+  toast('这天已清空');
+});
+
+/* 天气 chips */
+$('wxChips').addEventListener('click', function (ev) {
+  var b = ev.target.closest ? ev.target.closest('.wx-chip') : null;
+  if (!b || !selected) return;
+  var w = b.getAttribute('data-w');
+  var e = DIARY[selected] || (DIARY[selected] = {});
+  e.w = (e.w === w) ? '' : w;        /* 再点一次取消 */
+  if (!e.w) delete e.w;
+  e.u = Date.now();
+  cleanupIfEmpty(selected);
+  saveDiary();
+  renderWxChips();
+  renderMonth();
+  $('diaryClear').classList.toggle('hide', !hasContent(selected));
+});
+function cleanupIfEmpty(ds) {
+  var e = DIARY[ds];
+  if (!e) return;
+  var empty = !(ALL.indexOf(e.m) >= 0) && !(e.w && wxOf(e.w)) && !(e.t && e.t.trim());
+  if (empty) delete DIARY[ds];
+}
+
+/* 正文 */
+$('diaryText').addEventListener('input', function () {
+  if (!selected) return;
+  var v = $('diaryText').value;
+  var e = DIARY[selected] || (DIARY[selected] = {});
+  e.t = v;
+  e.u = Date.now();
+  cleanupIfEmpty(selected);
+  debouncedSave();
+  $('diaryClear').classList.toggle('hide', !hasContent(selected));
+});
+
+/* ══════════ 心情选择器 ══════════ */
+function openPick() {
+  if (!selected) return;
+  var cur = moodOf(selected);
+  $('pickTitle').innerHTML = '挑一张心情<small>' + dateLabel(selected).replace(' · ', ' · ') + '</small>';
   var body = $('pickBody');
   var html = '';
   GROUPS.forEach(function (g) {
@@ -520,31 +793,40 @@ function openPick(ds) {
 function closePick() {
   $('pickMask').classList.remove('show');
   document.body.style.overflow = '';
-  pickDate = null;
 }
-function setMood(ds, name) {
-  DATA[ds] = name;
-  save();
+function setMood(name) {
+  if (!selected) return;
+  var e = DIARY[selected] || (DIARY[selected] = {});
+  e.m = name;
+  e.u = Date.now();
+  saveDiary();
   checkAch();
-  renderMonth(ds);
+  fillDiary();
+  renderMonth(selected);
   toast('已贴上「' + name + '」' + (name === '开心' || name === '快乐' ? ' 🎉' : ' 🐾'));
 }
-function clearMood(ds) {
-  delete DATA[ds];
-  save();
+$('moodSlot').addEventListener('click', openPick);
+$('pickClose').addEventListener('click', closePick);
+$('pickCancel').addEventListener('click', closePick);
+$('pickMask').addEventListener('click', function (e) { if (e.target === this) closePick(); });
+$('pickBody').addEventListener('click', function (e) {
+  var b = e.target.closest ? e.target.closest('.mood-btn') : null;
+  if (!b) return;
+  var name = b.getAttribute('data-mood');
+  closePick();
+  setMood(name);
+});
+$('pickClear').addEventListener('click', function () {
+  if (!selected) return;
+  var e = DIARY[selected];
+  if (e) { delete e.m; e.u = Date.now(); cleanupIfEmpty(selected); saveDiary(); }
+  closePick();
+  fillDiary();
   renderMonth();
   toast('这天的心情已清除');
-}
-
-/* ── 事件 ── */
-$('calGrid').addEventListener('click', function (e) {
-  var cell = e.target.closest ? e.target.closest('.day') : null;
-  if (!cell) return;
-  var ds = cell.getAttribute('data-date');
-  if (!ds) return;
-  if (cell.classList.contains('future')) { toast('还没到那一天哦～'); return; }
-  openPick(ds);
 });
+
+/* ══════════ 导航 / 快捷键 ══════════ */
 $('prevBtn').addEventListener('click', function () {
   viewM--; if (viewM < 0) { viewM = 11; viewY--; }
   renderMonth();
@@ -555,37 +837,56 @@ $('nextBtn').addEventListener('click', function () {
   renderMonth();
 });
 $('jumpBtn').addEventListener('click', function () {
-  viewY = NOW.getFullYear(); viewM = NOW.getMonth();
-  renderMonth(TODAY);
+  openDiary(TODAY);
 });
-$('todayBtn').addEventListener('click', function () { openPick(TODAY); });
-$('pickClose').addEventListener('click', closePick);
-$('pickCancel').addEventListener('click', closePick);
-$('pickMask').addEventListener('click', function (e) { if (e.target === this) closePick(); });
-$('pickBody').addEventListener('click', function (e) {
-  var b = e.target.closest ? e.target.closest('.mood-btn') : null;
-  if (!b || !pickDate) return;
-  var name = b.getAttribute('data-mood');
-  var ds = pickDate;
-  closePick();
-  setMood(ds, name);
+$('todayBtn').addEventListener('click', function () { openDiary(TODAY); });
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') {
+    if ($('pickMask').classList.contains('show')) closePick();
+    else if (selected) closeDiary();
+    return;
+  }
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && selected) {
+    flushSave(); toast('已保存 🐾'); closeDiary();
+  }
 });
-$('pickClear').addEventListener('click', function () {
-  if (!pickDate) return;
-  var ds = pickDate;
-  closePick();
-  clearMood(ds);
-});
-document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePick(); });
 
-/* ── 导出 / 导入 ── */
+/* ══════════ 成就检查 ══════════ */
+function hasRun(len) {
+  var dates = Object.keys(DIARY).filter(function (k) { return hasContent(k); }).sort();
+  var run = 1;
+  for (var i = 1; i < dates.length; i++) {
+    var diff = (parseD(dates[i]) - parseD(dates[i - 1])) / 86400000;
+    run = (diff === 1) ? run + 1 : 1;
+    if (run >= len) return true;
+  }
+  return false;
+}
+function checkAch() {
+  var n = totalDays();
+  if (n >= 1) STAch.unlock('mood.record', '第一笔心情', '📔');
+  if (n >= 30) STAch.unlock('mood.total30', '心情收藏家', '🌈');
+  if (hasRun(7)) STAch.unlock('mood.week', '一周好心情', '🔥');
+}
+
+/* ══════════ toast ══════════ */
+var toastT = null;
+function toast(msg) {
+  var el = $('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(function () { el.classList.remove('show'); }, 2200);
+}
+
+/* ══════════ 导出 / 导入（v2） ══════════ */
 $('exportBtn').addEventListener('click', function () {
   try {
-    var out = { app: 'startian-mood', v: 1, exportedAt: new Date().toISOString(), moods: DATA };
+    var out = { app: 'startian-mood', v: 2, exportedAt: new Date().toISOString(), diary: DIARY };
     var blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = '心情日历-备份-' + TODAY.replace(/-/g, '') + '.json';
+    a.download = '心情日记-备份-' + TODAY.replace(/-/g, '') + '.json';
     document.body.appendChild(a); a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); if (a.parentNode) a.parentNode.removeChild(a); }, 400);
     toast('已导出备份文件 ⤓');
@@ -600,24 +901,47 @@ $('importFile').addEventListener('change', function (e) {
   reader.onload = function () {
     try {
       var obj = JSON.parse(reader.result);
-      var moods = (obj && obj.moods && typeof obj.moods === 'object') ? obj.moods : null;
-      if (!moods) throw new Error('文件格式不对');
-      var n = 0;
-      for (var k in moods) { if (/^\d{4}-\d{2}-\d{2}$/.test(k)) n++; }
+      var src = null, n = 0;
+      if (obj && obj.diary && typeof obj.diary === 'object') src = obj.diary;          /* v2 */
+      else if (obj && obj.moods && typeof obj.moods === 'object') {                    /* v1 兼容 */
+        src = {};
+        for (var k0 in obj.moods) src[k0] = { m: obj.moods[k0] };
+      }
+      if (!src) throw new Error('文件格式不对');
+      for (var k in src) { if (/^\d{4}-\d{2}-\d{2}$/.test(k) && src[k] && typeof src[k] === 'object') n++; }
       if (!n) throw new Error('里面没有心情数据');
-      if (!window.confirm('要导入 ' + n + ' 天的记录吗？\n会「覆盖」当前已记录的日子（同一天取导入的），确定继续？')) return;
-      for (var k2 in moods) { if (/^\d{4}-\d{2}-\d{2}$/.test(k2)) DATA[k2] = moods[k2]; }
-      save(); checkAch(); renderMonth();
-      toast('已导入 ' + n + ' 天的记录 ✓');
+      if (!window.confirm('要导入 ' + n + ' 天的记录吗？\n会「覆盖」当前同一天的记录，确定继续？')) return;
+      var imported = 0;
+      for (var k2 in src) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(k2)) continue;
+        var e2 = src[k2];
+        if (!e2 || typeof e2 !== 'object') continue;
+        DIARY[k2] = { m: ALL.indexOf(e2.m) >= 0 ? e2.m : undefined, w: e2.w || undefined, t: e2.t || '', u: Date.now() };
+        if (!DIARY[k2].m) delete DIARY[k2].m;
+        if (!DIARY[k2].w) delete DIARY[k2].w;
+        imported++;
+      }
+      saveDiary(); checkAch(); renderMonth();
+      if (selected) fillDiary();
+      toast('已导入 ' + imported + ' 天的记录 ✓');
     } catch (err) { toast('导入失败：' + err.message); }
   };
   reader.readAsText(f);
 });
 
-/* ── 启动 ── */
+/* ══════════ 启动 ══════════ */
 renderMonth();
 setTimeout(checkAch, 1000);
-console.log('🐱 心情日历已启动（43 张猫耳表情 · 数据本地保存）');
+/* URL hash 自动定位（#2026-10-01 → 自动切月 + 展开该日日记） */
+(function () {
+  var h = (location.hash || '').replace('#', '');
+  if (/^\d{4}-\d{2}-\d{2}$/.test(h) && h <= TODAY) {
+    openDiary(h);
+  } else if (h === 'today') {
+    openDiary(TODAY);
+  }
+})();
+console.log('🐱 心情日记已启动（43 张猫耳表情 · 天气 · 日记 · 本地保存）');
 })();
 </script>
 </body>
