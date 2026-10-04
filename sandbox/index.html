@@ -380,6 +380,379 @@ body{
 <a class="wb-home" href="https://startian.top/" title="返回星恬的小站主页">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>主页</span>
 </a>
+<script>
+/* ==== i18n-kit v1.2 begin ==== */
+/* ══════════════════════════════════════════════════════════
+   🌐 多语言 i18n Kit（startian.top 全站共享 · v1.2 · 2026-10-04）
+   · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
+   · 自动识别：首次访问按 navigator.language（zh 开头 → 中文，其余 → English）
+   · 两种接入模式（可混用）：
+     ① 短语表模式（推荐，低侵入）：I18N.phrase({ '中文原文': 'English', ... })
+        自动扫描文本节点 / title / placeholder / aria-label / alt，动态插入的文本也自动翻译
+     ② 标注模式：data-i18n / data-i18n-html / data-i18n-title / data-i18n-aria / data-i18n-ph / data-i18n-alt
+   · 子树上加 data-i18n-skip 可整体跳过（用户输入内容、ARG 谜题原文等）
+   · API：I18N.t(k[,vars]) · I18N.tOr(k,fb) · I18N.tr(原文) · I18N.set(lang) · I18N.lang()
+          · I18N.phrase(map) · I18N.scan(root) · I18N.apply(root) · I18N.onChange(fn)
+          · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n)
+   · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
+   ══════════════════════════════════════════════════════════ */
+var I18N = (function () {
+  'use strict';
+  var LS = 'st_lang';
+  var FALLBACK = 'zh';
+  var lang = FALLBACK;
+  var dict = { zh: {}, en: {} };
+  var phrase = {};      /* 短语表：中文原文（归一化）→ 译文 */
+  var listeners = [];
+  var bd = {};          /* boot data：原文快照等 */
+
+  /* ---- 基础词典（全站通用词条） ---- */
+  dict.zh['common.home'] = '主页';
+  dict.en['common.home'] = 'Home';
+  dict.zh['common.homeTitle'] = '返回星恬的小站主页';
+  dict.en['common.homeTitle'] = "Back to Startian's homepage";
+  dict.zh['common.close'] = '关闭';
+  dict.en['common.close'] = 'Close';
+  dict.zh['common.cancel'] = '取消';
+  dict.en['common.cancel'] = 'Cancel';
+
+  /* ---- 存储与识别 ---- */
+  function norm(v) {
+    v = String(v || '').toLowerCase();
+    if (v.indexOf('zh') === 0) return 'zh';
+    if (v.indexOf('en') === 0) return 'en';
+    return null;
+  }
+  function readCookie() {
+    try { var m = document.cookie.match(/(?:^|;\s*)st_lang=([^;]*)/); return m ? decodeURIComponent(m[1]) : null; }
+    catch (e) { return null; }
+  }
+  function readLS() { try { return localStorage.getItem(LS); } catch (e) { return null; } }
+  function persist(v) {
+    try { localStorage.setItem(LS, v); } catch (e) {}
+    try { document.cookie = 'st_lang=' + encodeURIComponent(v) + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax'; } catch (e) {}
+  }
+  function detect() {
+    var s = norm(readCookie()) || norm(readLS());
+    if (s) return s;
+    var n = norm(navigator.language || navigator.userLanguage);
+    return n || FALLBACK;
+  }
+
+  /* ---- 文案 ---- */
+  /* tRaw：查词典（当前语言 → zh 兜底），查不到返回 null（= 保持原文） */
+  function tRaw(key) {
+    var v = (dict[lang] && dict[lang][key] != null) ? dict[lang][key] : null;
+    if (v == null) v = (dict[FALLBACK] && dict[FALLBACK][key] != null) ? dict[FALLBACK][key] : null;
+    return v;
+  }
+  function t(key, vars) {
+    var v = tRaw(key);
+    if (v == null) return key;
+    if (vars) v = String(v).replace(/\{(\w+)\}/g, function (m, k) { return (vars[k] != null) ? vars[k] : m; });
+    return v;
+  }
+  /* tOr：查不到时用传入的兜底值（页面 JS 动态文案用这个） */
+  function tOr(key, fallback) {
+    var v = tRaw(key);
+    return (v == null) ? fallback : v;
+  }
+  function add(obj) {
+    if (!obj) return;
+    ['zh', 'en'].forEach(function (k) {
+      if (obj[k]) for (var key in obj[k]) dict[k][key] = obj[k][key];
+    });
+  }
+  /* tr：短语表直译（原文进，译文出；zh 侧原样返回）-JS 动态文案直接用 */
+  function tr(s) {
+    if (lang === 'zh') return s;
+    var v = lookup(normText(s));
+    return (v == null) ? s : v;
+  }
+  function addPhrase(map) {
+    if (!map) return;
+    for (var k in map) { if (map[k] != null) phrase[normText(k)] = String(map[k]); }
+  }
+  /* 规则表：[[/正则/, '替换（可用 $1）'], ...] - 处理「已复习 3」「12 天有记录」这类数字拼接 */
+  var rules = [];
+  function addRules(list) {
+    if (!list) return;
+    for (var i = 0; i < list.length; i++) {
+      try {
+        var re = (list[i][0] instanceof RegExp) ? list[i][0] : new RegExp(list[i][0]);
+        rules.push([re, String(list[i][1])]);
+      } catch (e) {}
+    }
+  }
+  function lookup(t) {
+    var v = phrase[t];
+    if (v != null) return v;
+    for (var i = 0; i < rules.length; i++) {
+      try { if (rules[i][0].test(t)) return t.replace(rules[i][0], rules[i][1]); } catch (e) {}
+    }
+    return null;
+  }
+
+  /* ---- 短语表扫描（静态 + 动态） ---- */
+  function normText(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
+  var PTAGS = ['title', 'placeholder', 'aria-label', 'alt'];
+  function translText(node) {
+    var raw = node.nodeValue;
+    if (!raw) return;
+    var rec = node.__i18nR;
+    if (rec) {
+      if (lang === 'zh') {
+        if (raw === rec.en) { node.nodeValue = rec.orig; delete node.__i18nR; }
+        else if (raw !== rec.orig) { delete node.__i18nR; }
+        return;
+      }
+      if (raw === rec.en) return;
+      if (raw === rec.orig) { node.nodeValue = rec.en; return; }
+      delete node.__i18nR;
+    }
+    var out = lookup(normText(raw));
+    if (out == null) return;
+    if (lang === 'en') { if (raw !== out) { node.__i18nR = { orig: raw, en: out }; node.nodeValue = out; } }
+  }
+  function translAttrs(el) {
+    if (!el.getAttribute) return;
+    for (var i = 0; i < PTAGS.length; i++) {
+      var a = PTAGS[i], v = el.getAttribute(a);
+      if (v == null || v === '') continue;
+      var rec = el.__i18nA && el.__i18nA[a];
+      if (rec) {
+        if (lang === 'zh') {
+          if (v === rec.en) { el.setAttribute(a, rec.orig); delete el.__i18nA[a]; }
+          else if (v !== rec.orig) { delete el.__i18nA[a]; }
+          continue;
+        }
+        if (v === rec.en) continue;
+        if (v === rec.orig) { el.setAttribute(a, rec.en); continue; }
+        delete el.__i18nA[a];
+      }
+      var out = lookup(normText(v));
+      if (out == null) continue;
+      if (lang === 'en') {
+        if (v !== out) { if (!el.__i18nA) el.__i18nA = {}; el.__i18nA[a] = { orig: v, en: out }; el.setAttribute(a, out); }
+      }
+    }
+  }
+  function scanNode(node) {
+    if (!node) return;
+    if (node.nodeType === 9) node = node.documentElement || node.body;   /* 文档节点 → 转元素 */
+    if (!node) return;
+    if (node.nodeType === 3) { translText(node); return; }
+    if (node.nodeType !== 1) return;
+    var tag = node.tagName;
+    if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'NOSCRIPT') return;
+    if (node.hasAttribute('data-i18n-skip')) return;
+    translAttrs(node);
+    for (var c = node.firstChild; c; c = c.nextSibling) scanNode(c);
+  }
+  function scan(root) { try { scanNode(root || document.body || document.documentElement); } catch (e) {} }
+  /* 动态内容自动翻译（MutationObserver，逐节点增量，无重扫） */
+  var moOn = false;
+  function auto(root) {
+    if (moOn || typeof MutationObserver === 'undefined') return;
+    var target = root || document.body;
+    if (!target) {   /* head 提前注入时 body 还没解析出来，等 DOM ready */
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { auto(root); });
+      return;
+    }
+    moOn = true;
+    try {
+      var mo = new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          var m = muts[i];
+          try {
+            if (m.type === 'characterData') translText(m.target);
+            else if (m.type === 'attributes') translAttrs(m.target);
+            else if (m.type === 'childList') {
+              for (var j = 0; j < m.addedNodes.length; j++) scanNode(m.addedNodes[j]);
+            }
+          } catch (e) {}
+        }
+      });
+      mo.observe(target, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: PTAGS });
+    } catch (e) {}
+  }
+
+  /* ---- 日期 / 数字 ---- */
+  var MN_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var WD_ZH = '日一二三四五六';
+  var WD_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  function fmtDate(d, opt) {
+    if (typeof d === 'string') { var a = d.split('-'); d = new Date(+a[0], (+a[1] || 1) - 1, +a[2] || 1); }
+    if (!(d instanceof Date) || isNaN(d.getTime())) return '';
+    opt = opt || {};
+    var s;
+    if (lang === 'zh') {
+      s = d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日';
+      if (opt.weekday) s += ' · 星期' + WD_ZH.charAt(d.getDay());
+    } else {
+      s = MN_EN[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+      if (opt.weekday) s += ' · ' + WD_EN[d.getDay()];
+    }
+    return s;
+  }
+  function fmtNum(n) {
+    try { return Number(n).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US'); }
+    catch (e) { return String(n); }
+  }
+
+  /* ---- DOM 标注应用（标注模式；词条缺失时恢复原文 - 保证切回中文能还原） ---- */
+  function apply(root) {
+    root = root || document;
+    try {
+      var i, list, v, el;
+      list = root.querySelectorAll('[data-i18n]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrig == null) el.__i18nOrig = el.textContent;
+        v = tRaw(el.getAttribute('data-i18n'));
+        el.textContent = (v != null) ? v : el.__i18nOrig;
+      }
+      list = root.querySelectorAll('[data-i18n-html]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigHTML == null) el.__i18nOrigHTML = el.innerHTML;
+        v = tRaw(el.getAttribute('data-i18n-html'));
+        el.innerHTML = (v != null) ? v : el.__i18nOrigHTML;
+      }
+      list = root.querySelectorAll('[data-i18n-title]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigTitle == null) el.__i18nOrigTitle = el.title;
+        v = tRaw(el.getAttribute('data-i18n-title'));
+        el.title = (v != null) ? v : el.__i18nOrigTitle;
+      }
+      list = root.querySelectorAll('[data-i18n-aria]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAria == null) el.__i18nOrigAria = el.getAttribute('aria-label') || '';
+        v = tRaw(el.getAttribute('data-i18n-aria'));
+        el.setAttribute('aria-label', (v != null) ? v : el.__i18nOrigAria);
+      }
+      list = root.querySelectorAll('[data-i18n-ph]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigPh == null) el.__i18nOrigPh = el.placeholder || '';
+        v = tRaw(el.getAttribute('data-i18n-ph'));
+        el.placeholder = (v != null) ? v : el.__i18nOrigPh;
+      }
+      list = root.querySelectorAll('[data-i18n-alt]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAlt == null) el.__i18nOrigAlt = el.getAttribute('alt') || '';
+        v = tRaw(el.getAttribute('data-i18n-alt'));
+        el.setAttribute('alt', (v != null) ? v : el.__i18nOrigAlt);
+      }
+      /* 标题（短语表优先，其次 page.title 词条） */
+      if (!bd.__origTitle) bd.__origTitle = document.title;
+      var tv = lookup(normText(bd.__origTitle));
+      if (tv == null) tv = tRaw('page.title');
+      if (tv != null) { document.title = (lang === 'en') ? tv : bd.__origTitle; bd.__titleTouched = true; }
+      else if (bd.__titleTouched) { document.title = bd.__origTitle; }
+      document.documentElement.lang = (lang === 'zh') ? 'zh-CN' : 'en';
+      syncSwitch();
+    } catch (e) {}
+  }
+
+  function set(v) {
+    v = norm(v);
+    if (!v) return;
+    if (v === lang) { apply(document); scan(document); return; }
+    lang = v;
+    persist(v);
+    apply(document);
+    scan(document);
+    for (var i = 0; i < listeners.length; i++) { try { listeners[i](lang); } catch (e) {} }
+    try {
+      var live = document.getElementById('i18n-live');
+      if (live) live.textContent = (lang === 'zh') ? '已切换到中文' : 'Switched to English';
+    } catch (e) {}
+  }
+  function onChange(fn) { if (typeof fn === 'function') listeners.push(fn); }
+  function getLang() { return lang; }
+
+  /* ---- 切换入口（右下角胶囊，自动注入） ---- */
+  var SW_CSS = '.i18n-sw{position:fixed;right:14px;bottom:14px;z-index:9992;display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:rgba(17,24,39,.6);-webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);border:1px solid rgba(255,255,255,.16);box-shadow:0 6px 18px rgba(0,0,0,.2);font-family:inherit}' +
+    '.i18n-sw button{border:0;background:transparent;color:rgba(255,255,255,.72);font-size:12px;font-weight:700;letter-spacing:.4px;padding:6px 11px;border-radius:999px;cursor:pointer;font-family:inherit;transition:all .18s ease;line-height:1}' +
+    '.i18n-sw button:hover{color:#fff;background:rgba(255,255,255,.12)}' +
+    '.i18n-sw button:focus-visible{outline:2px solid #7dd3fc;outline-offset:1px}' +
+    '.i18n-sw button.on{background:rgba(255,255,255,.92);color:#1f2937;box-shadow:0 2px 8px rgba(0,0,0,.25)}' +
+    '.i18n-sw button:active{transform:translateY(1px)}' +
+    '.i18n-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}' +
+    '@media (max-width:620px){.i18n-sw{right:10px;bottom:10px}.i18n-sw button{padding:5px 9px;font-size:11.5px}}';
+
+  var swEl = null;
+  function buildSwitch() {
+    try {
+      if (!document.body) return;
+      var exist = document.querySelector('.i18n-sw');
+      if (exist) { swEl = exist; syncSwitch(); return; }
+      var st = document.createElement('style');
+      st.textContent = SW_CSS;
+      (document.head || document.documentElement).appendChild(st);
+      var wrap = document.createElement('div');
+      wrap.className = 'i18n-sw';
+      wrap.setAttribute('role', 'group');
+      wrap.setAttribute('aria-label', '切换语言 / Switch language');
+      [['zh', '中文'], ['en', 'English']].forEach(function (p) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('data-lang', p[0]);
+        b.textContent = p[1];
+        b.addEventListener('click', function () { set(p[0]); });
+        wrap.appendChild(b);
+      });
+      var live = document.createElement('span');
+      live.id = 'i18n-live';
+      live.className = 'i18n-sr';
+      live.setAttribute('aria-live', 'polite');
+      wrap.appendChild(live);
+      document.body.appendChild(wrap);
+      swEl = wrap;
+      syncSwitch();
+    } catch (e) {}
+  }
+  function syncSwitch() {
+    try {
+      if (!swEl) return;
+      var bs = swEl.querySelectorAll('button[data-lang]');
+      for (var i = 0; i < bs.length; i++) {
+        var on = bs[i].getAttribute('data-lang') === lang;
+        bs[i].classList.toggle('on', on);
+        bs[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    } catch (e) {}
+  }
+
+  /* ---- 启动 ---- */
+  lang = detect();
+  function boot() {
+    buildSwitch();
+    apply(document);
+    scan(document);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+
+  return {
+    t: t, tOr: tOr, tr: tr, set: set, apply: apply, scan: scan, auto: auto,
+    phrase: addPhrase, rules: addRules, add: add, lang: getLang, onChange: onChange,
+    fmtDate: fmtDate, fmtNum: fmtNum
+  };
+})();
+
+/* ---- 短语表（中文原文 → English）---- */
+I18N.phrase({"万物沙盒 · 落沙成山、星海可控的像素世界 · 星恬的小站": "Everything Sandbox · a pixel world where falling sand becomes mountains and the star sea is yours to control · Startian's Little Site","万物沙盒": "Everything Sandbox","暂停": "Pause","清空": "Clear","新世界": "New world","光之相机": "Light Camera","星域来客": "Starfield Visitors","成就": "Achievements","帮助": "Help","按住拖动就能玩 · 滚轮 / 双指缩放 · 双击复位 · 左上那颗星球……多按一会儿看看？": "Hold and drag to play · wheel / pinch to zoom · double-click to reset · that planet in the top-left… try holding it a little longer?","笔刷": "Brush","一块漂浮在星海中的像素土地。选一种元素，在画布上按住拖动，世界就会自己活起来。": "A pixel land floating in a sea of stars. Pick an element, hold and drag on the canvas, and the world comes alive on its own.","一、自由探索（无限世界）": "1. Free exploration (infinite world)","左键拖动": "Left drag","撒下选中的元素": "Scatter the selected element","右键拖动": "Right drag","快速擦除": "Quick erase","滚轮": "Wheel","缩放（跟随指针）·": "Zoom (follows pointer) ·","双指捏合": "Two-finger pinch","也能缩放": "also zooms","双击画布": "Double-click the canvas","一键复位视图": "Reset the view in one tap","空格 + 拖动": "Space + drag","或": "or","中键拖动": "Middle drag","双指拖动": "Two-finger drag","平移世界": "Pan the world","方向键 / WASD": "Arrow keys / WASD","平移镜头": "Pan the camera","世界向两侧": "The world to either side","无限延伸": "stretches on forever","，走到哪生成到哪，没有边界": ", generated wherever you go, with no boundaries","二、沙盒底下还藏着另一层世界（神秘入口）": "2. Another world hides beneath the sandbox (mysterious entrance)","左上角那颗小星球，不只是回主页的按钮——": "That little planet in the top-left isn't just a button back to home—","按住它别松手": "press and hold it","，多按一会儿，世界会「翻个面」": ", hold it a while and the world will \"flip over\"","翻面之后是另一个世界：": "After the flip is another world:","W A S D / 方向键": "W A S D / arrow keys","移动、": "move, ","鼠标": "Mouse","转视角（自动锁定，": "look around (auto-locks, ","解锁）": "to unlock)","空格 / Shift": "Space / Shift","升降飞行；不按就贴地行走；": "fly up and down; release to walk on the ground;","调整视野": "Adjust the view","点击画面": "Click the screen","在准星处放下方块；选光束笔则沿视线发射光束": "place a block at the crosshair; with the beam brush, fire a beam along your line of sight","想回来：按": "To get back: press ","，或先按 ESC 解锁鼠标、再长按那颗星球": ", or press ESC to unlock the mouse, then long-press that planet","那一层里还有别的住客：水面上会「嘎」的鸭子、天上慢慢游过的鲸鱼……自己去看": "Other residents live on that layer too: ducks that quack on the water and whales drifting slowly across the sky… go see for yourself","三、时间倍速": "3. Time speed","点顶部": "Click the top","循环切换 ×1 → ×2 → ×4 → ×8 → ×16": "cycles ×1 → ×2 → ×4 → ×8 → ×16","高倍速下引擎会自动控制步进预算，掉帧时自动保守": "At high speeds the engine manages the step budget on its own and plays safe when frames drop","四、世界会自己发生的事": "4. Things the world does on its own","水会把火烧成蒸汽，蒸汽飘着飘着又凝成雨落回来": "Water burns fire into steam, and the steam drifts and condenses back into rain","木、油、藤蔓都怕火；火药碰到火会炸；烟花会窜上天炸开": "Wood, oil, and vines all fear fire; gunpowder explodes on contact; fireworks shoot up and burst","种子落在水边会发芽，落在泥土/沙地上也会慢慢发芽长藤": "Seeds sprout by the water, and slowly sprout and grow vines on soil or sand","酸能吃穿石头却怕玻璃；岩浆又烫又亮，遇到水会凝固成石头": "Acid eats through stone but fears glass; lava is hot and bright, and hardens into stone when it meets water","五、光会拐弯（炫技点）": "5. Light bends (show-off bit)","选": "Pick","✨ 光束笔": "✨ Beam brush","，按下并拖动来瞄准，松手前光束会一直跟着手指走": ", press and drag to aim; until you let go, the beam keeps following your finger","光束会被": "The beam is reflected by","镜 / 镜 \\": "Mirror / Mirror \\","反射、被玻璃折射、进棱镜散成彩虹": ", refracted by glass, split into a rainbow by a prism","光能点燃路上的油和木头；拿镜子铺一条光路试试": "Light can ignite the oil and wood along the way; try paving a light path with mirrors","六、物理与天空": "6. Physics and sky","用": "Use","⚪ 钢球": "⚪ Steel ball","点一下生成滚球：会滚坡、扬尘、犁沙、球撞球": "Click to spawn a rolling ball: it rolls down slopes, kicks up dust, plows sand, and balls collide","🪢 绳": "🪢 Rope","钩住一点，垂下来的绳子会自己荡（也会被烧断）": "Hook onto a point and the hanging rope swings on its own (and can burn through)","🌀 星流": "🌀 Star flow","在天空划动，能把极光搅出漩涡，还能吹散烟": "Swipe across the sky to stir the aurora into a whirlpool and blow smoke away","天空里偶尔有流星；星域来客偶尔路过，也会偶尔帮你烧点什么": "Meteors sometimes streak across the sky; Starfield Visitors drop by now and then and might burn something for you","七、隐藏起来的小事": "7. Hidden little things","试试老派游戏秘技（↑↑↓↓←→←→ B A）": "Try the old-school game cheat (↑↑↓↓←→←→ B A)","左上角那颗星球按得够久，据说会翻出世界的另一面……（先别急着松手）": "Hold that top-left planet long enough and they say another side of the world flips out… (don't let go just yet)","走远一点，也许会有成就悄悄亮起来": "Wander farther, and an achievement might quietly light up","更多等你慢慢撞见": "More waits for you to stumble upon","纯前端单文件 · 零依赖 · 数据不出本机 · 成就与星恬小站互通": "Pure front-end single file · zero dependencies · data never leaves your device · achievements sync with Startian's Little Site","🏆 沙盒成就": "🏆 Sandbox achievements","已点亮": "Unlocked","· 与星恬小站成就柜互通": "· syncs with the Trophy Case on Startian's Little Site","玩着玩着就会亮起来。悄悄说：这页还有一些没写在这里的隐藏成就……": "They light up as you play. Psst: this page has a few hidden achievements not listed here…","主页": "Home","返回星恬的小站": "Back to Startian's Little Site","暂停 / 继续世界演化": "Pause / resume the world evolving","世界速度倍率（×1 ~ ×16）": "World speed multiplier (×1 ~ ×16)","清空整个世界": "Clear the whole world","重新生成地形与星空": "Regenerate terrain and starfield","把当前世界导出为 PNG 照片": "Export the current world as a PNG photo","召唤星域来客（彩蛋）": "Summon the Starfield Visitors (easter egg)","查看成就": "View achievements","玩法说明": "How to play","最左 = 单格（1 像素）": "Leftmost = single cell (1 pixel)","关闭": "Close","返回星恬的小站主页": "Back to Startian's Little Site home","漂浮在星海中的像素沙盘：22 种元素互相反应、光束反射与棱镜色散、流体极光、滚石物理。": "A pixel sandbox floating in a sea of stars: 22 elements reacting with one another, beam reflection and prism dispersion, fluid aurora, and rolling-stone physics.","星恬": "Startian","沙": "Sand","会堆积、会塌方": "piles up and collapses","土": "Soil","更深的土": "Deeper soil","石": "Stone","坚实不塌": "solid, won't collapse","木": "Wood","可燃": "flammable","水": "Water","会流动、灭火": "flows and puts out fire","油": "Oil","浮在水上、易燃": "floats on water, flammable","酸": "Acid","溶穿石木，怕玻璃": "dissolves stone and wood, fears glass","冰": "Ice","遇热融化": "melts when heated","种": "Seed","遇水或落在土上会发芽": "sprouts on water or on soil","火": "Fire","会蔓延、会熄灭": "spreads and dies out","岩浆": "Lava","高热、遇水成石": "very hot, turns to stone in water","火药": "Gunpowder","遇火爆炸": "explodes on fire","烟花": "Fireworks","遇火窜上天": "shoots skyward on fire","灯": "Lamp","常亮的暖光": "steady warm light","玻璃": "Glass","透光、防酸": "lets light through, blocks acid","镜/": "Mirror/","反射光束": "reflects beams","镜\\\\": "Mirror\\\\","棱镜": "Prism","把光散成彩虹": "splits light into a rainbow","擦除": "Erase","抹掉一切": "wipes out everything","光束笔": "Beam brush","拖动瞄准，光束会跟着走": "drag to aim; the beam follows","钢球": "Steel ball","点一下放一颗滚球": "click to drop a rolling ball","星流": "Star flow","在天空划动，搅出极光漩涡": "swipe the sky to stir an aurora whirlpool","绳": "Rope","按住钩一点，垂下会荡的绳": "hold to hook a point and hang a swinging rope","嘎！": "Quack!","嘎嘎！": "Quack quack!","嘎！！": "Quack!!","🦆 嘎！！": "🦆 Quack!!","橡皮：抹掉画过的一切": "Eraser: wipes out everything you drew","1格": "1 cell","回到平面": "Back to flat","3D 世界": "3D world","继续": "Resume","世界已冻结（还可以画画和瞄准）": "World frozen (you can still draw and aim)","世界继续演化": "World evolving again","世界已清空，来画点新的吧": "World cleared — draw something new","新世界已生成 · 种子": "New world generated · seed ","万物沙盒-": "Everything Sandbox-","📷 光之相机：照片已保存": "📷 Light Camera: photo saved","导出失败：": "Export failed: ","🛸 星域来客正在过境……小心它们的光束": "🛸 Starfield Visitors are passing through… mind their beams","🌌 世界翻了个面 · WASD 移动 / 鼠标看向 / 左键放置 · 离开按 V": "🌌 The world flipped over · WASD to move / mouse to look / left-click to place · press V to leave","回到平面视野": "Return to flat view","世界速度 ×": "World speed ×","🌌 重力反转！万物开始上升……": "🌌 Gravity reversed! Everything begins to rise…","重力回来了": "Gravity is back","点击画面锁定鼠标 · WASD 移动 · 空格/Shift 升降 · ESC 解锁": "Click the screen to lock the mouse · WASD to move · Space/Shift to rise and fall · ESC to unlock","🧊 潜入 3D 世界 · WASD 移动 / 鼠标看向 / 点击放置方块": "🧊 Dive into the 3D world · WASD to move / mouse to look / click to place blocks","🏆 成就解锁：": "🏆 Achievement unlocked: ","沙盒居民": "Sandbox Resident","到访万物沙盒": "Visit the Everything Sandbox","第一笔": "First Stroke","在沙盒里画下第一笔": "Draw your first stroke in the sandbox","玩火者": "Firestarter","点燃第一簇火焰": "Light your first flame","追光者": "Light Chaser","射出第一道光束": "Fire your first beam","播种者": "Sower","让第一颗种子发芽": "Make your first seed sprout","烟花师": "Fireworks Artist","让烟花在空中炸开": "Burst a firework in the sky","搅动星海": "Stir the Star Sea","亲手把天空搅出漩涡": "Stir a whirlpool in the sky yourself","目击星域舰队过境": "Witness the Starfield fleet pass by","升维者": "Dimension Ascender","飞进 3D 世界看一看": "Fly into the 3D world for a look","空中造物": "Sky Builder","在 3D 世界里放置方块": "Place a block in the 3D world","鸭鸭好朋友": "Ducky's Best Friend","在 3D 世界里撸一把鸭鸭": "Pet a duck in the 3D world","星海拓荒": "Star Sea Pioneer","向远方探索超过 2000 格": "Explore more than 2000 cells into the distance","快进人生": "Fast-forward Life","把世界开到 16 倍速": "Crank the world to 16× speed","重力反转": "Gravity Reversed","触发了藏在沙盒里的老秘技": "Trigger the old cheat hidden in the sandbox","隐藏成就 · 自己撞撞看": "Hidden achievement · go bump into it yourself","📜 找到一篇日志（去主页头像连点 7 下看全文）": "📜 Find a log (tap the avatar on the home page 7 times to read it all)","🌌 十页日记，都回来了……这个世界，完整了": "🌌 Ten pages of diary, all back… this world is complete","📜 找到最后一篇日志（去主页终端交付八个字母吧）": "📜 Find the last log (deliver eight letters at the terminal on the home page)","镜\\": "Mirror","镜": "Mirror"});
+I18N.auto();
+/* ==== i18n-kit v1.2 end ==== */
+</script>
 
 <script>
 "use strict";
