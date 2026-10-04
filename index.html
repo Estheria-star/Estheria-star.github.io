@@ -1213,47 +1213,47 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
   <div class="nav-in">
     <a class="brand" href="#top"><img alt="" data-avatar id="navAvatar"><script>(function(){var i=document.getElementById("navAvatar");i.src=window.__initAvatar||"avatar.png";})();</script>星恬<span class="brand-sub"> · startian.top</span></a>
     <div class="nav-links">
-      <a href="#projects">项目</a>
-      <a href="#achievements">成就</a>
-      <a href="#about">关于</a>
-      <a href="#contact">联系</a>
-      <button class="tk-btn" id="tkBtn" type="button" title="配色切换" aria-haspopup="dialog" aria-expanded="false">🕖</button>
+      <a href="#projects" data-i18n="nav.projects">项目</a>
+      <a href="#achievements" data-i18n="nav.ach">成就</a>
+      <a href="#about" data-i18n="nav.about">关于</a>
+      <a href="#contact" data-i18n="nav.contact">联系</a>
+      <button class="tk-btn" id="tkBtn" type="button" title="配色切换" data-i18n-title="nav.themeTitle" aria-haspopup="dialog" aria-expanded="false">🕖</button>
     </div>
   </div>
   <div class="tk-panel" id="tkPanel" role="dialog" aria-label="配色设置">
-    <div class="tk-p-title">🎨 配色方案</div>
+    <div class="tk-p-title" data-i18n="theme.title">🎨 配色方案</div>
     <div class="tk-seg" id="tkSeg">
-      <button type="button" data-mode="auto">🕖 自动</button>
-      <button type="button" data-mode="light">☀️ 蓝白</button>
-      <button type="button" data-mode="dark">🌙 暗红</button>
-      <button type="button" data-mode="purple">🔮 梦幻紫</button>
-      <button type="button" data-mode="fresh">🌿 清新绿</button>
-      <button type="button" data-mode="warm">🌸 温馨粉</button>
-      <button type="button" data-mode="colorful">🎨 缤纷彩</button>
-      <button type="button" data-mode="custom">🖌 自定义</button>
-      <button type="button" data-mode="starry" id="tkStarryBtn" style="display:none">🌌 星夜</button>
+      <button type="button" data-mode="auto" data-i18n="theme.auto">🕖 自动</button>
+      <button type="button" data-mode="light" data-i18n="theme.light">☀️ 蓝白</button>
+      <button type="button" data-mode="dark" data-i18n="theme.dark">🌙 暗红</button>
+      <button type="button" data-mode="purple" data-i18n="theme.purple">🔮 梦幻紫</button>
+      <button type="button" data-mode="fresh" data-i18n="theme.fresh">🌿 清新绿</button>
+      <button type="button" data-mode="warm" data-i18n="theme.warm">🌸 温馨粉</button>
+      <button type="button" data-mode="colorful" data-i18n="theme.colorful">🎨 缤纷彩</button>
+      <button type="button" data-mode="custom" data-i18n="theme.custom">🖌 自定义</button>
+      <button type="button" data-mode="starry" id="tkStarryBtn" data-i18n="theme.starry" style="display:none">🌌 星夜</button>
     </div>
-    <div class="tk-p-sub">自动组合（跟随时间切换的配色方案）</div>
+    <div class="tk-p-sub" data-i18n="theme.sub">自动组合（跟随时间切换的配色方案）</div>
     <div class="tk-seg tk-seg-2" id="tkPair">
-      <button type="button" data-pair="classic">☀️ 蓝白 ⇄ 🌙 暗红</button>
-      <button type="button" data-pair="dreamy">🌿 清新绿 ⇄ 🔮 梦幻紫</button>
-      <button type="button" data-pair="pink" class="tk-pair-wide">🌸 温馨粉 ⇄ 🎨 缤纷彩</button>
+      <button type="button" data-pair="classic" data-i18n="theme.pair1">☀️ 蓝白 ⇄ 🌙 暗红</button>
+      <button type="button" data-pair="dreamy" data-i18n="theme.pair2">🌿 清新绿 ⇄ 🔮 梦幻紫</button>
+      <button type="button" data-pair="pink" class="tk-pair-wide" data-i18n="theme.pair3">🌸 温馨粉 ⇄ 🎨 缤纷彩</button>
     </div>
     <div class="tk-custom" id="tkCustom">
       <div class="tk-custom-row">
-        <label>底色 <input type="color" id="tkCustomBg" value="#f4f1ff"></label>
-        <label>主色 <input type="color" id="tkCustomAc" value="#7c5cf0"></label>
+        <label><span data-i18n="theme.bg">底色</span> <input type="color" id="tkCustomBg" value="#f4f1ff"></label>
+        <label><span data-i18n="theme.ac">主色</span> <input type="color" id="tkCustomAc" value="#7c5cf0"></label>
       </div>
       <div class="tk-custom-row">
-        <button type="button" class="btn btn-ghost btn-xs" id="tkCustomRand" style="flex:1">🎲 随机灵感</button>
-        <button type="button" class="btn btn-ghost btn-xs" id="tkCustomReset" style="flex:1">↺ 恢复默认</button>
+        <button type="button" class="btn btn-ghost btn-xs" id="tkCustomRand" style="flex:1" data-i18n="theme.rand">🎲 随机灵感</button>
+        <button type="button" class="btn btn-ghost btn-xs" id="tkCustomReset" style="flex:1" data-i18n="theme.reset">↺ 恢复默认</button>
       </div>
-      <div class="tk-custom-tip">选底色与主色，整站配色（含转场光晕）自动生成 · 仅存本机</div>
+      <div class="tk-custom-tip" data-i18n="theme.customTip">选底色与主色，整站配色（含转场光晕）自动生成 · 仅存本机</div>
     </div>
-    <div class="tk-p-sub">自定义切换时刻（跟随时间模式生效）</div>
+    <div class="tk-p-sub" data-i18n="theme.timesSub">自定义切换时刻（跟随时间模式生效）</div>
     <div class="tk-times">
-      <label>☀️ 蓝白开始 <input type="time" id="tkLightAt" value="07:00"></label>
-      <label>🌙 暗红开始 <input type="time" id="tkDarkAt" value="19:00"></label>
+      <label><span data-i18n="theme.lightAt">☀️ 蓝白开始</span> <input type="time" id="tkLightAt" value="07:00"></label>
+      <label><span data-i18n="theme.darkAt">🌙 暗红开始</span> <input type="time" id="tkDarkAt" value="19:00"></label>
     </div>
     <div class="tk-p-hint" id="tkHint"></div>
   </div>
@@ -1264,34 +1264,34 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
   <section class="hero">
     <div class="avatar reveal" style="--d:.02s"><img alt="星恬" data-avatar id="heroAvatar"><script>(function(){var i=document.getElementById("heroAvatar");i.src=window.__initAvatar||"avatar.png";})();</script></div>
     <div class="hero-eyebrow reveal" style="--d:.1s">STARTIAN.TOP</div>
-    <h1 class="reveal" style="--d:.16s">星恬的小站</h1>
-    <div class="hero-tag reveal" style="--d:.24s">下棋 · 画几何 · 捣鼓 AI 小玩意 —— 欢迎来逛逛</div>
+    <h1 class="reveal" style="--d:.16s" data-i18n="hero.h1">星恬的小站</h1>
+    <div class="hero-tag reveal" style="--d:.24s" data-i18n="hero.tag">下棋 · 画几何 · 捣鼓 AI 小玩意 —— 欢迎来逛逛</div>
     <div class="hero-cta reveal" style="--d:.32s">
-      <a class="btn btn-p" href="#projects">看看我的项目 ↓</a>
-      <a class="btn btn-g" href="#contact">联系我</a>
+      <a class="btn btn-p" href="#projects" data-i18n="hero.cta1">看看我的项目 ↓</a>
+      <a class="btn btn-g" href="#contact" data-i18n="hero.cta2">联系我</a>
     </div>
   </section>
 
   <div class="marquee reveal" style="--d:.4s" aria-hidden="true">
     <div class="marquee-track" id="marqTrack">
-      <span>⚫ 五子棋 · AI 反制</span><span><em>·</em></span>
-      <span>◆ Rapfi 引擎</span><span><em>·</em></span>
-      <span>⬡ 六边形维度</span><span><em>·</em></span>
-      <span>📐 几何工坊</span><span><em>·</em></span>
-      <span>🏖 万物沙盒</span><span><em>·</em></span>
-      <span>🗓️ 打卡日程</span><span><em>·</em></span>
-      <span>🐱 心情日历</span><span><em>·</em></span>
-      <span>🧠 mix9 神经网络</span><span><em>·</em></span>
-      <span>✨ 无限星空 #1818</span><span><em>·</em></span>
-      <span>🦠 生命花园</span><span><em>·</em></span>
-      <span>🎵 函数音乐</span><span><em>·</em></span>
-      <span>🎭 假加载页</span><span><em>·</em></span>
-      <span>🎨 配色实验室</span><span><em>·</em></span>
-      <span>📈 函数拟合</span><span><em>·</em></span>
-      <span>📕 错题本</span><span><em>·</em></span>
-      <span>🩺 今日诊断</span><span><em>·</em></span>
-      <span>🗺 宇宙地图</span><span><em>·</em></span>
-      <span>😏 偶尔整活</span><span><em>·</em></span>
+      <span data-i18n="marq.0">⚫ 五子棋 · AI 反制</span><span><em>·</em></span>
+      <span data-i18n="marq.1">◆ Rapfi 引擎</span><span><em>·</em></span>
+      <span data-i18n="marq.2">⬡ 六边形维度</span><span><em>·</em></span>
+      <span data-i18n="marq.3">📐 几何工坊</span><span><em>·</em></span>
+      <span data-i18n="marq.4">🏖 万物沙盒</span><span><em>·</em></span>
+      <span data-i18n="marq.5">🗓️ 打卡日程</span><span><em>·</em></span>
+      <span data-i18n="marq.6">🐱 心情日历</span><span><em>·</em></span>
+      <span data-i18n="marq.7">🧠 mix9 神经网络</span><span><em>·</em></span>
+      <span data-i18n="marq.8">✨ 无限星空 #1818</span><span><em>·</em></span>
+      <span data-i18n="marq.9">🦠 生命花园</span><span><em>·</em></span>
+      <span data-i18n="marq.10">🎵 函数音乐</span><span><em>·</em></span>
+      <span data-i18n="marq.11">🎭 假加载页</span><span><em>·</em></span>
+      <span data-i18n="marq.12">🎨 配色实验室</span><span><em>·</em></span>
+      <span data-i18n="marq.13">📈 函数拟合</span><span><em>·</em></span>
+      <span data-i18n="marq.14">📕 错题本</span><span><em>·</em></span>
+      <span data-i18n="marq.15">🩺 今日诊断</span><span><em>·</em></span>
+      <span data-i18n="marq.16">🗺 宇宙地图</span><span><em>·</em></span>
+      <span data-i18n="marq.17">😏 偶尔整活</span><span><em>·</em></span>
       <span>🌙 startian.top</span><span><em>·</em></span>
     </div>
   </div>
@@ -1299,8 +1299,8 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
   <section id="projects">
     <div class="section reveal" style="--d:.05s">
       <div class="sec-eyebrow">PROJECTS</div>
-      <div class="sec-title">我的作品</div>
-      <div class="sec-sub">每一个都是自己一点点折腾出来的 · 悬停 2 秒有惊喜</div>
+      <div class="sec-title" data-i18n="projects.title">我的作品</div>
+      <div class="sec-sub" data-i18n="projects.sub">每一个都是自己一点点折腾出来的 · 悬停 2 秒有惊喜</div>
     </div>
 
     <!-- ============================================================
@@ -1327,10 +1327,10 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
         <button class="zone-head" type="button" aria-expanded="false">
           <span class="zone-ico zc-fun"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="13" rx="6"/><path d="M7 13h4M9 11v4M15.5 12.5h.01M18 15h.01"/></svg></span>
           <span class="zone-info">
-            <span class="zone-name">娱乐</span>
-            <span class="zone-sub">下棋、转转玩的 · 放松向</span>
+            <span class="zone-name" data-i18n="zone.fun.name">娱乐</span>
+            <span class="zone-sub" data-i18n="zone.fun.sub">下棋、转转玩的 · 放松向</span>
           </span>
-          <span class="zone-count">5 个作品</span>
+          <span class="zone-count" data-i18n="zone.fun.count">5 个作品</span>
           <span class="zone-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
         </button>
         <div class="zone-body">
@@ -1339,46 +1339,46 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       <a class="tile" style="--d:.02s" data-demo="wuziqi" href="https://wuziqi.startian.top/">
         <div class="tile-media"><img src="demos/wuziqi.jpg" alt="五子棋演示" loading="lazy"></div>
         <div class="tile-body">
-          <span class="ptag">游戏 · AI</span>
-          <h3>五子棋 · 学习反制版</h3>
-          <p>内嵌 Rapfi 引擎：经典算力 ×「灵拙」神经网络双引擎可选，AI 会学习你的棋风并在下一局反制；还有陪你说话的灵拙。</p>
-          <span class="cta">来一局 <i>→</i></span>
+          <span class="ptag" data-i18n="tile.wuziqi.tag">游戏 · AI</span>
+          <h3 data-i18n="tile.wuziqi.title">五子棋 · 学习反制版</h3>
+          <p data-i18n="tile.wuziqi.desc">内嵌 Rapfi 引擎：经典算力 ×「灵拙」神经网络双引擎可选，AI 会学习你的棋风并在下一局反制；还有陪你说话的灵拙。</p>
+          <span class="cta" data-i18n="tile.wuziqi.cta">来一局 <i>→</i></span>
         </div>
       </a>
       <a class="tile flip" style="--d:.08s" data-demo="tujie" href="https://startian.top/tujie/">
         <div class="tile-media"><img src="demos/tujie.jpg" alt="六边形维度展示器演示" loading="lazy"></div>
         <div class="tile-body">
-          <span class="ptag">可视化 · 解压</span>
-          <h3>六边形维度展示器</h3>
-          <p>无上限展开的六边形几何展示器：多层级嵌套、旋转与配色实验，随手转一转就挺上头。</p>
-          <span class="cta">玩一下 <i>→</i></span>
+          <span class="ptag" data-i18n="tile.tujie.tag">可视化 · 解压</span>
+          <h3 data-i18n="tile.tujie.title">六边形维度展示器</h3>
+          <p data-i18n="tile.tujie.desc">无上限展开的六边形几何展示器：多层级嵌套、旋转与配色实验，随手转一转就挺上头。</p>
+          <span class="cta" data-i18n="tile.tujie.cta">玩一下 <i>→</i></span>
         </div>
       </a>
       <a class="tile flip" style="--d:.14s" data-demo="star" href="https://startian.top/star/">
         <div class="tile-media"><img src="demos/star.jpg" alt="无限星空生成器演示" loading="lazy"></div>
         <div class="tile-body">
-          <span class="ptag">生成艺术 · 解压</span>
-          <h3>无限星空生成器</h3>
-          <p>像 Minecraft 一样用种子生成星空：往任何方向拖动，无限延伸都是同一片宇宙。星星会眨眼、流星会划过，星团与空洞交错，还能偶遇螺旋星系——换种子就是换一个宇宙的气质。</p>
-          <span class="cta">去看星星 <i>→</i></span>
+          <span class="ptag" data-i18n="tile.star.tag">生成艺术 · 解压</span>
+          <h3 data-i18n="tile.star.title">无限星空生成器</h3>
+          <p data-i18n="tile.star.desc">像 Minecraft 一样用种子生成星空：往任何方向拖动，无限延伸都是同一片宇宙。星星会眨眼、流星会划过，星团与空洞交错，还能偶遇螺旋星系——换种子就是换一个宇宙的气质。</p>
+          <span class="cta" data-i18n="tile.star.cta">去看星星 <i>→</i></span>
         </div>
       </a>
       <a class="tile" style="--d:.20s" data-demo="life" href="https://startian.top/life/">
         <div class="tile-media"><img src="demos/life.jpg" alt="生命游戏花园演示" loading="lazy"></div>
         <div class="tile-body">
-          <span class="ptag">元胞自动机 · 解压</span>
-          <h3>康威生命游戏花园</h3>
-          <p>撒一把种子看细胞生长：能存「物种」、还能让两个物种相向对撞，看它们擦出什么火花。能玩一晚上的那种。</p>
-          <span class="cta">去播种 <i>→</i></span>
+          <span class="ptag" data-i18n="tile.life.tag">元胞自动机 · 解压</span>
+          <h3 data-i18n="tile.life.title">康威生命游戏花园</h3>
+          <p data-i18n="tile.life.desc">撒一把种子看细胞生长：能存「物种」、还能让两个物种相向对撞，看它们擦出什么火花。能玩一晚上的那种。</p>
+          <span class="cta" data-i18n="tile.life.cta">去播种 <i>→</i></span>
         </div>
       </a>
       <a class="tile flip" style="--d:.26s" data-demo="music" href="https://startian.top/music/">
         <div class="tile-media"><img src="demos/music.jpg" alt="函数音乐演示" loading="lazy"></div>
         <div class="tile-body">
-          <span class="ptag">数学 · 音乐</span>
-          <h3>函数音乐</h3>
-          <p>把函数画成声波：正弦是纯音、方波是游戏机、随便叠几个三角函数就是一个新乐器——图形还会跟着跳。</p>
-          <span class="cta">去弹一段 <i>→</i></span>
+          <span class="ptag" data-i18n="tile.music.tag">数学 · 音乐</span>
+          <h3 data-i18n="tile.music.title">函数音乐</h3>
+          <p data-i18n="tile.music.desc">把函数画成声波：正弦是纯音、方波是游戏机、随便叠几个三角函数就是一个新乐器——图形还会跟着跳。</p>
+          <span class="cta" data-i18n="tile.music.cta">去弹一段 <i>→</i></span>
         </div>
       </a>
             </div>
@@ -1390,10 +1390,10 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
         <button class="zone-head" type="button" aria-expanded="false">
           <span class="zone-ico zc-tool"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a5 5 0 0 0-6.6 6.6L3 18l3 3 5.1-5.1a5 5 0 0 0 6.6-6.6l-3.2 3.2-2.5-.5-.5-2.5z"/></svg></span>
           <span class="zone-info">
-            <span class="zone-name">工具</span>
-            <span class="zone-sub">学习与效率 · 干正事用</span>
+            <span class="zone-name" data-i18n="zone.tool.name">工具</span>
+            <span class="zone-sub" data-i18n="zone.tool.sub">学习与效率 · 干正事用</span>
           </span>
-          <span class="zone-count">7 个作品</span>
+          <span class="zone-count" data-i18n="zone.tool.count">7 个作品</span>
           <span class="zone-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
         </button>
         <div class="zone-body">
@@ -1402,64 +1402,64 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       <a class="tile" style="--d:.02s" data-demo="geometry" href="https://geometry.startian.top/">
         <div class="tile-media"><img src="demos/geometry.jpg" alt="几何工坊演示" loading="lazy"></div>
         <div class="tile-body">
-          <span class="ptag">教学 · AI 出图</span>
-          <h3>几何工坊 · 数学工作台</h3>
-          <p>面向高中数学的几何教学工作台：平面 / 立体双模式，函数实时绘制、向量关系自动判定、面积体积二面角一键求解，还能让 AI 读题自动出图。</p>
-          <span class="cta">去作图 <i>→</i></span>
+          <span class="ptag" data-i18n="tile.geometry.tag">教学 · AI 出图</span>
+          <h3 data-i18n="tile.geometry.title">几何工坊 · 数学工作台</h3>
+          <p data-i18n="tile.geometry.desc">面向高中数学的几何教学工作台：平面 / 立体双模式，函数实时绘制、向量关系自动判定、面积体积二面角一键求解，还能让 AI 读题自动出图。</p>
+          <span class="cta" data-i18n="tile.geometry.cta">去作图 <i>→</i></span>
         </div>
       </a>
       <a class="tile flip" style="--d:.08s" data-demo="daka" href="https://daka.startian.top/">
         <div class="tile-media"><img src="demos/daka.jpg" alt="打卡日程表演示" loading="lazy"></div>
         <div class="tile-body">
-          <span class="ptag">效率 · 工具</span>
-          <h3>打卡日程表</h3>
-          <p>给自己定几个小目标：一键打卡、连续天数 🔥、月度日历回顾；数据只存在你的浏览器里，可离线使用。</p>
-          <span class="cta">来打卡 <i>→</i></span>
+          <span class="ptag" data-i18n="tile.daka.tag">效率 · 工具</span>
+          <h3 data-i18n="tile.daka.title">打卡日程表</h3>
+          <p data-i18n="tile.daka.desc">给自己定几个小目标：一键打卡、连续天数 🔥、月度日历回顾；数据只存在你的浏览器里，可离线使用。</p>
+          <span class="cta" data-i18n="tile.daka.cta">来打卡 <i>→</i></span>
         </div>
       </a>
       <a class="tile flip" style="--d:.14s" data-demo="colorlab" href="https://startian.top/colorlab/">
         <div class="tile-media"><img src="demos/colorlab.jpg" alt="配色实验室演示" loading="lazy"></div>
         <div class="tile-body">
-          <span class="ptag">设计 · 工具</span>
-          <h3>配色实验室</h3>
-          <p>选两个颜色，实时预览整套 UI（按钮 / 卡片 / 玻璃导航全派生），一键复制或下载 CSS 变量，直接拿去用。</p>
-          <span class="cta">去调色 <i>→</i></span>
+          <span class="ptag" data-i18n="tile.colorlab.tag">设计 · 工具</span>
+          <h3 data-i18n="tile.colorlab.title">配色实验室</h3>
+          <p data-i18n="tile.colorlab.desc">选两个颜色，实时预览整套 UI（按钮 / 卡片 / 玻璃导航全派生），一键复制或下载 CSS 变量，直接拿去用。</p>
+          <span class="cta" data-i18n="tile.colorlab.cta">去调色 <i>→</i></span>
         </div>
       </a>
       <a class="tile" style="--d:.20s" data-demo="fit" href="https://startian.top/fit/">
         <div class="tile-media"><img src="demos/fit.jpg" alt="函数拟合器演示" loading="lazy"></div>
         <div class="tile-body">
-          <span class="ptag">数学 · 工具</span>
-          <h3>函数拟合器</h3>
-          <p>丢进一堆散点，自动找出最像的函数：线性 / 二次 / 三次 / 指数 / 幂 / 对数六种模型实时比拼 R²，画布点一点数据就重算。</p>
-          <span class="cta">去拟合 <i>→</i></span>
+          <span class="ptag" data-i18n="tile.fit.tag">数学 · 工具</span>
+          <h3 data-i18n="tile.fit.title">函数拟合器</h3>
+          <p data-i18n="tile.fit.desc">丢进一堆散点，自动找出最像的函数：线性 / 二次 / 三次 / 指数 / 幂 / 对数六种模型实时比拼 R²，画布点一点数据就重算。</p>
+          <span class="cta" data-i18n="tile.fit.cta">去拟合 <i>→</i></span>
         </div>
       </a>
       <a class="tile flip" style="--d:.26s" data-demo="cuoti" href="https://startian.top/cuoti/">
         <div class="tile-media"><img src="demos/cuoti.jpg" alt="错题本演示" loading="lazy"></div>
         <div class="tile-body">
-          <span class="ptag">学习 · 记忆科学</span>
-          <h3>错题本 · 间隔重复</h3>
-          <p>把错题记下来，按遗忘曲线自动排复习：忘了就回炉，记住就拉长间隔——用最少的复习次数，换最牢的记忆。</p>
-          <span class="cta">去记错题 <i>→</i></span>
+          <span class="ptag" data-i18n="tile.cuoti.tag">学习 · 记忆科学</span>
+          <h3 data-i18n="tile.cuoti.title">错题本 · 间隔重复</h3>
+          <p data-i18n="tile.cuoti.desc">把错题记下来，按遗忘曲线自动排复习：忘了就回炉，记住就拉长间隔——用最少的复习次数，换最牢的记忆。</p>
+          <span class="cta" data-i18n="tile.cuoti.cta">去记错题 <i>→</i></span>
         </div>
       </a>
       <a class="tile" style="--d:.32s" data-demo="map" href="https://startian.top/map/">
         <div class="tile-media"><img src="demos/map.jpg" alt="宇宙地图演示" loading="lazy"></div>
         <div class="tile-body">
-          <span class="ptag">导览 · 全站地图</span>
-          <h3>宇宙地图 · 全站导航</h3>
-          <p>14 颗作品星串成一片宇宙：去过的会亮起来，点一颗星就能直达 —— 不知道逛哪好，先来这看一眼星图。</p>
-          <span class="cta">去看星图 <i>→</i></span>
+          <span class="ptag" data-i18n="tile.map.tag">导览 · 全站地图</span>
+          <h3 data-i18n="tile.map.title">宇宙地图 · 全站导航</h3>
+          <p data-i18n="tile.map.desc">14 颗作品星串成一片宇宙：去过的会亮起来，点一颗星就能直达 —— 不知道逛哪好，先来这看一眼星图。</p>
+          <span class="cta" data-i18n="tile.map.cta">去看星图 <i>→</i></span>
         </div>
       </a>
       <a class="tile flip" style="--d:.38s" data-demo="mood" href="https://startian.top/mood/">
         <div class="tile-media"><img src="demos/mood.jpg" alt="心情日历演示" loading="lazy"></div>
         <div class="tile-body">
-          <span class="ptag">生活 · 心情记录</span>
-          <h3>心情日历</h3>
-          <p>43 张猫耳少女表情，给每天贴一张心情：点一个日子贴上，翻一翻就是这个月的样子。数据存在本机浏览器，支持导出备份。</p>
-          <span class="cta">贴一张 🐾 <i>→</i></span>
+          <span class="ptag" data-i18n="tile.mood.tag">生活 · 心情记录</span>
+          <h3 data-i18n="tile.mood.title">心情日历</h3>
+          <p data-i18n="tile.mood.desc">43 张猫耳少女表情，给每天贴一张心情：点一个日子贴上，翻一翻就是这个月的样子。数据存在本机浏览器，支持导出备份。</p>
+          <span class="cta" data-i18n="tile.mood.cta">贴一张 🐾 <i>→</i></span>
         </div>
       </a>
             </div>
@@ -1471,10 +1471,10 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
         <button class="zone-head" type="button" aria-expanded="false">
           <span class="zone-ico zc-zhenghuo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18 9.5l-4.1 1.9L12 16l-1.9-4.6L6 9.5l4.1-1.9z"/><path d="M18.5 15l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/></svg></span>
           <span class="zone-info">
-            <span class="zone-name">整活</span>
-            <span class="zone-sub">没啥用但挺逗 · 会心一笑</span>
+            <span class="zone-name" data-i18n="zone.fun2.name">整活</span>
+            <span class="zone-sub" data-i18n="zone.fun2.sub">没啥用但挺逗 · 会心一笑</span>
           </span>
-          <span class="zone-count">4 个作品</span>
+          <span class="zone-count" data-i18n="zone.fun2.count">4 个作品</span>
           <span class="zone-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
         </button>
         <div class="zone-body">
@@ -1483,37 +1483,37 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       <a class="tile" style="--d:.02s" data-demo="zhenghuo" href="https://startian.top/zhenghuo/">
         <div class="tile-media"><img src="demos/zhenghuo.jpg" alt="整活演示" loading="lazy"></div>
         <div class="tile-body">
-          <span class="ptag">趣味 · 彩蛋</span>
-          <h3>整活 · 隐私协议</h3>
-          <p>伪装成「服务协议与隐私政策」的整活小页面：郑重其事地点下「同意并继续」，就会收获一点小小的惊喜（笑）。</p>
-          <span class="cta">点一下 <i>→</i></span>
+          <span class="ptag" data-i18n="tile.zhenghuo.tag">趣味 · 彩蛋</span>
+          <h3 data-i18n="tile.zhenghuo.title">整活 · 隐私协议</h3>
+          <p data-i18n="tile.zhenghuo.desc">伪装成「服务协议与隐私政策」的整活小页面：郑重其事地点下「同意并继续」，就会收获一点小小的惊喜（笑）。</p>
+          <span class="cta" data-i18n="tile.zhenghuo.cta">点一下 <i>→</i></span>
         </div>
       </a>
       <a class="tile flip" style="--d:.08s" data-demo="fake" href="https://startian.top/fake/">
         <div class="tile-media"><img src="demos/fake.jpg" alt="假加载页演示" loading="lazy"></div>
         <div class="tile-body">
-          <span class="ptag">整活 · 反转</span>
-          <h3>假加载页</h3>
-          <p>一个非常正经的加载页面：进度条卡在 99% 开始跟你唠嗑，聊两句它才肯承认其实早就加载完了。</p>
-          <span class="cta">去等一等 <i>→</i></span>
+          <span class="ptag" data-i18n="tile.fake.tag">整活 · 反转</span>
+          <h3 data-i18n="tile.fake.title">假加载页</h3>
+          <p data-i18n="tile.fake.desc">一个非常正经的加载页面：进度条卡在 99% 开始跟你唠嗑，聊两句它才肯承认其实早就加载完了。</p>
+          <span class="cta" data-i18n="tile.fake.cta">去等一等 <i>→</i></span>
         </div>
       </a>
       <a class="tile" style="--d:.14s" data-demo="report" href="https://startian.top/report/">
         <div class="tile-media"><img src="demos/report.jpg" alt="今日份诊断报告演示" loading="lazy"></div>
         <div class="tile-body">
-          <span class="ptag">趣味 · 玄学</span>
-          <h3>今日份诊断报告</h3>
-          <p>给今天的你开一张体检单：精神状态、欧气、发量……七项指标每日不同，还能换变体、存成报告图，纯玄学仅供参考（笑）。</p>
-          <span class="cta">去体检 <i>→</i></span>
+          <span class="ptag" data-i18n="tile.report.tag">趣味 · 玄学</span>
+          <h3 data-i18n="tile.report.title">今日份诊断报告</h3>
+          <p data-i18n="tile.report.desc">给今天的你开一张体检单：精神状态、欧气、发量……七项指标每日不同，还能换变体、存成报告图，纯玄学仅供参考（笑）。</p>
+          <span class="cta" data-i18n="tile.report.cta">去体检 <i>→</i></span>
         </div>
       </a>
       <a class="tile flip" style="--d:.2s" data-demo="sandbox" href="https://startian.top/sandbox/">
         <div class="tile-media"><img src="demos/sandbox.jpg" alt="万物沙盒演示" loading="lazy"></div>
         <div class="tile-body">
-          <span class="ptag">整活 · 旗舰</span>
-          <h3>万物沙盒</h3>
-          <p>一块向两侧无限延伸的星海像素大陆：22 种元素自己会反应，光束会拐弯、棱镜会下彩虹；一键潜入真 3D 世界（WASD + 鼠标自由飞行、点哪造哪）——水面上还有会「嘎」的鸭鸭舰队。走到哪，世界长到哪。</p>
-          <span class="cta">去探索 <i>→</i></span>
+          <span class="ptag" data-i18n="tile.sandbox.tag">整活 · 旗舰</span>
+          <h3 data-i18n="tile.sandbox.title">万物沙盒</h3>
+          <p data-i18n="tile.sandbox.desc">一块向两侧无限延伸的星海像素大陆：22 种元素自己会反应，光束会拐弯、棱镜会下彩虹；一键潜入真 3D 世界（WASD + 鼠标自由飞行、点哪造哪）——水面上还有会「嘎」的鸭鸭舰队。走到哪，世界长到哪。</p>
+          <span class="cta" data-i18n="tile.sandbox.cta">去探索 <i>→</i></span>
         </div>
       </a>
             </div>
@@ -1525,8 +1525,8 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
         <button class="zone-head" type="button" aria-expanded="false">
           <span class="zone-ico zc-secret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span>
           <span class="zone-info">
-            <span class="zone-name">秘密</span>
-            <span class="zone-sub">给逛完全站的人</span>
+            <span class="zone-name" data-i18n="zone.secret.name">秘密</span>
+            <span class="zone-sub" data-i18n="zone.secret.sub">给逛完全站的人</span>
           </span>
           <span class="zone-count">??</span>
           <span class="zone-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
@@ -1535,11 +1535,11 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
           <div class="zone-inner">
             <div class="secret-card">
               <div class="sc-badge">🗝 SECRET</div>
-              <h3>你居然真的逛完了整站</h3>
-              <p>谢谢你，认真的旅人。<br>这个小站里的每一样东西，都是一个个深夜里「再改最后一版」攒出来的。<br>送你一句话 ——<b>愿你对这个世界，永远保持好奇</b>。<br><span style="opacity:.65">—— 星恬 &amp; 月月 🌙</span></p>
+              <h3 data-i18n="secret.h3">你居然真的逛完了整站</h3>
+              <p data-i18n-html="secret.p">谢谢你，认真的旅人。<br>这个小站里的每一样东西，都是一个个深夜里「再改最后一版」攒出来的。<br>送你一句话 ——<b>愿你对这个世界，永远保持好奇</b>。<br><span style="opacity:.65">—— 星恬 &amp; 月月 🌙</span></p>
               <div class="sc-row">
-                <button class="btn btn-p" id="btnSecretConfetti" type="button">🎉 撒一次花</button>
-                <a class="btn btn-g" href="https://startian.top/star/">🌌 去看颗星星</a>
+                <button class="btn btn-p" id="btnSecretConfetti" type="button" data-i18n="secret.confetti">🎉 撒一次花</button>
+                <a class="btn btn-g" href="https://startian.top/star/" data-i18n="secret.star">🌌 去看颗星星</a>
               </div>
             </div>
           </div>
@@ -1552,17 +1552,17 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
   <section id="about">
     <div class="section reveal" style="--d:.05s">
       <div class="sec-eyebrow">ABOUT</div>
-      <div class="sec-title">关于我</div>
+      <div class="sec-title" data-i18n="about.title">关于我</div>
     </div>
     <div class="about reveal" style="--d:.1s">
-      <p>你好呀，我是星恬 ✨ 喜欢下棋、写点小东西、捣鼓各种有趣的玩意。这个小站里的每一件作品，从会学习的五子棋 AI 到几何教学工作台，都是自己一点点折腾出来的。</p>
-      <p>平时也喜欢和 AI 小伙伴一起做实验 —— 有什么好玩的点子，欢迎来聊～</p>
-      <p style="font-size:12.5px;color:var(--ink3,#8896b0);opacity:.85">（对了，头像里有东西，点一下，再点一下，别停）</p>
+      <p data-i18n="about.p1">你好呀，我是星恬 ✨ 喜欢下棋、写点小东西、捣鼓各种有趣的玩意。这个小站里的每一件作品，从会学习的五子棋 AI 到几何教学工作台，都是自己一点点折腾出来的。</p>
+      <p data-i18n="about.p2">平时也喜欢和 AI 小伙伴一起做实验 —— 有什么好玩的点子，欢迎来聊～</p>
+      <p style="font-size:12.5px;color:var(--ink3,#8896b0);opacity:.85" data-i18n="about.p3">（对了，头像里有东西，点一下，再点一下，别停）</p>
       <div class="chips">
-        <span class="chip">♟ 五子棋重度爱好者</span>
-        <span class="chip">📐 数学可视化</span>
-        <span class="chip">🌙 和 AI 小伙伴一起折腾</span>
-        <span class="chip">📺 B 站常驻</span>
+        <span class="chip" data-i18n="about.chip1">♟ 五子棋重度爱好者</span>
+        <span class="chip" data-i18n="about.chip2">📐 数学可视化</span>
+        <span class="chip" data-i18n="about.chip3">🌙 和 AI 小伙伴一起折腾</span>
+        <span class="chip" data-i18n="about.chip4">📺 B 站常驻</span>
       </div>
     </div>
   </section>
@@ -1570,35 +1570,35 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
   <section id="achievements">
     <div class="section reveal" style="--d:.05s">
       <div class="sec-eyebrow">ACHIEVEMENTS</div>
-      <div class="sec-title">成就馆</div>
-      <div class="sec-sub">每个作品里都藏着成就徽章 —— 玩着玩着就亮起来的那种</div>
+      <div class="sec-title" data-i18n="ach.title">成就馆</div>
+      <div class="sec-sub" data-i18n="ach.sub">每个作品里都藏着成就徽章 —— 玩着玩着就亮起来的那种</div>
     </div>
     <div class="ach-showcase">
       <a class="ach-app reveal" style="--d:.08s" href="https://wuziqi.startian.top/">
-        <div class="aa-head"><span class="aa-emo">⚫</span>五子棋<span class="aa-count">11 枚徽章</span></div>
+        <div class="aa-head"><span class="aa-emo">⚫</span><span data-i18n="ach.gomokuName">五子棋</span><span class="aa-count" data-i18n="ach.gomokuCount">11 枚徽章</span></div>
         <div class="aa-chips">
-          <span>🌱 初见棋枰</span><span>🥇 首胜</span><span>🔥 三连胜</span><span>⚡ 闪电战</span><span>🎯 落子无悔</span><span>🧠 智者挑战</span><span>👑 灵拙之敌</span><span>…还有 4 枚</span>
+          <span data-i18n="ach.g1">🌱 初见棋枰</span><span data-i18n="ach.g2">🥇 首胜</span><span data-i18n="ach.g3">🔥 三连胜</span><span data-i18n="ach.g4">⚡ 闪电战</span><span data-i18n="ach.g5">🎯 落子无悔</span><span data-i18n="ach.g6">🧠 智者挑战</span><span data-i18n="ach.g7">👑 灵拙之敌</span><span data-i18n="ach.g8">…还有 4 枚</span>
         </div>
-        <span class="cta">去下棋 <i>→</i></span>
+        <span class="cta" data-i18n-html="ach.cta1">去下棋 <i>→</i></span>
       </a>
       <a class="ach-app reveal" style="--d:.12s" href="https://daka.startian.top/">
-        <div class="aa-head"><span class="aa-emo">🗓️</span>打卡日程表<span class="aa-count">10 枚徽章</span></div>
+        <div class="aa-head"><span class="aa-emo">🗓️</span><span data-i18n="ach.dakaName">打卡日程表</span><span class="aa-count" data-i18n="ach.dakaCount">10 枚徽章</span></div>
         <div class="aa-chips">
-          <span>🌱 启程</span><span>🔥 七日之火</span><span>🏔️ 三十天</span><span>🎯 今日全勤</span><span>🌅 早起鸟</span><span>🌙 夜猫子</span><span>…还有 4 枚</span>
+          <span data-i18n="ach.d1">🌱 启程</span><span data-i18n="ach.d2">🔥 七日之火</span><span data-i18n="ach.d3">🏔️ 三十天</span><span data-i18n="ach.d4">🎯 今日全勤</span><span data-i18n="ach.d5">🌅 早起鸟</span><span data-i18n="ach.d6">🌙 夜猫子</span><span data-i18n="ach.d7">…还有 4 枚</span>
         </div>
-        <span class="cta">去打卡 <i>→</i></span>
+        <span class="cta" data-i18n-html="ach.cta2">去打卡 <i>→</i></span>
       </a>
     </div>
     <div class="ach-cross reveal collapsed" style="--d:.16s" id="achCard">
-      <div class="acx-head" id="acxHead" role="button" tabindex="0" aria-expanded="false" aria-controls="acxBody" title="点击展开 / 收起成就柜">
-        <span class="acx-title">🏆 跨站成就柜</span>
-        <span class="acx-prog">已点亮 <b id="achLit">0</b> / <span id="achTotal">73</span></span>
+      <div class="acx-head" id="acxHead" role="button" tabindex="0" aria-expanded="false" aria-controls="acxBody" title="点击展开 / 收起成就柜" data-i18n-title="ach.cabTitle">
+        <span class="acx-title" data-i18n="ach.cab">🏆 跨站成就柜</span>
+        <span class="acx-prog"><span data-i18n="ach.litLabel">已点亮</span> <b id="achLit">0</b> / <span id="achTotal">73</span></span>
         <span class="acx-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
       </div>
       <div class="acx-body" id="acxBody">
         <div class="acx-clip">
           <div class="acx-grid" id="achGrid"></div>
-          <div class="acx-tip">游玩任意小站会自动点亮 · 记录只存本机（全站共享），不上传任何地方</div>
+          <div class="acx-tip" data-i18n="ach.tip">游玩任意小站会自动点亮 · 记录只存本机（全站共享），不上传任何地方</div>
         </div>
       </div>
     </div>
@@ -1608,32 +1608,32 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
   <section id="contact">
     <div class="section reveal" style="--d:.05s">
       <div class="sec-eyebrow">CONTACT</div>
-      <div class="sec-title">联系我</div>
+      <div class="sec-title" data-i18n="contact.title">联系我</div>
     </div>
 
     <div class="fb reveal" style="--d:.08s" id="fbCard">
       <div class="fb-head">
         <span class="fb-ico">💌</span>
         <div>
-          <div class="fb-title">留言箱</div>
-          <div class="fb-sub">有什么想说的都可以写在这里，会直接送到我的邮箱。建议 / 报错 / 提问 / 随便聊，都欢迎</div>
+          <div class="fb-title" data-i18n="fb.title">留言箱</div>
+          <div class="fb-sub" data-i18n="fb.sub">有什么想说的都可以写在这里，会直接送到我的邮箱。建议 / 报错 / 提问 / 随便聊，都欢迎</div>
         </div>
       </div>
       <form id="fbForm" novalidate>
         <div class="fb-types" id="fbTypes" aria-label="反馈类型">
-          <button type="button" class="fb-type on" data-t="💡 建议" aria-pressed="true">💡 建议</button>
-          <button type="button" class="fb-type" data-t="🐛 报错" aria-pressed="false">🐛 报错</button>
-          <button type="button" class="fb-type" data-t="🤔 提问" aria-pressed="false">🤔 提问</button>
-          <button type="button" class="fb-type" data-t="💬 随便聊" aria-pressed="false">💬 随便聊</button>
+          <button type="button" class="fb-type on" data-t="💡 建议" aria-pressed="true" data-i18n="fb.t1">💡 建议</button>
+          <button type="button" class="fb-type" data-t="🐛 报错" aria-pressed="false" data-i18n="fb.t2">🐛 报错</button>
+          <button type="button" class="fb-type" data-t="🤔 提问" aria-pressed="false" data-i18n="fb.t3">🤔 提问</button>
+          <button type="button" class="fb-type" data-t="💬 随便聊" aria-pressed="false" data-i18n="fb.t4">💬 随便聊</button>
         </div>
         <div class="fb-row">
-          <input class="fb-input" id="fbNick" type="text" maxlength="40" placeholder="昵称（选填）" autocomplete="nickname">
-          <input class="fb-input" id="fbMail" type="email" maxlength="80" placeholder="邮箱（选填 · 方便我回信）" autocomplete="email">
+          <input class="fb-input" id="fbNick" type="text" maxlength="40" placeholder="昵称（选填）" data-i18n-ph="fb.nick" autocomplete="nickname">
+          <input class="fb-input" id="fbMail" type="email" maxlength="80" placeholder="邮箱（选填 · 方便我回信）" data-i18n-ph="fb.mail" autocomplete="email">
         </div>
-        <textarea class="fb-area" id="fbMsg" maxlength="2000" placeholder="写点什么……（Ctrl + Enter 直接发送）" aria-label="留言内容"></textarea>
+        <textarea class="fb-area" id="fbMsg" maxlength="2000" placeholder="写点什么……（Ctrl + Enter 直接发送）" data-i18n-ph="fb.msg" aria-label="留言内容" data-i18n-aria="fb.msgAria"></textarea>
         <input class="fb-honey" id="fbSite" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
         <div class="fb-foot">
-          <button class="fb-btn" id="fbBtn" type="submit"><span id="fbBtnT">发送 ✈</span></button>
+          <button class="fb-btn" id="fbBtn" type="submit"><span id="fbBtnT" data-i18n="fb.send">发送 ✈</span></button>
           <span class="fb-status" id="fbStatus" aria-live="polite"></span>
         </div>
       </form>
@@ -1641,27 +1641,27 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
 
     <div class="contacts">
 
-      <div class="ct reveal" style="--d:.05s" id="ctQQ" role="button" tabindex="0" title="点击复制 QQ 号">
+      <div class="ct reveal" style="--d:.05s" id="ctQQ" role="button" tabindex="0" title="点击复制 QQ 号" data-i18n-title="ct.qqTitle">
         <span class="ct-ico"><svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"><path fill="#12B7F5" d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"/></svg></span>
-        <span class="cl">QQ · 点击复制</span>
+        <span class="cl" data-i18n="ct.qq">QQ · 点击复制</span>
         <span class="cv">2433165914</span>
       </div>
 
       <a class="ct reveal" style="--d:.1s" href="mailto:2433165914@qq.com">
         <span class="ct-ico"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="#66a9f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="3"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
-        <span class="cl">邮箱 · 写封邮件 →</span>
+        <span class="cl" data-i18n="ct.mail">邮箱 · 写封邮件 →</span>
         <span class="cv">2433165914@qq.com</span>
       </a>
 
       <a class="ct reveal" style="--d:.15s" href="https://space.bilibili.com/3494370703575552" target="_blank" rel="noopener">
         <span class="ct-ico"><svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"><path fill="#00A1D6" d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.511.556-2.765 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.658.373-.907l.027-.027c.267-.249.573-.373.92-.373.347 0 .653.124.92.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .16-.213l2.853-2.747c.267-.249.573-.373.92-.373.347 0 .662.151.929.4.267.249.391.551.391.907 0 .355-.124.657-.373.906zM5.333 7.24c-.746.018-1.373.276-1.88.773-.506.498-.769 1.13-.786 1.894v7.52c.017.764.28 1.395.786 1.893.507.498 1.134.756 1.88.773h13.334c.746-.017 1.373-.275 1.88-.773.506-.498.769-1.129.786-1.893v-7.52c-.017-.765-.28-1.396-.786-1.894-.507-.497-1.134-.755-1.88-.773zM8 11.107c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c0-.373.129-.689.386-.947.258-.257.574-.386.947-.386zm8 0c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c.017-.391.15-.711.4-.96.249-.249.56-.373.933-.373Z"/></svg></span>
-        <span class="cl">B 站 · 点我跳转 ↗</span>
-        <span class="cv">个人空间</span>
+        <span class="cl" data-i18n="ct.bili">B 站 · 点我跳转 ↗</span>
+        <span class="cv" data-i18n="ct.biliVal">个人空间</span>
       </a>
 
       <a class="ct reveal" style="--d:.2s" href="https://github.com/Estheria-star" target="_blank" rel="noopener">
         <span class="ct-ico"><svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"><path fill="#181717" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></span>
-        <span class="cl">GitHub · 点我跳转 ↗</span>
+        <span class="cl" data-i18n="ct.gh">GitHub · 点我跳转 ↗</span>
         <span class="cv">@Estheria-star</span>
       </a>
 
@@ -1670,8 +1670,8 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
 
   <footer class="reveal" style="--d:.1s">
     <div class="theater">💭 <span id="mono"></span></div>
-    © 2026 星恬 · startian.top<br>
-    也欢迎来 <a href="https://space.bilibili.com/3494370703575552" target="_blank" rel="noopener">B 站</a> 和 <a href="https://github.com/Estheria-star" target="_blank" rel="noopener">GitHub</a> 找我玩
+    <span data-i18n="footer.copy">© 2026 星恬 · startian.top</span><br>
+    <span data-i18n-html="footer.links">也欢迎来 <a href="https://space.bilibili.com/3494370703575552" target="_blank" rel="noopener">B 站</a> 和 <a href="https://github.com/Estheria-star" target="_blank" rel="noopener">GitHub</a> 找我玩</span>
   </footer>
 
 </div>
@@ -1679,14 +1679,751 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
 <div class="dock" id="demoDock" aria-hidden="true">
   <img id="dockImg" alt="">
   <div class="dbody">
-    <div class="dtitle"><span id="dockTitle"></span><span class="tag">演示</span></div>
+    <div class="dtitle"><span id="dockTitle"></span><span class="tag" data-i18n="dock.tag">演示</span></div>
     <div class="ddesc" id="dockDesc"></div>
-    <div class="dhint">悬停 2 秒自动浮现 · 鼠标移开收起 · 直接点卡片开玩 →</div>
+    <div class="dhint" data-i18n="dock.hint">悬停 2 秒自动浮现 · 鼠标移开收起 · 直接点卡片开玩 →</div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
+<script>
+/* ══════════════════════════════════════════════════════════
+   🌐 多语言 i18n Kit（startian.top 全站共享 · v1 · 2026-10-04）
+   · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
+   · 自动识别：首次访问按 navigator.language（zh 开头 → 中文，其余 → English）
+   · DOM 标注：data-i18n（文本）/ data-i18n-title / data-i18n-aria / data-i18n-ph（placeholder）
+   · API：I18N.t(k[,vars]) · I18N.set(lang) · I18N.apply(root) · I18N.onChange(fn)
+          · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n) · I18N.lang()
+   · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
+   ══════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════
+   🌐 多语言 i18n Kit（startian.top 全站共享 · v1.1 · 2026-10-04）
+   · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
+   · 自动识别：首次访问按 navigator.language（zh 开头 → 中文，其余 → English）
+   · 两种接入模式（可混用）：
+     ① 短语表模式（推荐，低侵入）：I18N.phrase({ '中文原文': 'English', ... })
+        自动扫描文本节点 / title / placeholder / aria-label / alt，动态插入的文本也自动翻译
+     ② 标注模式：data-i18n / data-i18n-html / data-i18n-title / data-i18n-aria / data-i18n-ph / data-i18n-alt
+   · 子树上加 data-i18n-skip 可整体跳过（用户输入内容、ARG 谜题原文等）
+   · API：I18N.t(k[,vars]) · I18N.tOr(k,fb) · I18N.tr(原文) · I18N.set(lang) · I18N.lang()
+          · I18N.phrase(map) · I18N.scan(root) · I18N.apply(root) · I18N.onChange(fn)
+          · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n)
+   · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
+   ══════════════════════════════════════════════════════════ */
+var I18N = (function () {
+  'use strict';
+  var LS = 'st_lang';
+  var FALLBACK = 'zh';
+  var lang = FALLBACK;
+  var dict = { zh: {}, en: {} };
+  var phrase = {};      /* 短语表：中文原文（归一化）→ 译文 */
+  var listeners = [];
+  var bd = {};          /* boot data：原文快照等 */
+
+  /* ---- 基础词典（全站通用词条） ---- */
+  dict.zh['common.home'] = '主页';
+  dict.en['common.home'] = 'Home';
+  dict.zh['common.homeTitle'] = '返回星恬的小站主页';
+  dict.en['common.homeTitle'] = "Back to Startian's homepage";
+  dict.zh['common.close'] = '关闭';
+  dict.en['common.close'] = 'Close';
+  dict.zh['common.cancel'] = '取消';
+  dict.en['common.cancel'] = 'Cancel';
+
+  /* ---- 存储与识别 ---- */
+  function norm(v) {
+    v = String(v || '').toLowerCase();
+    if (v.indexOf('zh') === 0) return 'zh';
+    if (v.indexOf('en') === 0) return 'en';
+    return null;
+  }
+  function readCookie() {
+    try { var m = document.cookie.match(/(?:^|;\s*)st_lang=([^;]*)/); return m ? decodeURIComponent(m[1]) : null; }
+    catch (e) { return null; }
+  }
+  function readLS() { try { return localStorage.getItem(LS); } catch (e) { return null; } }
+  function persist(v) {
+    try { localStorage.setItem(LS, v); } catch (e) {}
+    try { document.cookie = 'st_lang=' + encodeURIComponent(v) + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax'; } catch (e) {}
+  }
+  function detect() {
+    var s = norm(readCookie()) || norm(readLS());
+    if (s) return s;
+    var n = norm(navigator.language || navigator.userLanguage);
+    return n || FALLBACK;
+  }
+
+  /* ---- 文案 ---- */
+  /* tRaw：查词典（当前语言 → zh 兜底），查不到返回 null（= 保持原文） */
+  function tRaw(key) {
+    var v = (dict[lang] && dict[lang][key] != null) ? dict[lang][key] : null;
+    if (v == null) v = (dict[FALLBACK] && dict[FALLBACK][key] != null) ? dict[FALLBACK][key] : null;
+    return v;
+  }
+  function t(key, vars) {
+    var v = tRaw(key);
+    if (v == null) return key;
+    if (vars) v = String(v).replace(/\{(\w+)\}/g, function (m, k) { return (vars[k] != null) ? vars[k] : m; });
+    return v;
+  }
+  /* tOr：查不到时用传入的兜底值（页面 JS 动态文案用这个） */
+  function tOr(key, fallback) {
+    var v = tRaw(key);
+    return (v == null) ? fallback : v;
+  }
+  function add(obj) {
+    if (!obj) return;
+    ['zh', 'en'].forEach(function (k) {
+      if (obj[k]) for (var key in obj[k]) dict[k][key] = obj[k][key];
+    });
+  }
+  /* tr：短语表直译（原文进，译文出；zh 侧原样返回）——JS 动态文案直接用 */
+  function tr(s) {
+    if (lang === 'zh') return s;
+    var v = phrase[normText(s)];
+    return (v == null) ? s : v;
+  }
+  function addPhrase(map) {
+    if (!map) return;
+    for (var k in map) { if (map[k] != null) phrase[normText(k)] = String(map[k]); }
+  }
+
+  /* ---- 短语表扫描（静态 + 动态） ---- */
+  function normText(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
+  var PTAGS = ['title', 'placeholder', 'aria-label', 'alt'];
+  function translText(node) {
+    var raw = node.nodeValue;
+    if (!raw) return;
+    var orig = node.__i18nOrig;
+    if (orig != null) {
+      var enOfOrig = phrase[normText(orig)];
+      if (lang === 'zh') {
+        if (enOfOrig != null && raw === enOfOrig) { node.nodeValue = orig; node.__i18nOrig = null; }
+        else if (raw !== enOfOrig) { node.__i18nOrig = null; }
+        return;
+      }
+      if (enOfOrig != null && raw === enOfOrig) return;                 /* 已是译文 */
+      if (enOfOrig != null && normText(raw) === normText(orig)) {       /* 页面又渲染回原文 → 再翻 */
+        node.nodeValue = enOfOrig; return;
+      }
+      node.__i18nOrig = null;                                          /* 新内容 → 走通用逻辑 */
+    }
+    var en = phrase[normText(raw)];
+    if (en == null) return;
+    if (lang === 'en') { if (raw !== en) { node.__i18nOrig = raw; node.nodeValue = en; } }
+  }
+  function translAttrs(el) {
+    if (!el.getAttribute) return;
+    for (var i = 0; i < PTAGS.length; i++) {
+      var a = PTAGS[i], v = el.getAttribute(a);
+      if (v == null || v === '') continue;
+      var snap = el.__i18nA && el.__i18nA[a];
+      if (snap != null) {
+        var enOfSnap = phrase[normText(snap)];
+        if (lang === 'zh') {
+          if (enOfSnap != null && v === enOfSnap) { el.setAttribute(a, snap); delete el.__i18nA[a]; }
+          else if (v !== enOfSnap) { delete el.__i18nA[a]; }
+          continue;
+        }
+        if (enOfSnap != null && v === enOfSnap) continue;
+        if (enOfSnap != null && normText(v) === normText(snap)) { el.setAttribute(a, enOfSnap); continue; }
+        delete el.__i18nA[a];
+      }
+      var en = phrase[normText(v)];
+      if (en == null) continue;
+      if (lang === 'en') {
+        if (v !== en) { if (!el.__i18nA) el.__i18nA = {}; el.__i18nA[a] = v; el.setAttribute(a, en); }
+      }
+    }
+  }
+  function scanNode(node) {
+    if (!node) return;
+    if (node.nodeType === 9) node = node.documentElement || node.body;   /* 文档节点 → 转元素 */
+    if (!node) return;
+    if (node.nodeType === 3) { translText(node); return; }
+    if (node.nodeType !== 1) return;
+    var tag = node.tagName;
+    if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'NOSCRIPT') return;
+    if (node.hasAttribute('data-i18n-skip')) return;
+    translAttrs(node);
+    for (var c = node.firstChild; c; c = c.nextSibling) scanNode(c);
+  }
+  function scan(root) { try { scanNode(root || document.body || document.documentElement); } catch (e) {} }
+  /* 动态内容自动翻译（MutationObserver，逐节点增量，无重扫） */
+  var moOn = false;
+  function auto(root) {
+    if (moOn || typeof MutationObserver === 'undefined') return;
+    var target = root || document.body;
+    if (!target) return;
+    moOn = true;
+    try {
+      var mo = new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          var m = muts[i];
+          try {
+            if (m.type === 'characterData') translText(m.target);
+            else if (m.type === 'attributes') translAttrs(m.target);
+            else if (m.type === 'childList') {
+              for (var j = 0; j < m.addedNodes.length; j++) scanNode(m.addedNodes[j]);
+            }
+          } catch (e) {}
+        }
+      });
+      mo.observe(target, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: PTAGS });
+    } catch (e) {}
+  }
+
+  /* ---- 日期 / 数字 ---- */
+  var MN_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var WD_ZH = '日一二三四五六';
+  var WD_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  function fmtDate(d, opt) {
+    if (typeof d === 'string') { var a = d.split('-'); d = new Date(+a[0], (+a[1] || 1) - 1, +a[2] || 1); }
+    if (!(d instanceof Date) || isNaN(d.getTime())) return '';
+    opt = opt || {};
+    var s;
+    if (lang === 'zh') {
+      s = d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日';
+      if (opt.weekday) s += ' · 星期' + WD_ZH.charAt(d.getDay());
+    } else {
+      s = MN_EN[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+      if (opt.weekday) s += ' · ' + WD_EN[d.getDay()];
+    }
+    return s;
+  }
+  function fmtNum(n) {
+    try { return Number(n).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US'); }
+    catch (e) { return String(n); }
+  }
+
+  /* ---- DOM 标注应用（标注模式；词条缺失时恢复原文 —— 保证切回中文能还原） ---- */
+  function apply(root) {
+    root = root || document;
+    try {
+      var i, list, v, el;
+      list = root.querySelectorAll('[data-i18n]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrig == null) el.__i18nOrig = el.textContent;
+        v = tRaw(el.getAttribute('data-i18n'));
+        el.textContent = (v != null) ? v : el.__i18nOrig;
+      }
+      list = root.querySelectorAll('[data-i18n-html]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigHTML == null) el.__i18nOrigHTML = el.innerHTML;
+        v = tRaw(el.getAttribute('data-i18n-html'));
+        el.innerHTML = (v != null) ? v : el.__i18nOrigHTML;
+      }
+      list = root.querySelectorAll('[data-i18n-title]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigTitle == null) el.__i18nOrigTitle = el.title;
+        v = tRaw(el.getAttribute('data-i18n-title'));
+        el.title = (v != null) ? v : el.__i18nOrigTitle;
+      }
+      list = root.querySelectorAll('[data-i18n-aria]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAria == null) el.__i18nOrigAria = el.getAttribute('aria-label') || '';
+        v = tRaw(el.getAttribute('data-i18n-aria'));
+        el.setAttribute('aria-label', (v != null) ? v : el.__i18nOrigAria);
+      }
+      list = root.querySelectorAll('[data-i18n-ph]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigPh == null) el.__i18nOrigPh = el.placeholder || '';
+        v = tRaw(el.getAttribute('data-i18n-ph'));
+        el.placeholder = (v != null) ? v : el.__i18nOrigPh;
+      }
+      list = root.querySelectorAll('[data-i18n-alt]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAlt == null) el.__i18nOrigAlt = el.getAttribute('alt') || '';
+        v = tRaw(el.getAttribute('data-i18n-alt'));
+        el.setAttribute('alt', (v != null) ? v : el.__i18nOrigAlt);
+      }
+      /* 标题（短语表优先，其次 page.title 词条） */
+      if (!bd.__origTitle) bd.__origTitle = document.title;
+      var tv = phrase[normText(bd.__origTitle)];
+      if (tv == null) tv = tRaw('page.title');
+      if (tv != null) { document.title = (lang === 'en') ? tv : bd.__origTitle; bd.__titleTouched = true; }
+      else if (bd.__titleTouched) { document.title = bd.__origTitle; }
+      document.documentElement.lang = (lang === 'zh') ? 'zh-CN' : 'en';
+      syncSwitch();
+    } catch (e) {}
+  }
+
+  function set(v) {
+    v = norm(v);
+    if (!v) return;
+    if (v === lang) { apply(document); scan(document); return; }
+    lang = v;
+    persist(v);
+    apply(document);
+    scan(document);
+    for (var i = 0; i < listeners.length; i++) { try { listeners[i](lang); } catch (e) {} }
+    try {
+      var live = document.getElementById('i18n-live');
+      if (live) live.textContent = (lang === 'zh') ? '已切换到中文' : 'Switched to English';
+    } catch (e) {}
+  }
+  function onChange(fn) { if (typeof fn === 'function') listeners.push(fn); }
+  function getLang() { return lang; }
+
+  /* ---- 切换入口（右下角胶囊，自动注入） ---- */
+  var SW_CSS = '.i18n-sw{position:fixed;right:14px;bottom:14px;z-index:9992;display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:rgba(17,24,39,.6);-webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);border:1px solid rgba(255,255,255,.16);box-shadow:0 6px 18px rgba(0,0,0,.2);font-family:inherit}' +
+    '.i18n-sw button{border:0;background:transparent;color:rgba(255,255,255,.72);font-size:12px;font-weight:700;letter-spacing:.4px;padding:6px 11px;border-radius:999px;cursor:pointer;font-family:inherit;transition:all .18s ease;line-height:1}' +
+    '.i18n-sw button:hover{color:#fff;background:rgba(255,255,255,.12)}' +
+    '.i18n-sw button:focus-visible{outline:2px solid #7dd3fc;outline-offset:1px}' +
+    '.i18n-sw button.on{background:rgba(255,255,255,.92);color:#1f2937;box-shadow:0 2px 8px rgba(0,0,0,.25)}' +
+    '.i18n-sw button:active{transform:translateY(1px)}' +
+    '.i18n-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}' +
+    '@media (max-width:620px){.i18n-sw{right:10px;bottom:10px}.i18n-sw button{padding:5px 9px;font-size:11.5px}}';
+
+  var swEl = null;
+  function buildSwitch() {
+    try {
+      if (!document.body) return;
+      var exist = document.querySelector('.i18n-sw');
+      if (exist) { swEl = exist; syncSwitch(); return; }
+      var st = document.createElement('style');
+      st.textContent = SW_CSS;
+      (document.head || document.documentElement).appendChild(st);
+      var wrap = document.createElement('div');
+      wrap.className = 'i18n-sw';
+      wrap.setAttribute('role', 'group');
+      wrap.setAttribute('aria-label', '切换语言 / Switch language');
+      [['zh', '中文'], ['en', 'English']].forEach(function (p) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('data-lang', p[0]);
+        b.textContent = p[1];
+        b.addEventListener('click', function () { set(p[0]); });
+        wrap.appendChild(b);
+      });
+      var live = document.createElement('span');
+      live.id = 'i18n-live';
+      live.className = 'i18n-sr';
+      live.setAttribute('aria-live', 'polite');
+      wrap.appendChild(live);
+      document.body.appendChild(wrap);
+      swEl = wrap;
+      syncSwitch();
+    } catch (e) {}
+  }
+  function syncSwitch() {
+    try {
+      if (!swEl) return;
+      var bs = swEl.querySelectorAll('button[data-lang]');
+      for (var i = 0; i < bs.length; i++) {
+        var on = bs[i].getAttribute('data-lang') === lang;
+        bs[i].classList.toggle('on', on);
+        bs[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    } catch (e) {}
+  }
+
+  /* ---- 启动 ---- */
+  lang = detect();
+  function boot() {
+    buildSwitch();
+    apply(document);
+    scan(document);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+
+  return {
+    t: t, tOr: tOr, tr: tr, set: set, apply: apply, scan: scan, auto: auto,
+    phrase: addPhrase, add: add, lang: getLang, onChange: onChange,
+    fmtDate: fmtDate, fmtNum: fmtNum
+  };
+})();
+</script>
+<script>
+var __I18N_EN = {
+ "page.title": "Startian's Little Site · Gomoku, Geometry Studio & Universe Map",
+ "nav.projects": "Projects",
+ "nav.ach": "Achievements",
+ "nav.about": "About",
+ "nav.contact": "Contact",
+ "nav.themeTitle": "Color theme",
+ "theme.title": "🎨 Color theme",
+ "theme.auto": "🕖 Auto",
+ "theme.light": "☀️ Blue-white",
+ "theme.dark": "🌙 Dark red",
+ "theme.purple": "🔮 Dreamy purple",
+ "theme.fresh": "🌿 Fresh green",
+ "theme.warm": "🌸 Warm pink",
+ "theme.colorful": "🎨 Colorful",
+ "theme.custom": "🖌 Custom",
+ "theme.starry": "🌌 Starry night",
+ "theme.sub": "Auto pairs (theme switches with time)",
+ "theme.pair1": "☀️ Blue-white ⇄ 🌙 Dark red",
+ "theme.pair2": "🌿 Fresh green ⇄ 🔮 Dreamy purple",
+ "theme.pair3": "🌸 Warm pink ⇄ 🎨 Colorful",
+ "theme.bg": "Base color",
+ "theme.ac": "Accent color",
+ "theme.rand": "🎲 Random inspiration",
+ "theme.reset": "↺ Reset to default",
+ "theme.customTip": "Pick a base and accent color — the whole theme (including transition glow) is generated automatically · stored locally only",
+ "theme.timesSub": "Custom switch times (applies to the time-based mode)",
+ "theme.lightAt": "☀️ Blue-white starts",
+ "theme.darkAt": "🌙 Dark red starts",
+ "hero.h1": "Startian's Little Site",
+ "hero.tag": "Chess, geometry & AI tinkering — come take a look",
+ "hero.cta1": "See my projects ↓",
+ "hero.cta2": "Contact me",
+ "marq.0": "⚫ Gomoku · Adaptive AI",
+ "marq.1": "◆ Rapfi engine",
+ "marq.2": "⬡ Hexagon dimensions",
+ "marq.3": "📐 Geometry Studio",
+ "marq.4": "🏖 Everything Sandbox",
+ "marq.5": "🗓️ Habit Tracker",
+ "marq.6": "🐱 Mood Calendar",
+ "marq.7": "🧠 mix9 neural net",
+ "marq.8": "✨ Infinite Starfield #1818",
+ "marq.9": "🦠 Life Garden",
+ "marq.10": "🎵 Function Music",
+ "marq.11": "🎭 Fake Loading",
+ "marq.12": "🎨 Color Lab",
+ "marq.13": "📈 Curve Fitting",
+ "marq.14": "📕 Mistake Notebook",
+ "marq.15": "🩺 Daily Diagnosis",
+ "marq.16": "🗺 Universe Map",
+ "marq.17": "😏 Just for fun",
+ "projects.title": "My Projects",
+ "projects.sub": "Every piece built one step at a time · hover 2s for a surprise",
+ "zone.fun.name": "Play",
+ "zone.fun.sub": "Games & toys · chill out",
+ "zone.fun.count": "5 works",
+ "zone.tool.name": "Tools",
+ "zone.tool.sub": "Study & productivity",
+ "zone.tool.count": "7 works",
+ "zone.fun2.name": "Just for Fun",
+ "zone.fun2.sub": "Useless but funny",
+ "zone.fun2.count": "4 works",
+ "zone.secret.name": "Secret",
+ "zone.secret.sub": "For those who explored everything",
+ "tile.wuziqi.tag": "Game · AI",
+ "tile.wuziqi.title": "Gomoku · Adaptive AI",
+ "tile.wuziqi.desc": "Built-in Rapfi engine: classic search × “Lingzhuo” mix9 neural net — the AI learns your style and counters you in the next game. Undo, game-log export, and Lingzhuo to chat with.",
+ "tile.wuziqi.cta": "Play now",
+ "tile.tujie.tag": "Visualizer · chill",
+ "tile.tujie.title": "Hexagon Dimension Explorer",
+ "tile.tujie.desc": "Endlessly unfolding hexagonal geometry toy: nested layers, rotation and color experiments — oddly addictive to spin around.",
+ "tile.tujie.cta": "Try it",
+ "tile.star.tag": "Generative art · chill",
+ "tile.star.title": "Infinite Starfield Generator",
+ "tile.star.desc": "Procedural stars from a seed, Minecraft-style: drag any direction and it keeps generating the same universe. Twinkling stars, meteors, clusters and voids — even spiral galaxies. A new seed is a whole new vibe.",
+ "tile.star.cta": "See the stars",
+ "tile.life.tag": "Cellular automata · chill",
+ "tile.life.title": "Conway's Game of Life Garden",
+ "tile.life.desc": "Scatter seeds and watch cells grow: save “species”, or send two species head-on and see what sparks fly. An all-nighter kind of toy.",
+ "tile.life.cta": "Start seeding",
+ "tile.music.tag": "Math · music",
+ "tile.music.title": "Function Music",
+ "tile.music.desc": "Turn functions into timbre: sine is pure, square is retro game-console, stack a few and you get a new instrument — the waveform dances along.",
+ "tile.music.cta": "Play a tune",
+ "tile.geometry.tag": "Teaching · AI drawing",
+ "tile.geometry.title": "Geometry Studio · Math Workbench",
+ "tile.geometry.desc": "A geometry workbench for high-school math: 2D/3D modes, live function plotting, automatic vector relations, one-click area / volume / dihedral — and AI reads your problem to plot it.",
+ "tile.geometry.cta": "Draw geometry",
+ "tile.daka.tag": "Productivity · tool",
+ "tile.daka.title": "Habit Tracker",
+ "tile.daka.desc": "Set a few goals: one-tap check-in, streak counts 🔥, monthly calendar review. Data stays in your browser; works offline.",
+ "tile.daka.cta": "Start tracking",
+ "tile.colorlab.tag": "Design · tool",
+ "tile.colorlab.title": "Color Lab",
+ "tile.colorlab.desc": "Pick two colors and preview a whole UI live (buttons, cards, glass nav — all derived). Copy or download the CSS variables and use them directly.",
+ "tile.colorlab.cta": "Mix colors",
+ "tile.fit.tag": "Math · tool",
+ "tile.fit.title": "Curve Fitter",
+ "tile.fit.desc": "Drop in scattered points and it finds the best-fit function: linear / quadratic / cubic / exponential / power / log compete by R². Click to add points, right-click to remove.",
+ "tile.fit.cta": "Fit a curve",
+ "tile.cuoti.tag": "Study · memory science",
+ "tile.cuoti.title": "Mistake Notebook · Spaced Repetition",
+ "tile.cuoti.desc": "Log your wrong answers and review on a forgetting curve: forget → relearn, remember → longer intervals. Minimum reviews, maximum retention.",
+ "tile.cuoti.cta": "Log mistakes",
+ "tile.map.tag": "Guide · site map",
+ "tile.map.title": "Universe Map · Site Navigator",
+ "tile.map.desc": "14 works as stars in one universe: visited ones light up, click a star to jump right there — wondering where to start? Take a look at the map.",
+ "tile.map.cta": "View the map",
+ "tile.mood.tag": "Life · mood journal",
+ "tile.mood.title": "Mood Calendar",
+ "tile.mood.desc": "43 cat-ear stickers to tag each day — tap a date to write a little diary (weather, mood, text). Everything stays in your browser, exportable.",
+ "tile.mood.cta": "Paw a mood 🐾",
+ "tile.zhenghuo.tag": "Fun · easter egg",
+ "tile.zhenghuo.title": "Just for Fun · “Privacy Policy”",
+ "tile.zhenghuo.desc": "A fake “Terms & Privacy Policy” page: read it solemnly, click “Agree & continue”, get a tiny surprise (lol). Pure front-end, instant fun.",
+ "tile.zhenghuo.cta": "Click it",
+ "tile.fake.tag": "Just for fun · twist",
+ "tile.fake.title": "Fake Loading Page",
+ "tile.fake.desc": "A very serious loading page: the bar sticks at 99% and starts chatting with you. Talk a bit and it admits it finished long ago.",
+ "tile.fake.cta": "Go wait a bit",
+ "tile.report.tag": "Fun · fortune-telling",
+ "tile.report.title": "Daily Diagnosis Report",
+ "tile.report.desc": "A check-up report for today’s you: mood, luck, hair volume… seven metrics, different every day — save it as an image. Pure whimsy, for fun only (lol).",
+ "tile.report.cta": "Get diagnosed",
+ "tile.sandbox.tag": "Just for fun · flagship",
+ "tile.sandbox.title": "Everything Sandbox",
+ "tile.sandbox.desc": "A pixel continent endlessly extending in the sea of stars: 22 elements that react, light beams that bend, prisms that throw rainbows. Dive into a true 3D world (WASD + mouse free flight, click to build) — with quacking rubber ducks on the water.",
+ "tile.sandbox.cta": "Explore",
+ "about.title": "About Me",
+ "about.p1": "Hi, I’m Startian ✨ I love board games, building small things, and tinkering with fun ideas. Every piece on this site — from the learning Gomoku AI to the geometry workbench — was built bit by bit by myself.",
+ "about.p2": "I also love running experiments with my AI friends — got a fun idea? Come say hi~",
+ "about.p3": "(P.S. There’s something in the avatar. Click it, and click again — don’t stop)",
+ "about.chip1": "♟ Gomoku enthusiast",
+ "about.chip2": "📐 Math visualization",
+ "about.chip3": "🌙 Tinkering with AI friends",
+ "about.chip4": "📺 On Bilibili",
+ "ach.title": "Achievement Gallery",
+ "ach.sub": "Every work hides achievement badges — the kind that light up as you play",
+ "ach.gomokuName": "Gomoku",
+ "ach.gomokuCount": "11 badges",
+ "ach.g1": "🌱 First Game",
+ "ach.g2": "🥇 First Win",
+ "ach.g3": "🔥 3-Win Streak",
+ "ach.g4": "⚡ Blitz",
+ "ach.g5": "🎯 No Undo",
+ "ach.g6": "🧠 Beat the Master",
+ "ach.g7": "👑 Slay Lingzhuo",
+ "ach.g8": "…4 more",
+ "ach.dakaName": "Habit Tracker",
+ "ach.dakaCount": "10 badges",
+ "ach.d1": "🌱 Getting Started",
+ "ach.d2": "🔥 7-Day Fire",
+ "ach.d3": "🏔️ 30 Days",
+ "ach.d4": "🎯 Full Day",
+ "ach.d5": "🌅 Early Bird",
+ "ach.d6": "🌙 Night Owl",
+ "ach.d7": "…4 more",
+ "ach.cta1": "Play now <i>→</i>",
+ "ach.cta2": "Start tracking <i>→</i>",
+ "ach.cab": "🏆 Cross-site Achievement Cabinet",
+ "ach.litLabel": "Lit",
+ "ach.cabTitle": "Click to expand / collapse the cabinet",
+ "ach.tip": "Unlocked by visiting any sub-site · stored locally only (shared site-wide), never uploaded",
+ "ach.lit": "Unlocked",
+ "ach.unlit": "Locked",
+ "contact.title": "Contact Me",
+ "fb.title": "Message Box",
+ "fb.sub": "Anything you want to say — it goes straight to my inbox. Suggestions / bug reports / questions / small talk, all welcome",
+ "fb.t1": "💡 Suggestion",
+ "fb.t2": "🐛 Bug",
+ "fb.t3": "🤔 Question",
+ "fb.t4": "💬 Chat",
+ "fb.nick": "Nickname (optional)",
+ "fb.mail": "Email (optional · so I can reply)",
+ "fb.msg": "Say something… (Ctrl + Enter to send)",
+ "fb.msgAria": "Message content",
+ "fb.send": "Send ✈",
+ "ct.qq": "QQ · click to copy",
+ "ct.qqTitle": "Click to copy the QQ number",
+ "ct.mail": "Email · write me →",
+ "ct.bili": "Bilibili · visit ↗",
+ "ct.gh": "GitHub · visit ↗",
+ "ct.biliVal": "My channel",
+ "footer.copy": "© 2026 Startian · startian.top",
+ "footer.links": "Also find me on <a href=\"https://space.bilibili.com/3494370703575552\" target=\"_blank\" rel=\"noopener\">Bilibili</a> and <a href=\"https://github.com/Estheria-star\" target=\"_blank\" rel=\"noopener\">GitHub</a>",
+ "dock.tag": "Demo",
+ "dock.hint": "Hover 2s to preview · move away to hide · click the card to play →",
+ "secret.h3": "You actually explored the whole site",
+ "secret.p": "Thank you, earnest traveller.<br>Everything here was polished late at night, one “one last update” at a time.<br>One line for you — <b>may you always stay curious about this world</b>.<br><span style=\"opacity:.65\">— Startian &amp; Yueyue 🌙</span>",
+ "secret.confetti": "🎉 Throw confetti",
+ "secret.star": "🌌 Go see a star",
+ "js.qqCopied": "QQ copied: 2433165914 ✓",
+ "js.qqCopyFail": "Copy failed — note it down: 2433165914",
+ "demo.wuziqi.title": "Gomoku · Adaptive AI",
+ "demo.tujie.title": "Hexagon Dimension Explorer",
+ "demo.star.title": "Infinite Starfield Generator",
+ "demo.life.title": "Conway's Game of Life Garden",
+ "demo.music.title": "Function Music",
+ "demo.geometry.title": "Geometry Studio · Math Workbench",
+ "demo.daka.title": "Habit Tracker",
+ "demo.colorlab.title": "Color Lab",
+ "demo.fit.title": "Curve Fitter",
+ "demo.cuoti.title": "Mistake Notebook · Spaced Repetition",
+ "demo.map.title": "Universe Map · Site Navigator",
+ "demo.mood.title": "Mood Calendar",
+ "demo.zhenghuo.title": "Just for Fun · “Privacy Policy”",
+ "demo.fake.title": "Fake Loading Page",
+ "demo.report.title": "Daily Diagnosis Report",
+ "demo.sandbox.title": "Everything Sandbox",
+ "demo.wuziqi.desc": "A browser Gomoku with the Rapfi engine built in: choose classic search or the “Lingzhuo” mix9 neural net; the AI studies your style and counters you next game. Undo, game-log export, and Lingzhuo to keep you company. Engine assets download in the background on first visit.",
+ "demo.daka.desc": "A lightweight habit tracker: custom goals (emoji icon + theme color + weekly target), one-tap check-in with streaks and a monthly calendar. Data stays in your browser, exportable / importable, works offline.",
+ "demo.mood.desc": "A calendar to tag each day with one of 43 cat-ear stickers, plus a little diary: weather, mood and free text. Monthly stats and streaks are automatic. Stored locally only, exportable / importable, works offline.",
+ "demo.zhenghuo.desc": "A fake “Terms of Service & Privacy Policy” page: read it solemnly, click “Agree & continue”, and get a tiny surprise (lol). Pure front-end, instant fun.",
+ "demo.tujie.desc": "An endlessly unfolding hexagonal geometry display: nested layers, rotation and color experiments — weirdly satisfying, perfect for spacing out.",
+ "demo.geometry.desc": "A geometry workbench for high-school math: 2D/3D modes, live plotting of functions and equations, automatic intersections and vector relations, one-click area / volume / distance / dihedral solving, parameter sliders and PNG export.",
+ "demo.star.desc": "Procedural infinite stars from a seed, Minecraft-style: the world generates chunk by chunk, drag anywhere and it never ends; same seed, same coordinates, same stars. Twinkling, meteors, clusters and voids, spiral galaxies — with parallax depth. Share a link (“My starfield #3721”) or download a 1920×1080 wallpaper.",
+ "demo.life.desc": "A visualization garden of the classic B3/S23 cellular automaton: cells shade by age; drag to draw, right-click to erase, wheel to zoom. Seed patterns (glider / spaceship / pulsar), save them as “species”, or crash two species head-on and watch the sparks.",
+ "demo.music.desc": "Turn functions into timbre: any expression (one cycle, 256 samples → DFT → real waveform synthesis). Sine is pure, square is game-console; 8 presets plus custom expressions, the waveform canvas dances along, and keyboard A–K lets you play.",
+ "demo.colorlab.desc": "Pick two colors (background + accent) and preview a whole UI live: nav, gradient titles, cards, inputs, buttons all derived automatically. Copy or download the CSS variables, or share your palette via a link.",
+ "demo.fit.desc": "Drop in scattered points and it finds the closest function: linear / quadratic / cubic / exponential / power / log compete by R² in real time, the winner highlighted in gold. Click to add points, right-click to delete, paste data to import.",
+ "demo.cuoti.desc": "Log your wrong answers and let spaced repetition (SM-2) schedule reviews: forget → relearn, fuzzy ×1.2, remembered ×ease, easy ×ease×1.3; mastered after a 21-day interval. Subject filters, search, import / export — all local.",
+ "demo.map.desc": "14 works as stars drifting in one universe; nearby ones auto-connect, visited ones light up. Click any star to smoothly open the “star-map relations” view and see how everything connects.",
+ "demo.fake.desc": "A very serious loading page: the bar reaches 99% and gets stuck, starts complaining and chatting with you; talk a bit and it admits it finished long ago — hand-made fun, worth the wait.",
+ "demo.report.desc": "AI writes a check-up report for today’s you: mood, focus, luck, hair volume… seven metrics, different every day (same all day long). Switch variants, save as an image — pure whimsy, for fun only.",
+ "demo.sandbox.desc": "A pixel continent endlessly extending in the sea of stars: pour sand, water, fire, vines — 22 elements react with each other; light beams reflect off mirrors and split into rainbows through prisms. 🆕 Dive into a true 3D world (mouse auto-locks, Minecraft-style): WASD flight + crosshair block placement, quacking rubber ducks on the water, whales and a moon in the sky.",
+ "ach.home.visit.name": "First Visit",
+ "ach.home.visit.desc": "Visited startian.top",
+ "ach.site.gomoku.name": "Gomoku Friend",
+ "ach.site.gomoku.desc": "Visited Gomoku",
+ "ach.gomoku.first_game.name": "First Game",
+ "ach.gomoku.first_game.desc": "Finished your first match",
+ "ach.gomoku.first_win.name": "First Win",
+ "ach.gomoku.first_win.desc": "Beat the AI for the first time",
+ "ach.gomoku.games_10.name": "Ten Games",
+ "ach.gomoku.games_10.desc": "Played 10 matches",
+ "ach.gomoku.games_50.name": "Fifty Games",
+ "ach.gomoku.games_50.desc": "Played 50 matches",
+ "ach.gomoku.streak_3.name": "3-Win Streak",
+ "ach.gomoku.streak_3.desc": "Won three AI matches in a row",
+ "ach.gomoku.beat_hard.name": "Beat the Master",
+ "ach.gomoku.beat_hard.desc": "Defeated the Hard classic engine",
+ "ach.gomoku.beat_nnue.name": "Slay Lingzhuo",
+ "ach.gomoku.beat_nnue.desc": "Defeated the “Lingzhuo” mix9 net",
+ "ach.gomoku.fast_win.name": "Blitz",
+ "ach.gomoku.fast_win.desc": "Won within 30 moves",
+ "ach.gomoku.no_undo_win.name": "No Undo",
+ "ach.gomoku.no_undo_win.desc": "Won a whole game without undoing",
+ "ach.gomoku.draw_1.name": "Peace Treaty",
+ "ach.gomoku.draw_1.desc": "Drew against the AI",
+ "ach.gomoku.quick_win.name": "Quick Shot",
+ "ach.gomoku.quick_win.desc": "Defeated the Quick difficulty",
+ "ach.site.geometry.name": "Geometry Apprentice",
+ "ach.site.geometry.desc": "Visited Geometry Studio",
+ "ach.site.daka.name": "Self-Discipline",
+ "ach.site.daka.desc": "Visited Habit Tracker",
+ "ach.daka.first_goal.name": "Getting Started",
+ "ach.daka.first_goal.desc": "Added your first goal",
+ "ach.daka.total_10.name": "Small Pile",
+ "ach.daka.total_10.desc": "10 total check-ins",
+ "ach.daka.total_100.name": "Forged in Steel",
+ "ach.daka.total_100.desc": "100 total check-ins",
+ "ach.daka.streak_7.name": "7-Day Fire",
+ "ach.daka.streak_7.desc": "7-day streak on any goal",
+ "ach.daka.streak_30.name": "Thirty Days",
+ "ach.daka.streak_30.desc": "30-day streak on any goal",
+ "ach.daka.full_day.name": "Full Day",
+ "ach.daka.full_day.desc": "Completed all goals in one day",
+ "ach.daka.habits_5.name": "Multi-Tasking",
+ "ach.daka.habits_5.desc": "5 goals at once",
+ "ach.daka.early_bird.name": "Early Bird",
+ "ach.daka.early_bird.desc": "Checked in before 8 AM",
+ "ach.daka.night_owl.name": "Night Owl",
+ "ach.daka.night_owl.desc": "Checked in after 11 PM",
+ "ach.daka.colorful.name": "Color Collector",
+ "ach.daka.colorful.desc": "Goals with 4 different theme colors",
+ "ach.site.mood.name": "Cat-ear Mood",
+ "ach.site.mood.desc": "Visited Mood Calendar",
+ "ach.mood.record.name": "First Mood",
+ "ach.mood.record.desc": "Recorded a mood for the first time",
+ "ach.mood.week.name": "Good Week",
+ "ach.mood.week.desc": "Recorded moods 7 days in a row",
+ "ach.mood.total30.name": "Mood Collector",
+ "ach.mood.total30.desc": "30 days of mood records",
+ "ach.site.zhenghuo.name": "Fooled Once",
+ "ach.site.zhenghuo.desc": "Visited the Just-for-Fun page",
+ "ach.site.tujie.name": "Dimensional Roamer",
+ "ach.site.tujie.desc": "Visited Hexagon Explorer",
+ "ach.site.star.name": "Star Picker",
+ "ach.site.star.desc": "Visited the Starfield Generator",
+ "ach.site.colorlab.name": "Colorist",
+ "ach.site.colorlab.desc": "Visited Color Lab",
+ "ach.geo.ai_build.name": "AI Creation",
+ "ach.geo.ai_build.desc": "Let Geometry AI plot for you",
+ "ach.geo.sphere.name": "Sphere Catcher",
+ "ach.geo.sphere.desc": "Generated a circumscribed / inscribed sphere",
+ "ach.geo.custom_solid.name": "Creator",
+ "ach.geo.custom_solid.desc": "Assembled a custom solid",
+ "ach.star.wall.name": "Bring Stars Home",
+ "ach.star.wall.desc": "Downloaded a starfield wallpaper",
+ "ach.colorlab.export.name": "Style Export",
+ "ach.colorlab.export.desc": "Exported CSS in Color Lab",
+ "ach.site.life.name": "Observer",
+ "ach.site.life.desc": "Visited the Life Garden",
+ "ach.life.seed.name": "Species Collector",
+ "ach.life.seed.desc": "Saved a species in the Life Garden",
+ "ach.life.pattern.name": "Life Maker",
+ "ach.life.pattern.desc": "Placed a species",
+ "ach.life.collide.name": "Collision Lab",
+ "ach.life.collide.desc": "Crashed two species together",
+ "ach.site.music.name": "Frequency Player",
+ "ach.site.music.desc": "Visited Function Music",
+ "ach.music.play.name": "Timbre Lab",
+ "ach.music.play.desc": "Made sound with a custom function",
+ "ach.site.fake.name": "Patient One",
+ "ach.site.fake.desc": "Visited the Fake Loading Page",
+ "ach.fake.done.name": "Chatted the Bar Away",
+ "ach.fake.done.desc": "Waited for the truth on the fake page",
+ "ach.site.report.name": "Regular Customer",
+ "ach.site.report.desc": "Visited the Daily Diagnosis",
+ "ach.report.save.name": "Report Sharer",
+ "ach.report.save.desc": "Saved a diagnosis report",
+ "ach.site.fit.name": "Data Detective",
+ "ach.site.fit.desc": "Visited the Curve Fitter",
+ "ach.fit.fit.name": "Best Match",
+ "ach.fit.fit.desc": "Completed a curve fit",
+ "ach.site.cuoti.name": "Mistake Organizer",
+ "ach.site.cuoti.desc": "Visited the Mistake Notebook",
+ "ach.cuoti.add.name": "First Mistake",
+ "ach.cuoti.add.desc": "Logged a problem in the notebook",
+ "ach.cuoti.review.name": "Review Check-in",
+ "ach.cuoti.review.desc": "Completed a review session",
+ "ach.cuoti.master.name": "Truly Learned",
+ "ach.cuoti.master.desc": "Moved a problem into “Mastered”",
+ "ach.site.map.name": "Star Navigator",
+ "ach.site.map.desc": "Opened the Universe Map",
+ "ach.map.all.name": "Cosmic Atlas",
+ "ach.map.all.desc": "Lit all 14 stars on the map",
+ "ach.site.sandbox.name": "Sandbox Resident",
+ "ach.site.sandbox.desc": "Visited the Everything Sandbox",
+ "ach.sandbox.paint.name": "First Stroke",
+ "ach.sandbox.paint.desc": "Drew the first stroke in the sandbox",
+ "ach.sandbox.sprout.name": "Sower",
+ "ach.sandbox.sprout.desc": "Made the first seed sprout",
+ "ach.sandbox.dim3d.name": "Dimension Jumper",
+ "ach.sandbox.dim3d.desc": "Flew into the 3D world",
+ "ach.sandbox.block3d.name": "Sky Builder",
+ "ach.sandbox.block3d.desc": "Placed a block in the 3D world",
+ "ach.sandbox.duck.name": "Duck Friend",
+ "ach.sandbox.duck.desc": "Petted a duck in the 3D world",
+ "ach.sandbox.far.name": "Star Pioneer",
+ "ach.sandbox.far.desc": "Explored beyond 2,000 tiles",
+ "ach.sandbox.speed.name": "Fast Forward",
+ "ach.sandbox.speed.desc": "Ran the world at 16× speed",
+ "ach.sandbox.fire.name": "Fire Starter",
+ "ach.sandbox.fire.desc": "Lit the first flame in the sandbox",
+ "ach.sandbox.beam.name": "Light Chaser",
+ "ach.sandbox.beam.desc": "Shot the first light beam",
+ "ach.sandbox.firework.name": "Pyrotechnist",
+ "ach.sandbox.firework.desc": "Set off fireworks in the sandbox sky",
+ "ach.sandbox.aurora.name": "Star Stirrer",
+ "ach.sandbox.aurora.desc": "Swirled the sandbox sky with your own hands",
+ "ach.sandbox.star.name": "Star Visitor",
+ "ach.sandbox.star.desc": "Witnessed a star fleet crossing the sandbox",
+ "ach.sandbox.gravity.name": "Gravity Flip",
+ "ach.sandbox.gravity.desc": "Triggered the old secret in the sandbox",
+ "ach.home.starry.name": "Starchaser",
+ "ach.home.starry.desc": "Found the hidden “Starry Night” theme",
+ "ach.home.secret.name": "Finder of Secrets",
+ "ach.home.secret.desc": "Unlocked the hidden zone",
+ "ach.explorer.all.name": "Site Explorer",
+ "ach.explorer.all.desc": "Collected every site footprint"
+};
+I18N.add({ en: __I18N_EN });
+/* 动态文案短语表（独白 / 品牌 / 锁定提示等） */
+I18N.phrase({"星恬": "Startian","已手动锁定为": "Locked manually to ","，不受时间影响": " — it won’t follow the time of day","今天也在想：如果坐标轴会做梦，会梦到什么？": "Wondering again today: if coordinate axes could dream, what would they dream of?","刚刚好像有个 bug 从我眼前飞过去了。": "A bug just flew right past my eyes, I swear.","检测到你在发呆，推荐去星空页生成一颗星星。": "Daydreaming detected — go generate a star on the Starfield page.","面包会有的，闭环也会有的。": "There will be bread, and there will be closed loops.","本人的脑子现在运行在 30 帧，请多包涵。": "My brain is running at 30 fps right now. Bear with me.","二面角今天也想被正确地求出来。": "The dihedral angle would like to be solved correctly today, too.","我把昨天没解出的题藏在草稿箱第三页了，嘘。": "I hid yesterday’s unsolved problem on page three of my drafts. Shh.","好想给每个来玩的访客发一颗糖。": "I wish I could hand every visitor a piece of candy.","今天的风很温柔，适合写一个不带 bug 的函数。": "The breeze is gentle today — perfect for writing a bug-free function.","如果灵感没来，就先随机一点。": "If inspiration is late, just randomize a little.","有时候觉得自己是一个渲染循环，一直在画下一帧。": "Sometimes I feel like a render loop, always drawing the next frame.","建议：喝口水，伸个懒腰，然后去点亮两颗星星。": "Tip: sip some water, stretch, then go light up two stars.","刚刚认真思考了三秒人生，然后继续摸鱼。": "Just spent three seconds thinking seriously about life. Back to slacking off.","向量会相加，开心也要叠加。": "Vectors add up — and so does happiness.","今天也要把边界条件照顾好呀。": "Let’s take good care of the boundary conditions today, too.","我刚试着数星星，数到 3721 就走神了。": "I tried counting stars and lost focus at 3721.","别问我为什么，问就是艺术效果。": "Don’t ask me why. If you must: it’s an artistic effect.","这行独白是随机出现的，就像你遇见这个小站一样。": "This monologue shows up at random — just like you stumbling upon this little site.","把耳机戴上，世界就安静成一块画布。": "Put on your headphones, and the world quiets down into a canvas.","凌晨的心事，到了早上都会变成待办。": "Late-night thoughts all turn into to-dos by morning.","你已经很棒了，真的。": "You’re doing great. Really."});
+I18N.phrase({"已手动锁定为蓝白 ☀️，不受时间影响": "Locked manually to ☀️ Blue-white — it won’t follow the time of day", "已手动锁定为暗红 🌙，不受时间影响": "Locked manually to 🌙 Dark red — it won’t follow the time of day", "已手动锁定为梦幻紫 🔮，不受时间影响": "Locked manually to 🔮 Dreamy purple — it won’t follow the time of day", "已手动锁定为清新绿 🌿，不受时间影响": "Locked manually to 🌿 Fresh green — it won’t follow the time of day", "已手动锁定为温馨粉 🌸，不受时间影响": "Locked manually to 🌸 Warm pink — it won’t follow the time of day", "已手动锁定为缤纷彩 🎨，不受时间影响": "Locked manually to 🎨 Colorful — it won’t follow the time of day", "已手动锁定为自定义 🖌，不受时间影响": "Locked manually to 🖌 Custom — it won’t follow the time of day", "已手动锁定为星夜 🌌，不受时间影响": "Locked manually to 🌌 Starry night — it won’t follow the time of day"});
+I18N.auto();
+</script>
 <script>
 (function(){
   /* —— 入场动效 —— */
@@ -1739,8 +2476,8 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
   if (qq) {
     var doCopy = function(){
       copyText('2433165914').then(
-        function(){ toast('已复制 QQ：2433165914 ✓'); },
-        function(){ toast('复制失败，手记一下：2433165914'); }
+        function(){ toast(I18N.tOr('js.qqCopied', '已复制 QQ：2433165914 ✓')); },
+        function(){ toast(I18N.tOr('js.qqCopyFail', '复制失败，手记一下：2433165914')); }
       );
     };
     qq.addEventListener('click', doCopy);
@@ -1840,11 +2577,13 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     var d = DEMOS[id];
     if (!d || !dock) return;
     if (!dockLoaded[id]) { dockImg.src = d.img; dockImg.alt = d.title; dockLoaded[id] = true; }
-    dockTitle.textContent = d.title;
-    dockDesc.textContent = d.desc;
+    dockTitle.textContent = I18N.tOr('demo.' + id + '.title', d.title);
+    dockDesc.textContent = I18N.tOr('demo.' + id + '.desc', d.desc);
     dock.classList.add('show');
     dock.setAttribute('aria-hidden', 'false');
+    window.__lastDockId = id;
   }
+  try { I18N.onChange(function () { if (window.__lastDockId && dock.classList.contains('show')) showDock(window.__lastDockId); }); } catch (e) {}
   function hideDock(){
     if (!dock || !dock.classList.contains('show')) return;
     dock.classList.remove('show');
@@ -2314,7 +3053,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
           hint.textContent = '当前跟随时间（' + pairName + '）：现在应为' + (NAME[expectedByTime()] || '蓝白 ☀️') +
             ' · 白天 ' + state.lightAt + ' 起，夜晚 ' + state.darkAt + ' 起';
         } else {
-          hint.textContent = '已手动锁定为' + (NAME[state.mode] || '蓝白 ☀️') + '，不受时间影响';
+          hint.textContent = I18N.tr('已手动锁定为') + I18N.tOr('theme.' + state.mode, NAME[state.mode] || '蓝白 ☀️') + I18N.tr('，不受时间影响');
         }
       }
     }
@@ -2533,9 +3272,9 @@ function renderAch() {
   grid.innerHTML = ACH_DEFS.map(function (a) {
     var on = STAch.has(a.id);
     if (on) lit++;
-    return '<div class="acx-item' + (on ? ' lit' : '') + '" title="' + (on ? '已解锁' : '未解锁') + '">' +
+    return '<div class="acx-item' + (on ? ' lit' : '') + '" title="' + I18N.tOr(on ? 'ach.lit' : 'ach.unlit', on ? '已解锁' : '未解锁') + '">' +
       '<span class="em">' + a.ico + '</span>' +
-      '<span><span class="nm">' + a.name + '</span><br><span class="ds">' + a.desc + '</span></span></div>';
+      '<span><span class="nm">' + I18N.tOr('ach.' + a.id + '.name', a.name) + '</span><br><span class="ds">' + I18N.tOr('ach.' + a.id + '.desc', a.desc) + '</span></span></div>';
   }).join('');
   var c = document.getElementById('achLit');
   if (c) c.textContent = lit;
@@ -2553,6 +3292,7 @@ setTimeout(function () {
   if (fresh || all) renderAch();
 }, 700);
 window.__renderAch = renderAch;
+try { I18N.onChange(function () { renderAch(); }); } catch (e) {}
 
 /* ============================================================
    🌌 隐藏主题「星夜」：Konami 秘技 / 长按 logo 解锁
@@ -2728,7 +3468,9 @@ window.__checkSecretZone = checkSecretZone;
     '凌晨的心事，到了早上都会变成待办。',
     '你已经很棒了，真的。'
   ];
-  el.textContent = MONOS[Math.floor(Math.random() * MONOS.length)];
+  var __monoPick = MONOS[Math.floor(Math.random() * MONOS.length)];
+  el.textContent = I18N.tr(__monoPick);
+  try { I18N.onChange(function () { el.textContent = I18N.tr(__monoPick); }); } catch (e) {}
 })();
 </script>
 <script>
