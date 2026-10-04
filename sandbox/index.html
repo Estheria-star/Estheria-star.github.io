@@ -286,7 +286,7 @@ body{
 
   <main class="stage" id="stage">
     <canvas id="cv"></canvas>
-    <div class="stage-hint" id="hint">按住拖动就能玩 · 天空可以被搅动 · 左上那颗星球……多按一会儿看看？</div>
+    <div class="stage-hint" id="hint">按住拖动就能玩 · 滚轮 / 双指缩放 · 双击复位 · 左上那颗星球……多按一会儿看看？</div>
     <div id="fps">--</div>
   </main>
 
@@ -294,7 +294,7 @@ body{
     <div class="dock-row">
       <div class="pal" id="pal"></div>
       <div class="dock-side">
-        <div class="brushbox">笔刷 <input type="range" id="brush" min="1" max="12" step="1" value="4"><b id="brushV">4</b></div>
+        <div class="brushbox">笔刷 <input type="range" id="brush" min="0" max="12" step="1" value="4" title="最左 = 单格（1 像素）"><b id="brushV">4</b></div>
       </div>
     </div>
   </footer>
@@ -311,8 +311,9 @@ body{
     <ul class="help-grid">
       <li><code>左键拖动</code> 撒下选中的元素</li>
       <li><code>右键拖动</code> 快速擦除</li>
-      <li><code>滚轮</code> 缩放（跟随指针）</li>
-      <li><code>空格 + 拖动</code> 或 <code>中键拖动</code> 或 <code>双指</code> 平移世界</li>
+      <li><code>滚轮</code> 缩放（跟随指针）· <code>双指捏合</code> 也能缩放</li>
+      <li><code>双击画布</code> 一键复位视图</li>
+      <li><code>空格 + 拖动</code> 或 <code>中键拖动</code> 或 <code>双指拖动</code> 平移世界</li>
       <li><code>方向键 / WASD</code> 平移镜头</li>
       <li>世界向两侧<strong>无限延伸</strong>，走到哪生成到哪，没有边界</li>
     </ul>
@@ -1173,7 +1174,7 @@ var SB = SBX;
 
   /* ---------- 绘制工具 ---------- */
   SB.paint = function (cx, cy, t, brush) {
-    var r = brush || 1;
+    var r = (typeof brush === 'number') ? brush : 1;   /* r=0 → 单格（最小笔刷） */
     var xi = Math.floor(cx), yi = Math.floor(cy);
     for (var dy = -r; dy <= r; dy++) {
       for (var dx = -r; dx <= r; dx++) {
@@ -2965,10 +2966,15 @@ var SB = SBX;
   var cam = SB.cam = { x: 256, y: 90, z: 4, tz: 4 };
 
   SB.canvasW = 1000;
-  function zMin() {
+  function zFit() {
+    /* 全览：整个世界刚好铺满画布 */
     var a = cv.height / H;
     var b = cv.width / (W * 0.985);
     return Math.max(a, b);
+  }
+  function zMin() {
+    /* 下限放宽到全览的 45%：可以退出世界边缘、看到整座岛漂在星海里 */
+    return zFit() * 0.45;
   }
   function clampCam() {
     var vh = cv.height / cam.z;
@@ -3022,7 +3028,7 @@ var SB = SBX;
   var zoomAnchor = null;
   function zoomAt(sx, sy, factor) {
     var zm = zMin();
-    var nz = Math.max(zm, Math.min(zm * 8, cam.tz * factor));
+    var nz = Math.max(zm, Math.min(zFit() * 14, cam.tz * factor));
     if (Math.abs(nz - cam.tz) < 1e-4) return;
     cam.tz = nz;
     zoomAnchor = { s: [sx, sy], w: screenToWorld(sx, sy) };
@@ -3097,7 +3103,7 @@ var SB = SBX;
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pointers.size === 2) {
       painting = false; aiming = false; stirring = false;
-      var arr = [].slice.call(pointers.values());
+      var arr = Array.from(pointers.values());  /* 修复：Map Iterator 不支持 slice.call（会得到空数组，双指一按就崩） */
       pinchBase = {
         d: Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y),
         cx: (arr[0].x + arr[1].x) / 2, cy: (arr[0].y + arr[1].y) / 2,
@@ -3136,11 +3142,11 @@ var SB = SBX;
       var pdx = e.clientX - p.x, pdy = e.clientY - p.y;
       p.x = e.clientX; p.y = e.clientY;
       if (pointers.size === 2 && pinchBase) {
-        var arr = [].slice.call(pointers.values());
+        var arr = Array.from(pointers.values());  /* 修复：Map Iterator 不支持 slice.call（会得到空数组，双指一按就崩） */
         var d = Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y);
         var cx2 = (arr[0].x + arr[1].x) / 2, cy2 = (arr[0].y + arr[1].y) / 2;
         var zm = zMin();
-        cam.z = Math.max(zm, Math.min(zm * 8, pinchBase.z * (d / Math.max(20, pinchBase.d))));
+        cam.z = Math.max(zm, Math.min(zFit() * 14, pinchBase.z * (d / Math.max(20, pinchBase.d))));
         cam.tz = cam.z;
         panBy(-(cx2 - pinchBase.cx), -(cy2 - pinchBase.cy));
         pinchBase.cx = cx2; pinchBase.cy = cy2;
@@ -3185,6 +3191,16 @@ var SB = SBX;
     var py = (e.clientY - rect.top) * (cv.height / rect.height);
     zoomAt(px, py, Math.exp(-d * 0.0011));
   }, { passive: false });
+
+  /* 双击画布：复位视图（瞬时缩回全览 + 水平回中 + 回到初始视角） */
+  cv.addEventListener('dblclick', function () {
+    if (in3D()) return;
+    cam.z = cam.tz = zFit();
+    cam.x = W / 2;
+    cam.y = 90;
+    zoomAnchor = null;
+    clampCam();
+  });
 
   function fireAim(w) {
     if (SB.frameCount() - lastBeamAt < 20) return;
@@ -3270,7 +3286,7 @@ var SB = SBX;
 
   var brushEl = document.getElementById('brush');
   var brushV = document.getElementById('brushV');
-  brushEl.addEventListener('input', function () { brush = +brushEl.value; brushV.textContent = brush; });
+  brushEl.addEventListener('input', function () { brush = +brushEl.value; brushV.textContent = brush === 0 ? '1格' : brush; });
 
   /* ---------- 世界生成 ---------- */
   function genWorld(sd) {
@@ -3485,7 +3501,7 @@ var SB = SBX;
         ctx.strokeStyle = 'rgba(255,255,255,.4)';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.arc(sx, sy, Math.max(3, brush * z), 0, 6.2832);
+        ctx.arc(sx, sy, Math.max(brush === 0 ? 1.5 : 3, brush * z), 0, 6.2832);
         ctx.stroke();
         ctx.restore();
       }
@@ -3692,7 +3708,7 @@ var SB = SBX;
     },
     zoomBy: function (f) { zoomAt(cv.width / 2, cv.height / 2, f); },
     panBy: panBy,
-    zoomRange: function () { return { min: zMin(), max: zMin() * 8 }; },
+    zoomRange: function () { return { min: zMin(), max: zFit() * 14 }; },
     dim: function () { return m3Prog; },
     dimState: function () { return { dim: m3Prog, dimT: m3Target }; },
     advance: function (ms) {
