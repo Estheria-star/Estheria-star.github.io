@@ -852,16 +852,15 @@ footer a:hover{text-decoration:underline}
   --sh-lg:0 2px 4px rgba(0,0,0,.6), 0 24px 50px rgba(4,8,26,.65);
 }
 [data-theme="starry"] body{
-  background:
-    radial-gradient(1.4px 1.4px at 22% 18%, rgba(255,255,255,.85), transparent 100%),
-    radial-gradient(1px 1px at 68% 32%, rgba(220,235,255,.7), transparent 100%),
-    radial-gradient(1.8px 1.8px at 42% 74%, rgba(255,255,255,.6), transparent 100%),
-    radial-gradient(1px 1px at 88% 62%, rgba(200,220,255,.65), transparent 100%),
-    radial-gradient(1.2px 1.2px at 12% 88%, rgba(255,255,255,.55), transparent 100%),
-    radial-gradient(1400px 700px at 50% -120px, #16204a 0%, #0a1024 45%, #060912 100%);
-  background-size: 420px 420px, 320px 320px, 520px 520px, 380px 380px, 460px 460px, 100% 100%;
-  background-repeat: repeat, repeat, repeat, repeat, repeat, no-repeat;
+  background:radial-gradient(1400px 700px at 50% -120px, #16204a 0%, #0a1024 45%, #060912 100%);
 }
+/* 🌌 星夜动态星野（无限程序化 · 星星缓缓向左漂；由 __starryField 驱动） */
+#starField{
+  position:fixed; inset:0; width:100%; height:100%;
+  pointer-events:none; z-index:0;
+  opacity:0; transition:opacity 1s ease;
+}
+[data-theme="starry"] #starField{opacity:1}
 [data-theme="starry"] ::selection{background:#243056}
 [data-theme="starry"] .loadbar{background:linear-gradient(90deg,#7dd3fc,#c4b5fd,#f0abfc)}
 [data-theme="starry"] .nav{background:rgba(9,14,32,.72);border-bottom-color:rgba(36,48,86,.8)}
@@ -1204,6 +1203,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
 </style>
 </head>
 <body>
+<canvas id="starField" aria-hidden="true"></canvas>
 <div class="loadbar"></div>
 <div class="blob b1"></div>
 <div class="blob b2"></div>
@@ -2012,6 +2012,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       if (theme === 'custom') { try { applyCustom(loadCustom(), false); } catch (e) {} }
       else clearCustomVars();   /* 离开自定义主题：清掉内联变量，恢复各主题自身配色 */
       document.documentElement.setAttribute('data-theme', theme);
+      try { window.__starryField && window.__starryField.sync(theme); } catch (e) {}
       setAvatar(theme);
       var m = document.querySelector('meta[name="theme-color"]');
       var MC = { dark: CFG.themeColorDark, purple: CFG.themeColorPurple, fresh: CFG.themeColorFresh, warm: CFG.themeColorWarm, colorful: CFG.themeColorColorful };
@@ -3258,6 +3259,149 @@ window.__checkSecretZone = checkSecretZone;
 
   /* ---------- 测试钩子 ---------- */
   window.__ARGT = { open: open, close: close, render: function () { renderSlots(); renderCells(); }, collect: ARG.collect };
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   🌌 星夜动态星野（2026-10-04）
+   无限程序化星空：按区块哈希生成，往左无限漂（相机向右）。
+   只在「星夜」主题激活时运行；尊重 prefers-reduced-motion。
+   ══════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  var cv = document.getElementById('starField');
+  if (!cv) return;
+  var ctx = cv.getContext('2d');
+  var DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+  var W = 0, H = 0;
+  var active = false, rafId = 0, lastPaint = 0;
+  var T0 = performance.now();
+  var reduced = false;
+  try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+
+  /* —— 两层视差：远层小而缓，近层大而快 —— */
+  var LAYERS = [
+    { id: 'far',  chunk: 320, speed: 5.0,  seed: 1818,     count: [2, 6], rMin: 0.5, rMax: 1.15, aMin: 0.28, aMax: 0.66, halo: 0.05, tintBias: 0.75 },
+    { id: 'near', chunk: 460, speed: 12.0, seed: 20261004, count: [2, 5], rMin: 0.7, rMax: 1.8,  aMin: 0.42, aMax: 0.95, halo: 0.16, tintBias: 0.5 }
+  ];
+  var TINTS = ['255,255,255', '223,233,255', '186,230,253', '196,181,253', '240,246,255'];
+
+  function hash2(x, y, sd) {
+    var h = Math.imul((x | 0) ^ Math.imul(y | 0, 2654435761), 2246822519) ^ Math.imul(sd | 0, 668265263);
+    h = Math.imul(h ^ (h >>> 15), 3266489917);
+    h ^= h >>> 13;
+    return (h >>> 0) / 4294967296;
+  }
+
+  var cache = {}, cacheN = 0;
+  function starsOf(cx, cy, ly) {
+    var key = ly.id + ':' + cx + ':' + cy;
+    var got = cache[key];
+    if (got) return got;
+    var cnt = ly.count[0] + Math.floor(hash2(cx, cy, ly.seed + 11) * (ly.count[1] - ly.count[0] + 1));
+    var arr = [];
+    for (var i = 0; i < cnt; i++) {
+      var kk = i * 31;
+      var hT = hash2(cx, cy, ly.seed + kk + 7);
+      var tintIdx = hT < ly.tintBias ? 0 : 1 + Math.floor(hT * 7) % (TINTS.length - 1);
+      arr.push({
+        x: (cx + hash2(cx, cy, ly.seed + kk + 1)) * ly.chunk,
+        y: (cy + hash2(cx, cy, ly.seed + kk + 2)) * ly.chunk,
+        r: ly.rMin + hash2(cx, cy, ly.seed + kk + 3) * (ly.rMax - ly.rMin),
+        a: ly.aMin + hash2(cx, cy, ly.seed + kk + 4) * (ly.aMax - ly.aMin),
+        tw: 0.5 + hash2(cx, cy, ly.seed + kk + 5) * 1.6,
+        ph: hash2(cx, cy, ly.seed + kk + 6) * 6.2832,
+        tint: TINTS[tintIdx],
+        halo: hash2(cx, cy, ly.seed + kk + 8) < ly.halo
+      });
+    }
+    cache[key] = arr;
+    if (++cacheN > 1200) { cache = {}; cacheN = 0; }
+    return arr;
+  }
+
+  function fit() {
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+  }
+  fit();
+  window.addEventListener('resize', function () {
+    fit();
+    if (active) paint(performance.now());
+  }, { passive: true });
+
+  function paint(now) {
+    var tt = (now - T0) / 1000;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.save();
+    ctx.scale(DPR, DPR);
+    for (var li = 0; li < LAYERS.length; li++) {
+      var ly = LAYERS[li];
+      var ox = reduced ? 0 : tt * ly.speed;      /* 相机向右 → 星星向左漂 */
+      var cx0 = Math.floor((ox - 60) / ly.chunk), cx1 = Math.floor((ox + W + 60) / ly.chunk);
+      var cy0 = Math.floor(-60 / ly.chunk), cy1 = Math.floor((H + 60) / ly.chunk);
+      for (var cx = cx0; cx <= cx1; cx++) {
+        for (var cy = cy0; cy <= cy1; cy++) {
+          var stars = starsOf(cx, cy, ly);
+          for (var si = 0; si < stars.length; si++) {
+            var st = stars[si];
+            var sx = st.x - ox;
+            var sy = st.y;
+            if (sx < -4 || sx > W + 4) continue;
+            var twk = 0.58 + 0.42 * Math.sin(tt * st.tw + st.ph);
+            var alpha = st.a * twk;
+            if (st.halo) {
+              var hr = Math.max(2.6, st.r * 3.4);
+              var rg = ctx.createRadialGradient(sx, sy, 0, sx, sy, hr);
+              rg.addColorStop(0, 'rgba(' + st.tint + ',' + (0.45 * alpha).toFixed(3) + ')');
+              rg.addColorStop(1, 'rgba(' + st.tint + ',0)');
+              ctx.fillStyle = rg;
+              ctx.beginPath(); ctx.arc(sx, sy, hr, 0, 6.2832); ctx.fill();
+            }
+            ctx.globalAlpha = Math.min(1, alpha * 1.2);
+            ctx.fillStyle = 'rgb(' + st.tint + ')';
+            ctx.fillRect(sx - st.r, sy - st.r, st.r * 2, st.r * 2);
+          }
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  function loop(ts) {
+    rafId = 0;
+    if (!active) return;
+    if (ts - lastPaint < 30) { rafId = requestAnimationFrame(loop); return; }  /* 限 ~33fps，省电 */
+    lastPaint = ts;
+    paint(ts);
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function sync(theme) {
+    var want = theme === 'starry';
+    if (want && !active) {
+      active = true;
+      if (reduced) { paint(performance.now()); }
+      else if (!rafId) rafId = requestAnimationFrame(loop);
+    } else if (!want && active) {
+      active = false;
+      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, cv.width, cv.height);
+    }
+  }
+
+  window.__starryField = {
+    sync: sync,
+    active: function () { return active; },
+    camX: function () { return (performance.now() - T0) / 1000; },
+    paint: function () { paint(performance.now()); }
+  };
+  /* 初始化：读当前主题（可能已是星夜） */
+  sync(document.documentElement.getAttribute('data-theme') || 'light');
 })();
 </script>
 </body>
