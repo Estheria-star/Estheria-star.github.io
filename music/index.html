@@ -542,6 +542,15 @@
     if (tag === 'input' || tag === 'textarea') return;
     if (KMAP[e.code] !== undefined) feed(KMAP[e.code]);
   });
+  /* 🖱 鼠标（触摸）点琴键也要算——琴键上有 data-note，照读就行
+     之前只监听了键盘，鼠标点破天也进不了判定序列 */
+  document.addEventListener('pointerdown', function (e) {
+    var el = e.target;
+    var keyEl = el && el.closest ? el.closest('#piano .key') : null;
+    if (!keyEl) return;
+    var note = parseInt(keyEl.getAttribute('data-note'), 10);
+    if (isFinite(note)) feed(note);
+  }, true);
   window.__musicARG = { feed: feed, reset: function () { seq = []; } };
 })();
 </script>
