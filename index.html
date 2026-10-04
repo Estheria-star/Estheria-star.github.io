@@ -5,14 +5,14 @@
 <script>document.documentElement.classList.add('js');(function(){try{var p=JSON.parse(localStorage.getItem('startian_theme_v1')||'{}');var m=p.mode||'auto',t=m;if(m==='auto'){var n=new Date(),x=n.getHours()*60+n.getMinutes();var l=((p.lightAt||'07:00')+'').split(':'),d=((p.darkAt||'19:00')+'').split(':');var lm=(+l[0])*60+(+l[1]||0),dm=(+d[0])*60+(+d[1]||0);t=(lm<dm)?((x>=lm&&x<dm)?'light':'dark'):((x>=lm||x<dm)?'light':'dark');var pr=p.autoPair||'classic';if(pr==='dreamy'){t=(t==='light')?'fresh':'purple';}else if(pr==='pink'){t=(t==='light')?'warm':'colorful';}}document.documentElement.setAttribute('data-theme',t);if(t==='custom'){try{var rc=JSON.parse(localStorage.getItem('startian_custom_resolved_v1')||'null');if(rc){for(var ck in rc){if(ck!=='__dark'&&typeof rc[ck]==='string')document.documentElement.style.setProperty(ck,rc[ck]);}}}catch(e){}}var avm={dark:'avatar-dark.jpg',purple:'avatar-purple.jpg',fresh:'avatar-fresh.jpg',warm:'avatar-warm.jpg',colorful:'avatar-colorful.jpg',custom:''};var avp=avm[t]||'';window.__initAvatar=avp||'avatar.png';if(avp){var ln=document.createElement('link');ln.rel='preload';ln.as='image';ln.href=avp;document.head.appendChild(ln);}}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>星恬的小站 · 五子棋 几何工坊 宇宙地图 · startian.top</title>
-<meta name="description" content="星恬的个人作品小站：在线五子棋（AI 学习反制）、高中数学几何工坊、宇宙地图、无限星空生成器、生命游戏、函数音乐、错题本等 13 个免费网页工具，打开即用无需安装。">
-<meta name="keywords" content="星恬,startian,五子棋在线,几何工坊,高中数学几何,宇宙地图,无限星空,星空生成器,生命游戏,函数音乐,错题本,配色实验室">
+<meta name="description" content="星恬的个人作品小站：在线五子棋（AI 学习反制）、高中数学几何工坊、宇宙地图、无限星空生成器、生命游戏、函数音乐、错题本等 16 个免费网页小作品，打开即用无需安装。">
+<meta name="keywords" content="星恬,startian,五子棋在线,几何工坊,高中数学几何,宇宙地图,无限星空,星空生成器,生命游戏,函数音乐,错题本,配色实验室,心情日历">
 <meta name="author" content="星恬">
 <meta name="theme-color" content="#E6F7FF">
 <link rel="canonical" href="https://startian.top/">
 <meta property="og:site_name" content="星恬的小站">
-<meta property="og:title" content="星恬的小站 · 13 个免费网页小作品">
-<meta property="og:description" content="下棋、画几何、捣鼓 AI 小玩意 —— 五子棋、几何工坊、万物沙盒等 14 个作品，欢迎来逛逛～">
+<meta property="og:title" content="星恬的小站 · 16 个免费网页小作品">
+<meta property="og:description" content="下棋、画几何、捣鼓 AI 小玩意 —— 五子棋、几何工坊、万物沙盒等 16 个作品，欢迎来逛逛～">
 <meta property="og:image" content="https://startian.top/avatar.png">
 <meta property="og:url" content="https://startian.top/">
 <meta property="og:type" content="website">
@@ -1280,6 +1280,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       <span>📐 几何工坊</span><span><em>·</em></span>
       <span>🏖 万物沙盒</span><span><em>·</em></span>
       <span>🗓️ 打卡日程</span><span><em>·</em></span>
+      <span>🐱 心情日历</span><span><em>·</em></span>
       <span>🧠 mix9 神经网络</span><span><em>·</em></span>
       <span>✨ 无限星空 #1818</span><span><em>·</em></span>
       <span>🦠 生命花园</span><span><em>·</em></span>
@@ -1392,7 +1393,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
             <span class="zone-name">工具</span>
             <span class="zone-sub">学习与效率 · 干正事用</span>
           </span>
-          <span class="zone-count">6 个作品</span>
+          <span class="zone-count">7 个作品</span>
           <span class="zone-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
         </button>
         <div class="zone-body">
@@ -1450,6 +1451,15 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
           <h3>宇宙地图 · 全站导航</h3>
           <p>14 颗作品星串成一片宇宙：去过的会亮起来，点一颗星就能直达 —— 不知道逛哪好，先来这看一眼星图。</p>
           <span class="cta">去看星图 <i>→</i></span>
+        </div>
+      </a>
+      <a class="tile flip" style="--d:.38s" data-demo="mood" href="https://startian.top/mood/">
+        <div class="tile-media"><img src="demos/mood.jpg" alt="心情日历演示" loading="lazy"></div>
+        <div class="tile-body">
+          <span class="ptag">生活 · 心情记录</span>
+          <h3>心情日历</h3>
+          <p>43 张猫耳少女表情，给每天贴一张心情：点一个日子贴上，翻一翻就是这个月的样子。数据存在本机浏览器，支持导出备份。</p>
+          <span class="cta">贴一张 🐾 <i>→</i></span>
         </div>
       </a>
             </div>
@@ -1582,7 +1592,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     <div class="ach-cross reveal collapsed" style="--d:.16s" id="achCard">
       <div class="acx-head" id="acxHead" role="button" tabindex="0" aria-expanded="false" aria-controls="acxBody" title="点击展开 / 收起成就柜">
         <span class="acx-title">🏆 跨站成就柜</span>
-        <span class="acx-prog">已点亮 <b id="achLit">0</b> / <span id="achTotal">48</span></span>
+        <span class="acx-prog">已点亮 <b id="achLit">0</b> / <span id="achTotal">73</span></span>
         <span class="acx-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
       </div>
       <div class="acx-body" id="acxBody">
@@ -1748,6 +1758,11 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       img: 'demos/daka.jpg',
       title: '打卡日程表',
       desc: '轻量习惯打卡应用：自定义目标（emoji 图标 + 主题色 + 每周目标），每天一键打卡看连续天数与月度日历；数据保存在浏览器本地，支持导出 / 导入，可离线使用。'
+    },
+    mood: {
+      img: 'demos/mood.jpg',
+      title: '心情日历',
+      desc: '给每天贴一张猫耳心情的日历：43 张猫耳少女表情随挑随贴，翻一翻就是这个月的样子；自动统计月度心情分布与连续记录天数。数据只存在浏览器本地，支持导出 / 导入备份，可离线使用。'
     },
     zhenghuo: {
       img: 'demos/zhenghuo.jpg',
@@ -2439,8 +2454,33 @@ window.STAch = STAch;
 var ACH_DEFS = [
   { id: 'home.visit', ico: '🏠', name: '初次到访', desc: '来过 startian.top' },
   { id: 'site.gomoku', ico: '⚫', name: '棋友', desc: '到访五子棋' },
+  { id: 'gomoku.first_game', ico: '🌱', name: '初见棋枰', desc: '完成第一盘对局' },
+  { id: 'gomoku.first_win', ico: '🥇', name: '首胜', desc: '第一次战胜 AI' },
+  { id: 'gomoku.games_10', ico: '⚔️', name: '十番棋', desc: '累计对局 10 盘' },
+  { id: 'gomoku.games_50', ico: '🏯', name: '五十番棋', desc: '累计对局 50 盘' },
+  { id: 'gomoku.streak_3', ico: '🔥', name: '三连胜', desc: '连续战胜 AI 三局' },
+  { id: 'gomoku.beat_hard', ico: '🧠', name: '智者挑战', desc: '战胜「困难」经典引擎' },
+  { id: 'gomoku.beat_nnue', ico: '👑', name: '灵拙之敌', desc: '战胜「灵拙」mix9 神经网络' },
+  { id: 'gomoku.fast_win', ico: '⚡', name: '闪电战', desc: '30 手内速胜一局' },
+  { id: 'gomoku.no_undo_win', ico: '🎯', name: '落子无悔', desc: '全程未悔棋赢下一局' },
+  { id: 'gomoku.draw_1', ico: '🤝', name: '以和为贵', desc: '与 AI 下成平局' },
+  { id: 'gomoku.quick_win', ico: '🚀', name: '快枪手', desc: '战胜「快速」难度' },
   { id: 'site.geometry', ico: '📐', name: '几何学徒', desc: '到访几何工坊' },
   { id: 'site.daka', ico: '🗓️', name: '自律伊始', desc: '到访打卡日程表' },
+  { id: 'daka.first_goal', ico: '🌱', name: '启程', desc: '添加第一个目标' },
+  { id: 'daka.total_10', ico: '📌', name: '小有积累', desc: '累计打卡 10 次' },
+  { id: 'daka.total_100', ico: '💪', name: '百炼成钢', desc: '累计打卡 100 次' },
+  { id: 'daka.streak_7', ico: '🔥', name: '七日之火', desc: '任一目标连续 7 天' },
+  { id: 'daka.streak_30', ico: '🏔️', name: '三十天', desc: '任一目标连续 30 天' },
+  { id: 'daka.full_day', ico: '🎯', name: '今日全勤', desc: '一天内完成全部目标' },
+  { id: 'daka.habits_5', ico: '🧩', name: '多线作战', desc: '同时拥有 5 个目标' },
+  { id: 'daka.early_bird', ico: '🌅', name: '早起鸟', desc: '早上 8 点前完成打卡' },
+  { id: 'daka.night_owl', ico: '🌙', name: '夜猫子', desc: '晚上 23 点后完成打卡' },
+  { id: 'daka.colorful', ico: '🎨', name: '色彩收藏家', desc: '目标的主题色达到 4 种' },
+  { id: 'site.mood', ico: '🐱', name: '猫耳心情', desc: '到访心情日历' },
+  { id: 'mood.record', ico: '📔', name: '第一笔心情', desc: '第一次记录心情' },
+  { id: 'mood.week', ico: '🔥', name: '一周好心情', desc: '连续 7 天记录心情' },
+  { id: 'mood.total30', ico: '🌈', name: '心情收藏家', desc: '累计记录满 30 天' },
   { id: 'site.zhenghuo', ico: '😏', name: '上当一次', desc: '到访整活页' },
   { id: 'site.tujie', ico: '⬡', name: '维度漫游', desc: '到访六边形展示器' },
   { id: 'site.star', ico: '✨', name: '摘星人', desc: '到访星空生成器' },
@@ -2507,7 +2547,7 @@ renderAch();
 /* 到访主页：解锁 + 全站探险家检查 */
 setTimeout(function () {
   var fresh = STAch.unlock('home.visit', '初次到访', '🏠');
-  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox'];
+  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood'];
   var all = sites.every(function (id) { return STAch.has(id); });
   if (all) STAch.unlock('explorer.all', '全站探险家', '🧭');
   if (fresh || all) renderAch();
@@ -2611,7 +2651,7 @@ function unlockStarry() {
    🗝 隐藏分区：集齐全部站点足迹后出现
    ============================================================ */
 function checkSecretZone() {
-  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox'];
+  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood'];
   var all = sites.every(function (id) { return STAch.has(id); });
   if (!all) return;
   var z = document.querySelector('.secret-zone');
@@ -2627,7 +2667,7 @@ function checkSecretZone() {
   }
 }
 setTimeout(function () {
-  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox'];
+  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood'];
   var all = sites.every(function (id) { return STAch.has(id); });
   if (all) STAch.unlock('explorer.all', '全站探险家', '🧭');
   if (all) renderAch();
