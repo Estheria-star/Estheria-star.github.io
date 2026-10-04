@@ -44,10 +44,13 @@
   .key{
     flex:1;min-width:56px;height:120px;border-radius:0 0 14px 14px;border:1px solid rgba(180,140,240,.4);
     background:linear-gradient(180deg,#f2ecff,#d8c8f5);cursor:pointer;position:relative;
-    display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:9px;gap:1px;
     font-size:12px;font-weight:800;color:#4a2d78;font-family:inherit;
     transition:all .09s ease;user-select:none;-webkit-user-select:none;touch-action:none;
   }
+  .key .kn{font-size:23px;font-weight:900;line-height:1;letter-spacing:.5px}
+  .key .kn sup{font-size:12px;position:relative;top:-8px;left:1px;opacity:.85}
+  .key .kname{font-size:9.5px;font-weight:700;opacity:.5;letter-spacing:1px}
   .key:hover{background:linear-gradient(180deg,#ffffff,#e8dcff)}
   .key.press{background:linear-gradient(180deg,#c084fc,#a855f7);color:#fff;transform:translateY(3px);box-shadow:0 0 24px rgba(190,120,255,.7)}
   .key small{position:absolute;top:8px;left:0;right:0;text-align:center;font-size:10px;opacity:.65;font-weight:700}
@@ -90,7 +93,7 @@
     <div class="fx" style="margin-top:14px">
       <button class="btn" id="btnTune" type="button">▶ 试听一小段</button>
       <button class="btn ghost" id="btnStart" type="button">🔊 开启声音</button>
-      <span class="tip" style="margin:0">电脑键盘：A S D F G H J K 也能弹 · 第一次要先「开启声音」</span>
+      <span class="tip" style="margin:0">简谱对照：1 2 3 4 5 6 7 = do re mi fa sol la si · 电脑键盘 A S D F G H J K 也能弹 · 第一次要先「开启声音」</span>
     </div>
   </section>
 </main>
@@ -333,15 +336,18 @@
   }
 
   /* ============ 钢琴 UI ============ */
+  /* 简谱数字：1 2 3 4 5 6 7 = do re mi fa sol la si（⁺ 键为高音 1，带音点） */
   var KEYS = [
-    { note: 0, name: 'C', kb: 'KeyA' }, { note: 2, name: 'D', kb: 'KeyS' },
-    { note: 4, name: 'E', kb: 'KeyD' }, { note: 5, name: 'F', kb: 'KeyF' },
-    { note: 7, name: 'G', kb: 'KeyG' }, { note: 9, name: 'A', kb: 'KeyH' },
-    { note: 11, name: 'B', kb: 'KeyJ' }, { note: 12, name: 'C⁺', kb: 'KeyK' }
+    { note: 0, name: 'C', kb: 'KeyA', num: '1' }, { note: 2, name: 'D', kb: 'KeyS', num: '2' },
+    { note: 4, name: 'E', kb: 'KeyD', num: '3' }, { note: 5, name: 'F', kb: 'KeyF', num: '4' },
+    { note: 7, name: 'G', kb: 'KeyG', num: '5' }, { note: 9, name: 'A', kb: 'KeyH', num: '6' },
+    { note: 11, name: 'B', kb: 'KeyJ', num: '7' }, { note: 12, name: 'C⁺', kb: 'KeyK', num: '1', up: true }
   ];
   var piano = document.getElementById('piano');
   piano.innerHTML = KEYS.map(function (k, i) {
-    return '<div class="key" data-note="' + k.note + '" data-i="' + i + '"><small>' + k.kb.replace('Key', '') + '</small>' + k.name + '</div>';
+    var numHtml = k.num + (k.up ? '<sup>·</sup>' : '');
+    return '<div class="key" data-note="' + k.note + '" data-i="' + i + '" title="简谱 ' + k.num + (k.up ? '（高音）' : '') + ' · ' + k.name + '">' +
+      '<small>' + k.kb.replace('Key', '') + '</small><b class="kn">' + numHtml + '</b><span class="kname">' + k.name + '</span></div>';
   }).join('');
   var noteKeyByI = {};
   KEYS.forEach(function (k, i) { noteKeyByI[i] = k.note; });
