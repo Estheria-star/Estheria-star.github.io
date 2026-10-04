@@ -1711,6 +1711,20 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
           · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n)
    · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
    ══════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════
+   🌐 多语言 i18n Kit（startian.top 全站共享 · v1.2 · 2026-10-04）
+   · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
+   · 自动识别：首次访问按 navigator.language（zh 开头 → 中文，其余 → English）
+   · 两种接入模式（可混用）：
+     ① 短语表模式（推荐，低侵入）：I18N.phrase({ '中文原文': 'English', ... })
+        自动扫描文本节点 / title / placeholder / aria-label / alt，动态插入的文本也自动翻译
+     ② 标注模式：data-i18n / data-i18n-html / data-i18n-title / data-i18n-aria / data-i18n-ph / data-i18n-alt
+   · 子树上加 data-i18n-skip 可整体跳过（用户输入内容、ARG 谜题原文等）
+   · API：I18N.t(k[,vars]) · I18N.tOr(k,fb) · I18N.tr(原文) · I18N.set(lang) · I18N.lang()
+          · I18N.phrase(map) · I18N.scan(root) · I18N.apply(root) · I18N.onChange(fn)
+          · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n)
+   · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
+   ══════════════════════════════════════════════════════════ */
 var I18N = (function () {
   'use strict';
   var LS = 'st_lang';
@@ -1778,15 +1792,34 @@ var I18N = (function () {
       if (obj[k]) for (var key in obj[k]) dict[k][key] = obj[k][key];
     });
   }
-  /* tr：短语表直译（原文进，译文出；zh 侧原样返回）——JS 动态文案直接用 */
+  /* tr：短语表直译（原文进，译文出；zh 侧原样返回）-JS 动态文案直接用 */
   function tr(s) {
     if (lang === 'zh') return s;
-    var v = phrase[normText(s)];
+    var v = lookup(normText(s));
     return (v == null) ? s : v;
   }
   function addPhrase(map) {
     if (!map) return;
     for (var k in map) { if (map[k] != null) phrase[normText(k)] = String(map[k]); }
+  }
+  /* 规则表：[[/正则/, '替换（可用 $1）'], ...] - 处理「已复习 3」「12 天有记录」这类数字拼接 */
+  var rules = [];
+  function addRules(list) {
+    if (!list) return;
+    for (var i = 0; i < list.length; i++) {
+      try {
+        var re = (list[i][0] instanceof RegExp) ? list[i][0] : new RegExp(list[i][0]);
+        rules.push([re, String(list[i][1])]);
+      } catch (e) {}
+    }
+  }
+  function lookup(t) {
+    var v = phrase[t];
+    if (v != null) return v;
+    for (var i = 0; i < rules.length; i++) {
+      try { if (rules[i][0].test(t)) return t.replace(rules[i][0], rules[i][1]); } catch (e) {}
+    }
+    return null;
   }
 
   /* ---- 短语表扫描（静态 + 动态） ---- */
@@ -1795,45 +1828,41 @@ var I18N = (function () {
   function translText(node) {
     var raw = node.nodeValue;
     if (!raw) return;
-    var orig = node.__i18nOrig;
-    if (orig != null) {
-      var enOfOrig = phrase[normText(orig)];
+    var rec = node.__i18nR;
+    if (rec) {
       if (lang === 'zh') {
-        if (enOfOrig != null && raw === enOfOrig) { node.nodeValue = orig; node.__i18nOrig = null; }
-        else if (raw !== enOfOrig) { node.__i18nOrig = null; }
+        if (raw === rec.en) { node.nodeValue = rec.orig; delete node.__i18nR; }
+        else if (raw !== rec.orig) { delete node.__i18nR; }
         return;
       }
-      if (enOfOrig != null && raw === enOfOrig) return;                 /* 已是译文 */
-      if (enOfOrig != null && normText(raw) === normText(orig)) {       /* 页面又渲染回原文 → 再翻 */
-        node.nodeValue = enOfOrig; return;
-      }
-      node.__i18nOrig = null;                                          /* 新内容 → 走通用逻辑 */
+      if (raw === rec.en) return;
+      if (raw === rec.orig) { node.nodeValue = rec.en; return; }
+      delete node.__i18nR;
     }
-    var en = phrase[normText(raw)];
-    if (en == null) return;
-    if (lang === 'en') { if (raw !== en) { node.__i18nOrig = raw; node.nodeValue = en; } }
+    var out = lookup(normText(raw));
+    if (out == null) return;
+    if (lang === 'en') { if (raw !== out) { node.__i18nR = { orig: raw, en: out }; node.nodeValue = out; } }
   }
   function translAttrs(el) {
     if (!el.getAttribute) return;
     for (var i = 0; i < PTAGS.length; i++) {
       var a = PTAGS[i], v = el.getAttribute(a);
       if (v == null || v === '') continue;
-      var snap = el.__i18nA && el.__i18nA[a];
-      if (snap != null) {
-        var enOfSnap = phrase[normText(snap)];
+      var rec = el.__i18nA && el.__i18nA[a];
+      if (rec) {
         if (lang === 'zh') {
-          if (enOfSnap != null && v === enOfSnap) { el.setAttribute(a, snap); delete el.__i18nA[a]; }
-          else if (v !== enOfSnap) { delete el.__i18nA[a]; }
+          if (v === rec.en) { el.setAttribute(a, rec.orig); delete el.__i18nA[a]; }
+          else if (v !== rec.orig) { delete el.__i18nA[a]; }
           continue;
         }
-        if (enOfSnap != null && v === enOfSnap) continue;
-        if (enOfSnap != null && normText(v) === normText(snap)) { el.setAttribute(a, enOfSnap); continue; }
+        if (v === rec.en) continue;
+        if (v === rec.orig) { el.setAttribute(a, rec.en); continue; }
         delete el.__i18nA[a];
       }
-      var en = phrase[normText(v)];
-      if (en == null) continue;
+      var out = lookup(normText(v));
+      if (out == null) continue;
       if (lang === 'en') {
-        if (v !== en) { if (!el.__i18nA) el.__i18nA = {}; el.__i18nA[a] = v; el.setAttribute(a, en); }
+        if (v !== out) { if (!el.__i18nA) el.__i18nA = {}; el.__i18nA[a] = { orig: v, en: out }; el.setAttribute(a, out); }
       }
     }
   }
@@ -1855,7 +1884,10 @@ var I18N = (function () {
   function auto(root) {
     if (moOn || typeof MutationObserver === 'undefined') return;
     var target = root || document.body;
-    if (!target) return;
+    if (!target) {   /* head 提前注入时 body 还没解析出来，等 DOM ready */
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { auto(root); });
+      return;
+    }
     moOn = true;
     try {
       var mo = new MutationObserver(function (muts) {
@@ -1897,7 +1929,7 @@ var I18N = (function () {
     catch (e) { return String(n); }
   }
 
-  /* ---- DOM 标注应用（标注模式；词条缺失时恢复原文 —— 保证切回中文能还原） ---- */
+  /* ---- DOM 标注应用（标注模式；词条缺失时恢复原文 - 保证切回中文能还原） ---- */
   function apply(root) {
     root = root || document;
     try {
@@ -1946,7 +1978,7 @@ var I18N = (function () {
       }
       /* 标题（短语表优先，其次 page.title 词条） */
       if (!bd.__origTitle) bd.__origTitle = document.title;
-      var tv = phrase[normText(bd.__origTitle)];
+      var tv = lookup(normText(bd.__origTitle));
       if (tv == null) tv = tRaw('page.title');
       if (tv != null) { document.title = (lang === 'en') ? tv : bd.__origTitle; bd.__titleTouched = true; }
       else if (bd.__titleTouched) { document.title = bd.__origTitle; }
@@ -2040,7 +2072,7 @@ var I18N = (function () {
 
   return {
     t: t, tOr: tOr, tr: tr, set: set, apply: apply, scan: scan, auto: auto,
-    phrase: addPhrase, add: add, lang: getLang, onChange: onChange,
+    phrase: addPhrase, rules: addRules, add: add, lang: getLang, onChange: onChange,
     fmtDate: fmtDate, fmtNum: fmtNum
   };
 })();
