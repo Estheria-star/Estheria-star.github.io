@@ -269,6 +269,10 @@ body{
 .wb-home:active{transform:translateY(0)}
 .wb-home svg{width:13px;height:13px;flex:0 0 auto}
 @media (max-width:620px){ .wb-home{left:10px;bottom:10px;padding:7px 11px 7px 9px;font-size:12px} }
+
+/* —— 语言切换胶囊：抬到工具栏（dock）上方，避免遮挡笔刷（2026-10-05 星恬反馈）—— */
+.i18n-sw{ bottom: calc(var(--i18n-dock-h, 26px) + 12px + env(safe-area-inset-bottom,0px)) !important; right: 12px !important }
+@media (max-width:620px){ .i18n-sw{ right: 10px !important } }
 </style>
 </head>
 <body>
@@ -4201,6 +4205,31 @@ var SB = SBX;
     view: view,
     toast: toast
   };
+})();
+
+
+/* ============================================================
+   语言切换胶囊避让工具栏（星恬反馈：挡住笔刷大小调整）
+   动态读取 .dock 高度，把胶囊抬到工具栏上方
+   ============================================================ */
+(function () {
+  'use strict';
+  function syncDockH() {
+    try {
+      var d = document.querySelector('.dock');
+      document.documentElement.style.setProperty('--i18n-dock-h', (d ? d.offsetHeight : 26) + 'px');
+    } catch (e) {}
+  }
+  function boot() {
+    syncDockH();
+    window.addEventListener('resize', syncDockH);
+    window.addEventListener('orientationchange', syncDockH);
+    try { if (window.ResizeObserver) new ResizeObserver(syncDockH).observe(document.querySelector('.dock')); } catch (e) {}
+    setTimeout(syncDockH, 600);
+    setTimeout(syncDockH, 2000);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();
 /* ============================================================
    j6_ach — 跨站成就（STAch，与星恬小站成就柜互通）
