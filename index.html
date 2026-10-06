@@ -1199,7 +1199,28 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
 /* 连点头像的星屑 */
 .arg-spark{position:fixed;width:10px;height:10px;border-radius:50%;pointer-events:none;z-index:9989;background:radial-gradient(circle,#fff,#c6d6f0 60%,transparent 72%);animation:argSpark .7s ease-out forwards}
 @keyframes argSpark{from{transform:translate(-50%,-50%) scale(.4);opacity:1}to{transform:translate(-50%,-140%) scale(1.5);opacity:0}}
-.hero .avatar{cursor:pointer}
+.hero .avatar{cursor:pointer}
+/* ================= 💬 社区板块（2026-10-06） ================= */
+.comm{display:grid;grid-template-columns:1fr 1.02fr;gap:30px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:28px 30px;box-shadow:var(--sh-sm)}
+@media (max-width:760px){.comm{grid-template-columns:1fr;padding:22px 18px;gap:20px}}
+.comm-desc{font-size:14.5px;line-height:1.9;color:var(--ink2)}
+.comm-feats{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 20px}
+.comm-feats span{font-size:12.5px;font-weight:700;color:var(--ink2);background:var(--tint);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+.comm-note{margin-top:10px;font-size:12px;color:var(--ink3)}
+.comm-mock{position:relative;display:flex;flex-direction:column;gap:12px;padding:16px 0}
+.comm-mock-tag{position:absolute;top:-4px;right:6px;font-size:10.5px;font-weight:800;color:var(--ink3);letter-spacing:1.5px;opacity:.75}
+.cm-card{background:var(--tint);border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:var(--sh-sm);transition:transform .3s var(--ease)}
+.cm-card:first-of-type{transform:rotate(-1.2deg)}
+.cm-card:last-of-type{transform:rotate(1.4deg)}
+.cm-card:hover{transform:rotate(0deg) translateY(-2px)}
+.cm-head{display:flex;align-items:center;gap:10px}
+.cm-ava{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:13px;font-weight:800;flex:0 0 auto}
+.cm-head b{font-size:13.5px;color:var(--ink)}
+.cm-meta{font-size:11.5px;color:var(--ink3)}
+.cm-stars{margin-left:auto;color:#f5b722;font-size:13px;letter-spacing:1px;white-space:nowrap}
+.cm-card p{margin-top:9px;font-size:13px;line-height:1.75;color:var(--ink2)}
+
+
 </style>
 </head>
 <body>
@@ -1217,6 +1238,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       <a href="#achievements" data-i18n="nav.ach">成就</a>
       <a href="#about" data-i18n="nav.about">关于</a>
       <a href="#contact" data-i18n="nav.contact">联系</a>
+      <a class="comm-link" href="https://star-community.app.workbuddy.host/" target="_blank" rel="noopener" data-i18n="nav.community">社区</a>
       <button class="tk-btn" id="tkBtn" type="button" title="配色切换" data-i18n-title="nav.themeTitle" aria-haspopup="dialog" aria-expanded="false">🕖</button>
     </div>
   </div>
@@ -1292,6 +1314,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       <span data-i18n="marq.15">🩺 今日诊断</span><span><em>·</em></span>
       <span data-i18n="marq.16">🗺 宇宙地图</span><span><em>·</em></span>
       <span data-i18n="marq.17">😏 偶尔整活</span><span><em>·</em></span>
+      <span data-i18n="marq.18">💬 社区评论墙</span><span><em>·</em></span>
       <span>🌙 startian.top</span><span><em>·</em></span>
     </div>
   </div>
@@ -1546,6 +1569,37 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
         </div>
       </section>
 
+    </div>
+  </section>
+
+  <section id="community">
+    <div class="section reveal" style="--d:.05s">
+      <div class="sec-eyebrow">COMMUNITY</div>
+      <div class="sec-title" data-i18n="comm.title">社区 · 大家的评论墙</div>
+    </div>
+    <div class="comm reveal" style="--d:.1s">
+      <div class="comm-intro">
+        <p class="comm-desc" data-i18n="comm.desc">选一个作品，打星、写评论、晒截图 —— 像 Steam 那样留下你的游玩记录。</p>
+        <div class="comm-feats">
+          <span data-i18n="comm.f1">⭐ 五星评分</span>
+          <span data-i18n="comm.f2">⏱ 自动带出游玩时长</span>
+          <span data-i18n="comm.f3">📷 晒截图</span>
+          <span data-i18n="comm.f4">💬 人人可发</span>
+        </div>
+        <a class="btn btn-p comm-link" href="https://star-community.app.workbuddy.host/" target="_blank" rel="noopener" data-i18n="comm.go">进入社区 →</a>
+        <div class="comm-note" data-i18n="comm.note">会带上你的主题和游玩记录哦</div>
+      </div>
+      <div class="comm-mock" aria-hidden="true">
+        <div class="comm-mock-tag" data-i18n="comm.mockTag">示例预览</div>
+        <div class="cm-card">
+          <div class="cm-head"><span class="cm-ava" style="background:#6aabf2">棋</span><div><b>热心棋友</b><div class="cm-meta">⏱ 3.2 小时 · 2 小时前 · ♟ 五子棋</div></div><div class="cm-stars">★★★★★</div></div>
+          <p>灵拙真的会记我的开局……这局换了个套路，终于赢了！</p>
+        </div>
+        <div class="cm-card">
+          <div class="cm-head"><span class="cm-ava" style="background:#8b5cf6">星</span><div><b>路过的小星</b><div class="cm-meta">⏱ 46 分钟 · 昨天 · ✨ 无限星空</div></div><div class="cm-stars">★★★★☆</div></div>
+          <p>种子 1818 的星空太美了，已经设成壁纸。</p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -2174,6 +2228,19 @@ var __I18N_EN = {
  "nav.ach": "Achievements",
  "nav.about": "About",
  "nav.contact": "Contact",
+ "nav.community": "Community",
+ "comm.title": "Community · Review Wall",
+ "comm.desc": "Pick a project, rate it, write a review, share a screenshot — Steam-style footprints of your playtime.",
+ "comm.f1": "⭐ 5-star rating",
+ "comm.f2": "⏱ Playtime auto-filled",
+ "comm.f3": "📷 Share screenshots",
+ "comm.f4": "💬 Open to everyone",
+ "comm.go": "Enter the community →",
+ "comm.note": "Your theme and playtime come along automatically",
+ "comm.mockTag": "Sample preview",
+ "ach.site.community.name": "Community Regular",
+ "ach.site.community.desc": "Visited the Community wall",
+ "marq.18": "💬 Community wall",
  "nav.themeTitle": "Color theme",
  "theme.title": "🎨 Color theme",
  "theme.auto": "🕖 Auto",
@@ -2544,7 +2611,7 @@ var __I18N_EN = {
 };
 I18N.add({ en: __I18N_EN });
 /* 动态文案短语表（独白 / 品牌 / 锁定提示等） */
-I18N.phrase({"星恬": "Startian","已手动锁定为": "Locked manually to ","，不受时间影响": " — it won’t follow the time of day","今天也在想：如果坐标轴会做梦，会梦到什么？": "Wondering again today: if coordinate axes could dream, what would they dream of?","刚刚好像有个 bug 从我眼前飞过去了。": "A bug just flew right past my eyes, I swear.","检测到你在发呆，推荐去星空页生成一颗星星。": "Daydreaming detected — go generate a star on the Starfield page.","面包会有的，闭环也会有的。": "There will be bread, and there will be closed loops.","本人的脑子现在运行在 30 帧，请多包涵。": "My brain is running at 30 fps right now. Bear with me.","二面角今天也想被正确地求出来。": "The dihedral angle would like to be solved correctly today, too.","我把昨天没解出的题藏在草稿箱第三页了，嘘。": "I hid yesterday’s unsolved problem on page three of my drafts. Shh.","好想给每个来玩的访客发一颗糖。": "I wish I could hand every visitor a piece of candy.","今天的风很温柔，适合写一个不带 bug 的函数。": "The breeze is gentle today — perfect for writing a bug-free function.","如果灵感没来，就先随机一点。": "If inspiration is late, just randomize a little.","有时候觉得自己是一个渲染循环，一直在画下一帧。": "Sometimes I feel like a render loop, always drawing the next frame.","建议：喝口水，伸个懒腰，然后去点亮两颗星星。": "Tip: sip some water, stretch, then go light up two stars.","刚刚认真思考了三秒人生，然后继续摸鱼。": "Just spent three seconds thinking seriously about life. Back to slacking off.","向量会相加，开心也要叠加。": "Vectors add up — and so does happiness.","今天也要把边界条件照顾好呀。": "Let’s take good care of the boundary conditions today, too.","我刚试着数星星，数到 3721 就走神了。": "I tried counting stars and lost focus at 3721.","别问我为什么，问就是艺术效果。": "Don’t ask me why. If you must: it’s an artistic effect.","这行独白是随机出现的，就像你遇见这个小站一样。": "This monologue shows up at random — just like you stumbling upon this little site.","把耳机戴上，世界就安静成一块画布。": "Put on your headphones, and the world quiets down into a canvas.","凌晨的心事，到了早上都会变成待办。": "Late-night thoughts all turn into to-dos by morning.","你已经很棒了，真的。": "You’re doing great. Really."});
+I18N.phrase({"星恬": "Startian","已手动锁定为": "Locked manually to ","，不受时间影响": " — it won’t follow the time of day","今天也在想：如果坐标轴会做梦，会梦到什么？": "Wondering again today: if coordinate axes could dream, what would they dream of?","刚刚好像有个 bug 从我眼前飞过去了。": "A bug just flew right past my eyes, I swear.","检测到你在发呆，推荐去星空页生成一颗星星。": "Daydreaming detected — go generate a star on the Starfield page.","面包会有的，闭环也会有的。": "There will be bread, and there will be closed loops.","本人的脑子现在运行在 30 帧，请多包涵。": "My brain is running at 30 fps right now. Bear with me.","二面角今天也想被正确地求出来。": "The dihedral angle would like to be solved correctly today, too.","我把昨天没解出的题藏在草稿箱第三页了，嘘。": "I hid yesterday’s unsolved problem on page three of my drafts. Shh.","好想给每个来玩的访客发一颗糖。": "I wish I could hand every visitor a piece of candy.","今天的风很温柔，适合写一个不带 bug 的函数。": "The breeze is gentle today — perfect for writing a bug-free function.","如果灵感没来，就先随机一点。": "If inspiration is late, just randomize a little.","有时候觉得自己是一个渲染循环，一直在画下一帧。": "Sometimes I feel like a render loop, always drawing the next frame.","建议：喝口水，伸个懒腰，然后去点亮两颗星星。": "Tip: sip some water, stretch, then go light up two stars.","刚刚认真思考了三秒人生，然后继续摸鱼。": "Just spent three seconds thinking seriously about life. Back to slacking off.","向量会相加，开心也要叠加。": "Vectors add up — and so does happiness.","今天也要把边界条件照顾好呀。": "Let’s take good care of the boundary conditions today, too.","我刚试着数星星，数到 3721 就走神了。": "I tried counting stars and lost focus at 3721.","别问我为什么，问就是艺术效果。": "Don’t ask me why. If you must: it’s an artistic effect.","这行独白是随机出现的，就像你遇见这个小站一样。": "This monologue shows up at random — just like you stumbling upon this little site.","把耳机戴上，世界就安静成一块画布。": "Put on your headphones, and the world quiets down into a canvas.","凌晨的心事，到了早上都会变成待办。": "Late-night thoughts all turn into to-dos by morning.","你已经很棒了，真的。": "You’re doing great. Really.","男孩子在外边也要保护好自己，不要和给你面包的人回家": "Boys, take care of yourselves out there — don't go home with the one who offers you bread."});
 I18N.phrase({"已手动锁定为蓝白 ☀️，不受时间影响": "Locked manually to ☀️ Blue-white — it won’t follow the time of day", "已手动锁定为暗红 🌙，不受时间影响": "Locked manually to 🌙 Dark red — it won’t follow the time of day", "已手动锁定为梦幻紫 🔮，不受时间影响": "Locked manually to 🔮 Dreamy purple — it won’t follow the time of day", "已手动锁定为清新绿 🌿，不受时间影响": "Locked manually to 🌿 Fresh green — it won’t follow the time of day", "已手动锁定为温馨粉 🌸，不受时间影响": "Locked manually to 🌸 Warm pink — it won’t follow the time of day", "已手动锁定为缤纷彩 🎨，不受时间影响": "Locked manually to 🎨 Colorful — it won’t follow the time of day", "已手动锁定为自定义 🖌，不受时间影响": "Locked manually to 🖌 Custom — it won’t follow the time of day", "已手动锁定为星夜 🌌，不受时间影响": "Locked manually to 🌌 Starry night — it won’t follow the time of day"});
 I18N.auto();
 </script>
@@ -3331,6 +3398,7 @@ var ACH_DEFS = [
   { id: 'gomoku.online_1', ico: '🌐', name: '联机初战', desc: '完成第一场联机对局' },
   { id: 'site.geometry', ico: '📐', name: '几何学徒', desc: '到访几何工坊' },
   { id: 'site.daka', ico: '🗓️', name: '自律伊始', desc: '到访打卡日程表' },
+  { id: 'site.community', ico: '💬', name: '社区常客', desc: '进入过星恬社区' },
   { id: 'daka.first_goal', ico: '🌱', name: '启程', desc: '添加第一个目标' },
   { id: 'daka.total_10', ico: '📌', name: '小有积累', desc: '累计打卡 10 次' },
   { id: 'daka.total_100', ico: '💪', name: '百炼成钢', desc: '累计打卡 100 次' },
@@ -3411,7 +3479,7 @@ renderAch();
 /* 到访主页：解锁 + 全站探险家检查 */
 setTimeout(function () {
   var fresh = STAch.unlock('home.visit', '初次到访', '🏠');
-  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood'];
+  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood', 'site.community'];
   var all = sites.every(function (id) { return STAch.has(id); });
   if (all) STAch.unlock('explorer.all', '全站探险家', '🧭');
   if (fresh || all) renderAch();
@@ -3516,7 +3584,7 @@ function unlockStarry() {
    🗝 隐藏分区：集齐全部站点足迹后出现
    ============================================================ */
 function checkSecretZone() {
-  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood'];
+  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood', 'site.community'];
   var all = sites.every(function (id) { return STAch.has(id); });
   if (!all) return;
   var z = document.querySelector('.secret-zone');
@@ -3532,7 +3600,7 @@ function checkSecretZone() {
   }
 }
 setTimeout(function () {
-  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood'];
+  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood', 'site.community'];
   var all = sites.every(function (id) { return STAch.has(id); });
   if (all) STAch.unlock('explorer.all', '全站探险家', '🧭');
   if (all) renderAch();
@@ -3591,7 +3659,8 @@ window.__checkSecretZone = checkSecretZone;
     '这行独白是随机出现的，就像你遇见这个小站一样。',
     '把耳机戴上，世界就安静成一块画布。',
     '凌晨的心事，到了早上都会变成待办。',
-    '你已经很棒了，真的。'
+    '你已经很棒了，真的。',
+    '男孩子在外边也要保护好自己，不要和给你面包的人回家'
   ];
   var __monoPick = MONOS[Math.floor(Math.random() * MONOS.length)];
   el.textContent = I18N.tr(__monoPick);
@@ -4309,6 +4378,42 @@ window.__checkSecretZone = checkSecretZone;
   };
   /* 初始化：读当前主题（可能已是星夜） */
   sync(document.documentElement.getAttribute('data-theme') || 'light');
+})();
+</script>
+<script>
+/* —— 💬 社区入口：自动带上主题 / 语言 / 游玩时长（2026-10-06）—— */
+(function () {
+  var LINKS = document.querySelectorAll('.comm-link');
+  if (!LINKS.length) return;
+  var BASE = 'https://star-community.app.workbuddy.host/';
+  function cookieGet(name) {
+    try {
+      var parts = document.cookie.split(';');
+      for (var i = 0; i < parts.length; i++) {
+        var p = parts[i].trim();
+        if (p.indexOf(name + '=') === 0) return decodeURIComponent(p.slice(name.length + 1));
+      }
+    } catch (e) {}
+    return '';
+  }
+  function build() {
+    var q = [];
+    q.push('theme=' + encodeURIComponent(document.documentElement.getAttribute('data-theme') || 'light'));
+    var lg = (document.documentElement.getAttribute('lang') || 'zh').toLowerCase().indexOf('en') === 0 ? 'en' : 'zh';
+    q.push('lang=' + lg);
+    var m = cookieGet('st_pt');
+    if (m) q.push('pt=' + encodeURIComponent(m));
+    var full = BASE + '?' + q.join('&');
+    [].forEach.call(LINKS, function (a) { a.href = full; });
+  }
+  build();
+  [].forEach.call(LINKS, function (a) {
+    a.addEventListener('click', function () {
+      build();
+      try { window.STAch && STAch.unlock('site.community', '社区常客', '💬'); window.__renderAch && window.__renderAch(); } catch (e) {}
+    }, true);
+  });
+  setInterval(build, 60000);
 })();
 </script>
 </body>
