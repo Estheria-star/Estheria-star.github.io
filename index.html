@@ -5,14 +5,14 @@
 <script>document.documentElement.classList.add('js');(function(){try{var p=JSON.parse(localStorage.getItem('startian_theme_v1')||'{}');var m=p.mode||'auto',t=m;if(m==='auto'){var n=new Date(),x=n.getHours()*60+n.getMinutes();var l=((p.lightAt||'07:00')+'').split(':'),d=((p.darkAt||'19:00')+'').split(':');var lm=(+l[0])*60+(+l[1]||0),dm=(+d[0])*60+(+d[1]||0);t=(lm<dm)?((x>=lm&&x<dm)?'light':'dark'):((x>=lm||x<dm)?'light':'dark');var pr=p.autoPair||'classic';if(pr==='dreamy'){t=(t==='light')?'fresh':'purple';}else if(pr==='pink'){t=(t==='light')?'warm':'colorful';}}document.documentElement.setAttribute('data-theme',t);if(t==='custom'){try{var rc=JSON.parse(localStorage.getItem('startian_custom_resolved_v1')||'null');if(rc){for(var ck in rc){if(ck!=='__dark'&&typeof rc[ck]==='string')document.documentElement.style.setProperty(ck,rc[ck]);}}}catch(e){}}var avm={dark:'avatar-dark.jpg',purple:'avatar-purple.jpg',fresh:'avatar-fresh.jpg',warm:'avatar-warm.jpg',colorful:'avatar-colorful.jpg',custom:''};var avp=avm[t]||'';window.__initAvatar=avp||'avatar.png';if(avp){var ln=document.createElement('link');ln.rel='preload';ln.as='image';ln.href=avp;document.head.appendChild(ln);}}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>星恬的小站 · 五子棋 几何工坊 宇宙地图 · startian.top</title>
-<meta name="description" content="星恬的个人作品小站：在线五子棋（AI 学习反制）、高中数学几何工坊、宇宙地图、无限星空生成器、生命游戏、函数音乐、错题本等 16 个免费网页小作品，打开即用无需安装。">
+<meta name="description" content="星恬的个人作品小站：在线五子棋（AI 学习反制）、高中数学几何工坊、宇宙地图、无限星空生成器、生命游戏、函数音乐、错题本等 17 个免费网页小作品，打开即用无需安装。">
 <meta name="keywords" content="星恬,startian,五子棋在线,几何工坊,高中数学几何,宇宙地图,无限星空,星空生成器,生命游戏,函数音乐,错题本,配色实验室,心情日历">
 <meta name="author" content="星恬">
 <meta name="theme-color" content="#E6F7FF">
 <link rel="canonical" href="https://startian.top/">
 <meta property="og:site_name" content="星恬的小站">
-<meta property="og:title" content="星恬的小站 · 16 个免费网页小作品">
-<meta property="og:description" content="下棋、画几何、捣鼓 AI 小玩意 —— 五子棋、几何工坊、万物沙盒等 16 个作品，欢迎来逛逛～">
+<meta property="og:title" content="星恬的小站 · 17 个免费网页小作品">
+<meta property="og:description" content="下棋、画几何、捣鼓 AI 小玩意 —— 五子棋、几何工坊、万物沙盒等 17 个作品，欢迎来逛逛～">
 <meta property="og:image" content="https://startian.top/avatar.png">
 <meta property="og:url" content="https://startian.top/">
 <meta property="og:type" content="website">
@@ -1200,27 +1200,6 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
 .arg-spark{position:fixed;width:10px;height:10px;border-radius:50%;pointer-events:none;z-index:9989;background:radial-gradient(circle,#fff,#c6d6f0 60%,transparent 72%);animation:argSpark .7s ease-out forwards}
 @keyframes argSpark{from{transform:translate(-50%,-50%) scale(.4);opacity:1}to{transform:translate(-50%,-140%) scale(1.5);opacity:0}}
 .hero .avatar{cursor:pointer}
-/* ================= 💬 社区板块（2026-10-06） ================= */
-.comm{display:grid;grid-template-columns:1fr 1.02fr;gap:30px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:28px 30px;box-shadow:var(--sh-sm)}
-@media (max-width:760px){.comm{grid-template-columns:1fr;padding:22px 18px;gap:20px}}
-.comm-desc{font-size:14.5px;line-height:1.9;color:var(--ink2)}
-.comm-feats{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 20px}
-.comm-feats span{font-size:12.5px;font-weight:700;color:var(--ink2);background:var(--tint);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
-.comm-note{margin-top:10px;font-size:12px;color:var(--ink3)}
-.comm-mock{position:relative;display:flex;flex-direction:column;gap:12px;padding:16px 0}
-.comm-mock-tag{position:absolute;top:-4px;right:6px;font-size:10.5px;font-weight:800;color:var(--ink3);letter-spacing:1.5px;opacity:.75}
-.cm-card{background:var(--tint);border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:var(--sh-sm);transition:transform .3s var(--ease)}
-.cm-card:first-of-type{transform:rotate(-1.2deg)}
-.cm-card:last-of-type{transform:rotate(1.4deg)}
-.cm-card:hover{transform:rotate(0deg) translateY(-2px)}
-.cm-head{display:flex;align-items:center;gap:10px}
-.cm-ava{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:13px;font-weight:800;flex:0 0 auto}
-.cm-head b{font-size:13.5px;color:var(--ink)}
-.cm-meta{font-size:11.5px;color:var(--ink3)}
-.cm-stars{margin-left:auto;color:#f5b722;font-size:13px;letter-spacing:1px;white-space:nowrap}
-.cm-card p{margin-top:9px;font-size:13px;line-height:1.75;color:var(--ink2)}
-
-
 </style>
 </head>
 <body>
@@ -1238,7 +1217,6 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       <a href="#achievements" data-i18n="nav.ach">成就</a>
       <a href="#about" data-i18n="nav.about">关于</a>
       <a href="#contact" data-i18n="nav.contact">联系</a>
-      <a class="comm-link" href="https://star-community.app.workbuddy.host/" target="_blank" rel="noopener" data-i18n="nav.community">社区</a>
       <button class="tk-btn" id="tkBtn" type="button" title="配色切换" data-i18n-title="nav.themeTitle" aria-haspopup="dialog" aria-expanded="false">🕖</button>
     </div>
   </div>
@@ -1314,7 +1292,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       <span data-i18n="marq.15">🩺 今日诊断</span><span><em>·</em></span>
       <span data-i18n="marq.16">🗺 宇宙地图</span><span><em>·</em></span>
       <span data-i18n="marq.17">😏 偶尔整活</span><span><em>·</em></span>
-      <span data-i18n="marq.18">💬 社区评论墙</span><span><em>·</em></span>
+      <span data-i18n="marq.18">💣 扫雷</span><span><em>·</em></span>
       <span>🌙 startian.top</span><span><em>·</em></span>
     </div>
   </div>
@@ -1353,7 +1331,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
             <span class="zone-name" data-i18n="zone.fun.name">娱乐</span>
             <span class="zone-sub" data-i18n="zone.fun.sub">下棋、转转玩的 · 放松向</span>
           </span>
-          <span class="zone-count" data-i18n="zone.fun.count">5 个作品</span>
+          <span class="zone-count" data-i18n="zone.fun.count">6 个作品</span>
           <span class="zone-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
         </button>
         <div class="zone-body">
@@ -1402,6 +1380,15 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
           <h3 data-i18n="tile.music.title">函数音乐</h3>
           <p data-i18n="tile.music.desc">把函数画成声波：正弦是纯音、方波是游戏机、随便叠几个三角函数就是一个新乐器——图形还会跟着跳。</p>
           <span class="cta" data-i18n="tile.music.cta">去弹一段 <i>→</i></span>
+        </div>
+      </a>
+      <a class="tile" style="--d:.32s" data-demo="saolei" href="https://startian.top/saolei/">
+        <div class="tile-media"><img src="demos/saolei.jpg" alt="扫雷演示" loading="lazy"></div>
+        <div class="tile-body">
+          <span class="ptag" data-i18n="tile.saolei.tag">游戏 · 经典</span>
+          <h3 data-i18n="tile.saolei.title">扫雷</h3>
+          <p data-i18n="tile.saolei.desc">经典扫雷的浏览器版：初级 9×9 到高级 16×30，首击永远安全、双击数字一秒展开一圈；手机上长按插旗，各难度最佳成绩都记着。</p>
+          <span class="cta" data-i18n="tile.saolei.cta">来排雷 <i>→</i></span>
         </div>
       </a>
             </div>
@@ -1572,38 +1559,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     </div>
   </section>
 
-  <section id="community">
-    <div class="section reveal" style="--d:.05s">
-      <div class="sec-eyebrow">COMMUNITY</div>
-      <div class="sec-title" data-i18n="comm.title">社区 · 大家的评论墙</div>
-    </div>
-    <div class="comm reveal" style="--d:.1s">
-      <div class="comm-intro">
-        <p class="comm-desc" data-i18n="comm.desc">选一个作品，打星、写评论、晒截图 —— 像 Steam 那样留下你的游玩记录。</p>
-        <div class="comm-feats">
-          <span data-i18n="comm.f1">⭐ 五星评分</span>
-          <span data-i18n="comm.f2">⏱ 自动带出游玩时长</span>
-          <span data-i18n="comm.f3">📷 晒截图</span>
-          <span data-i18n="comm.f4">💬 人人可发</span>
-        </div>
-        <a class="btn btn-p comm-link" href="https://star-community.app.workbuddy.host/" target="_blank" rel="noopener" data-i18n="comm.go">进入社区 →</a>
-        <div class="comm-note" data-i18n="comm.note">会带上你的主题和游玩记录哦</div>
-      </div>
-      <div class="comm-mock" aria-hidden="true">
-        <div class="comm-mock-tag" data-i18n="comm.mockTag">示例预览</div>
-        <div class="cm-card">
-          <div class="cm-head"><span class="cm-ava" style="background:#6aabf2">棋</span><div><b>热心棋友</b><div class="cm-meta">⏱ 3.2 小时 · 2 小时前 · ♟ 五子棋</div></div><div class="cm-stars">★★★★★</div></div>
-          <p>灵拙真的会记我的开局……这局换了个套路，终于赢了！</p>
-        </div>
-        <div class="cm-card">
-          <div class="cm-head"><span class="cm-ava" style="background:#8b5cf6">星</span><div><b>路过的小星</b><div class="cm-meta">⏱ 46 分钟 · 昨天 · ✨ 无限星空</div></div><div class="cm-stars">★★★★☆</div></div>
-          <p>种子 1818 的星空太美了，已经设成壁纸。</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="about">
+<section id="about">
     <div class="section reveal" style="--d:.05s">
       <div class="sec-eyebrow">ABOUT</div>
       <div class="sec-title" data-i18n="about.title">关于我</div>
@@ -1646,7 +1602,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     <div class="ach-cross reveal collapsed" style="--d:.16s" id="achCard">
       <div class="acx-head" id="acxHead" role="button" tabindex="0" aria-expanded="false" aria-controls="acxBody" title="点击展开 / 收起成就柜" data-i18n-title="ach.cabTitle">
         <span class="acx-title" data-i18n="ach.cab">🏆 跨站成就柜</span>
-        <span class="acx-prog"><span data-i18n="ach.litLabel">已点亮</span> <b id="achLit">0</b> / <span id="achTotal">73</span></span>
+        <span class="acx-prog"><span data-i18n="ach.litLabel">已点亮</span> <b id="achLit">0</b> / <span id="achTotal">80</span></span>
         <span class="acx-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
       </div>
       <div class="acx-body" id="acxBody">
@@ -2228,19 +2184,6 @@ var __I18N_EN = {
  "nav.ach": "Achievements",
  "nav.about": "About",
  "nav.contact": "Contact",
- "nav.community": "Community",
- "comm.title": "Community · Review Wall",
- "comm.desc": "Pick a project, rate it, write a review, share a screenshot — Steam-style footprints of your playtime.",
- "comm.f1": "⭐ 5-star rating",
- "comm.f2": "⏱ Playtime auto-filled",
- "comm.f3": "📷 Share screenshots",
- "comm.f4": "💬 Open to everyone",
- "comm.go": "Enter the community →",
- "comm.note": "Your theme and playtime come along automatically",
- "comm.mockTag": "Sample preview",
- "ach.site.community.name": "Community Regular",
- "ach.site.community.desc": "Visited the Community wall",
- "marq.18": "💬 Community wall",
  "nav.themeTitle": "Color theme",
  "theme.title": "🎨 Color theme",
  "theme.auto": "🕖 Auto",
@@ -2290,7 +2233,7 @@ var __I18N_EN = {
  "projects.sub": "Every piece built one step at a time · hover 2s for a surprise",
  "zone.fun.name": "Play",
  "zone.fun.sub": "Games & toys · chill out",
- "zone.fun.count": "5 works",
+ "zone.fun.count": "6 works",
  "zone.tool.name": "Tools",
  "zone.tool.sub": "Study & productivity",
  "zone.tool.count": "7 works",
@@ -2512,6 +2455,23 @@ var __I18N_EN = {
  "ach.daka.night_owl.desc": "Checked in after 11 PM",
  "ach.daka.colorful.name": "Color Collector",
  "ach.daka.colorful.desc": "Goals with 4 different theme colors",
+ "tile.saolei.tag": "Game · classic",
+ "tile.saolei.title": "Minesweeper",
+ "tile.saolei.desc": "Browser minesweeper: from Easy 9×9 to Expert 16×30, first click always safe, double-click a number to auto-open around it; long-press to flag on mobile — best times saved per difficulty.",
+ "tile.saolei.cta": "Start sweeping",
+ "marq.18": "💣 Minesweeper",
+ "ach.site.saolei.name": "Rookie Sweeper",
+ "ach.site.saolei.desc": "Visited Minesweeper",
+ "ach.saolei.first_win.name": "First Victory",
+ "ach.saolei.first_win.desc": "Cleared your first game",
+ "ach.saolei.win_mid.name": "Intermediate Sweeper",
+ "ach.saolei.win_mid.desc": "Cleared Intermediate difficulty",
+ "ach.saolei.win_hard.name": "Expert Deminer",
+ "ach.saolei.win_hard.desc": "Cleared Expert difficulty",
+ "ach.saolei.speed.name": "Lightning Clear",
+ "ach.saolei.speed.desc": "Cleared Easy within 60 seconds",
+ "ach.saolei.noflag.name": "Flagless Clear",
+ "ach.saolei.noflag.desc": "Cleared a game without placing any flags",
  "ach.site.mood.name": "Cat-ear Mood",
  "ach.site.mood.desc": "Visited Mood Calendar",
  "ach.mood.record.name": "First Mood",
@@ -2751,6 +2711,11 @@ I18N.auto();
       img: 'demos/report.jpg',
       title: '🩺 今日份诊断报告',
       desc: 'AI 给今天的你开一张体检单：精神状态、专注力、欧气、发量……七项指标每日不同（同一天永远同一份）；能换变体、保存成报告图分享，纯玄学仅供参考（笑）。'
+    },
+    saolei: {
+      img: 'demos/saolei.jpg',
+      title: '💣 扫雷 · 经典排雷',
+      desc: '经典扫雷的浏览器版：三种难度（初级 9×9 / 中级 16×16 / 高级 16×30·99 雷），首击永远安全不会开局就踩雷，双击数字一键展开周围、手机长按格子插旗；每个难度的最佳成绩都记在本机，还有 5 枚隐藏小成就等着亮起来。'
     },
     sandbox: {
       img: 'demos/sandbox.jpg',
@@ -3398,7 +3363,6 @@ var ACH_DEFS = [
   { id: 'gomoku.online_1', ico: '🌐', name: '联机初战', desc: '完成第一场联机对局' },
   { id: 'site.geometry', ico: '📐', name: '几何学徒', desc: '到访几何工坊' },
   { id: 'site.daka', ico: '🗓️', name: '自律伊始', desc: '到访打卡日程表' },
-  { id: 'site.community', ico: '💬', name: '社区常客', desc: '进入过星恬社区' },
   { id: 'daka.first_goal', ico: '🌱', name: '启程', desc: '添加第一个目标' },
   { id: 'daka.total_10', ico: '📌', name: '小有积累', desc: '累计打卡 10 次' },
   { id: 'daka.total_100', ico: '💪', name: '百炼成钢', desc: '累计打卡 100 次' },
@@ -3410,6 +3374,12 @@ var ACH_DEFS = [
   { id: 'daka.night_owl', ico: '🌙', name: '夜猫子', desc: '晚上 23 点后完成打卡' },
   { id: 'daka.colorful', ico: '🎨', name: '色彩收藏家', desc: '目标的主题色达到 4 种' },
   { id: 'site.mood', ico: '🐱', name: '猫耳心情', desc: '到访心情日历' },
+  { id: 'site.saolei', ico: '💣', name: '排雷新兵', desc: '到访扫雷' },
+  { id: 'saolei.first_win', ico: '🚩', name: '旗开得胜', desc: '完成第一局扫雷' },
+  { id: 'saolei.win_mid', ico: '🧭', name: '中级排雷手', desc: '通关中级扫雷' },
+  { id: 'saolei.win_hard', ico: '🏅', name: '高级排雷专家', desc: '通关高级扫雷' },
+  { id: 'saolei.speed', ico: '⚡', name: '闪电排雷', desc: '初级 60 秒内排雷成功' },
+  { id: 'saolei.noflag', ico: '🖐️', name: '徒手排雷', desc: '一旗不插通关' },
   { id: 'mood.record', ico: '📔', name: '第一笔心情', desc: '第一次记录心情' },
   { id: 'mood.week', ico: '🔥', name: '一周好心情', desc: '连续 7 天记录心情' },
   { id: 'mood.total30', ico: '🌈', name: '心情收藏家', desc: '累计记录满 30 天' },
@@ -3479,7 +3449,7 @@ renderAch();
 /* 到访主页：解锁 + 全站探险家检查 */
 setTimeout(function () {
   var fresh = STAch.unlock('home.visit', '初次到访', '🏠');
-  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood', 'site.community'];
+  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood', 'site.saolei'];
   var all = sites.every(function (id) { return STAch.has(id); });
   if (all) STAch.unlock('explorer.all', '全站探险家', '🧭');
   if (fresh || all) renderAch();
@@ -3584,7 +3554,7 @@ function unlockStarry() {
    🗝 隐藏分区：集齐全部站点足迹后出现
    ============================================================ */
 function checkSecretZone() {
-  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood', 'site.community'];
+  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood', 'site.saolei'];
   var all = sites.every(function (id) { return STAch.has(id); });
   if (!all) return;
   var z = document.querySelector('.secret-zone');
@@ -3600,7 +3570,7 @@ function checkSecretZone() {
   }
 }
 setTimeout(function () {
-  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood', 'site.community'];
+  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood', 'site.saolei'];
   var all = sites.every(function (id) { return STAch.has(id); });
   if (all) STAch.unlock('explorer.all', '全站探险家', '🧭');
   if (all) renderAch();
@@ -4379,42 +4349,5 @@ window.__checkSecretZone = checkSecretZone;
   /* 初始化：读当前主题（可能已是星夜） */
   sync(document.documentElement.getAttribute('data-theme') || 'light');
 })();
-</script>
-<script>
-/* —— 💬 社区入口：自动带上主题 / 语言 / 游玩时长（2026-10-06）—— */
-(function () {
-  var LINKS = document.querySelectorAll('.comm-link');
-  if (!LINKS.length) return;
-  var BASE = 'https://star-community.app.workbuddy.host/';
-  function cookieGet(name) {
-    try {
-      var parts = document.cookie.split(';');
-      for (var i = 0; i < parts.length; i++) {
-        var p = parts[i].trim();
-        if (p.indexOf(name + '=') === 0) return decodeURIComponent(p.slice(name.length + 1));
-      }
-    } catch (e) {}
-    return '';
-  }
-  function build() {
-    var q = [];
-    q.push('theme=' + encodeURIComponent(document.documentElement.getAttribute('data-theme') || 'light'));
-    var lg = (document.documentElement.getAttribute('lang') || 'zh').toLowerCase().indexOf('en') === 0 ? 'en' : 'zh';
-    q.push('lang=' + lg);
-    var m = cookieGet('st_pt');
-    if (m) q.push('pt=' + encodeURIComponent(m));
-    var full = BASE + '?' + q.join('&');
-    [].forEach.call(LINKS, function (a) { a.href = full; });
-  }
-  build();
-  [].forEach.call(LINKS, function (a) {
-    a.addEventListener('click', function () {
-      build();
-      try { window.STAch && STAch.unlock('site.community', '社区常客', '💬'); window.__renderAch && window.__renderAch(); } catch (e) {}
-    }, true);
-  });
-  setInterval(build, 60000);
-})();
-</script>
-</body>
+</script></body>
 </html>
