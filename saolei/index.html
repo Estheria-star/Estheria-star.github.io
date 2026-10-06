@@ -429,7 +429,7 @@ var I18N = (function () {
 })();
 
 /* ---- 短语表（中文原文 → English）---- */
-I18N.phrase({"扫雷": "Minesweeper","扫雷 · 经典排雷小游戏 | 星恬的小站": "Minesweeper · Classic Puzzle Game | Startian's Site","翻开所有安全的格子，把雷都标出来 · 首击永远安全": "Open every safe cell and mark all mines · First click is always safe","剩余雷数": "Mines left","用时": "Time","初级": "Easy","中级": "Intermediate","高级": "Expert","9×9 · 10 雷": "9×9 · 10 mines","16×16 · 40 雷": "16×16 · 40 mines","30×16 · 99 雷": "30×16 · 99 mines","最佳：初级": "Best: Easy","🚩 插旗模式：关": "🚩 Flag mode: OFF","🚩 插旗模式：开": "🚩 Flag mode: ON","🎉 排雷成功！": "🎉 Cleared!","用时 32 秒": "Time 32s","再来一局": "Play again","左键": "Left-click","右键": "Right-click","双击数字": "Double-click a number","翻开 ·": "to open ·","插旗 ·": "to flag ·","快速展开一圈 · 手机长按格子也能插旗": "to auto-open around it · long-press to flag on mobile","主页": "Home","重开一局": "Restart","手机友好：开启后点按即插旗": "Mobile friendly: tap a cell to flag","返回星恬的小站主页": "Back to Startian's homepage","经典扫雷小游戏：三种难度、首击安全、双击快速展开、手机长按插旗。": "Classic minesweeper: three difficulties, first-click safety, double-click to auto-open, long-press to flag on mobile.","🏆 成就解锁：": "🏆 Achievement unlocked: ","排雷新兵": "Rookie Sweeper","旗开得胜": "First Victory","中级排雷手": "Intermediate Sweeper","高级排雷专家": "Expert Deminer","闪电排雷": "Lightning Clear","徒手排雷": "Flagless Clear","💥 踩到雷了": "💥 Boom! You hit a mine"});
+I18N.phrase({"扫雷": "Minesweeper","扫雷 · 经典排雷小游戏 | 星恬的小站": "Minesweeper · Classic Puzzle Game | Startian's Site","翻开所有安全的格子，把雷都标出来 · 首击永远安全": "Open every safe cell and mark all mines · First click is always safe","剩余雷数": "Mines left","用时": "Time","初级": "Easy","中级": "Intermediate","高级": "Expert","9×9 · 10 雷": "9×9 · 10 mines","16×16 · 40 雷": "16×16 · 40 mines","30×16 · 99 雷": "30×16 · 99 mines","最佳：初级": "Best: Easy","🚩 插旗模式：关": "🚩 Flag mode: OFF","🚩 插旗模式：开": "🚩 Flag mode: ON","🎉 排雷成功！": "🎉 Cleared!","用时 32 秒": "Time 32s","再来一局": "Play again","左键": "Left-click","右键": "Right-click","双击数字": "Double-click a number","翻开 ·": "to open ·","插旗 ·": "to flag ·","快速展开一圈 · 手机长按格子也能插旗": "to auto-open around it · long-press to flag on mobile","主页": "Home","重开一局": "Restart","手机友好：开启后点按即插旗": "Mobile friendly: tap a cell to flag","返回星恬的小站主页": "Back to Startian's homepage","经典扫雷小游戏：三种难度、首击安全、双击快速展开、手机长按插旗。": "Classic minesweeper: three difficulties, first-click safety, double-click to auto-open, long-press to flag on mobile.","🏆 成就解锁：": "🏆 Achievement unlocked: ","排雷新兵": "Rookie Sweeper","旗开得胜": "First Victory","中级排雷手": "Intermediate Sweeper","高级排雷专家": "Expert Deminer","闪电排雷": "Lightning Clear","徒手排雷": "Flagless Clear","💥 踩到雷了": "💥 Boom! You hit a mine","⚙️ 自定义": "⚙️ Custom","行 / 列 / 雷数自选": "Rows / Cols / Mines","行": "Rows","列": "Cols","雷": "Mines","▶ 开始游戏": "▶ Start game","收起": "Collapse","自定义": "Custom","· 列": " · Cols ","· 雷 1–": " · Mines 1–","· 🏆 新纪录！": " · 🏆 New record!","通关 · 用时": " cleared · time ","秒": " s","别灰心，": "Don't give up — try ","再试一次～": " again~"});
 I18N.auto();
 /* ==== i18n-kit v1.2 end ==== */
 </script>
@@ -506,6 +506,20 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
 .diff:hover{border-color:var(--accent);color:var(--accent-deep)}
 .diff.on{background:linear-gradient(135deg,var(--accent),var(--accent-deep));border-color:var(--accent-deep);color:#fff;box-shadow:0 6px 18px rgba(63,134,209,.35)}
 .diff.on small{color:rgba(255,255,255,.85)}
+
+/* —— 自定义难度面板 —— */
+.custom-panel{display:none;margin:0 auto 14px;max-width:420px;padding:14px 16px;border:1.5px solid var(--line);border-radius:16px;background:var(--tint);text-align:center}
+.custom-panel.show{display:block;animation:fadeIn .25s ease}
+.cp-grid{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.cp-field{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11.5px;color:var(--ink3);font-weight:700;letter-spacing:.5px}
+.cp-field input{width:86px;padding:8px 6px;text-align:center;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-family:inherit;font-size:16px;font-weight:800;outline:none;transition:border-color .2s ease}
+.cp-field input:focus{border-color:var(--accent)}
+.cp-hint{margin-top:10px;font-size:11.5px;color:var(--ink3)}
+.cp-btns{display:flex;gap:8px;justify-content:center;margin-top:12px}
+.cp-start{border:0;background:linear-gradient(135deg,var(--accent),var(--accent-deep));color:#fff;border-radius:12px;padding:9px 22px;font-size:13.5px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 6px 16px rgba(63,134,209,.3);transition:transform .15s ease}
+.cp-start:hover{transform:translateY(-1px)}
+.cp-cancel{border:1.5px solid var(--line);background:transparent;color:var(--ink2);border-radius:12px;padding:9px 18px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .18s ease}
+.cp-cancel:hover{border-color:var(--accent);color:var(--accent-deep)}
 
 .best{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;font-size:12px;color:var(--ink3);margin-bottom:14px}
 .best b{color:var(--ink2);font-variant-numeric:tabular-nums}
@@ -600,6 +614,20 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
       <button class="diff on" data-diff="easy">初级<small>9×9 · 10 雷</small></button>
       <button class="diff" data-diff="mid">中级<small>16×16 · 40 雷</small></button>
       <button class="diff" data-diff="hard">高级<small>30×16 · 99 雷</small></button>
+      <button class="diff" data-diff="custom" id="customToggle">⚙️ 自定义<small>行 / 列 / 雷数自选</small></button>
+    </div>
+
+    <div class="custom-panel" id="customPanel">
+      <div class="cp-grid">
+        <label class="cp-field"><span>行</span><input type="number" id="cpRows" min="5" max="30" step="1" inputmode="numeric"></label>
+        <label class="cp-field"><span>列</span><input type="number" id="cpCols" min="5" max="40" step="1" inputmode="numeric"></label>
+        <label class="cp-field"><span>雷</span><input type="number" id="cpMines" min="1" step="1" inputmode="numeric"></label>
+      </div>
+      <div class="cp-hint" id="cpHint"></div>
+      <div class="cp-btns">
+        <button class="cp-start" id="cpStart" type="button">▶ 开始游戏</button>
+        <button class="cp-cancel" id="cpCancel" type="button">收起</button>
+      </div>
     </div>
 
     <div class="best">
@@ -693,10 +721,35 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
     mid:  { rows: 16, cols: 16, mines: 40, name: '中级', nameEn: 'Intermediate' },
     hard: { rows: 16, cols: 30, mines: 99, name: '高级', nameEn: 'Expert' }
   };
+  DIFFS.custom = { rows: 12, cols: 12, mines: 30, name: '自定义', nameEn: 'Custom' };
+  var CUSTOM_KEY = 'startian_saolei_custom_v1';
+  var CP_RANGE = { rowsMin: 5, rowsMax: 30, colsMin: 5, colsMax: 40 };
+  var CP_DEFAULT = { rows: 12, cols: 12, mines: 30 };
+  function cpNum(v, min, max, fallback) {
+    var n = parseInt(v, 10);
+    if (isNaN(n)) n = fallback;          /* 非法输入 → 回退默认；数字（含 0）→ 钳到范围内 */
+    return Math.min(max, Math.max(min, n));
+  }
+  function customClamp(rows, cols, mines) {
+    rows = cpNum(rows, CP_RANGE.rowsMin, CP_RANGE.rowsMax, CP_DEFAULT.rows);
+    cols = cpNum(cols, CP_RANGE.colsMin, CP_RANGE.colsMax, CP_DEFAULT.cols);
+    var maxMines = Math.max(1, rows * cols - 9);
+    mines = cpNum(mines, 1, maxMines, CP_DEFAULT.mines);
+    return { rows: rows, cols: cols, mines: mines };
+  }
+  (function loadCustom() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(CUSTOM_KEY) || 'null');
+      if (saved && saved.rows && saved.cols && saved.mines) {
+        var c = customClamp(saved.rows, saved.cols, saved.mines);
+        DIFFS.custom.rows = c.rows; DIFFS.custom.cols = c.cols; DIFFS.custom.mines = c.mines;
+      }
+    } catch (e) {}
+  })();
   function dname(d) { var D = DIFFS[d || diff]; return isEn() ? D.nameEn : D.name; }
   function achName(zh, en) { return isEn() ? en : zh; }
   var BEST_KEY = 'startian_saolei_best_v1';
-  var CELL_PREF = { easy: 38, mid: 30, hard: 24 };
+  var CELL_PREF = { easy: 38, mid: 30, hard: 24, custom: 30 };
 
   var board = document.getElementById('board');
   var boardWrap = document.getElementById('boardWrap');
@@ -888,9 +941,12 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
         if (cells[i].mine && !cells[i].flag) { cells[i].flag = true; flagCount++; renderCell(i); }
       }
       mineNumEl.textContent = '0';
-      var b = loadBest();
-      var isNew = (b[diff] === undefined || seconds < b[diff]);
-      if (isNew) { b[diff] = seconds; saveBest(b); renderBest(); }
+      var isNew = false;
+      if (diff !== 'custom') {
+        var b = loadBest();
+        isNew = (b[diff] === undefined || seconds < b[diff]);
+        if (isNew) { b[diff] = seconds; saveBest(b); renderBest(); }
+      }
       /* —— 成就 —— */
       try {
         if (!STAch.has('saolei.first_win')) STAch.unlock('saolei.first_win', achName('旗开得胜', 'First Victory'), '🚩');
@@ -1031,10 +1087,58 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
   /* ============ 按钮 ============ */
   faceEl.addEventListener('click', function () { newGame(diff); });
   document.getElementById('againBtn').addEventListener('click', function () { newGame(diff); });
+  /* ---- 自定义难度面板 ---- */
+  var customPanel = document.getElementById('customPanel');
+  var cpRows = document.getElementById('cpRows');
+  var cpCols = document.getElementById('cpCols');
+  var cpMines = document.getElementById('cpMines');
+  var cpHint = document.getElementById('cpHint');
+  function updateCpHint() {
+    var r = Math.min(CP_RANGE.rowsMax, Math.max(CP_RANGE.rowsMin, parseInt(cpRows.value, 10) || DIFFS.custom.rows));
+    var c = Math.min(CP_RANGE.colsMax, Math.max(CP_RANGE.colsMin, parseInt(cpCols.value, 10) || DIFFS.custom.cols));
+    var maxM = Math.max(1, r * c - 9);
+    cpHint.textContent = isEn()
+      ? ('Rows ' + CP_RANGE.rowsMin + '–' + CP_RANGE.rowsMax + ' · Cols ' + CP_RANGE.colsMin + '–' + CP_RANGE.colsMax + ' · Mines 1–' + maxM)
+      : ('行 ' + CP_RANGE.rowsMin + '–' + CP_RANGE.rowsMax + ' · 列 ' + CP_RANGE.colsMin + '–' + CP_RANGE.colsMax + ' · 雷 1–' + maxM);
+  }
+  function openCustomPanel() {
+    cpRows.value = DIFFS.custom.rows;
+    cpCols.value = DIFFS.custom.cols;
+    cpMines.value = DIFFS.custom.mines;
+    updateCpHint();
+    customPanel.classList.add('show');
+  }
+  function closeCustomPanel() { customPanel.classList.remove('show'); }
+  function startCustom() {
+    var c = customClamp(cpRows.value, cpCols.value, cpMines.value);
+    DIFFS.custom.rows = c.rows; DIFFS.custom.cols = c.cols; DIFFS.custom.mines = c.mines;
+    cpRows.value = c.rows; cpCols.value = c.cols; cpMines.value = c.mines;
+    try { localStorage.setItem(CUSTOM_KEY, JSON.stringify({ rows: c.rows, cols: c.cols, mines: c.mines })); } catch (e) {}
+    closeCustomPanel();
+    newGame('custom');
+  }
+  document.getElementById('cpStart').addEventListener('click', startCustom);
+  document.getElementById('cpCancel').addEventListener('click', closeCustomPanel);
+  [cpRows, cpCols, cpMines].forEach(function (inp) {
+    inp.addEventListener('input', updateCpHint);
+    inp.addEventListener('change', function () {
+      var c = customClamp(cpRows.value, cpCols.value, cpMines.value);
+      cpRows.value = c.rows; cpCols.value = c.cols; cpMines.value = c.mines;
+      updateCpHint();
+    });
+  });
+
   document.getElementById('diffs').addEventListener('click', function (e) {
     var b = e.target.closest('.diff');
     if (!b) return;
-    newGame(b.getAttribute('data-diff'));
+    var d = b.getAttribute('data-diff');
+    if (d === 'custom') {
+      if (customPanel.classList.contains('show')) closeCustomPanel();
+      else openCustomPanel();
+      return;
+    }
+    closeCustomPanel();
+    newGame(d);
   });
   flagModeBtn.addEventListener('click', function () {
     flagMode = !flagMode;
@@ -1047,6 +1151,7 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
     if (window.I18N && I18N.onChange) {
       I18N.onChange(function () {
         renderFlagBtn();
+        if (customPanel.classList.contains('show')) updateCpHint();
         if (resultEl.classList.contains('show')) renderResultLines();
       });
     }
@@ -1065,6 +1170,13 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
     flag: function (i) { toggleFlag(i); },
     chord: function (i) { chord(i); },
     newGame: function (d) { newGame(d); },
+    custom: function (r, c, m) {
+      var cc = customClamp(r, c, m);
+      DIFFS.custom.rows = cc.rows; DIFFS.custom.cols = cc.cols; DIFFS.custom.mines = cc.mines;
+      newGame('custom');
+      return { rows: cc.rows, cols: cc.cols, mines: cc.mines };
+    },
+    customCfg: function () { return { rows: DIFFS.custom.rows, cols: DIFFS.custom.cols, mines: DIFFS.custom.mines }; },
     board: function () { return board; }
   };
 })();
