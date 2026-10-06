@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>扫雷 · 经典排雷小游戏 | 星恬的小站</title>
+<meta name="description" content="经典扫雷在线玩：初级 9×9 / 中级 16×16 / 高级 16×30，首击安全、双击快速展开、手机长按插旗；记录各难度最佳成绩，数据只存浏览器本地。">
+<link rel="canonical" href="https://startian.top/saolei/">
+<meta name="theme-color" content="#eef8ff">
+<meta property="og:type" content="website">
+<meta property="og:title" content="扫雷 · 经典排雷小游戏">
+<meta property="og:description" content="初级 / 中级 / 高级三种难度，首击安全，支持手机长按插旗与最佳成绩记录。">
+<meta property="og:url" content="https://startian.top/saolei/">
+<meta property="og:site_name" content="星恬的小站">
+<script>
+/* ==== i18n-kit v1.2 begin ==== */
+/* ══════════════════════════════════════════════════════════
+   🌐 多语言 i18n Kit（startian.top 全站共享 · v1.2 · 2026-10-04）
+   · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
+   · 自动识别：首次访问按 navigator.language（zh 开头 → 中文，其余 → English）
+   · 两种接入模式（可混用）：
+     ① 短语表模式（推荐，低侵入）：I18N.phrase({ '中文原文': 'English', ... })
+        自动扫描文本节点 / title / placeholder / aria-label / alt，动态插入的文本也自动翻译
+     ② 标注模式：data-i18n / data-i18n-html / data-i18n-title / data-i18n-aria / data-i18n-ph / data-i18n-alt
+   · 子树上加 data-i18n-skip 可整体跳过（用户输入内容、ARG 谜题原文等）
+   · API：I18N.t(k[,vars]) · I18N.tOr(k,fb) · I18N.tr(原文) · I18N.set(lang) · I18N.lang()
+          · I18N.phrase(map) · I18N.scan(root) · I18N.apply(root) · I18N.onChange(fn)
+          · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n)
+   · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
+   ══════════════════════════════════════════════════════════ */
+var I18N = (function () {
+  'use strict';
+  var LS = 'st_lang';
+  var FALLBACK = 'zh';
+  var lang = FALLBACK;
+  var dict = { zh: {}, en: {} };
+  var phrase = {};      /* 短语表：中文原文（归一化）→ 译文 */
+  var listeners = [];
+  var bd = {};          /* boot data：原文快照等 */
+
+  /* ---- 基础词典（全站通用词条） ---- */
+  dict.zh['common.home'] = '主页';
+  dict.en['common.home'] = 'Home';
+  dict.zh['common.homeTitle'] = '返回星恬的小站主页';
+  dict.en['common.homeTitle'] = "Back to Startian's homepage";
+  dict.zh['common.close'] = '关闭';
+  dict.en['common.close'] = 'Close';
+  dict.zh['common.cancel'] = '取消';
+  dict.en['common.cancel'] = 'Cancel';
+
+  /* ---- 存储与识别 ---- */
+  function norm(v) {
+    v = String(v || '').toLowerCase();
+    if (v.indexOf('zh') === 0) return 'zh';
+    if (v.indexOf('en') === 0) return 'en';
+    return null;
+  }
+  function readCookie() {
+    try { var m = document.cookie.match(/(?:^|;\s*)st_lang=([^;]*)/); return m ? decodeURIComponent(m[1]) : null; }
+    catch (e) { return null; }
+  }
+  function readLS() { try { return localStorage.getItem(LS); } catch (e) { return null; } }
+  function persist(v) {
+    try { localStorage.setItem(LS, v); } catch (e) {}
+    try { document.cookie = 'st_lang=' + encodeURIComponent(v) + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax'; } catch (e) {}
+  }
+  function detect() {
+    var s = norm(readCookie()) || norm(readLS());
+    if (s) return s;
+    var n = norm(navigator.language || navigator.userLanguage);
+    return n || FALLBACK;
+  }
+
+  /* ---- 文案 ---- */
+  /* tRaw：查词典（当前语言 → zh 兜底），查不到返回 null（= 保持原文） */
+  function tRaw(key) {
+    var v = (dict[lang] && dict[lang][key] != null) ? dict[lang][key] : null;
+    if (v == null) v = (dict[FALLBACK] && dict[FALLBACK][key] != null) ? dict[FALLBACK][key] : null;
+    return v;
+  }
+  function t(key, vars) {
+    var v = tRaw(key);
+    if (v == null) return key;
+    if (vars) v = String(v).replace(/\{(\w+)\}/g, function (m, k) { return (vars[k] != null) ? vars[k] : m; });
+    return v;
+  }
+  /* tOr：查不到时用传入的兜底值（页面 JS 动态文案用这个） */
+  function tOr(key, fallback) {
+    var v = tRaw(key);
+    return (v == null) ? fallback : v;
+  }
+  function add(obj) {
+    if (!obj) return;
+    ['zh', 'en'].forEach(function (k) {
+      if (obj[k]) for (var key in obj[k]) dict[k][key] = obj[k][key];
+    });
+  }
+  /* tr：短语表直译（原文进，译文出；zh 侧原样返回）-JS 动态文案直接用 */
+  function tr(s) {
+    if (lang === 'zh') return s;
+    var v = lookup(normText(s));
+    return (v == null) ? s : v;
+  }
+  function addPhrase(map) {
+    if (!map) return;
+    for (var k in map) { if (map[k] != null) phrase[normText(k)] = String(map[k]); }
+  }
+  /* 规则表：[[/正则/, '替换（可用 $1）'], ...] - 处理「已复习 3」「12 天有记录」这类数字拼接 */
+  var rules = [];
+  function addRules(list) {
+    if (!list) return;
+    for (var i = 0; i < list.length; i++) {
+      try {
+        var re = (list[i][0] instanceof RegExp) ? list[i][0] : new RegExp(list[i][0]);
+        rules.push([re, String(list[i][1])]);
+      } catch (e) {}
+    }
+  }
+  function lookup(t) {
+    var v = phrase[t];
+    if (v != null) return v;
+    for (var i = 0; i < rules.length; i++) {
+      try { if (rules[i][0].test(t)) return t.replace(rules[i][0], rules[i][1]); } catch (e) {}
+    }
+    return null;
+  }
+
+  /* ---- 短语表扫描（静态 + 动态） ---- */
+  function normText(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
+  var PTAGS = ['title', 'placeholder', 'aria-label', 'alt'];
+  function translText(node) {
+    var raw = node.nodeValue;
+    if (!raw) return;
+    var rec = node.__i18nR;
+    if (rec) {
+      if (lang === 'zh') {
+        if (raw === rec.en) { node.nodeValue = rec.orig; delete node.__i18nR; }
+        else if (raw !== rec.orig) { delete node.__i18nR; }
+        return;
+      }
+      if (raw === rec.en) return;
+      if (raw === rec.orig) { node.nodeValue = rec.en; return; }
+      delete node.__i18nR;
+    }
+    var out = lookup(normText(raw));
+    if (out == null) return;
+    if (lang === 'en') { if (raw !== out) { node.__i18nR = { orig: raw, en: out }; node.nodeValue = out; } }
+  }
+  function translAttrs(el) {
+    if (!el.getAttribute) return;
+    for (var i = 0; i < PTAGS.length; i++) {
+      var a = PTAGS[i], v = el.getAttribute(a);
+      if (v == null || v === '') continue;
+      var rec = el.__i18nA && el.__i18nA[a];
+      if (rec) {
+        if (lang === 'zh') {
+          if (v === rec.en) { el.setAttribute(a, rec.orig); delete el.__i18nA[a]; }
+          else if (v !== rec.orig) { delete el.__i18nA[a]; }
+          continue;
+        }
+        if (v === rec.en) continue;
+        if (v === rec.orig) { el.setAttribute(a, rec.en); continue; }
+        delete el.__i18nA[a];
+      }
+      var out = lookup(normText(v));
+      if (out == null) continue;
+      if (lang === 'en') {
+        if (v !== out) { if (!el.__i18nA) el.__i18nA = {}; el.__i18nA[a] = { orig: v, en: out }; el.setAttribute(a, out); }
+      }
+    }
+  }
+  function scanNode(node) {
+    if (!node) return;
+    if (node.nodeType === 9) node = node.documentElement || node.body;   /* 文档节点 → 转元素 */
+    if (!node) return;
+    if (node.nodeType === 3) { translText(node); return; }
+    if (node.nodeType !== 1) return;
+    var tag = node.tagName;
+    if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'NOSCRIPT') return;
+    if (node.hasAttribute('data-i18n-skip')) return;
+    translAttrs(node);
+    for (var c = node.firstChild; c; c = c.nextSibling) scanNode(c);
+  }
+  function scan(root) { try { scanNode(root || document.body || document.documentElement); } catch (e) {} }
+  /* 动态内容自动翻译（MutationObserver，逐节点增量，无重扫） */
+  var moOn = false;
+  function auto(root) {
+    if (moOn || typeof MutationObserver === 'undefined') return;
+    var target = root || document.body;
+    if (!target) {   /* head 提前注入时 body 还没解析出来，等 DOM ready */
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { auto(root); });
+      return;
+    }
+    moOn = true;
+    try {
+      var mo = new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          var m = muts[i];
+          try {
+            if (m.type === 'characterData') translText(m.target);
+            else if (m.type === 'attributes') translAttrs(m.target);
+            else if (m.type === 'childList') {
+              for (var j = 0; j < m.addedNodes.length; j++) scanNode(m.addedNodes[j]);
+            }
+          } catch (e) {}
+        }
+      });
+      mo.observe(target, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: PTAGS });
+    } catch (e) {}
+  }
+
+  /* ---- 日期 / 数字 ---- */
+  var MN_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var WD_ZH = '日一二三四五六';
+  var WD_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  function fmtDate(d, opt) {
+    if (typeof d === 'string') { var a = d.split('-'); d = new Date(+a[0], (+a[1] || 1) - 1, +a[2] || 1); }
+    if (!(d instanceof Date) || isNaN(d.getTime())) return '';
+    opt = opt || {};
+    var s;
+    if (lang === 'zh') {
+      s = d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日';
+      if (opt.weekday) s += ' · 星期' + WD_ZH.charAt(d.getDay());
+    } else {
+      s = MN_EN[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+      if (opt.weekday) s += ' · ' + WD_EN[d.getDay()];
+    }
+    return s;
+  }
+  function fmtNum(n) {
+    try { return Number(n).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US'); }
+    catch (e) { return String(n); }
+  }
+
+  /* ---- DOM 标注应用（标注模式；词条缺失时恢复原文 - 保证切回中文能还原） ---- */
+  function apply(root) {
+    root = root || document;
+    try {
+      var i, list, v, el;
+      list = root.querySelectorAll('[data-i18n]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrig == null) el.__i18nOrig = el.textContent;
+        v = tRaw(el.getAttribute('data-i18n'));
+        el.textContent = (v != null) ? v : el.__i18nOrig;
+      }
+      list = root.querySelectorAll('[data-i18n-html]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigHTML == null) el.__i18nOrigHTML = el.innerHTML;
+        v = tRaw(el.getAttribute('data-i18n-html'));
+        el.innerHTML = (v != null) ? v : el.__i18nOrigHTML;
+      }
+      list = root.querySelectorAll('[data-i18n-title]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigTitle == null) el.__i18nOrigTitle = el.title;
+        v = tRaw(el.getAttribute('data-i18n-title'));
+        el.title = (v != null) ? v : el.__i18nOrigTitle;
+      }
+      list = root.querySelectorAll('[data-i18n-aria]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAria == null) el.__i18nOrigAria = el.getAttribute('aria-label') || '';
+        v = tRaw(el.getAttribute('data-i18n-aria'));
+        el.setAttribute('aria-label', (v != null) ? v : el.__i18nOrigAria);
+      }
+      list = root.querySelectorAll('[data-i18n-ph]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigPh == null) el.__i18nOrigPh = el.placeholder || '';
+        v = tRaw(el.getAttribute('data-i18n-ph'));
+        el.placeholder = (v != null) ? v : el.__i18nOrigPh;
+      }
+      list = root.querySelectorAll('[data-i18n-alt]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAlt == null) el.__i18nOrigAlt = el.getAttribute('alt') || '';
+        v = tRaw(el.getAttribute('data-i18n-alt'));
+        el.setAttribute('alt', (v != null) ? v : el.__i18nOrigAlt);
+      }
+      /* 标题（短语表优先，其次 page.title 词条） */
+      if (!bd.__origTitle) bd.__origTitle = document.title;
+      var tv = lookup(normText(bd.__origTitle));
+      if (tv == null) tv = tRaw('page.title');
+      if (tv != null) { document.title = (lang === 'en') ? tv : bd.__origTitle; bd.__titleTouched = true; }
+      else if (bd.__titleTouched) { document.title = bd.__origTitle; }
+      document.documentElement.lang = (lang === 'zh') ? 'zh-CN' : 'en';
+      syncSwitch();
+    } catch (e) {}
+  }
+
+  function applyLang(v) {
+    lang = v;
+    persist(v);
+    apply(document);
+    scan(document);
+    for (var i = 0; i < listeners.length; i++) { try { listeners[i](lang); } catch (e) {} }
+    try {
+      var live = document.getElementById('i18n-live');
+      if (live) live.textContent = (lang === 'zh') ? '已切换到中文' : 'Switched to English';
+    } catch (e) {}
+  }
+  /* 切换转场（仿主页主题转场）：黑幕淡入 → 光晕从切换器扩散 → 幕中换语言 → 揭幕；可打断；尊重 reduced-motion */
+  var tid = 0, stage = null;
+  function ensureStage() {
+    if (stage) return stage;
+    var ov = document.createElement('div'); ov.className = 'i18n-veil';
+    var hl = document.createElement('div'); hl.className = 'i18n-halo';
+    var host = document.body || document.documentElement;
+    host.appendChild(ov); host.appendChild(hl);
+    stage = { ov: ov, hl: hl };
+    return stage;
+  }
+  function set(v) {
+    v = norm(v);
+    if (!v) return;
+    if (v === lang) { apply(document); scan(document); return; }
+    var calm = true;
+    try { calm = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) {}
+    if (!calm || !document.body) { applyLang(v); return; }
+    try {
+      var st = ensureStage(), my = ++tid;
+      var x = (window.innerWidth || 360) - 80, y = (window.innerHeight || 640) - 34;
+      try { if (swEl) { var r = swEl.getBoundingClientRect(); x = r.left + r.width / 2; y = r.top + r.height / 2; } } catch (e) {}
+      st.ov.style.setProperty('--ix', x + 'px'); st.ov.style.setProperty('--iy', y + 'px');
+      st.hl.style.setProperty('--ix', x + 'px'); st.hl.style.setProperty('--iy', y + 'px');
+      st.ov.classList.remove('out'); st.ov.classList.add('on'); st.ov.style.display = 'block';
+      st.hl.classList.remove('go'); void st.hl.offsetWidth; st.hl.classList.add('go');
+      setTimeout(function () {
+        if (my !== tid) return;
+        applyLang(v);
+        st.ov.classList.remove('on'); st.ov.classList.add('out');
+        setTimeout(function () {
+          if (my !== tid) return;
+          st.ov.style.display = 'none'; st.ov.classList.remove('out');
+        }, 520);
+      }, 430);
+    } catch (e) { applyLang(v); }
+  }
+  function onChange(fn) { if (typeof fn === 'function') listeners.push(fn); }
+  function getLang() { return lang; }
+
+  /* ---- 切换入口（右下角胶囊，自动注入） ---- */
+  var SW_CSS = '.i18n-sw{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:9992;display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:rgba(17,24,39,.74);-webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);border:1px solid rgba(255,255,255,.26);box-shadow:0 6px 20px rgba(0,0,0,.28);font-family:inherit}' +
+    '.i18n-sw:hover{background:rgba(17,24,39,.86);border-color:rgba(255,255,255,.38)}' +
+    '.i18n-gl{font-size:13px;line-height:1;padding:0 5px 0 8px;opacity:.95;pointer-events:none}' +
+    '.i18n-sw button{border:0;background:transparent;color:rgba(255,255,255,.78);font-size:12px;font-weight:700;letter-spacing:.4px;padding:6px 11px;border-radius:999px;cursor:pointer;font-family:inherit;transition:all .18s ease;line-height:1}' +
+    '.i18n-sw button:hover{color:#fff;background:rgba(255,255,255,.12)}' +
+    '.i18n-sw button:focus-visible{outline:2px solid #7dd3fc;outline-offset:1px}' +
+    '.i18n-sw button.on{background:rgba(255,255,255,.92);color:#1f2937;box-shadow:0 2px 8px rgba(0,0,0,.25)}' +
+    '.i18n-sw button:active{transform:translateY(1px)}' +
+    '.i18n-veil{position:fixed;inset:0;z-index:9990;pointer-events:none;display:none;opacity:0;background:#060a16;transition:opacity .42s ease}' +
+    '.i18n-veil.on{opacity:1}' +
+    '.i18n-veil.out{opacity:0;transition:opacity .5s cubic-bezier(.2,.8,.3,1)}' +
+    '.i18n-halo{position:fixed;z-index:9991;left:var(--ix,92%);top:var(--iy,93%);width:14px;height:14px;border-radius:50%;box-sizing:border-box;pointer-events:none;display:none;border:2px solid rgba(198,226,255,.95);box-shadow:0 0 24px 6px rgba(137,194,255,.6),0 0 70px 20px rgba(137,194,255,.3),inset 0 0 20px rgba(198,226,255,.5)}' +
+    '.i18n-halo.go{display:block;animation:i18nHalo .85s cubic-bezier(.16,.7,.3,1) forwards}' +
+    '@keyframes i18nHalo{0%{opacity:0;transform:translate(-50%,-50%) scale(.01)}22%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(58)}}' +
+    '.i18n-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}' +
+    '@media (max-width:620px){.i18n-sw{right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px))}.i18n-sw button{padding:5px 9px;font-size:11.5px}}';
+
+  var swEl = null;
+  function buildSwitch() {
+    try {
+      if (!document.body) return;
+      var exist = document.querySelector('.i18n-sw');
+      if (exist) { swEl = exist; syncSwitch(); return; }
+      var st = document.createElement('style');
+      st.textContent = SW_CSS;
+      (document.head || document.documentElement).appendChild(st);
+      var wrap = document.createElement('div');
+      wrap.className = 'i18n-sw';
+      wrap.setAttribute('role', 'group');
+      wrap.setAttribute('aria-label', '切换语言 / Switch language');
+      wrap.setAttribute('title', '切换语言 / Switch language');
+      var gl = document.createElement('span');
+      gl.className = 'i18n-gl';
+      gl.textContent = '🌐';
+      gl.setAttribute('aria-hidden', 'true');
+      wrap.appendChild(gl);
+      [['zh', '中文'], ['en', 'English']].forEach(function (p) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('data-lang', p[0]);
+        b.textContent = p[1];
+        b.addEventListener('click', function () { set(p[0]); });
+        wrap.appendChild(b);
+      });
+      var live = document.createElement('span');
+      live.id = 'i18n-live';
+      live.className = 'i18n-sr';
+      live.setAttribute('aria-live', 'polite');
+      wrap.appendChild(live);
+      document.body.appendChild(wrap);
+      swEl = wrap;
+      syncSwitch();
+    } catch (e) {}
+  }
+  function syncSwitch() {
+    try {
+      if (!swEl) return;
+      var bs = swEl.querySelectorAll('button[data-lang]');
+      for (var i = 0; i < bs.length; i++) {
+        var on = bs[i].getAttribute('data-lang') === lang;
+        bs[i].classList.toggle('on', on);
+        bs[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    } catch (e) {}
+  }
+
+  /* ---- 启动 ---- */
+  lang = detect();
+  function boot() {
+    buildSwitch();
+    apply(document);
+    scan(document);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+
+  return {
+    t: t, tOr: tOr, tr: tr, set: set, apply: apply, scan: scan, auto: auto,
+    phrase: addPhrase, rules: addRules, add: add, lang: getLang, onChange: onChange,
+    fmtDate: fmtDate, fmtNum: fmtNum
+  };
+})();
+
+/* ---- 短语表（中文原文 → English）---- */
+I18N.phrase({"扫雷": "Minesweeper","扫雷 · 经典排雷小游戏 | 星恬的小站": "Minesweeper · Classic Puzzle Game | Startian's Site","翻开所有安全的格子，把雷都标出来 · 首击永远安全": "Open every safe cell and mark all mines · First click is always safe","剩余雷数": "Mines left","用时": "Time","初级": "Easy","中级": "Intermediate","高级": "Expert","9×9 · 10 雷": "9×9 · 10 mines","16×16 · 40 雷": "16×16 · 40 mines","30×16 · 99 雷": "30×16 · 99 mines","最佳：初级": "Best: Easy","🚩 插旗模式：关": "🚩 Flag mode: OFF","🚩 插旗模式：开": "🚩 Flag mode: ON","🎉 排雷成功！": "🎉 Cleared!","用时 32 秒": "Time 32s","再来一局": "Play again","左键": "Left-click","右键": "Right-click","双击数字": "Double-click a number","翻开 ·": "to open ·","插旗 ·": "to flag ·","快速展开一圈 · 手机长按格子也能插旗": "to auto-open around it · long-press to flag on mobile","主页": "Home","重开一局": "Restart","手机友好：开启后点按即插旗": "Mobile friendly: tap a cell to flag","返回星恬的小站主页": "Back to Startian's homepage","经典扫雷小游戏：三种难度、首击安全、双击快速展开、手机长按插旗。": "Classic minesweeper: three difficulties, first-click safety, double-click to auto-open, long-press to flag on mobile.","🏆 成就解锁：": "🏆 Achievement unlocked: ","排雷新兵": "Rookie Sweeper","旗开得胜": "First Victory","中级排雷手": "Intermediate Sweeper","高级排雷专家": "Expert Deminer","闪电排雷": "Lightning Clear","徒手排雷": "Flagless Clear","💥 踩到雷了": "💥 Boom! You hit a mine"});
+I18N.auto();
+/* ==== i18n-kit v1.2 end ==== */
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "扫雷",
+  "url": "https://startian.top/saolei/",
+  "applicationCategory": "Game",
+  "operatingSystem": "Any",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" },
+  "description": "经典扫雷小游戏：三种难度、首击安全、双击快速展开、手机长按插旗。"
+}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg1:#eef8ff; --bg2:#d9edff;
+  --card:#ffffff; --tint:#f4faff;
+  --line:#d5e9fb; --line2:#e3f2fd;
+  --ink:#1f3c5e; --ink2:#54759a; --ink3:#93b4d4;
+  --accent:#89c2ff; --accent-deep:#3f86d1;
+  --sh-sm:0 1px 2px rgba(76,116,164,.06), 0 10px 28px rgba(120,160,210,.12);
+  --sh-lg:0 2px 4px rgba(76,116,164,.08), 0 24px 50px rgba(110,155,210,.24);
+  --cell-grad-a:#d6ebfd; --cell-grad-b:#b9d9f6; --cell-border:#a8cdf0;
+  --cell-hover-a:#e4f2ff; --cell-hover-b:#c6e0fa;
+  --open-bg:#f6fbff; --open-line:#e2eefb;
+  --n1:#1d74d4; --n2:#2e9e4f; --n3:#d94040; --n4:#7a3db8; --n5:#c98a1b; --n6:#16979e; --n7:#3c4d5c; --n8:#8aa0b4;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg1:#0b1526; --bg2:#0f1d33;
+    --card:#121f36; --tint:#16253f;
+    --line:#24395c; --line2:#1d2f4d;
+    --ink:#e8f1fd; --ink2:#9db4d4; --ink3:#5f7698;
+    --accent:#5b8fd6; --accent-deep:#8fb8ff;
+    --sh-sm:0 1px 2px rgba(0,0,0,.4), 0 10px 28px rgba(2,8,20,.5);
+    --sh-lg:0 2px 4px rgba(0,0,0,.5), 0 24px 50px rgba(2,8,20,.6);
+    --cell-grad-a:#2a4a74; --cell-grad-b:#1e3a5e; --cell-border:#2d527e;
+    --cell-hover-a:#33578a; --cell-hover-b:#254573;
+    --open-bg:#152642; --open-line:#1f3454;
+    --n1:#7db6f0; --n2:#7fd6a0; --n3:#f08a8a; --n4:#c49bea; --n5:#e6bc6b; --n6:#6fd3da; --n7:#c9d6e4; --n8:#8aa0b4;
+  }
+}
+html{-webkit-text-size-adjust:100%}
+body{
+  min-height:100vh; color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+  background:radial-gradient(1400px 700px at 50% -120px, var(--card) 0%, var(--bg1) 45%, var(--bg2) 100%) fixed;
+  line-height:1.6;
+}
+.wrap{max-width:900px;margin:0 auto;padding:36px 16px 90px}
+header{text-align:center;margin-bottom:22px}
+h1{font-size:clamp(26px,5vw,38px);letter-spacing:1px}
+h1 .bomb{display:inline-block;animation:bob 3s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-4px) rotate(-8deg)}}
+@media (prefers-reduced-motion: reduce){ h1 .bomb{animation:none} }
+header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
+
+.panel{background:var(--card);border:1px solid var(--line);border-radius:24px;box-shadow:var(--sh-lg);padding:20px;max-width:fit-content;margin:0 auto}
+.hud{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+.hud-box{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:88px;background:var(--tint);border:1px solid var(--line);border-radius:14px;padding:8px 14px}
+.hud-label{font-size:11px;color:var(--ink3);letter-spacing:1px}
+.hud-num{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:1px}
+#mineNum{color:#d94040}
+.face{width:58px;height:58px;border-radius:50%;border:2px solid var(--line);background:var(--tint);font-size:28px;line-height:1;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;box-shadow:var(--sh-sm)}
+.face:hover{transform:scale(1.06)}
+.face:active{transform:scale(.96)}
+
+.diffs{display:flex;gap:8px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
+.diff{border:1.5px solid var(--line);background:var(--tint);color:var(--ink2);border-radius:12px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .18s ease}
+.diff small{display:block;font-size:10.5px;font-weight:600;color:var(--ink3);margin-top:1px}
+.diff:hover{border-color:var(--accent);color:var(--accent-deep)}
+.diff.on{background:linear-gradient(135deg,var(--accent),var(--accent-deep));border-color:var(--accent-deep);color:#fff;box-shadow:0 6px 18px rgba(63,134,209,.35)}
+.diff.on small{color:rgba(255,255,255,.85)}
+
+.best{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;font-size:12px;color:var(--ink3);margin-bottom:14px}
+.best b{color:var(--ink2);font-variant-numeric:tabular-nums}
+
+.board-wrap{overflow:auto;border-radius:16px;max-width:calc(100vw - 64px)}
+.board{
+  --cell:38px;
+  display:grid;gap:2px;background:var(--line2);
+  border:3px solid var(--line);border-radius:14px;padding:3px;margin:0 auto;width:fit-content;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;
+}
+.cell{
+  width:var(--cell);height:var(--cell);border-radius:6px;display:grid;place-items:center;
+  font-size:calc(var(--cell)*.52);font-weight:800;line-height:1;cursor:pointer;
+  background:linear-gradient(155deg,var(--cell-grad-a),var(--cell-grad-b));
+  border:1px solid var(--cell-border);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55), 0 1px 2px rgba(90,130,180,.14);
+  transition:background .1s ease,transform .06s ease;
+}
+@media (prefers-color-scheme: dark){ .cell{box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 1px 2px rgba(0,0,0,.3)} }
+.cell:hover{background:linear-gradient(155deg,var(--cell-hover-a),var(--cell-hover-b))}
+.cell:active{transform:scale(.97)}
+.cell.open{
+  background:var(--open-bg);border-color:var(--open-line);cursor:default;
+  box-shadow:inset 0 0 0 1px var(--open-line);
+}
+.cell.open:active{transform:none}
+.cell.flag{animation:pop .18s ease}
+@keyframes pop{50%{transform:scale(1.14)}}
+.cell.n1{color:var(--n1)} .cell.n2{color:var(--n2)} .cell.n3{color:var(--n3)} .cell.n4{color:var(--n4)}
+.cell.n5{color:var(--n5)} .cell.n6{color:var(--n6)} .cell.n7{color:var(--n7)} .cell.n8{color:var(--n8)}
+.cell.boom{background:#f8caca;border-color:#e88}
+.cell.boom-x{background:#f3d9d9;border-color:#e0b6b6}
+.cell.wrong{background:#f4d6e2;border-color:#dda6c0;font-size:calc(var(--cell)*.4)}
+.cell.mine-show{background:var(--tint)}
+.cell.locked{cursor:default}
+
+.hint{margin-top:14px;text-align:center;font-size:12px;color:var(--ink3);line-height:1.9}
+.hint kbd{background:var(--tint);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px;font-family:inherit;color:var(--ink2)}
+.tools{display:flex;gap:8px;justify-content:center;margin-top:12px}
+.tool{border:1.5px solid var(--line);background:var(--tint);color:var(--ink2);border-radius:999px;padding:7px 16px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .18s ease}
+.tool:hover{border-color:var(--accent);color:var(--accent-deep)}
+.tool.on{background:linear-gradient(135deg,#f0b85c,#e09a2e);border-color:#d18f2a;color:#fff;box-shadow:0 6px 16px rgba(224,154,46,.35)}
+
+.result{display:none;text-align:center;margin-top:16px;padding:16px;border-radius:16px;border:1.5px solid var(--line);background:var(--tint)}
+.result.show{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}}
+.result .rt{font-size:20px;font-weight:800}
+.result .rs{font-size:13px;color:var(--ink2);margin-top:6px}
+.result .rb{margin-top:12px}
+.result button{border:0;background:linear-gradient(135deg,var(--accent),var(--accent-deep));color:#fff;border-radius:12px;padding:10px 24px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 8px 20px rgba(63,134,209,.3)}
+.result button:hover{transform:translateY(-1px)}
+
+/* —— 返回主页（全站统一 · 2026-09-29）—— */
+.wb-home{position:fixed;left:14px;bottom:14px;z-index:9990;display:inline-flex;align-items:center;gap:5px;
+  padding:8px 13px 8px 10px;border-radius:999px;text-decoration:none;
+  background:rgba(17,24,39,.55);color:#fff;font-size:12.5px;font-weight:600;letter-spacing:.3px;
+  -webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.14);box-shadow:0 6px 18px rgba(0,0,0,.18);
+  transition:background .2s,transform .2s,box-shadow .2s}
+.wb-home:hover{background:rgba(17,24,39,.78);transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.26);text-decoration:none}
+.wb-home:active{transform:translateY(0)}
+.wb-home svg{width:13px;height:13px;flex:0 0 auto}
+@media (max-width:620px){ .wb-home{left:10px;bottom:10px;padding:7px 11px 7px 9px;font-size:12px} }
+
+@media (max-width:640px){
+  .wrap{padding:24px 10px 80px}
+  .panel{padding:12px;border-radius:18px}
+  .hud{gap:8px}
+  .hud-box{min-width:70px;padding:6px 10px}
+  .hud-num{font-size:18px}
+  .face{width:48px;height:48px;font-size:23px}
+  .board-wrap{max-width:calc(100vw - 44px)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span class="bomb">💣</span> 扫雷</h1>
+    <p>翻开所有安全的格子，把雷都标出来 · 首击永远安全</p>
+  </header>
+
+  <div class="panel">
+    <div class="hud">
+      <div class="hud-box"><span class="hud-label">剩余雷数</span><span class="hud-num" id="mineNum">10</span></div>
+      <button class="face" id="face" title="重开一局">🙂</button>
+      <div class="hud-box"><span class="hud-label">用时</span><span class="hud-num" id="timer">000</span></div>
+    </div>
+
+    <div class="diffs" id="diffs">
+      <button class="diff on" data-diff="easy">初级<small>9×9 · 10 雷</small></button>
+      <button class="diff" data-diff="mid">中级<small>16×16 · 40 雷</small></button>
+      <button class="diff" data-diff="hard">高级<small>30×16 · 99 雷</small></button>
+    </div>
+
+    <div class="best">
+      <span>最佳：初级 <b id="bestEasy">--</b></span>
+      <span>中级 <b id="bestMid">--</b></span>
+      <span>高级 <b id="bestHard">--</b></span>
+    </div>
+
+    <div class="board-wrap" id="boardWrap"><div class="board" id="board"></div></div>
+
+    <div class="tools">
+      <button class="tool" id="flagMode" title="手机友好：开启后点按即插旗">🚩 插旗模式：关</button>
+    </div>
+
+    <div class="result" id="result">
+      <div class="rt" id="resultTitle">🎉 排雷成功！</div>
+      <div class="rs" id="resultSub">用时 32 秒</div>
+      <div class="rb"><button id="againBtn">再来一局</button></div>
+    </div>
+
+    <div class="hint">
+      <kbd>左键</kbd> 翻开 · <kbd>右键</kbd> 插旗 · <kbd>双击数字</kbd> 快速展开一圈 · 手机长按格子也能插旗
+    </div>
+  </div>
+</div>
+
+<!-- 返回主页按钮（全站统一按钮 · 2026-09-29） -->
+<a class="wb-home" href="https://startian.top/" title="返回星恬的小站主页">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>主页</span>
+</a>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============ i18n 辅助（短语表由 i18n-kit 注入） ============ */
+  function isEn() {
+    try { return window.I18N && I18N.lang && I18N.lang() === 'en'; } catch (e) { return false; }
+  }
+  function tr(s) {
+    try { return (window.I18N && I18N.tr) ? I18N.tr(s) : s; } catch (e) { return s; }
+  }
+
+  /* ============ 跨站成就 SDK（startian.top 全站共享；cookie + localStorage 兜底） ============ */
+  var STAch = (function () {
+    var KEY = 'st_ach';
+    function readCookie() {
+      var m = document.cookie.match(/(?:^|;\s*)st_ach=([^;]*)/);
+      if (!m) return null;
+      try { return JSON.parse(decodeURIComponent(m[1])) || []; } catch (e) { return null; }
+    }
+    function writeCookie(list) {
+      try {
+        var v = encodeURIComponent(JSON.stringify(list));
+        if (v.length < 3800) document.cookie = 'st_ach=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+      } catch (e) {}
+    }
+    var list = readCookie();
+    if (!list) { try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { list = []; } }
+    if (!Array.isArray(list)) list = [];
+    function save() {
+      try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+      writeCookie(list);
+    }
+    function unlock(id, name, ico) {
+      if (list.indexOf(id) >= 0) return false;
+      list.push(id);
+      save();
+      try {
+        var el = document.createElement('div');
+        el.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9999;background:rgba(22,26,48,.94);color:#fff;border:1px solid rgba(140,170,255,.42);border-radius:999px;padding:12px 22px;font:700 13.5px/1.4 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:86vw';
+        el.textContent = tr('🏆 成就解锁：') + (ico ? ico + ' ' : '') + tr(name || id);
+        document.body.appendChild(el);
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        setTimeout(function () {
+          el.style.opacity = '0';
+          el.style.transform = 'translateX(-50%) translateY(16px)';
+          setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+        }, 3200);
+      } catch (e) {}
+      return true;
+    }
+    return { list: function () { return list.slice(); }, has: function (id) { return list.indexOf(id) >= 0; }, unlock: unlock };
+  })();
+  window.STAch = STAch;
+  setTimeout(function () { STAch.unlock('site.saolei', '排雷新兵', '💣'); }, 600);
+
+  /* ============ 游戏配置 ============ */
+  var DIFFS = {
+    easy: { rows: 9,  cols: 9,  mines: 10, name: '初级', nameEn: 'Easy' },
+    mid:  { rows: 16, cols: 16, mines: 40, name: '中级', nameEn: 'Intermediate' },
+    hard: { rows: 16, cols: 30, mines: 99, name: '高级', nameEn: 'Expert' }
+  };
+  function dname(d) { var D = DIFFS[d || diff]; return isEn() ? D.nameEn : D.name; }
+  function achName(zh, en) { return isEn() ? en : zh; }
+  var BEST_KEY = 'startian_saolei_best_v1';
+  var CELL_PREF = { easy: 38, mid: 30, hard: 24 };
+
+  var board = document.getElementById('board');
+  var boardWrap = document.getElementById('boardWrap');
+  var mineNumEl = document.getElementById('mineNum');
+  var timerEl = document.getElementById('timer');
+  var faceEl = document.getElementById('face');
+  var resultEl = document.getElementById('result');
+  var resultTitle = document.getElementById('resultTitle');
+  var resultSub = document.getElementById('resultSub');
+  var flagModeBtn = document.getElementById('flagMode');
+
+  var cells = [];         // { mine, open, flag, num }
+  var rows = 0, cols = 0, mines = 0;
+  var diff = 'easy';
+  var started = false, over = false, win = false;
+  var openedCount = 0, flagCount = 0;
+  var timerId = null, seconds = 0;
+  var flagMode = false;
+  var suppressClick = false;
+
+  /* ============ 工具 ============ */
+  function idx(r, c) { return r * cols + c; }
+  function neighbors(i) {
+    var r = Math.floor(i / cols), c = i % cols, out = [];
+    for (var dr = -1; dr <= 1; dr++) {
+      for (var dc = -1; dc <= 1; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        var nr = r + dr, nc = c + dc;
+        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) out.push(idx(nr, nc));
+      }
+    }
+    return out;
+  }
+  function fmtTime(s) {
+    s = Math.min(999, Math.max(0, Math.round(s)));
+    return ('00' + s).slice(-3);
+  }
+  function fmtBest(s) {
+    if (s === null || s === undefined) return '--';
+    var m = Math.floor(s / 60), sec = s % 60;
+    return m + ':' + ('0' + sec).slice(-2);
+  }
+  function loadBest() {
+    try { return JSON.parse(localStorage.getItem(BEST_KEY) || '{}') || {}; } catch (e) { return {}; }
+  }
+  function saveBest(b) {
+    try { localStorage.setItem(BEST_KEY, JSON.stringify(b)); } catch (e) {}
+  }
+  function renderBest() {
+    var b = loadBest();
+    document.getElementById('bestEasy').textContent = fmtBest(b.easy);
+    document.getElementById('bestMid').textContent = fmtBest(b.mid);
+    document.getElementById('bestHard').textContent = fmtBest(b.hard);
+  }
+
+  /* ============ 建局 ============ */
+  function newGame(d, keepFace) {
+    diff = d || diff;
+    var cfg = DIFFS[diff];
+    rows = cfg.rows; cols = cfg.cols; mines = cfg.mines;
+    cells = [];
+    for (var i = 0; i < rows * cols; i++) cells.push({ mine: false, open: false, flag: false, num: 0 });
+    started = false; over = false; win = false;
+    openedCount = 0; flagCount = 0; seconds = 0;
+    suppressClick = false;
+    clearInterval(timerId); timerId = null;
+    timerEl.textContent = '000';
+    faceEl.textContent = '🙂';
+    mineNumEl.textContent = String(mines);
+    resultEl.classList.remove('show');
+    fitCell();
+    renderAll();
+    document.querySelectorAll('.diff').forEach(function (b) {
+      b.classList.toggle('on', b.getAttribute('data-diff') === diff);
+    });
+  }
+
+  function fitCell() {
+    var pref = CELL_PREF[diff];
+    var vw = Math.min(window.innerWidth, 920);
+    var pad = window.innerWidth <= 640 ? 44 : 84;
+    var avail = vw - pad;
+    var cell = Math.floor((avail - (cols - 1) * 2 - 12) / cols);
+    cell = Math.max(20, Math.min(pref, cell));
+    board.style.setProperty('--cell', cell + 'px');
+  }
+
+  function placeMines(safeIdx) {
+    var safe = {};
+    safe[safeIdx] = true;
+    neighbors(safeIdx).forEach(function (n) { safe[n] = true; });
+    var pool = [];
+    for (var i = 0; i < cells.length; i++) if (!safe[i]) pool.push(i);
+    // 兜底：若空间不足（理论不会），放宽到只保首击格
+    if (pool.length < mines) {
+      pool = [];
+      for (var j = 0; j < cells.length; j++) if (j !== safeIdx) pool.push(j);
+    }
+    for (var k = pool.length - 1; k > 0; k--) {
+      var r = Math.floor(Math.random() * (k + 1));
+      var t = pool[k]; pool[k] = pool[r]; pool[r] = t;
+    }
+    for (var m = 0; m < mines; m++) cells[pool[m]].mine = true;
+    for (var x = 0; x < cells.length; x++) {
+      if (cells[x].mine) continue;
+      var n2 = neighbors(x), cnt = 0;
+      for (var y = 0; y < n2.length; y++) if (cells[n2[y]].mine) cnt++;
+      cells[x].num = cnt;
+    }
+  }
+
+  /* ============ 渲染 ============ */
+  function cellEl(i) { return board.children[i]; }
+  function renderCell(i) {
+    var el = cellEl(i); if (!el) return;
+    var c = cells[i];
+    el.className = 'cell';
+    el.textContent = '';
+    if (c.open) {
+      el.classList.add('open');
+      if (c.mine) { el.textContent = '💣'; }
+      else if (c.num > 0) { el.classList.add('n' + c.num); el.textContent = String(c.num); }
+    } else {
+      if (c.flag) { el.classList.add('flag'); el.textContent = '🚩'; }
+    }
+    if (over) el.classList.add('locked');
+  }
+  function renderAll() {
+    board.innerHTML = '';
+    board.style.gridTemplateColumns = 'repeat(' + cols + ', var(--cell))';
+    for (var i = 0; i < cells.length; i++) {
+      var el = document.createElement('div');
+      el.className = 'cell';
+      el.setAttribute('data-i', String(i));
+      board.appendChild(el);
+    }
+    for (var j = 0; j < cells.length; j++) renderCell(j);
+  }
+
+  /* ============ 计时 ============ */
+  function startTimer() {
+    if (timerId) return;
+    timerId = setInterval(function () {
+      seconds++;
+      timerEl.textContent = fmtTime(seconds);
+    }, 1000);
+  }
+  function stopTimer() { clearInterval(timerId); timerId = null; }
+
+  /* ============ 翻开逻辑 ============ */
+  function floodOpen(start) {
+    var stack = [start];
+    while (stack.length) {
+      var i = stack.pop();
+      var c = cells[i];
+      if (c.open || c.flag) continue;
+      c.open = true;
+      openedCount++;
+      renderCell(i);
+      if (c.num === 0 && !c.mine) {
+        var ns = neighbors(i);
+        for (var k = 0; k < ns.length; k++) {
+          if (!cells[ns[k]].open && !cells[ns[k]].flag) stack.push(ns[k]);
+        }
+      }
+    }
+  }
+  function openCell(i) {
+    if (over) return;
+    var c = cells[i];
+    if (c.open || c.flag) return;
+    if (!started) {
+      started = true;
+      placeMines(i);
+      startTimer();
+    }
+    if (c.mine) { lose(i); return; }
+    floodOpen(i);
+    checkWin();
+  }
+  function checkWin() {
+    if (openedCount >= rows * cols - mines) {
+      win = true; over = true;
+      stopTimer();
+      faceEl.textContent = '😎';
+      var playerFlagCount = flagCount;   /* 自动插旗前：玩家自己插的旗数 */
+      // 自动插旗剩余雷
+      for (var i = 0; i < cells.length; i++) {
+        if (cells[i].mine && !cells[i].flag) { cells[i].flag = true; flagCount++; renderCell(i); }
+      }
+      mineNumEl.textContent = '0';
+      var b = loadBest();
+      var isNew = (b[diff] === undefined || seconds < b[diff]);
+      if (isNew) { b[diff] = seconds; saveBest(b); renderBest(); }
+      /* —— 成就 —— */
+      try {
+        if (!STAch.has('saolei.first_win')) STAch.unlock('saolei.first_win', achName('旗开得胜', 'First Victory'), '🚩');
+        if (diff === 'mid') STAch.unlock('saolei.win_mid', achName('中级排雷手', 'Intermediate Sweeper'), '🧭');
+        if (diff === 'hard') STAch.unlock('saolei.win_hard', achName('高级排雷专家', 'Expert Deminer'), '🏅');
+        if (diff === 'easy' && seconds <= 60) STAch.unlock('saolei.speed', achName('闪电排雷', 'Lightning Clear'), '⚡');
+        if (playerFlagCount === 0) STAch.unlock('saolei.noflag', achName('徒手排雷', 'Flagless Clear'), '🖐️');
+      } catch (e) {}
+      /* —— 结果面板 —— */
+      lastResult = { win: true, isNew: isNew };
+      renderResultLines();
+      setTimeout(function () { resultEl.classList.add('show'); }, 500);
+    }
+  }
+  function lose(boomIdx) {
+    over = true; win = false;
+    stopTimer();
+    faceEl.textContent = '😵';
+    for (var i = 0; i < cells.length; i++) {
+      var c = cells[i];
+      if (c.mine && !c.flag) { c.open = true; renderCell(i); }
+      if (!c.mine && c.flag) { renderCell(i); cellEl(i).classList.add('wrong'); cellEl(i).textContent = '❌'; }
+    }
+    var be = cellEl(boomIdx);
+    if (be) { be.textContent = '💥'; be.classList.add('boom'); }
+    lastResult = { win: false, isNew: false };
+    renderResultLines();
+    setTimeout(function () { resultEl.classList.add('show'); }, 800);
+  }
+
+  /* ============ 结果面板文本（双语） ============ */
+  var lastResult = null;
+  function renderResultLines() {
+    if (!lastResult) return;
+    if (lastResult.win) {
+      resultTitle.textContent = tr('🎉 排雷成功！');
+      resultSub.textContent = isEn()
+        ? (dname() + ' cleared · time ' + fmtTime(seconds) + ' s' + (lastResult.isNew ? ' · 🏆 New record!' : ''))
+        : (dname() + '通关 · 用时 ' + fmtTime(seconds) + ' 秒' + (lastResult.isNew ? ' · 🏆 新纪录！' : ''));
+    } else {
+      resultTitle.textContent = tr('💥 踩到雷了');
+      resultSub.textContent = isEn()
+        ? ('Don\'t give up — try ' + dname() + ' again~')
+        : ('别灰心，' + dname() + '再试一次～');
+    }
+  }
+  function renderFlagBtn() {
+    var on = isEn() ? '🚩 Flag mode: ON' : '🚩 插旗模式：开';
+    var off = isEn() ? '🚩 Flag mode: OFF' : '🚩 插旗模式：关';
+    flagModeBtn.textContent = flagMode ? on : off;
+  }
+
+  /* ============ 插旗 ============ */
+  function toggleFlag(i) {
+    if (over) return;
+    var c = cells[i];
+    if (c.open) return;
+    c.flag = !c.flag;
+    flagCount += c.flag ? 1 : -1;
+    mineNumEl.textContent = String(mines - flagCount);
+    renderCell(i);
+  }
+
+  /* ============ 双击快速展开（chord） ============ */
+  function chord(i) {
+    if (over) return;
+    var c = cells[i];
+    if (!c.open || c.num <= 0 || c.mine) return;
+    var ns = neighbors(i), flagged = 0;
+    for (var k = 0; k < ns.length; k++) if (cells[ns[k]].flag) flagged++;
+    if (flagged !== c.num) return;
+    for (var j = 0; j < ns.length; j++) {
+      var n = ns[j];
+      if (!cells[n].open && !cells[n].flag) {
+        if (cells[n].mine) { lose(n); return; }
+        floodOpen(n);
+      }
+    }
+    checkWin();
+  }
+
+  /* ============ 交互 ============ */
+  var longPressTimer = null, longPressFired = false, touchStartXY = null;
+
+  board.addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+    var t = e.target.closest('.cell');
+    if (!t) return;
+    toggleFlag(parseInt(t.getAttribute('data-i'), 10));
+  });
+
+  board.addEventListener('click', function (e) {
+    var t = e.target.closest('.cell');
+    if (!t) return;
+    var i = parseInt(t.getAttribute('data-i'), 10);
+    if (suppressClick) { suppressClick = false; return; }
+    if (flagMode) { toggleFlag(i); return; }
+    openCell(i);
+  });
+
+  board.addEventListener('dblclick', function (e) {
+    var t = e.target.closest('.cell');
+    if (!t) return;
+    chord(parseInt(t.getAttribute('data-i'), 10));
+  });
+
+  board.addEventListener('touchstart', function (e) {
+    if (e.touches.length !== 1) return;
+    var t = e.target.closest('.cell');
+    if (!t) return;
+    longPressFired = false;
+    var i = parseInt(t.getAttribute('data-i'), 10);
+    touchStartXY = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    clearTimeout(longPressTimer);
+    longPressTimer = setTimeout(function () {
+      longPressFired = true;
+      suppressClick = true;
+      toggleFlag(i);
+      if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e2) {} }
+    }, 420);
+  }, { passive: true });
+
+  board.addEventListener('touchmove', function (e) {
+    if (!touchStartXY || e.touches.length !== 1) return;
+    var dx = e.touches[0].clientX - touchStartXY.x;
+    var dy = e.touches[0].clientY - touchStartXY.y;
+    if (dx * dx + dy * dy > 100) { clearTimeout(longPressTimer); touchStartXY = null; }
+  }, { passive: true });
+
+  board.addEventListener('touchend', function () {
+    clearTimeout(longPressTimer);
+    if (longPressFired) { suppressClick = true; }
+    touchStartXY = null;
+  });
+
+  window.addEventListener('resize', function () { fitCell(); });
+
+  /* ============ 按钮 ============ */
+  faceEl.addEventListener('click', function () { newGame(diff); });
+  document.getElementById('againBtn').addEventListener('click', function () { newGame(diff); });
+  document.getElementById('diffs').addEventListener('click', function (e) {
+    var b = e.target.closest('.diff');
+    if (!b) return;
+    newGame(b.getAttribute('data-diff'));
+  });
+  flagModeBtn.addEventListener('click', function () {
+    flagMode = !flagMode;
+    flagModeBtn.classList.toggle('on', flagMode);
+    renderFlagBtn();
+  });
+
+  /* 语言切换：刷新动态文本 */
+  try {
+    if (window.I18N && I18N.onChange) {
+      I18N.onChange(function () {
+        renderFlagBtn();
+        if (resultEl.classList.contains('show')) renderResultLines();
+      });
+    }
+  } catch (e) {}
+
+  /* ============ 启动 ============ */
+  renderBest();
+  renderFlagBtn();
+  newGame('easy');
+
+  /* 测试钩子（仅调试用） */
+  window.__saolei = {
+    state: function () { return { rows: rows, cols: cols, mines: mines, diff: diff, started: started, over: over, win: win, opened: openedCount, flags: flagCount, seconds: seconds }; },
+    cell: function (i) { var c = cells[i]; return c ? { mine: c.mine, open: c.open, flag: c.flag, num: c.num } : null; },
+    open: function (i) { openCell(i); },
+    flag: function (i) { toggleFlag(i); },
+    chord: function (i) { chord(i); },
+    newGame: function (d) { newGame(d); },
+    board: function () { return board; }
+  };
+})();
+</script>
+</body>
+</html>
