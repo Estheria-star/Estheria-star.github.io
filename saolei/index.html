@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>扫雷 · 经典排雷小游戏 | 星恬的小站</title>
-<meta name="description" content="经典扫雷在线玩：初级 9×9 / 中级 16×16 / 高级 16×30，首击安全、双击快速展开、手机长按插旗；记录各难度最佳成绩，数据只存浏览器本地。">
+<meta name="description" content="经典扫雷在线玩：初级 9×9 / 中级 16×16 / 高级 16×30，还能自定义行列和雷数（最高 60×100）并生成链接把同一片雷区分享给朋友；首击安全、双击快速展开、手机长按插旗，数据只存浏览器本地。">
 <link rel="canonical" href="https://startian.top/saolei/">
 <meta name="theme-color" content="#eef8ff">
 <meta property="og:type" content="website">
 <meta property="og:title" content="扫雷 · 经典排雷小游戏">
-<meta property="og:description" content="初级 / 中级 / 高级三种难度，首击安全，支持手机长按插旗与最佳成绩记录。">
+<meta property="og:description" content="三种预设难度 + 自定义（最高 60×100），首击安全，可生成链接分享同一片雷区，支持手机长按插旗与最佳成绩记录。">
 <meta property="og:url" content="https://startian.top/saolei/">
 <meta property="og:site_name" content="星恬的小站">
 <script>
@@ -429,7 +429,7 @@ var I18N = (function () {
 })();
 
 /* ---- 短语表（中文原文 → English）---- */
-I18N.phrase({"扫雷": "Minesweeper","扫雷 · 经典排雷小游戏 | 星恬的小站": "Minesweeper · Classic Puzzle Game | Startian's Site","翻开所有安全的格子，把雷都标出来 · 首击永远安全": "Open every safe cell and mark all mines · First click is always safe","剩余雷数": "Mines left","用时": "Time","初级": "Easy","中级": "Intermediate","高级": "Expert","9×9 · 10 雷": "9×9 · 10 mines","16×16 · 40 雷": "16×16 · 40 mines","30×16 · 99 雷": "30×16 · 99 mines","最佳：初级": "Best: Easy","🚩 插旗模式：关": "🚩 Flag mode: OFF","🚩 插旗模式：开": "🚩 Flag mode: ON","🎉 排雷成功！": "🎉 Cleared!","用时 32 秒": "Time 32s","再来一局": "Play again","左键": "Left-click","右键": "Right-click","双击数字": "Double-click a number","翻开 ·": "to open ·","插旗 ·": "to flag ·","快速展开一圈 · 手机长按格子也能插旗": "to auto-open around it · long-press to flag on mobile","主页": "Home","重开一局": "Restart","手机友好：开启后点按即插旗": "Mobile friendly: tap a cell to flag","返回星恬的小站主页": "Back to Startian's homepage","经典扫雷小游戏：三种难度、首击安全、双击快速展开、手机长按插旗。": "Classic minesweeper: three difficulties, first-click safety, double-click to auto-open, long-press to flag on mobile.","🏆 成就解锁：": "🏆 Achievement unlocked: ","排雷新兵": "Rookie Sweeper","旗开得胜": "First Victory","中级排雷手": "Intermediate Sweeper","高级排雷专家": "Expert Deminer","闪电排雷": "Lightning Clear","徒手排雷": "Flagless Clear","💥 踩到雷了": "💥 Boom! You hit a mine","⚙️ 自定义": "⚙️ Custom","行 / 列 / 雷数自选": "Rows / Cols / Mines","行": "Rows","列": "Cols","雷": "Mines","▶ 开始游戏": "▶ Start game","收起": "Collapse","自定义": "Custom","· 列": " · Cols ","· 雷 1–": " · Mines 1–","· 🏆 新纪录！": " · 🏆 New record!","通关 · 用时": " cleared · time ","秒": " s","别灰心，": "Don't give up — try ","再试一次～": " again~"});
+I18N.phrase({"扫雷": "Minesweeper","扫雷 · 经典排雷小游戏 | 星恬的小站": "Minesweeper · Classic Puzzle Game | Startian's Site","翻开所有安全的格子，把雷都标出来 · 首击永远安全": "Open every safe cell and mark all mines · First click is always safe","剩余雷数": "Mines left","用时": "Time","初级": "Easy","中级": "Intermediate","高级": "Expert","9×9 · 10 雷": "9×9 · 10 mines","16×16 · 40 雷": "16×16 · 40 mines","30×16 · 99 雷": "30×16 · 99 mines","最佳：初级": "Best: Easy","🚩 插旗模式：关": "🚩 Flag mode: OFF","🚩 插旗模式：开": "🚩 Flag mode: ON","🎉 排雷成功！": "🎉 Cleared!","用时 32 秒": "Time 32s","再来一局": "Play again","左键": "Left-click","右键": "Right-click","双击数字": "Double-click a number","翻开 ·": "to open ·","插旗 ·": "to flag ·","快速展开一圈 · 手机长按格子也能插旗": "to auto-open around it · long-press to flag on mobile","主页": "Home","重开一局": "Restart","手机友好：开启后点按即插旗": "Mobile friendly: tap a cell to flag","返回星恬的小站主页": "Back to Startian's homepage","经典扫雷小游戏：三种难度、首击安全、双击快速展开、手机长按插旗。": "Classic minesweeper: three difficulties, first-click safety, double-click to auto-open, long-press to flag on mobile.","🏆 成就解锁：": "🏆 Achievement unlocked: ","排雷新兵": "Rookie Sweeper","旗开得胜": "First Victory","中级排雷手": "Intermediate Sweeper","高级排雷专家": "Expert Deminer","闪电排雷": "Lightning Clear","徒手排雷": "Flagless Clear","💥 踩到雷了": "💥 Boom! You hit a mine","⚙️ 自定义": "⚙️ Custom","行 / 列 / 雷数自选": "Rows / Cols / Mines","行": "Rows","列": "Cols","雷": "Mines","▶ 开始游戏": "▶ Start game","收起": "Collapse","自定义": "Custom","· 列": " · Cols ","· 雷 1–": " · Mines 1–","· 🏆 新纪录！": " · 🏆 New record!","通关 · 用时": " cleared · time ","秒": " s","别灰心，": "Don't give up — try ","再试一次～": " again~","种子": "Seed","随机": "Random","换一个种子": "New seed","🔗 复制分享链接": "🔗 Copy share link","🔗 分享这局": "🔗 Share this game"});
 I18N.auto();
 /* ==== i18n-kit v1.2 end ==== */
 </script>
@@ -515,7 +515,12 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
 .cp-field input{width:86px;padding:8px 6px;text-align:center;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-family:inherit;font-size:16px;font-weight:800;outline:none;transition:border-color .2s ease}
 .cp-field input:focus{border-color:var(--accent)}
 .cp-hint{margin-top:10px;font-size:11.5px;color:var(--ink3)}
-.cp-btns{display:flex;gap:8px;justify-content:center;margin-top:12px}
+.cp-btns{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.cp-seedrow{display:flex;gap:5px;align-items:center}
+.cp-dice{border:1.5px solid var(--line);background:var(--card);border-radius:10px;width:34px;height:36px;font-size:15px;cursor:pointer;line-height:1;transition:all .18s ease;padding:0}
+.cp-dice:hover{border-color:var(--accent);transform:rotate(-14deg)}
+.cp-share{border:1.5px solid var(--accent);background:transparent;color:var(--accent-deep);border-radius:12px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .18s ease}
+.cp-share:hover{background:var(--accent);color:#fff}
 .cp-start{border:0;background:linear-gradient(135deg,var(--accent),var(--accent-deep));color:#fff;border-radius:12px;padding:9px 22px;font-size:13.5px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 6px 16px rgba(63,134,209,.3);transition:transform .15s ease}
 .cp-start:hover{transform:translateY(-1px)}
 .cp-cancel{border:1.5px solid var(--line);background:transparent;color:var(--ink2);border-radius:12px;padding:9px 18px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .18s ease}
@@ -573,6 +578,12 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
 .result button{border:0;background:linear-gradient(135deg,var(--accent),var(--accent-deep));color:#fff;border-radius:12px;padding:10px 24px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 8px 20px rgba(63,134,209,.3)}
 .result button:hover{transform:translateY(-1px)}
 
+.toast{position:fixed;left:50%;top:16px;transform:translateX(-50%) translateY(-10px);opacity:0;z-index:300;
+  background:rgba(31,60,94,.94);color:#fff;border-radius:999px;padding:9px 18px;font-size:13px;font-weight:700;
+  transition:all .25s ease;pointer-events:none;max-width:88vw;text-align:center;box-sizing:border-box}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.hidden{display:none !important}
+
 /* —— 返回主页（全站统一 · 2026-09-29）—— */
 .wb-home{position:fixed;left:14px;bottom:14px;z-index:9990;display:inline-flex;align-items:center;gap:5px;
   padding:8px 13px 8px 10px;border-radius:999px;text-decoration:none;
@@ -619,13 +630,15 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
 
     <div class="custom-panel" id="customPanel">
       <div class="cp-grid">
-        <label class="cp-field"><span>行</span><input type="number" id="cpRows" min="5" max="30" step="1" inputmode="numeric"></label>
-        <label class="cp-field"><span>列</span><input type="number" id="cpCols" min="5" max="40" step="1" inputmode="numeric"></label>
+        <label class="cp-field"><span>行</span><input type="number" id="cpRows" min="5" max="60" step="1" inputmode="numeric"></label>
+        <label class="cp-field"><span>列</span><input type="number" id="cpCols" min="5" max="100" step="1" inputmode="numeric"></label>
         <label class="cp-field"><span>雷</span><input type="number" id="cpMines" min="1" step="1" inputmode="numeric"></label>
+        <label class="cp-field"><span>种子</span><span class="cp-seedrow"><input type="number" id="cpSeed" min="1" max="999999" step="1" inputmode="numeric" placeholder="随机"><button type="button" class="cp-dice" id="cpDice" title="换一个种子">🎲</button></span></label>
       </div>
       <div class="cp-hint" id="cpHint"></div>
       <div class="cp-btns">
         <button class="cp-start" id="cpStart" type="button">▶ 开始游戏</button>
+        <button class="cp-share" id="cpShare" type="button">🔗 复制分享链接</button>
         <button class="cp-cancel" id="cpCancel" type="button">收起</button>
       </div>
     </div>
@@ -640,6 +653,7 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
 
     <div class="tools">
       <button class="tool" id="flagMode" title="手机友好：开启后点按即插旗">🚩 插旗模式：关</button>
+      <button class="tool hidden" id="shareCur" type="button">🔗 分享这局</button>
     </div>
 
     <div class="result" id="result">
@@ -659,6 +673,8 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>主页</span>
 </a>
 
+<div class="toast" id="toast"></div>
+
 <script>
 (function () {
   'use strict';
@@ -669,6 +685,14 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
   }
   function tr(s) {
     try { return (window.I18N && I18N.tr) ? I18N.tr(s) : s; } catch (e) { return s; }
+  }
+  var toastTimer = null;
+  function toast(msg) {
+    var t = document.getElementById('toast'); if (!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2600);
   }
 
   /* ============ 跨站成就 SDK（startian.top 全站共享；cookie + localStorage 兜底） ============ */
@@ -723,7 +747,7 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
   };
   DIFFS.custom = { rows: 12, cols: 12, mines: 30, name: '自定义', nameEn: 'Custom' };
   var CUSTOM_KEY = 'startian_saolei_custom_v1';
-  var CP_RANGE = { rowsMin: 5, rowsMax: 30, colsMin: 5, colsMax: 40 };
+  var CP_RANGE = { rowsMin: 5, rowsMax: 60, colsMin: 5, colsMax: 100 };
   var CP_DEFAULT = { rows: 12, cols: 12, mines: 30 };
   function cpNum(v, min, max, fallback) {
     var n = parseInt(v, 10);
@@ -750,6 +774,17 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
   function achName(zh, en) { return isEn() ? en : zh; }
   var BEST_KEY = 'startian_saolei_best_v1';
   var CELL_PREF = { easy: 38, mid: 30, hard: 24, custom: 30 };
+  /* 种子：同一种子 + 同一首击 = 同一片雷区（分享链接靠它复现） */
+  var gameSeed = null;
+  function genSeed() { return Math.floor(100000 + Math.random() * 900000); }
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
 
   var board = document.getElementById('board');
   var boardWrap = document.getElementById('boardWrap');
@@ -808,6 +843,7 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
   /* ============ 建局 ============ */
   function newGame(d, keepFace) {
     diff = d || diff;
+    if (diff !== 'custom') gameSeed = null;
     var cfg = DIFFS[diff];
     rows = cfg.rows; cols = cfg.cols; mines = cfg.mines;
     cells = [];
@@ -825,6 +861,7 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
     document.querySelectorAll('.diff').forEach(function (b) {
       b.classList.toggle('on', b.getAttribute('data-diff') === diff);
     });
+    renderTools();
   }
 
   function fitCell() {
@@ -838,21 +875,25 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
   }
 
   function placeMines(safeIdx) {
+    /* 种子局用确定性洗牌（同种子同首击 → 同样的雷区）；普通局保持随机 */
+    var rand = (gameSeed !== null) ? mulberry32(gameSeed) : Math.random;
+    var order = [];
+    for (var i = 0; i < cells.length; i++) order.push(i);
+    for (var k = order.length - 1; k > 0; k--) {
+      var r = Math.floor(rand() * (k + 1));
+      var t = order[k]; order[k] = order[r]; order[r] = t;
+    }
     var safe = {};
     safe[safeIdx] = true;
     neighbors(safeIdx).forEach(function (n) { safe[n] = true; });
-    var pool = [];
-    for (var i = 0; i < cells.length; i++) if (!safe[i]) pool.push(i);
-    // 兜底：若空间不足（理论不会），放宽到只保首击格
-    if (pool.length < mines) {
-      pool = [];
-      for (var j = 0; j < cells.length; j++) if (j !== safeIdx) pool.push(j);
+    var placed = 0, deferred = [];
+    for (var q = 0; q < order.length && placed < mines; q++) {
+      if (safe[order[q]]) { deferred.push(order[q]); continue; }
+      cells[order[q]].mine = true; placed++;
     }
-    for (var k = pool.length - 1; k > 0; k--) {
-      var r = Math.floor(Math.random() * (k + 1));
-      var t = pool[k]; pool[k] = pool[r]; pool[r] = t;
+    for (var q2 = 0; q2 < deferred.length && placed < mines; q2++) {
+      cells[deferred[q2]].mine = true; placed++;
     }
-    for (var m = 0; m < mines; m++) cells[pool[m]].mine = true;
     for (var x = 0; x < cells.length; x++) {
       if (cells[x].mine) continue;
       var n2 = neighbors(x), cnt = 0;
@@ -1092,14 +1133,16 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
   var cpRows = document.getElementById('cpRows');
   var cpCols = document.getElementById('cpCols');
   var cpMines = document.getElementById('cpMines');
+  var cpSeed = document.getElementById('cpSeed');
   var cpHint = document.getElementById('cpHint');
   function updateCpHint() {
     var r = Math.min(CP_RANGE.rowsMax, Math.max(CP_RANGE.rowsMin, parseInt(cpRows.value, 10) || DIFFS.custom.rows));
     var c = Math.min(CP_RANGE.colsMax, Math.max(CP_RANGE.colsMin, parseInt(cpCols.value, 10) || DIFFS.custom.cols));
     var maxM = Math.max(1, r * c - 9);
-    cpHint.textContent = isEn()
+    cpHint.textContent = (isEn()
       ? ('Rows ' + CP_RANGE.rowsMin + '–' + CP_RANGE.rowsMax + ' · Cols ' + CP_RANGE.colsMin + '–' + CP_RANGE.colsMax + ' · Mines 1–' + maxM)
-      : ('行 ' + CP_RANGE.rowsMin + '–' + CP_RANGE.rowsMax + ' · 列 ' + CP_RANGE.colsMin + '–' + CP_RANGE.colsMax + ' · 雷 1–' + maxM);
+      : ('行 ' + CP_RANGE.rowsMin + '–' + CP_RANGE.rowsMax + ' · 列 ' + CP_RANGE.colsMin + '–' + CP_RANGE.colsMax + ' · 雷 1–' + maxM))
+      + (isEn() ? ' · shareable via link' : ' · 支持链接分享');
   }
   function openCustomPanel() {
     cpRows.value = DIFFS.custom.rows;
@@ -1113,12 +1156,59 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
     var c = customClamp(cpRows.value, cpCols.value, cpMines.value);
     DIFFS.custom.rows = c.rows; DIFFS.custom.cols = c.cols; DIFFS.custom.mines = c.mines;
     cpRows.value = c.rows; cpCols.value = c.cols; cpMines.value = c.mines;
+    var sv = parseInt(cpSeed.value, 10);
+    if (!isNaN(sv) && sv > 0) gameSeed = sv;
+    else { gameSeed = genSeed(); cpSeed.value = gameSeed; }
     try { localStorage.setItem(CUSTOM_KEY, JSON.stringify({ rows: c.rows, cols: c.cols, mines: c.mines })); } catch (e) {}
     closeCustomPanel();
     newGame('custom');
   }
   document.getElementById('cpStart').addEventListener('click', startCustom);
   document.getElementById('cpCancel').addEventListener('click', closeCustomPanel);
+
+  /* ---- 分享雷局：链接携带 行/列/雷/种子；同一种子 + 同一首击 = 同一片雷 ---- */
+  function buildShareUrl(r, c, m, sd) {
+    var base = (location.protocol === 'http:' || location.protocol === 'https:')
+      ? location.origin + location.pathname
+      : 'https://startian.top/saolei/';
+    return base + '#r=' + r + '&c=' + c + '&m=' + m + '&s=' + sd;
+  }
+  function copyText(t) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(t).catch(function () {});
+    }
+    return new Promise(function (resolve) {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = t; ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      } catch (e) {}
+      resolve();
+    });
+  }
+  function shareToast() {
+    toast(isEn() ? 'Link copied — challenge your friends!' : '链接已复制，发给大家来挑战吧～');
+  }
+  document.getElementById('cpDice').addEventListener('click', function () { cpSeed.value = genSeed(); });
+  document.getElementById('cpShare').addEventListener('click', function () {
+    var c = customClamp(cpRows.value, cpCols.value, cpMines.value);
+    cpRows.value = c.rows; cpCols.value = c.cols; cpMines.value = c.mines;
+    var sv = parseInt(cpSeed.value, 10);
+    if (isNaN(sv) || sv <= 0) { sv = genSeed(); cpSeed.value = sv; }
+    updateCpHint();
+    copyText(buildShareUrl(c.rows, c.cols, c.mines, sv)).then(shareToast);
+  });
+  var shareCurBtn = document.getElementById('shareCur');
+  shareCurBtn.addEventListener('click', function () {
+    var sd = (gameSeed !== null) ? gameSeed : genSeed();
+    copyText(buildShareUrl(rows, cols, mines, sd)).then(shareToast);
+  });
+  function renderTools() {
+    shareCurBtn.classList.toggle('hidden', diff !== 'custom');
+    shareCurBtn.textContent = tr('🔗 分享这局');
+  }
   [cpRows, cpCols, cpMines].forEach(function (inp) {
     inp.addEventListener('input', updateCpHint);
     inp.addEventListener('change', function () {
@@ -1151,6 +1241,7 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
     if (window.I18N && I18N.onChange) {
       I18N.onChange(function () {
         renderFlagBtn();
+        renderTools();
         if (customPanel.classList.contains('show')) updateCpHint();
         if (resultEl.classList.contains('show')) renderResultLines();
       });
@@ -1160,23 +1251,52 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
   /* ============ 启动 ============ */
   renderBest();
   renderFlagBtn();
+  renderTools();
   newGame('easy');
+
+  /* ---- 分享链接载入（#r=..&c=..&m=..&s=..）---- */
+  (function loadShared() {
+    try {
+      var q = {};
+      (location.hash || '').replace(/^#/, '').split('&').forEach(function (kv) {
+        var a = kv.split('=');
+        if (a[0]) q[a[0]] = a[1];
+      });
+      if (!q.r || !q.c || !q.m) return;
+      var cc = customClamp(q.r, q.c, q.m);
+      DIFFS.custom.rows = cc.rows; DIFFS.custom.cols = cc.cols; DIFFS.custom.mines = cc.mines;
+      var sv = parseInt(q.s, 10);
+      gameSeed = (!isNaN(sv) && sv > 0) ? sv : genSeed();
+      cpRows.value = cc.rows; cpCols.value = cc.cols; cpMines.value = cc.mines; cpSeed.value = gameSeed;
+      newGame('custom');
+      setTimeout(function () {
+        toast(isEn()
+          ? ('Shared minefield loaded: ' + cc.rows + '×' + cc.cols + ' · ' + cc.mines + ' mines' + (q.s ? (' · seed ' + gameSeed) : ''))
+          : ('已载入分享的雷局：' + cc.rows + '×' + cc.cols + ' · ' + cc.mines + ' 雷' + (q.s ? (' · 种子 ' + gameSeed) : '')));
+      }, 450);
+      try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+    } catch (e) {}
+  })();
 
   /* 测试钩子（仅调试用） */
   window.__saolei = {
-    state: function () { return { rows: rows, cols: cols, mines: mines, diff: diff, started: started, over: over, win: win, opened: openedCount, flags: flagCount, seconds: seconds }; },
+    state: function () { return { rows: rows, cols: cols, mines: mines, diff: diff, started: started, over: over, win: win, opened: openedCount, flags: flagCount, seconds: seconds, seed: gameSeed }; },
     cell: function (i) { var c = cells[i]; return c ? { mine: c.mine, open: c.open, flag: c.flag, num: c.num } : null; },
     open: function (i) { openCell(i); },
     flag: function (i) { toggleFlag(i); },
     chord: function (i) { chord(i); },
     newGame: function (d) { newGame(d); },
-    custom: function (r, c, m) {
+    custom: function (r, c, m, sd) {
       var cc = customClamp(r, c, m);
       DIFFS.custom.rows = cc.rows; DIFFS.custom.cols = cc.cols; DIFFS.custom.mines = cc.mines;
+      var sv = parseInt(sd, 10);
+      gameSeed = (!isNaN(sv) && sv > 0) ? sv : genSeed();
       newGame('custom');
-      return { rows: cc.rows, cols: cc.cols, mines: cc.mines };
+      return { rows: cc.rows, cols: cc.cols, mines: cc.mines, seed: gameSeed };
     },
     customCfg: function () { return { rows: DIFFS.custom.rows, cols: DIFFS.custom.cols, mines: DIFFS.custom.mines }; },
+    allMines: function () { var a = []; for (var i = 0; i < cells.length; i++) if (cells[i].mine) a.push(i); return a; },
+    shareUrl: function () { return buildShareUrl(rows, cols, mines, (gameSeed !== null) ? gameSeed : genSeed()); },
     board: function () { return board; }
   };
 })();
