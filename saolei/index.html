@@ -1148,6 +1148,8 @@ header p{margin-top:8px;color:var(--ink2);font-size:13.5px}
     cpRows.value = DIFFS.custom.rows;
     cpCols.value = DIFFS.custom.cols;
     cpMines.value = DIFFS.custom.mines;
+    /* 正在玩自定义局 → 种子字段同步当前局的（方便「分享这局」） */
+    if (diff === 'custom' && gameSeed !== null) cpSeed.value = gameSeed;
     updateCpHint();
     customPanel.classList.add('show');
   }
