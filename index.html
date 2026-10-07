@@ -1293,6 +1293,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
       <span data-i18n="marq.16">🗺 宇宙地图</span><span><em>·</em></span>
       <span data-i18n="marq.17">😏 偶尔整活</span><span><em>·</em></span>
       <span data-i18n="marq.18">💣 扫雷</span><span><em>·</em></span>
+      <span data-i18n="marq.19">✦ 超位魔法阵</span><span><em>·</em></span>
       <span>🌙 startian.top</span><span><em>·</em></span>
     </div>
   </div>
@@ -1484,7 +1485,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
             <span class="zone-name" data-i18n="zone.fun2.name">整活</span>
             <span class="zone-sub" data-i18n="zone.fun2.sub">没啥用但挺逗 · 会心一笑</span>
           </span>
-          <span class="zone-count" data-i18n="zone.fun2.count">4 个作品</span>
+          <span class="zone-count" data-i18n="zone.fun2.count">5 个作品</span>
           <span class="zone-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
         </button>
         <div class="zone-body">
@@ -1524,6 +1525,15 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
           <h3 data-i18n="tile.sandbox.title">万物沙盒</h3>
           <p data-i18n="tile.sandbox.desc">一块向两侧无限延伸的星海像素大陆：22 种元素自己会反应，光束会拐弯、棱镜会下彩虹；一键潜入真 3D 世界（WASD + 鼠标自由飞行、点哪造哪）——水面上还有会「嘎」的鸭鸭舰队。走到哪，世界长到哪。</p>
           <span class="cta" data-i18n="tile.sandbox.cta">去探索 <i>→</i></span>
+        </div>
+      </a>
+      <a class="tile" style="--d:.26s" data-demo="sigil" href="https://startian.top/sigil/">
+        <div class="tile-media"><img src="demos/sigil.jpg" alt="超位魔法阵演示" loading="lazy"></div>
+        <div class="tile-body">
+          <span class="ptag" data-i18n="tile.sigil.tag">视觉 · 特效</span>
+          <h3 data-i18n="tile.sigil.title">超位魔法阵</h3>
+          <p data-i18n="tile.sigil.desc">一块专门炫技的魔法画布：法阵、领域展开、超位爆发，还有那个——无量空处。六个阶段自动演出，六套配色随手换，符文密度 / 旋转 / 辉光 / 星尘实时可调；点一下鼠标就是一次施法。</p>
+          <span class="cta" data-i18n="tile.sigil.cta">去施法 <i>→</i></span>
         </div>
       </a>
             </div>
@@ -1602,7 +1612,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     <div class="ach-cross reveal collapsed" style="--d:.16s" id="achCard">
       <div class="acx-head" id="acxHead" role="button" tabindex="0" aria-expanded="false" aria-controls="acxBody" title="点击展开 / 收起成就柜" data-i18n-title="ach.cabTitle">
         <span class="acx-title" data-i18n="ach.cab">🏆 跨站成就柜</span>
-        <span class="acx-prog"><span data-i18n="ach.litLabel">已点亮</span> <b id="achLit">0</b> / <span id="achTotal">80</span></span>
+        <span class="acx-prog"><span data-i18n="ach.litLabel">已点亮</span> <b id="achLit">0</b> / <span id="achTotal">85</span></span>
         <span class="acx-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
       </div>
       <div class="acx-body" id="acxBody">
@@ -2239,7 +2249,7 @@ var __I18N_EN = {
  "zone.tool.count": "7 works",
  "zone.fun2.name": "Just for Fun",
  "zone.fun2.sub": "Useless but funny",
- "zone.fun2.count": "4 works",
+ "zone.fun2.count": "5 works",
  "zone.secret.name": "Secret",
  "zone.secret.sub": "For those who explored everything",
  "tile.wuziqi.tag": "Game · AI",
@@ -2459,7 +2469,12 @@ var __I18N_EN = {
  "tile.saolei.title": "Minesweeper",
  "tile.saolei.desc": "Browser minesweeper: from Easy 9×9 to Expert 16×30, plus a custom mode — pick your own rows, cols and mine count (up to 60×100) and share the exact same minefield via link; first click always safe, double-click a number to auto-open around it; long-press to flag on mobile — best times saved per difficulty. There is also an “Over-Rank Magic” effects kit — glowing seals on every open and a full-screen magic circle on victory (off by default).",
  "tile.saolei.cta": "Start sweeping",
+ "tile.sigil.tag": "Visual · FX",
+ "tile.sigil.title": "Arcane Sigil",
+ "tile.sigil.desc": "A canvas made purely for showing off: sigils, domain expansion, over-rank burst — and the Unlimited Void. Six auto stages, six palettes, four live parameters; every click casts a spell.",
+ "tile.sigil.cta": "Start casting",
  "marq.18": "💣 Minesweeper",
+ "marq.19": "✦ Arcane Sigil",
  "ach.site.saolei.name": "Rookie Sweeper",
  "ach.site.saolei.desc": "Visited Minesweeper",
  "ach.saolei.first_win.name": "First Victory",
@@ -2472,6 +2487,16 @@ var __I18N_EN = {
  "ach.saolei.speed.desc": "Cleared Easy within 60 seconds",
  "ach.saolei.noflag.name": "Flagless Clear",
  "ach.saolei.noflag.desc": "Cleared a game without placing any flags",
+ "ach.site.sigil.name": "First Magic",
+ "ach.site.sigil.desc": "Visited Arcane Sigil",
+ "ach.sigil.cast.name": "First Cast",
+ "ach.sigil.cast.desc": "Cast your first sigil by hand",
+ "ach.sigil.domain.name": "Domain Expansion",
+ "ach.sigil.domain.desc": "Cast a domain expansion",
+ "ach.sigil.void.name": "Unlimited Void",
+ "ach.sigil.void.desc": "Cast the Unlimited Void",
+ "ach.sigil.overrank.name": "Over-Rank Chant",
+ "ach.sigil.overrank.desc": "Cast an over-rank burst",
  "ach.site.mood.name": "Cat-ear Mood",
  "ach.site.mood.desc": "Visited Mood Calendar",
  "ach.mood.record.name": "First Mood",
@@ -2716,6 +2741,11 @@ I18N.auto();
       img: 'demos/saolei.jpg',
       title: '💣 扫雷 · 经典排雷',
       desc: '经典扫雷的浏览器版：三种预设难度（初级 9×9 / 中级 16×16 / 高级 16×30·99 雷）外加自定义档——行列和雷数都能自己调（最高 60×100），还能一键生成链接把同一片雷区分享给朋友一起来挑战；首击永远安全不会开局就踩雷，双击数字一键展开周围、手机长按格子插旗；预设难度的最佳成绩都记在本机，还有 5 枚隐藏小成就等着亮起来。🧙 最重要：内置一套「超位魔法」特效系统——符文环、星纹封印、七芒星法阵、逆六芒星，发光的；开关在棋盘下方，默认关闭。'
+    },
+    sigil: {
+      img: 'demos/sigil.jpg',
+      title: '✦ 超位魔法阵 · 魔法视觉场',
+      desc: '一块专门炫技的魔法画布：法阵、领域展开、超位爆发，还有那个——无量空处（无限信息灌入的三维符号场：暗核奇点 + 吸积光环 + 汇聚星流 + 过载故障）。六个阶段全自动演出，六套配色随手换，四个参数实时联动；点击 = 法阵，空格 = 领域展开，V = 无量空处，E = 超位爆发。纯前端单文件，打开即玩。'
     },
     sandbox: {
       img: 'demos/sandbox.jpg',
@@ -3380,6 +3410,11 @@ var ACH_DEFS = [
   { id: 'saolei.win_hard', ico: '🏅', name: '高级排雷专家', desc: '通关高级扫雷' },
   { id: 'saolei.speed', ico: '⚡', name: '闪电排雷', desc: '初级 60 秒内排雷成功' },
   { id: 'saolei.noflag', ico: '🖐️', name: '徒手排雷', desc: '一旗不插通关' },
+  { id: 'site.sigil', ico: '✦', name: '初见魔法', desc: '到访超位魔法阵' },
+  { id: 'sigil.cast', ico: '✧', name: '初施魔法', desc: '第一次亲手施放法阵' },
+  { id: 'sigil.domain', ico: '◈', name: '领域展开', desc: '释放一次领域展开' },
+  { id: 'sigil.void', ico: '∞', name: '无量空处', desc: '释放一次无量空处' },
+  { id: 'sigil.overrank', ico: '✹', name: '超位咏唱', desc: '释放一次超位爆发' },
   { id: 'mood.record', ico: '📔', name: '第一笔心情', desc: '第一次记录心情' },
   { id: 'mood.week', ico: '🔥', name: '一周好心情', desc: '连续 7 天记录心情' },
   { id: 'mood.total30', ico: '🌈', name: '心情收藏家', desc: '累计记录满 30 天' },
@@ -3449,7 +3484,7 @@ renderAch();
 /* 到访主页：解锁 + 全站探险家检查 */
 setTimeout(function () {
   var fresh = STAch.unlock('home.visit', '初次到访', '🏠');
-  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood', 'site.saolei'];
+  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood', 'site.saolei', 'site.sigil'];
   var all = sites.every(function (id) { return STAch.has(id); });
   if (all) STAch.unlock('explorer.all', '全站探险家', '🧭');
   if (fresh || all) renderAch();
@@ -3554,7 +3589,7 @@ function unlockStarry() {
    🗝 隐藏分区：集齐全部站点足迹后出现
    ============================================================ */
 function checkSecretZone() {
-  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood', 'site.saolei'];
+  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood', 'site.saolei', 'site.sigil'];
   var all = sites.every(function (id) { return STAch.has(id); });
   if (!all) return;
   var z = document.querySelector('.secret-zone');
@@ -3570,7 +3605,7 @@ function checkSecretZone() {
   }
 }
 setTimeout(function () {
-  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood', 'site.saolei'];
+  var sites = ['site.gomoku', 'site.geometry', 'site.daka', 'site.zhenghuo', 'site.tujie', 'site.star', 'site.colorlab', 'site.life', 'site.music', 'site.fake', 'site.report', 'site.fit', 'site.cuoti', 'site.sandbox', 'site.mood', 'site.saolei', 'site.sigil'];
   var all = sites.every(function (id) { return STAch.has(id); });
   if (all) STAch.unlock('explorer.all', '全站探险家', '🧭');
   if (all) renderAch();
