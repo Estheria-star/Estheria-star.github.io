@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>超位魔法阵 · 魔法特效视觉演示 | 星恬的小站</title>
+<meta name="description" content="一场分六个阶段的全屏魔法演出：法阵、领域展开、超位爆发，还有那个——无量空处。六套配色，符文密度 / 旋转 / 辉光 / 星尘实时可调，点击即施法，纯前端单文件。">
+<link rel="canonical" href="https://startian.top/sigil/">
+<meta name="theme-color" content="#05040c">
+<link rel="icon" href="https://startian.top/favicon.ico">
+<meta property="og:type" content="website">
+<meta property="og:title" content="超位魔法阵 · 魔法特效视觉演示">
+<meta property="og:description" content="法阵、领域展开、超位爆发与无量空处 —— 一场六阶段的全屏魔法演出，打开就能玩。">
+<meta property="og:url" content="https://startian.top/sigil/">
+<meta property="og:site_name" content="星恬的小站">
+<script>
+/* ==== i18n-kit v1.2 begin ==== */
+/* ══════════════════════════════════════════════════════════
+   🌐 多语言 i18n Kit（startian.top 全站共享 · v1.2 · 2026-10-04）
+   · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
+   · 自动识别：首次访问按 navigator.language（zh 开头 → 中文，其余 → English）
+   · 两种接入模式（可混用）：
+     ① 短语表模式（推荐，低侵入）：I18N.phrase({ '中文原文': 'English', ... })
+        自动扫描文本节点 / title / placeholder / aria-label / alt，动态插入的文本也自动翻译
+     ② 标注模式：data-i18n / data-i18n-html / data-i18n-title / data-i18n-aria / data-i18n-ph / data-i18n-alt
+   · 子树上加 data-i18n-skip 可整体跳过（用户输入内容、ARG 谜题原文等）
+   · API：I18N.t(k[,vars]) · I18N.tOr(k,fb) · I18N.tr(原文) · I18N.set(lang) · I18N.lang()
+          · I18N.phrase(map) · I18N.scan(root) · I18N.apply(root) · I18N.onChange(fn)
+          · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n)
+   · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
+   ══════════════════════════════════════════════════════════ */
+var I18N = (function () {
+  'use strict';
+  var LS = 'st_lang';
+  var FALLBACK = 'zh';
+  var lang = FALLBACK;
+  var dict = { zh: {}, en: {} };
+  var phrase = {};      /* 短语表：中文原文（归一化）→ 译文 */
+  var listeners = [];
+  var bd = {};          /* boot data：原文快照等 */
+
+  /* ---- 基础词典（全站通用词条） ---- */
+  dict.zh['common.home'] = '主页';
+  dict.en['common.home'] = 'Home';
+  dict.zh['common.homeTitle'] = '返回星恬的小站主页';
+  dict.en['common.homeTitle'] = "Back to Startian's homepage";
+  dict.zh['common.close'] = '关闭';
+  dict.en['common.close'] = 'Close';
+  dict.zh['common.cancel'] = '取消';
+  dict.en['common.cancel'] = 'Cancel';
+
+  /* ---- 存储与识别 ---- */
+  function norm(v) {
+    v = String(v || '').toLowerCase();
+    if (v.indexOf('zh') === 0) return 'zh';
+    if (v.indexOf('en') === 0) return 'en';
+    return null;
+  }
+  function readCookie() {
+    try { var m = document.cookie.match(/(?:^|;\s*)st_lang=([^;]*)/); return m ? decodeURIComponent(m[1]) : null; }
+    catch (e) { return null; }
+  }
+  function readLS() { try { return localStorage.getItem(LS); } catch (e) { return null; } }
+  function persist(v) {
+    try { localStorage.setItem(LS, v); } catch (e) {}
+    try { document.cookie = 'st_lang=' + encodeURIComponent(v) + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax'; } catch (e) {}
+  }
+  function detect() {
+    var s = norm(readCookie()) || norm(readLS());
+    if (s) return s;
+    var n = norm(navigator.language || navigator.userLanguage);
+    return n || FALLBACK;
+  }
+
+  /* ---- 文案 ---- */
+  /* tRaw：查词典（当前语言 → zh 兜底），查不到返回 null（= 保持原文） */
+  function tRaw(key) {
+    var v = (dict[lang] && dict[lang][key] != null) ? dict[lang][key] : null;
+    if (v == null) v = (dict[FALLBACK] && dict[FALLBACK][key] != null) ? dict[FALLBACK][key] : null;
+    return v;
+  }
+  function t(key, vars) {
+    var v = tRaw(key);
+    if (v == null) return key;
+    if (vars) v = String(v).replace(/\{(\w+)\}/g, function (m, k) { return (vars[k] != null) ? vars[k] : m; });
+    return v;
+  }
+  /* tOr：查不到时用传入的兜底值（页面 JS 动态文案用这个） */
+  function tOr(key, fallback) {
+    var v = tRaw(key);
+    return (v == null) ? fallback : v;
+  }
+  function add(obj) {
+    if (!obj) return;
+    ['zh', 'en'].forEach(function (k) {
+      if (obj[k]) for (var key in obj[k]) dict[k][key] = obj[k][key];
+    });
+  }
+  /* tr：短语表直译（原文进，译文出；zh 侧原样返回）-JS 动态文案直接用 */
+  function tr(s) {
+    if (lang === 'zh') return s;
+    var v = lookup(normText(s));
+    return (v == null) ? s : v;
+  }
+  function addPhrase(map) {
+    if (!map) return;
+    for (var k in map) { if (map[k] != null) phrase[normText(k)] = String(map[k]); }
+  }
+  /* 规则表：[[/正则/, '替换（可用 $1）'], ...] - 处理「已复习 3」「12 天有记录」这类数字拼接 */
+  var rules = [];
+  function addRules(list) {
+    if (!list) return;
+    for (var i = 0; i < list.length; i++) {
+      try {
+        var re = (list[i][0] instanceof RegExp) ? list[i][0] : new RegExp(list[i][0]);
+        rules.push([re, String(list[i][1])]);
+      } catch (e) {}
+    }
+  }
+  function lookup(t) {
+    var v = phrase[t];
+    if (v != null) return v;
+    for (var i = 0; i < rules.length; i++) {
+      try { if (rules[i][0].test(t)) return t.replace(rules[i][0], rules[i][1]); } catch (e) {}
+    }
+    return null;
+  }
+
+  /* ---- 短语表扫描（静态 + 动态） ---- */
+  function normText(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
+  var PTAGS = ['title', 'placeholder', 'aria-label', 'alt'];
+  function translText(node) {
+    var raw = node.nodeValue;
+    if (!raw) return;
+    var rec = node.__i18nR;
+    if (rec) {
+      if (lang === 'zh') {
+        if (raw === rec.en) { node.nodeValue = rec.orig; delete node.__i18nR; }
+        else if (raw !== rec.orig) { delete node.__i18nR; }
+        return;
+      }
+      if (raw === rec.en) return;
+      if (raw === rec.orig) { node.nodeValue = rec.en; return; }
+      delete node.__i18nR;
+    }
+    var out = lookup(normText(raw));
+    if (out == null) return;
+    if (lang === 'en') { if (raw !== out) { node.__i18nR = { orig: raw, en: out }; node.nodeValue = out; } }
+  }
+  function translAttrs(el) {
+    if (!el.getAttribute) return;
+    for (var i = 0; i < PTAGS.length; i++) {
+      var a = PTAGS[i], v = el.getAttribute(a);
+      if (v == null || v === '') continue;
+      var rec = el.__i18nA && el.__i18nA[a];
+      if (rec) {
+        if (lang === 'zh') {
+          if (v === rec.en) { el.setAttribute(a, rec.orig); delete el.__i18nA[a]; }
+          else if (v !== rec.orig) { delete el.__i18nA[a]; }
+          continue;
+        }
+        if (v === rec.en) continue;
+        if (v === rec.orig) { el.setAttribute(a, rec.en); continue; }
+        delete el.__i18nA[a];
+      }
+      var out = lookup(normText(v));
+      if (out == null) continue;
+      if (lang === 'en') {
+        if (v !== out) { if (!el.__i18nA) el.__i18nA = {}; el.__i18nA[a] = { orig: v, en: out }; el.setAttribute(a, out); }
+      }
+    }
+  }
+  function scanNode(node) {
+    if (!node) return;
+    if (node.nodeType === 9) node = node.documentElement || node.body;   /* 文档节点 → 转元素 */
+    if (!node) return;
+    if (node.nodeType === 3) { translText(node); return; }
+    if (node.nodeType !== 1) return;
+    var tag = node.tagName;
+    if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'NOSCRIPT') return;
+    if (node.hasAttribute('data-i18n-skip')) return;
+    translAttrs(node);
+    for (var c = node.firstChild; c; c = c.nextSibling) scanNode(c);
+  }
+  function scan(root) { try { scanNode(root || document.body || document.documentElement); } catch (e) {} }
+  /* 动态内容自动翻译（MutationObserver，逐节点增量，无重扫） */
+  var moOn = false;
+  function auto(root) {
+    if (moOn || typeof MutationObserver === 'undefined') return;
+    var target = root || document.body;
+    if (!target) {   /* head 提前注入时 body 还没解析出来，等 DOM ready */
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { auto(root); });
+      return;
+    }
+    moOn = true;
+    try {
+      var mo = new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          var m = muts[i];
+          try {
+            if (m.type === 'characterData') translText(m.target);
+            else if (m.type === 'attributes') translAttrs(m.target);
+            else if (m.type === 'childList') {
+              for (var j = 0; j < m.addedNodes.length; j++) scanNode(m.addedNodes[j]);
+            }
+          } catch (e) {}
+        }
+      });
+      mo.observe(target, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: PTAGS });
+    } catch (e) {}
+  }
+
+  /* ---- 日期 / 数字 ---- */
+  var MN_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var WD_ZH = '日一二三四五六';
+  var WD_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  function fmtDate(d, opt) {
+    if (typeof d === 'string') { var a = d.split('-'); d = new Date(+a[0], (+a[1] || 1) - 1, +a[2] || 1); }
+    if (!(d instanceof Date) || isNaN(d.getTime())) return '';
+    opt = opt || {};
+    var s;
+    if (lang === 'zh') {
+      s = d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日';
+      if (opt.weekday) s += ' · 星期' + WD_ZH.charAt(d.getDay());
+    } else {
+      s = MN_EN[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+      if (opt.weekday) s += ' · ' + WD_EN[d.getDay()];
+    }
+    return s;
+  }
+  function fmtNum(n) {
+    try { return Number(n).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US'); }
+    catch (e) { return String(n); }
+  }
+
+  /* ---- DOM 标注应用（标注模式；词条缺失时恢复原文 - 保证切回中文能还原） ---- */
+  function apply(root) {
+    root = root || document;
+    try {
+      var i, list, v, el;
+      list = root.querySelectorAll('[data-i18n]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrig == null) el.__i18nOrig = el.textContent;
+        v = tRaw(el.getAttribute('data-i18n'));
+        el.textContent = (v != null) ? v : el.__i18nOrig;
+      }
+      list = root.querySelectorAll('[data-i18n-html]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigHTML == null) el.__i18nOrigHTML = el.innerHTML;
+        v = tRaw(el.getAttribute('data-i18n-html'));
+        el.innerHTML = (v != null) ? v : el.__i18nOrigHTML;
+      }
+      list = root.querySelectorAll('[data-i18n-title]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigTitle == null) el.__i18nOrigTitle = el.title;
+        v = tRaw(el.getAttribute('data-i18n-title'));
+        el.title = (v != null) ? v : el.__i18nOrigTitle;
+      }
+      list = root.querySelectorAll('[data-i18n-aria]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAria == null) el.__i18nOrigAria = el.getAttribute('aria-label') || '';
+        v = tRaw(el.getAttribute('data-i18n-aria'));
+        el.setAttribute('aria-label', (v != null) ? v : el.__i18nOrigAria);
+      }
+      list = root.querySelectorAll('[data-i18n-ph]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigPh == null) el.__i18nOrigPh = el.placeholder || '';
+        v = tRaw(el.getAttribute('data-i18n-ph'));
+        el.placeholder = (v != null) ? v : el.__i18nOrigPh;
+      }
+      list = root.querySelectorAll('[data-i18n-alt]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAlt == null) el.__i18nOrigAlt = el.getAttribute('alt') || '';
+        v = tRaw(el.getAttribute('data-i18n-alt'));
+        el.setAttribute('alt', (v != null) ? v : el.__i18nOrigAlt);
+      }
+      /* 标题（短语表优先，其次 page.title 词条） */
+      if (!bd.__origTitle) bd.__origTitle = document.title;
+      var tv = lookup(normText(bd.__origTitle));
+      if (tv == null) tv = tRaw('page.title');
+      if (tv != null) { document.title = (lang === 'en') ? tv : bd.__origTitle; bd.__titleTouched = true; }
+      else if (bd.__titleTouched) { document.title = bd.__origTitle; }
+      document.documentElement.lang = (lang === 'zh') ? 'zh-CN' : 'en';
+      syncSwitch();
+    } catch (e) {}
+  }
+
+  function applyLang(v) {
+    lang = v;
+    persist(v);
+    apply(document);
+    scan(document);
+    for (var i = 0; i < listeners.length; i++) { try { listeners[i](lang); } catch (e) {} }
+    try {
+      var live = document.getElementById('i18n-live');
+      if (live) live.textContent = (lang === 'zh') ? '已切换到中文' : 'Switched to English';
+    } catch (e) {}
+  }
+  /* 切换转场（仿主页主题转场）：黑幕淡入 → 光晕从切换器扩散 → 幕中换语言 → 揭幕；可打断；尊重 reduced-motion */
+  var tid = 0, stage = null;
+  function ensureStage() {
+    if (stage) return stage;
+    var ov = document.createElement('div'); ov.className = 'i18n-veil';
+    var hl = document.createElement('div'); hl.className = 'i18n-halo';
+    var host = document.body || document.documentElement;
+    host.appendChild(ov); host.appendChild(hl);
+    stage = { ov: ov, hl: hl };
+    return stage;
+  }
+  function set(v) {
+    v = norm(v);
+    if (!v) return;
+    if (v === lang) { apply(document); scan(document); return; }
+    var calm = true;
+    try { calm = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) {}
+    if (!calm || !document.body) { applyLang(v); return; }
+    try {
+      var st = ensureStage(), my = ++tid;
+      var x = (window.innerWidth || 360) - 80, y = (window.innerHeight || 640) - 34;
+      try { if (swEl) { var r = swEl.getBoundingClientRect(); x = r.left + r.width / 2; y = r.top + r.height / 2; } } catch (e) {}
+      st.ov.style.setProperty('--ix', x + 'px'); st.ov.style.setProperty('--iy', y + 'px');
+      st.hl.style.setProperty('--ix', x + 'px'); st.hl.style.setProperty('--iy', y + 'px');
+      st.ov.classList.remove('out'); st.ov.classList.add('on'); st.ov.style.display = 'block';
+      st.hl.classList.remove('go'); void st.hl.offsetWidth; st.hl.classList.add('go');
+      setTimeout(function () {
+        if (my !== tid) return;
+        applyLang(v);
+        st.ov.classList.remove('on'); st.ov.classList.add('out');
+        setTimeout(function () {
+          if (my !== tid) return;
+          st.ov.style.display = 'none'; st.ov.classList.remove('out');
+        }, 520);
+      }, 430);
+    } catch (e) { applyLang(v); }
+  }
+  function onChange(fn) { if (typeof fn === 'function') listeners.push(fn); }
+  function getLang() { return lang; }
+
+  /* ---- 切换入口（右下角胶囊，自动注入） ---- */
+  var SW_CSS = '.i18n-sw{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:9992;display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:rgba(17,24,39,.74);-webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);border:1px solid rgba(255,255,255,.26);box-shadow:0 6px 20px rgba(0,0,0,.28);font-family:inherit}' +
+    '.i18n-sw:hover{background:rgba(17,24,39,.86);border-color:rgba(255,255,255,.38)}' +
+    '.i18n-gl{font-size:13px;line-height:1;padding:0 5px 0 8px;opacity:.95;pointer-events:none}' +
+    '.i18n-sw button{border:0;background:transparent;color:rgba(255,255,255,.78);font-size:12px;font-weight:700;letter-spacing:.4px;padding:6px 11px;border-radius:999px;cursor:pointer;font-family:inherit;transition:all .18s ease;line-height:1}' +
+    '.i18n-sw button:hover{color:#fff;background:rgba(255,255,255,.12)}' +
+    '.i18n-sw button:focus-visible{outline:2px solid #7dd3fc;outline-offset:1px}' +
+    '.i18n-sw button.on{background:rgba(255,255,255,.92);color:#1f2937;box-shadow:0 2px 8px rgba(0,0,0,.25)}' +
+    '.i18n-sw button:active{transform:translateY(1px)}' +
+    '.i18n-veil{position:fixed;inset:0;z-index:9990;pointer-events:none;display:none;opacity:0;background:#060a16;transition:opacity .42s ease}' +
+    '.i18n-veil.on{opacity:1}' +
+    '.i18n-veil.out{opacity:0;transition:opacity .5s cubic-bezier(.2,.8,.3,1)}' +
+    '.i18n-halo{position:fixed;z-index:9991;left:var(--ix,92%);top:var(--iy,93%);width:14px;height:14px;border-radius:50%;box-sizing:border-box;pointer-events:none;display:none;border:2px solid rgba(198,226,255,.95);box-shadow:0 0 24px 6px rgba(137,194,255,.6),0 0 70px 20px rgba(137,194,255,.3),inset 0 0 20px rgba(198,226,255,.5)}' +
+    '.i18n-halo.go{display:block;animation:i18nHalo .85s cubic-bezier(.16,.7,.3,1) forwards}' +
+    '@keyframes i18nHalo{0%{opacity:0;transform:translate(-50%,-50%) scale(.01)}22%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(58)}}' +
+    '.i18n-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}' +
+    '@media (max-width:620px){.i18n-sw{right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px))}.i18n-sw button{padding:5px 9px;font-size:11.5px}}';
+
+  var swEl = null;
+  function buildSwitch() {
+    try {
+      if (!document.body) return;
+      var exist = document.querySelector('.i18n-sw');
+      if (exist) { swEl = exist; syncSwitch(); return; }
+      var st = document.createElement('style');
+      st.textContent = SW_CSS;
+      (document.head || document.documentElement).appendChild(st);
+      var wrap = document.createElement('div');
+      wrap.className = 'i18n-sw';
+      wrap.setAttribute('role', 'group');
+      wrap.setAttribute('aria-label', '切换语言 / Switch language');
+      wrap.setAttribute('title', '切换语言 / Switch language');
+      var gl = document.createElement('span');
+      gl.className = 'i18n-gl';
+      gl.textContent = '🌐';
+      gl.setAttribute('aria-hidden', 'true');
+      wrap.appendChild(gl);
+      [['zh', '中文'], ['en', 'English']].forEach(function (p) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('data-lang', p[0]);
+        b.textContent = p[1];
+        b.addEventListener('click', function () { set(p[0]); });
+        wrap.appendChild(b);
+      });
+      var live = document.createElement('span');
+      live.id = 'i18n-live';
+      live.className = 'i18n-sr';
+      live.setAttribute('aria-live', 'polite');
+      wrap.appendChild(live);
+      document.body.appendChild(wrap);
+      swEl = wrap;
+      syncSwitch();
+    } catch (e) {}
+  }
+  function syncSwitch() {
+    try {
+      if (!swEl) return;
+      var bs = swEl.querySelectorAll('button[data-lang]');
+      for (var i = 0; i < bs.length; i++) {
+        var on = bs[i].getAttribute('data-lang') === lang;
+        bs[i].classList.toggle('on', on);
+        bs[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    } catch (e) {}
+  }
+
+  /* ---- 启动 ---- */
+  lang = detect();
+  function boot() {
+    buildSwitch();
+    apply(document);
+    scan(document);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+
+  return {
+    t: t, tOr: tOr, tr: tr, set: set, apply: apply, scan: scan, auto: auto,
+    phrase: addPhrase, rules: addRules, add: add, lang: getLang, onChange: onChange,
+    fmtDate: fmtDate, fmtNum: fmtNum
+  };
+})();
+
+/* ---- 短语表（中文原文 → English）---- */
+I18N.phrase({"超位魔法阵 · 魔法特效视觉演示 | 星恬的小站": "Arcane Sigil · Magic FX Playground | Startian's Site","◈ 配色": "◈ Palette","◈ 施放": "◈ Cast","法阵": "Sigil","领域": "Domain","超位": "Over-Rank","无量空处": "Unlimited Void","◈ 参数": "◈ Params","符文密度": "Rune Density","旋转速度": "Spin Speed","辉光强度": "Glow","星尘数量": "Stardust","◈ 开关": "◈ Toggles","自动演出序列": "Auto sequence","地面倒影": "Ground mirror","爆发色差": "Burst chroma","镜头震动": "Camera shake","辉光叠加": "Bloom","点击 = 法阵 · 空格 = 领域展开 ·": "Click = sigil · Space = domain ·","V = 无量空处": "V = Unlimited Void","· E = 超位爆发 · H = 收起面板": "· E = over-rank burst · H = panel","返回星恬的小站主页": "Back to Startian's homepage","主页": "Home","🏆 成就解锁：": "🏆 Achievement unlocked: ","初见魔法": "First Magic","初施魔法": "First Cast","领域展开": "Domain Expansion","超位咏唱": "Over-Rank Chant","超位魔法": "Over-Rank","圣金": "Gilded","暗紫": "Dark Violet","金紫": "Gold-Violet","深渊": "Abyss","极光": "Aurora","血月": "Blood Moon","静谧": "Dormant","充能": "Charging","余韵": "Afterglow","手动施放": "Manual"});
+/* ---- 数字/日期拼接规则 ---- */
+I18N.rules([["^(\\d+) FPS · 粒子 (\\d+) · 缓存 (\\d+)$", "$1 FPS · particles $2 · cache $3"]]);
+I18N.auto();
+/* ==== i18n-kit v1.2 end ==== */
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "超位魔法阵",
+  "url": "https://startian.top/sigil/",
+  "applicationCategory": "Game",
+  "operatingSystem": "Any",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" },
+  "description": "六阶段魔法演出：法阵、领域展开、超位爆发、无量空处，六套配色与实时参数。"
+}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;user-select:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#05040c;
+ font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:#e8ecf8;touch-action:none}
+#cv{display:block;position:fixed;inset:0;z-index:1}
+/* ── 阶段标题 ── */
+#stage{position:fixed;top:8%;left:0;right:0;z-index:5;text-align:center;pointer-events:none}
+#stageN{font-size:34px;font-weight:800;letter-spacing:14px;text-shadow:0 0 30px currentColor;opacity:0;transition:opacity .5s}
+#stageS{font-size:12px;letter-spacing:5px;color:#7b6bb5;margin-top:8px;opacity:0;transition:opacity .5s}
+/* ── 控制面板 ── */
+#ui{position:fixed;top:16px;right:16px;z-index:6;width:236px;
+ background:rgba(12,9,26,.72);border:1px solid rgba(139,92,246,.35);border-radius:14px;
+ padding:12px 14px;backdrop-filter:blur(10px);font-size:12px;max-height:94vh;overflow-y:auto}
+#ui.hide{transform:translateX(260px);opacity:0;pointer-events:none}
+#ui{transition:transform .3s,opacity .3s}
+.u-t{font-size:12px;color:#a78bfa;font-weight:700;letter-spacing:2px;margin:10px 0 6px}
+.u-t:first-child{margin-top:0}
+.sw{display:flex;flex-wrap:wrap;gap:5px}
+.s-c{width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:.15s}
+.s-c:hover{transform:scale(1.12)}
+.s-c.sel{border-color:#fff;box-shadow:0 0 12px currentColor}
+.btn{flex:1;min-width:66px;padding:7px 4px;font-size:11.5px;border:none;border-radius:8px;cursor:pointer;
+ background:linear-gradient(135deg,#5b21b6,#7c3aed);color:#fff;font-weight:700;transition:.15s}
+.btn:hover{filter:brightness(1.25)}
+.btn:active{transform:scale(.95)}
+.btn.gold{background:linear-gradient(135deg,#b45309,#f59e0b)}
+.rw{display:flex;align-items:center;gap:7px;margin:5px 0}
+.rw label{flex:0 0 58px;color:#8ea2d8;font-size:11px}
+.rw input[type=range]{flex:1;accent-color:#a78bfa;height:3px}
+.rw b{flex:0 0 30px;text-align:right;color:#fbbf24;font-size:10.5px;font-weight:600}
+.ch{display:flex;align-items:center;gap:6px;margin:4px 0;cursor:pointer;color:#8ea2d8;font-size:11px}
+.ch input{accent-color:#a78bfa;cursor:pointer}
+#fps{position:fixed;left:14px;bottom:52px;z-index:6;font-size:11px;color:#5b5280;font-variant-numeric:tabular-nums}
+#tip{position:fixed;bottom:12px;left:0;right:0;z-index:5;text-align:center;font-size:11.5px;color:#6b5f96;pointer-events:none}
+#toggle{position:fixed;top:16px;right:16px;z-index:7;width:34px;height:34px;border-radius:9px;cursor:pointer;
+ background:rgba(124,58,237,.35);border:1px solid rgba(167,139,250,.5);color:#ddd6fe;font-size:15px;display:none;
+ align-items:center;justify-content:center}
+#ui.hide~#toggle{display:flex}
+@media(max-width:640px){
+ #ui{width:190px;top:10px;right:10px;padding:10px;font-size:11px}
+ #stageN{font-size:22px;letter-spacing:8px}
+ .rw label{flex:0 0 46px}
+}
+#line{position:fixed;bottom:16%;left:0;right:0;z-index:8;text-align:center;
+pointer-events:none;opacity:0;transition:opacity .7s}
+#line.on{opacity:1}
+#lineJp{font-size:clamp(22px,4.6vw,48px);font-weight:800;letter-spacing:.16em;
+color:#fff;text-shadow:0 0 26px #a78bfa,0 0 74px #7c3aed,0 2px 6px #000}
+/* —— 返回主页（全站统一 · 2026-09-29）—— */
+.wb-home{position:fixed;left:14px;bottom:14px;z-index:9990;display:inline-flex;align-items:center;gap:5px;
+  padding:8px 13px 8px 10px;border-radius:999px;text-decoration:none;
+  background:rgba(17,24,39,.55);color:#fff;font-size:12.5px;font-weight:600;letter-spacing:.3px;
+  -webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.14);box-shadow:0 6px 18px rgba(0,0,0,.18);
+  transition:background .2s,transform .2s,box-shadow .2s}
+.wb-home:hover{background:rgba(17,24,39,.78);transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.26)}
+.wb-home:active{transform:translateY(0)}
+.wb-home svg{width:13px;height:13px;flex:0 0 auto}
+@media (max-width:620px){ .wb-home{left:10px;bottom:10px;padding:7px 11px 7px 9px;font-size:12px} }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div id="stage"><div id="stageN"></div><div id="stageS"></div></div>
+
+<div id="ui">
+  <div class="u-t">◈ 配色</div>
+  <div class="sw" id="swatch"></div>
+  <div class="u-t">◈ 施放</div>
+  <div class="sw">
+    <button class="btn" id="bSigil">法阵</button>
+    <button class="btn" id="bDomain">领域</button>
+    <button class="btn gold" id="bNova">超位</button>
+    <button class="btn" id="bVoid" style="flex-basis:100%;background:linear-gradient(135deg,#1e1b4b,#7c3aed,#fde047)">无量空处</button>
+  </div>
+  <div class="u-t">◈ 参数</div>
+  <div class="rw"><label>符文密度</label><input type="range" id="rGlyph" min="8" max="48" value="28"><b id="vGlyph">28</b></div>
+  <div class="rw"><label>旋转速度</label><input type="range" id="rSpin" min="0" max="250" value="100"><b id="vSpin">1.0</b></div>
+  <div class="rw"><label>辉光强度</label><input type="range" id="rGlow" min="20" max="220" value="110"><b id="vGlow">1.1</b></div>
+  <div class="rw"><label>星尘数量</label><input type="range" id="rDust" min="0" max="220" value="110"><b id="vDust">110</b></div>
+  <div class="u-t">◈ 开关</div>
+  <label class="ch"><input type="checkbox" id="cAuto" checked>自动演出序列</label>
+  <label class="ch"><input type="checkbox" id="cMirror" checked>地面倒影</label>
+  <label class="ch"><input type="checkbox" id="cChrom" checked>爆发色差</label>
+  <label class="ch"><input type="checkbox" id="cShake" checked>镜头震动</label>
+  <label class="ch"><input type="checkbox" id="cBloom" checked>辉光叠加</label>
+</div>
+<button id="toggle">☰</button>
+<div id="fps"></div>
+<div id="line"><div id="lineJp"></div></div>
+<div id="tip">点击 = 法阵 · 空格 = 领域展开 · <b style="color:#fde047">V = 无量空处</b> · E = 超位爆发 · H = 收起面板</div>
+
+<script>
+"use strict";
+/* ══════════════════════════════════════════════════════════════
+   超位魔法阵 · Arcane Sigil（独立演示版）
+   分层架构：几何 → 贴图缓存 → 层合成 → 粒子 → 特效 → 序列 → 交互
+   相比游戏内嵌版：分层独立旋转 · 真辉光 · 倒影 · 色差 · 光柱 · 天穹 · 序列演出
+   ══════════════════════════════════════════════════════════════ */
+
+/* ============ 跨站成就 SDK（startian.top 全站共享 · cookie + localStorage 兜底） ============ */
+var STAch=(function(){
+ var KEY='st_ach';
+ function readCookie(){var m=document.cookie.match(/(?:^|;\s*)st_ach=([^;]*)/);if(!m)return null;try{return JSON.parse(decodeURIComponent(m[1]))||[]}catch(e){return null}}
+ function writeCookie(list){try{var v=encodeURIComponent(JSON.stringify(list));if(v.length<3800)document.cookie='st_ach='+v+';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax'}catch(e){}}
+ var list=readCookie();
+ if(!list){try{list=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){list=[]}}
+ if(!Array.isArray(list))list=[];
+ function save(){try{localStorage.setItem(KEY,JSON.stringify(list))}catch(e){}writeCookie(list)}
+ function itr(t){try{return window.I18N?I18N.tr(t):t}catch(e){return t}}
+ function unlock(id,name,ico){
+  if(list.indexOf(id)>=0)return false;
+  list.push(id);save();
+  try{
+   var el=document.createElement('div');
+   el.style.cssText='position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:99999;background:rgba(22,26,48,.94);color:#fff;border:1px solid rgba(140,170,255,.42);border-radius:999px;padding:12px 22px;font:700 13.5px/1.4 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:86vw';
+   el.textContent=itr('🏆 成就解锁：')+(ico?ico+' ':'')+itr(name||id);
+   document.body.appendChild(el);
+   requestAnimationFrame(function(){el.style.opacity='1';el.style.transform='translateX(-50%)'});
+   setTimeout(function(){el.style.opacity='0';el.style.transform='translateX(-50%) translateY(16px)';setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el)},500)},3200);
+  }catch(e){}
+  return true;
+ }
+ return {list:function(){return list.slice()},has:function(id){return list.indexOf(id)>=0},unlock:unlock};
+})();
+window.STAch=STAch;
+function ach(id,name,ico){try{STAch.unlock(id,name,ico)}catch(e){}}
+setTimeout(function(){ach('site.sigil','初见魔法','✦')},600);
+
+/* ───────── §1 常量 · 配色 ───────── */
+const TAU=Math.PI*2;
+const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
+const rand=(a,b)=>a+Math.random()*(b-a);
+const lerp=(a,b,t)=>a+(b-a)*t;
+const easeOut=t=>1-Math.pow(1-t,3);
+const easeIn=t=>t*t*t;
+const easeIO=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+
+/* 六套配色：金 / 暗紫 / 金紫混 / 深渊 / 极光青 / 血月 */
+const PALETTE={
+ gold  :{ring:"#fde047",star:"#fffdf0",glyph:"#f59e0b",core:"#fffdf0",glow:"#f59e0b",aura:"#fbbf24",name:"圣金"},
+ violet:{ring:"#a78bfa",star:"#f5f3ff",glyph:"#8b5cf6",core:"#f5f3ff",glow:"#8b5cf6",aura:"#7c3aed",name:"暗紫"},
+ mix   :{ring:"#fde047",star:"#c4b5fd",glyph:"#f59e0b",core:"#ffffff",glow:"#8b5cf6",aura:"#a78bfa",name:"金紫"},
+ abyss :{ring:"#8b5cf6",star:"#ddd6fe",glyph:"#6d28d9",core:"#e9d5ff",glow:"#4c1d95",aura:"#5b21b6",name:"深渊"},
+ aurora:{ring:"#67e8f9",star:"#ecfeff",glyph:"#22d3ee",core:"#ffffff",glow:"#0ea5e9",aura:"#38bdf8",name:"极光"},
+ blood :{ring:"#fb7185",star:"#fff1f2",glyph:"#e11d48",core:"#ffffff",glow:"#9f1239",aura:"#be123c",name:"血月"}
+};
+let CUR="mix";
+
+/* ───────── §2 数学 · 几何 ───────── */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function gcd2(a,b){return b?gcd2(b,a%b):a;}
+/* 星形多边形 {n/step}：gcd>1 自动拆子路径 —— {6/2} 得两个三角＝标准六芒星 */
+function starPaths(c,cx,cy,R,n,step,rot){
+ const g=gcd2(n,step),sub=n/g;
+ for(let s=0;s<g;s++){
+  c.beginPath();
+  for(let i=0;i<=sub;i++){
+   const k=(s+i*step)%n,a=rot+k*TAU/n;
+   const x=cx+Math.cos(a)*R,y=cy+Math.sin(a)*R;
+   i?c.lineTo(x,y):c.moveTo(x,y);
+  }
+  c.closePath();
+ }
+}
+function polyPath(c,cx,cy,R,n,rot){
+ c.beginPath();
+ for(let i=0;i<n;i++){const a=rot+i*TAU/n,x=cx+Math.cos(a)*R,y=cy+Math.sin(a)*R;i?c.lineTo(x,y):c.moveTo(x,y);}
+ c.closePath();
+}
+/* 程序化符文：折线 + 偶发圆点，无字体依赖 */
+function runePath(c,x,y,s,seed){
+ const r=mulberry32(seed*9301+49297),n=3+Math.floor(r()*4);
+ let px=x+(r()-.5)*s,py=y-s*.55;
+ c.beginPath();c.moveTo(px,py);
+ for(let i=0;i<n;i++){
+  if(r()<.5){px+=(r()-.5)*s*1.15;py+=s*(.26+r()*.44);}
+  else{px+=(r()-.5)*s*1.05;py+=(r()-.5)*s*.95;}
+  c.lineTo(px,py);
+ }
+ c.stroke();
+ if(r()<.55){c.beginPath();c.arc(x+(r()-.5)*s*.5,y+(r()-.5)*s*.5,Math.max(.7,s*.11),0,TAU);c.fill();}
+}
+
+/* ───────── §3 分层法阵贴图（每层独立缓存 → 可各自旋转） ───────── */
+const CACHE=new Map();
+function q(v){return Math.max(24,Math.round(v/8)*8);}
+function cached(key,size,draw){
+ let cv=CACHE.get(key);if(cv)return cv;
+ cv=document.createElement("canvas");cv.width=cv.height=size;
+ const c=cv.getContext("2d");c.translate(size/2,size/2);draw(c,size/2);
+ if(CACHE.size>200)CACHE.delete(CACHE.keys().next().value);
+ CACHE.set(key,cv);return cv;
+}
+/* 三重辉光描边：粗淡 → 中透 → 细亮，让线条自带"发光体"质感（贴图生成时一次算好） */
+function gStroke(c,color,w,alpha,build){
+ c.strokeStyle=color;
+ c.globalAlpha=alpha*.26;c.lineWidth=w*3.8;build();c.stroke();
+ c.globalAlpha=alpha*.52;c.lineWidth=w*1.9;build();c.stroke();
+ c.globalAlpha=alpha;     c.lineWidth=w;     build();c.stroke();
+}
+/* 层种类：ring 外环刻度 / hex 六芒 / glyph 符文环 / pent 五芒 / core 内核 */
+function layer(kind,scheme,R,glyphN,seed){
+ const r=q(R),k=kind+"|"+scheme+"|"+r+"|"+glyphN+"|"+seed,S=PALETTE[scheme]||PALETTE.mix;
+ return cached(k,r*2,(c,h)=>{
+  c.lineCap="round";c.lineJoin="round";
+  const B=fn=>{c.beginPath();fn();};
+  if(kind==="ring"){
+   B(()=>c.arc(0,0,r*.985,0,TAU));gStroke(c,S.ring,Math.max(1,r*.013),.95,()=>0);
+   B(()=>c.arc(0,0,r*.905,0,TAU));gStroke(c,S.ring,Math.max(.8,r*.008),.6,()=>0);
+   c.strokeStyle=S.glyph;
+   for(let i=0;i<72;i+=6){                         // 刻度环分 6 组，组内一次 gStroke
+    const grp=i;
+    B(()=>{for(let j=grp;j<grp+6;j++){const a=j*TAU/72,r0=r*(j%4?.905:.84);
+     c.moveTo(Math.cos(a)*r0,Math.sin(a)*r0);c.lineTo(Math.cos(a)*r*.985,Math.sin(a)*r*.985);}});
+    gStroke(c,S.glyph,Math.max(.7,r*.0075),.75,()=>0);
+   }
+  }else if(kind==="hex"){
+   B(()=>starPaths(c,0,0,r*.86,6,2,-Math.PI/2));
+   gStroke(c,S.star,Math.max(1,r*.011),.95,()=>0);
+   c.globalAlpha=.5;
+   B(()=>starPaths(c,0,0,r*.86,12,5,-Math.PI/2));
+   gStroke(c,S.star,Math.max(.7,r*.006),.5,()=>0);
+   c.globalAlpha=1;
+  }else if(kind==="glyph"){
+   B(()=>c.arc(0,0,r*.735,0,TAU));
+   gStroke(c,S.glyph,Math.max(.7,r*.005),.4,()=>0);
+   c.strokeStyle=S.glyph;c.fillStyle=S.glyph;
+   for(let i=0;i<glyphN;i++){                     // 符文：先淡粗后亮细
+    const a=i*TAU/glyphN-Math.PI/2,x=Math.cos(a)*r*.735,y=Math.sin(a)*r*.735,s=r*.052,sd=seed*31+i*7;
+    c.globalAlpha=.30;c.lineWidth=Math.max(1.6,r*.02);runePath(c,x,y,s,sd);
+    c.globalAlpha=.95;c.lineWidth=Math.max(.8,r*.009);runePath(c,x,y,s,sd);
+   }
+   c.globalAlpha=1;
+  }else if(kind==="pent"){
+   B(()=>starPaths(c,0,0,r*.56,5,2,-Math.PI/2));
+   gStroke(c,S.star,Math.max(.9,r*.009),.95,()=>0);
+   c.globalAlpha=.5;
+   B(()=>polyPath(c,0,0,r*.33,5,-Math.PI/2));
+   gStroke(c,S.star,Math.max(.7,r*.006),.5,()=>0);
+   c.globalAlpha=1;
+  }else if(kind==="core"){
+   B(()=>c.arc(0,0,r*.2,0,TAU));gStroke(c,S.ring,Math.max(.9,r*.01),.95,()=>0);
+   B(()=>c.arc(0,0,r*.1,0,TAU));gStroke(c,S.ring,Math.max(.8,r*.008),.7,()=>0);
+  }
+  return cv;
+ });
+}
+
+/* ───────── §4 设置 ───────── */
+const OPT={glyphN:28,spin:1,glow:1.1,dust:110,
+ auto:true,mirror:true,chrom:true,shake:true,bloom:true};
+
+/* ───────── §5 粒子系统 ───────── */
+const PT={list:[],pool:[]};
+function emit(x,y,n,o){
+ o=o||{};
+ for(let i=0;i<n;i++){
+  if(PT.list.length>900)break;
+  let p=PT.pool.pop();
+  if(!p)p={x:0,y:0,vx:0,vy:0,life:0,max:1,r:1,c:"#fff",k:0,rot:0,vr:0};
+  const a=o.a!==undefined?o.a+rand(-o.spread||0,o.spread||0):rand(0,TAU);
+  const sp=rand(o.spd0||30,o.spd1||140);
+  p.x=x+rand(-(o.jitter||0),o.jitter||0);p.y=y+rand(-(o.jitter||0),o.jitter||0);
+  p.vx=Math.cos(a)*sp;p.vy=Math.sin(a)*sp;
+  p.max=p.life=rand(o.life0||.5,o.life1||1.4);
+  p.r=rand(o.r0||1,o.r1||3);
+  p.c=o.c||PALETTE[CUR].star;
+  p.k=o.k||0;                    // 0 星尘 1 放射火花 2 上浮金粉 3 雾
+  p.rot=rand(0,TAU);p.vr=rand(-3,3);
+  p.drag=o.drag||.97;
+  p.grav=o.grav||0;
+  PT.list.push(p);
+ }
+}
+function stepPT(dt){
+ for(let i=PT.list.length-1;i>=0;i--){
+  const p=PT.list[i];
+  p.x+=p.vx*dt;p.y+=p.vy*dt;
+  p.vx*=p.drag;p.vy*=p.drag;p.vy+=p.grav*dt;
+  p.rot+=p.vr*dt;p.life-=dt;
+  if(p.life<=0){PT.pool.push(p);PT.list.splice(i,1);}
+ }
+}
+function drawPT(c){
+ c.save();c.globalCompositeOperation="lighter";
+ for(const p of PT.list){
+  const a=clamp(p.life/p.max,0,1);
+  c.globalAlpha=a*(p.k===3?.22:.85);
+  c.fillStyle=p.c;
+  if(p.k===1){                                   // 放射火花：拖尾短线
+   c.strokeStyle=p.c;c.lineWidth=p.r*.7;
+   c.beginPath();c.moveTo(p.x,p.y);c.lineTo(p.x-p.vx*.035,p.y-p.vy*.035);c.stroke();
+  }else if(p.k===2){                             // 金粉：菱形
+   c.save();c.translate(p.x,p.y);c.rotate(p.rot);
+   c.beginPath();c.moveTo(0,-p.r*1.8);c.lineTo(p.r*.6,0);c.lineTo(0,p.r*1.8);c.lineTo(-p.r*.6,0);
+   c.closePath();c.fill();c.restore();
+  }else{
+   const r=p.r*(p.k===3?2.4:1);
+   c.beginPath();c.arc(p.x,p.y,r,0,TAU);c.fill();
+  }
+ }
+ c.restore();
+}
+
+/* ───────── §6 特效实例 ───────── */
+const FX={sigils:[],novas:[],shocks:[],pillars:[],domain:null,void:null};
+let SHAKE=0,ZOOM=1,FLASH=0;
+/* 无量空处符号场的推进速度：爆发涌入 → 维持缓流 → 收束回吸 */
+function voidSpeedOf(p){
+ if(p<.30)return lerp(7.5,1.2,easeOut(p/.30));
+ if(p>.90)return lerp(1.2,-5.5,(p-.90)/.10);
+ return 1.15;
+}
+function addSigil(x,y,R,o){
+ o=o||{};
+ if(FX.sigils.length>36)FX.sigils.shift();
+ FX.sigils.push({x,y,R,scheme:o.scheme||CUR,glyphN:o.glyphN||OPT.glyphN,
+  seed:o.seed!==undefined?o.seed:(Math.random()*97|0),
+  t:0,dur:o.dur||2.6,dir:o.dir||(Math.random()<.5?1:-1),
+  spin:o.spin||1,mirror:o.mirror!==false,base:o.base||.9,ease:o.ease||"out"});
+}
+function addNova(x,y,R,scheme){
+ FX.novas.push({x,y,R,scheme:scheme||CUR,t:0,dur:2.8});
+ FLASH=1;SHAKE=Math.max(SHAKE,16);
+ addShock(x,y,R*1.1,scheme,1.9);
+ addShock(x,y,R*.7,scheme,1.4);
+ addPillar(x,y,R,scheme);
+ emit(x,y,200,{spd0:120,spd1:640,r0:1,r1:3.4,life0:.5,life1:1.5,k:1,c:PALETTE[scheme||CUR].star,jitter:14});
+ emit(x,y,90,{spd0:20,spd1:120,r0:1.6,r1:4,life0:1.2,life1:2.6,k:2,c:PALETTE[scheme||CUR].ring,jitter:30,grav:-16});
+}
+function addShock(x,y,R,scheme,dur){FX.shocks.push({x,y,R,scheme:scheme||CUR,t:0,dur:dur||1.4});}
+function addPillar(x,y,R,scheme){FX.pillars.push({x,y,R,scheme:scheme||CUR,t:0,dur:2.2});}
+function castDomain(scheme,dur){FX.domain={t:0,dur:dur||8,scheme:scheme||"mix",seed:Math.random()*97|0};}
+
+/* 主法阵：分层独立旋转 + 轨道光点 */
+function drawSigilLayers(c,s){
+ const P=PALETTE[s.scheme]||PALETTE.mix;
+ const t=s.t,p=clamp(t/s.dur,0,1);
+ const fade=p<.10?p/.10:(p>.72?(1-p)/.28:1);
+ if(fade<=.01)return;
+ const R=s.R*(.32+.68*easeOut(clamp(t/.55,0,1)))*s.base;   // 生长固定 0.55s，与 dur 解耦
+ const rot=t*OPT.spin*s.spin;
+ c.save();
+ c.globalCompositeOperation="lighter";
+ c.globalAlpha=clamp(fade,0,1);
+ /* 地面聚光：法阵下方的椭圆光池 */
+ if(s.mirror!==false){
+  c.save();c.globalAlpha=clamp(fade,0,1)*.30*OPT.glow;
+  c.translate(s.x,s.y+R*.28);c.scale(1,.24);
+  const fg=c.createRadialGradient(0,0,0,0,0,R*1.5);
+  fg.addColorStop(0,P.core);fg.addColorStop(.4,P.glow);fg.addColorStop(1,"rgba(0,0,0,0)");
+  c.fillStyle=fg;c.beginPath();c.arc(0,0,R*1.5,0,TAU);c.fill();c.restore();
+ }
+ c.translate(s.x,s.y);
+ if(OPT.bloom){                                   // 辉光：放大半透明底
+  c.globalAlpha=clamp(fade,0,1)*.28*OPT.glow;
+  c.drawImage(layer("ring",s.scheme,R,s.glyphN,s.seed),-R*1.1,-R*1.1,R*2.2,R*2.2);
+  c.globalAlpha=clamp(fade,0,1);
+ }
+ const L=(k,r,ang)=>{
+  const im=layer(k,s.scheme,R,s.glyphN,s.seed);
+  c.save();c.rotate(ang);c.drawImage(im,-r,-r,r*2,r*2);c.restore();
+ };
+ L("ring",R,rot*.32*s.dir);
+ L("hex",R,rot*.62*s.dir);
+ L("glyph",R,-rot*.44*s.dir);
+ L("pent",R,rot*1.05*s.dir);
+ L("core",R,-rot*.8*s.dir);
+ /* 轨道光点（沿环运动的小光球） */
+ const gN=Math.min(8,3+Math.floor(s.glyphN/8));
+ for(let i=0;i<gN;i++){
+  const a=rot*1.6*s.dir+i*TAU/gN,rr=R*.86;
+  const x=Math.cos(a)*rr,y=Math.sin(a)*rr;
+  const g=c.createRadialGradient(x,y,0,x,y,R*.09);
+  g.addColorStop(0,P.core);g.addColorStop(.4,P.glow);g.addColorStop(1,"rgba(0,0,0,0)");
+  c.fillStyle=g;c.beginPath();c.arc(x,y,R*.09,0,TAU);c.fill();
+ }
+ /* 内核宝珠 */
+ const cr=R*(.17+.05*Math.sin(t*7));
+ const g2=c.createRadialGradient(0,0,0,0,0,cr*2.4);
+ g2.addColorStop(0,P.core);g2.addColorStop(.35,P.glow);g2.addColorStop(1,"rgba(0,0,0,0)");
+ c.fillStyle=g2;c.beginPath();c.arc(0,0,cr*2.4,0,TAU);c.fill();
+ /* 外扩冲击环 */
+ if(p<.55){
+  c.globalAlpha=clamp(fade,0,1)*(1-p/.55)*.5;
+  c.strokeStyle=P.ring;c.lineWidth=2.6;
+  c.beginPath();c.arc(0,0,R*(.7+p*1.25),0,TAU);c.stroke();
+ }
+ c.restore();
+}
+/* 地面倒影（垂直镜像 + 渐隐） */
+function drawMirror(c,s){
+ if(!OPT.mirror||!s.mirror)return;
+ const P=PALETTE[s.scheme]||PALETTE.mix;
+ const p=clamp(s.t/s.dur,0,1);
+ const fade=(p<.10?p/.10:(p>.72?(1-p)/.28:1))*.30;
+ if(fade<=.01)return;
+ const R=s.R*(.32+.68*easeOut(clamp(s.t/.55,0,1)))*s.base;
+ c.save();
+ c.globalCompositeOperation="lighter";
+ c.globalAlpha=clamp(fade,0,1);
+ c.translate(s.x,s.y);
+ c.scale(1,-.62);
+ c.translate(0,-R*.35);
+ const rot=s.t*OPT.spin*s.spin;
+ const L=(k,r,ang)=>{const im=layer(k,s.scheme,R,s.glyphN,s.seed);
+  c.save();c.rotate(ang);c.drawImage(im,-r,-r,r*2,r*2);c.restore();};
+ c.globalAlpha=clamp(fade,0,1)*.8;L("ring",R,rot*.32*s.dir);
+ c.globalAlpha=clamp(fade,0,1)*.5;L("hex",R,rot*.62*s.dir);
+ c.restore();
+}
+/* 冲击环 */
+function drawShock(c,s){
+ const p=clamp(s.t/s.dur,0,1),P=PALETTE[s.scheme]||PALETTE.mix;
+ const R=s.R*(.15+easeOut(p)*1.5),a=(1-p)*(1-p);
+ c.save();c.globalCompositeOperation="lighter";
+ c.globalAlpha=a*.85;c.strokeStyle=P.ring;c.lineWidth=3.5*(1-p)+1;
+ c.beginPath();c.arc(s.x,s.y,R,0,TAU);c.stroke();
+ c.globalAlpha=a*.4;c.strokeStyle=P.star;c.lineWidth=1.6;
+ c.beginPath();c.arc(s.x,s.y,R*.92,0,TAU);c.stroke();
+ c.restore();
+}
+/* 光柱：中心射向天顶的锥形光 */
+function drawPillar(c,s){
+ const p=clamp(s.t/s.dur,0,1),P=PALETTE[s.scheme]||PALETTE.mix;
+ const a=p<.2?p/.2:(1-(p-.2)/.8);
+ const h=s.R*4.2,w=s.R*(.30+p*.22);
+ c.save();c.globalCompositeOperation="lighter";c.globalAlpha=a*.5;
+ const g=c.createLinearGradient(s.x,s.y,s.x,s.y-h);
+ g.addColorStop(0,P.core);g.addColorStop(.35,P.glow);g.addColorStop(1,"rgba(0,0,0,0)");
+ c.fillStyle=g;
+ c.beginPath();c.moveTo(s.x-w,s.y);c.lineTo(s.x+w,s.y);
+ c.lineTo(s.x+w*.34,s.y-h);c.lineTo(s.x-w*.34,s.y-h);c.closePath();c.fill();
+ c.restore();
+}
+/* 超位爆发 */
+function drawNova(c,s){
+ const p=clamp(s.t/s.dur,0,1),P=PALETTE[s.scheme]||PALETTE.mix;
+ c.save();c.globalCompositeOperation="lighter";
+ if(p<.30){                                     // 蓄力：内吸 + 收缩环
+  const k=easeIn(p/.30),R=s.R*(1.6-1.1*k);
+  c.globalAlpha=.7*(1-k*.3);c.strokeStyle=P.star;c.lineWidth=2+k*5;
+  c.beginPath();c.arc(s.x,s.y,R,0,TAU);c.stroke();
+  for(let i=0;i<10;i++){
+   const a=i*TAU/10+s.t*4,r0=s.R*1.9*(1-k),r1=s.R*(1.2-.7*k);
+   c.globalAlpha=.35*(1-k);c.lineWidth=1.4;
+   c.beginPath();c.moveTo(s.x+Math.cos(a)*r0,s.y+Math.sin(a)*r0);
+   c.lineTo(s.x+Math.cos(a)*r1,s.y+Math.sin(a)*r1);c.stroke();
+  }
+ }
+ if(p>=.30&&p<.62){                             // 爆发：多层法阵炸开
+  const k=(p-.30)/.32;
+  for(let i=0;i<3;i++){
+   const R=s.R*(.5+k*(1.4+i*.85)),a=(1-k)*(1-i*.22);
+   const im=layer(i%2?"hex":"ring",s.scheme,R,OPT.glyphN,s.seed||7);
+   c.globalAlpha=clamp(a,0,1)*.85;
+   c.save();c.translate(s.x,s.y);c.rotate(s.t*(1.4+i)*.6);
+   c.drawImage(im,-R,-R,R*2,R*2);c.restore();
+  }
+ }
+ if(p<.45){                                     // 中心白核
+  const a=p<.30?p/.30:1-((p-.30)/.15);
+  const R=s.R*(.28+Math.sin(p*10)*.06);
+  const g=c.createRadialGradient(s.x,s.y,0,s.x,s.y,R*3);
+  g.addColorStop(0,"#ffffff");g.addColorStop(.3,P.core);g.addColorStop(1,"rgba(0,0,0,0)");
+  c.globalAlpha=clamp(a,0,1);c.fillStyle=g;
+  c.beginPath();c.arc(s.x,s.y,R*3,0,TAU);c.fill();
+ }
+ c.restore();
+}
+/* 领域展开：幕布 → 法阵 → 格栅 → 天穹 → 光柱 → 符文雨 → 收束 */
+function drawDomain(c,d){
+ const p=clamp(d.t/d.dur,0,1),P=PALETTE[d.scheme]||PALETTE.mix;
+ const cx=W/2,cy=H/2,Rmax=Math.min(W,H)*.62;
+ const inP=clamp(p/.22,0,1),outP=p>.88?clamp((p-.88)/.12,0,1):0;
+ const veil=Math.min(inP,1-outP);
+ /* ① 暗幕 */
+ c.save();c.globalAlpha=veil*.72;
+ const g=c.createRadialGradient(cx,cy,Rmax*.1,cx,cy,Rmax*1.35);
+ g.addColorStop(0,"rgba(8,5,20,0)");g.addColorStop(.5,"#0d0724");g.addColorStop(1,"rgba(6,4,16,.96)");
+ c.fillStyle=g;c.fillRect(0,0,W,H);
+ c.globalCompositeOperation="lighter";
+ /* ② 三层法阵扩散 */
+ const R=Rmax*(.16+.84*easeOut(clamp(p/.40,0,1)));
+ for(let i=0;i<3;i++){
+  const rr=R*(1-i*.26),a=veil*(.85-i*.24);
+  const im=layer(i===0?"ring":(i===1?"hex":"glyph"),d.scheme,Rmax*.6,OPT.glyphN,d.seed+i*13);
+  c.globalAlpha=clamp(a,0,1);
+  c.save();c.translate(cx,cy);c.rotate(d.t*(.4+i*.35)*(i%2?1:-1)*OPT.spin);
+  c.drawImage(im,-rr,-rr,rr*2,rr*2);c.restore();
+ }
+ /* ③ 六边格栅（地面透视网格） */
+ if(p>.24){
+  const gp=clamp((p-.24)/.30,0,1),ga=veil*(1-Math.abs(p-.62)/.42)*.7;
+  if(ga>.02){
+   c.globalAlpha=Math.max(0,ga);c.strokeStyle=P.glow;c.lineWidth=1.3;
+   for(let i=0;i<24;i++){
+    const a=i*TAU/24+d.t*.16;
+    c.beginPath();c.moveTo(cx+Math.cos(a)*R*.28,cy+Math.sin(a)*R*.28*.42);
+    c.lineTo(cx+Math.cos(a)*R*(.6+.4*gp),cy+Math.sin(a)*R*(.6+.4*gp)*.42);c.stroke();
+   }
+   for(let k=1;k<=5;k++){
+    const rr=R*(.26+k*.17*gp);
+    c.globalAlpha=Math.max(0,ga*(1-k*.15));
+    c.save();c.translate(cx,cy);c.scale(1,.42);c.rotate(d.t*.3+k*.2);
+    polyPath(c,0,0,rr,6,0);c.stroke();c.restore();
+   }
+  }
+ }
+ /* ④ 天穹：穹顶星线 */
+ if(p>.42){
+  const sp=clamp((p-.42)/.34,0,1),sa=veil*(1-Math.abs(p-.72)/.32)*.55;
+  if(sa>.02){
+   c.globalAlpha=Math.max(0,sa);c.strokeStyle=P.star;c.lineWidth=.9;
+   const rr=Math.random();
+   for(let i=0;i<40;i++){
+    const a=i*TAU/40,rr2=R*(.9+Math.sin(i*7.3+d.seed)*.12);
+    const y=cy-rr2*(.75+.25*sp);
+    c.globalAlpha=Math.max(0,sa*(.3+.7*Math.abs(Math.sin(i*2.1+d.t))));
+    c.beginPath();c.moveTo(cx+Math.cos(a)*rr2*.3,cy-rr2*.15);
+    c.lineTo(cx+Math.cos(a)*rr2,y);c.stroke();
+   }
+  }
+ }
+ /* ⑤ 符文环高速旋转 + 光柱 */
+ if(p>.34&&p<.94){
+  const rp=(p-.34)/.6,ra=veil*(1-Math.abs(rp-.5)*1.5);
+  if(ra>.02){
+   c.globalAlpha=Math.max(0,ra)*.95;
+   c.strokeStyle=P.ring;c.fillStyle=P.ring;c.lineWidth=1.7;
+   for(let i=0;i<Math.min(28,OPT.glyphN);i++){
+    const a=i*TAU/Math.min(28,OPT.glyphN)-d.t*2.2,rr=R*.93;
+    runePath(c,cx+Math.cos(a)*rr,cy+Math.sin(a)*rr,R*.045,d.seed*13+i*5);
+   }
+   c.globalAlpha=Math.max(0,ra)*.22;c.fillStyle=P.core;
+   for(let i=0;i<8;i++){
+    const a=i*TAU/8+d.t*.7;
+    c.beginPath();c.moveTo(cx+Math.cos(a)*R*.08,cy+Math.sin(a)*R*.08);
+    c.lineTo(cx+Math.cos(a-.045)*R*1.15,cy+Math.sin(a-.045)*R*1.15);
+    c.lineTo(cx+Math.cos(a+.045)*R*1.15,cy+Math.sin(a+.045)*R*1.15);
+    c.closePath();c.fill();
+   }
+  }
+ }
+ /* ⑥ 符文雨 */
+ if(p>.55&&p<.9&&Math.random()<.5){
+  const rr=rand(0,Rmax*1.1),a=rand(0,TAU);
+  c.globalAlpha=veil*.5;c.strokeStyle=P.glyph;c.lineWidth=1.1;
+  runePath(c,cx+Math.cos(a)*rr,cy+Math.sin(a)*rr*.6,rand(5,11),Math.random()*999|0);
+ }
+ c.restore();
+ /* ⑦ 收束闪白 */
+ if(outP>0){
+  c.save();c.globalAlpha=outP*.5;c.fillStyle="#fff";c.fillRect(0,0,W,H);c.restore();
+ }
+}
+
+/* ══════════ §6b 无量空处 · Unlimited Void（强化版 · 2026-10-07） ══════════
+   原作意象：被卷入者接收无限信息，空间被彻底改写
+   分层：黑洞奇点（暗核 + 亮缘 + 吸积环 + 脉冲波）→ 汇聚星流（螺旋吸入）
+        → 3D 符号雨（自转 / 拖尾 / 近景淡出）→ 无限环 → 过载故障（切片错位）
+        → 展开 / 塌缩白闪
+════════════════════════════════════════════════════════════ */
+const VOID={
+ sheet:null,parts:[],streams:[],rings:[],
+ ZMAX:3.2,ZMIN:0.18,density:640,
+ glitchT:0,glitchNext:1.0,pulse:0,pulseT:1.4,lastP:0,ringT:0
+};
+/* 符号 sprite sheet：24 枚（数学/几何符号 + 程序化符文），生成时上色，运行时零开销 */
+function buildGlyphSheet(){
+ const cols=8,rows=3,cell=48;
+ const cv=document.createElement("canvas");
+ cv.width=cols*cell;cv.height=rows*cell;
+ const c=cv.getContext("2d");
+ const chars=["+","×","∞","∑","∫","√","π","θ","Δ","○","□","◇",
+              "※","≡","≠","≤","≥","∇","Ω","λ","ψ","Φ","∀","⌘"];
+ const cols3=["#ffffff","#e9d5ff","#c4b5fd","#dbeafe","#fef3c7","#a5b4fc"];
+ c.textAlign="center";c.textBaseline="middle";c.lineCap="round";
+ for(let i=0;i<cols*rows;i++){
+  const x=(i%cols)*cell+cell/2,y=Math.floor(i/cols)*cell+cell/2;
+  const col=cols3[Math.floor(Math.random()*cols3.length)];
+  c.fillStyle=col;c.strokeStyle=col;
+  if(i<chars.length){
+   c.font="bold "+Math.round(cell*.6)+"px 'Times New Roman',serif";
+   c.fillText(chars[i],x,y);
+  }else{
+   c.lineWidth=1.7;c.save();c.translate(x,y);runePath(c,0,0,cell*.3,i*7+3);c.restore();
+  }
+ }
+ return {cv,cols,rows,cell};
+}
+function voidInit(n){
+ if(!VOID.sheet)VOID.sheet=buildGlyphSheet();
+ VOID.parts.length=0;
+ const dense=Math.round((n||VOID.density)*(Math.min(W,H)<700?.68:1));
+ for(let i=0;i<dense;i++){
+  VOID.parts.push({x:rand(-1.2,1.2),y:rand(-1.2,1.2),
+   z:rand(VOID.ZMIN,VOID.ZMAX),pz:VOID.ZMAX,g:Math.random()*24|0,
+   ph:rand(0,TAU),tw:rand(1.2,5.5),fl:Math.random()<.08,
+   rot:rand(0,TAU),vr:rand(-1.8,1.8)});
+ }
+ VOID.streams.length=0;
+ for(let i=0;i<56;i++){
+  VOID.streams.push({a:i*TAU/56+rand(-.05,.05),r:rand(.1,1.25),
+   sp:rand(.55,1.5),g:Math.random()*24|0,ph:rand(0,TAU)});
+ }
+ VOID.rings.length=0;VOID.ringT=.5;
+ VOID.glitchT=0;VOID.glitchNext=rand(.7,1.3);
+ VOID.pulse=0;VOID.pulseT=1.2;VOID.lastP=0;
+}
+function voidStep(dt,speed,p){
+ const ZM=VOID.ZMAX,ZN=VOID.ZMIN;
+ for(const pt of VOID.parts){
+  pt.pz=pt.z;
+  pt.z-=speed*dt;
+  pt.rot+=pt.vr*dt*(1+Math.abs(speed)*.09);
+  if(pt.z<ZN){pt.z=ZM;pt.x=rand(-1.2,1.2);pt.y=rand(-1.2,1.2);
+   pt.g=Math.random()*24|0;pt.rot=rand(0,TAU);pt.pz=ZM;}
+ }
+ const sp=clamp(Math.abs(speed),0,8);
+ for(const st of VOID.streams){
+  st.r-=(.08+st.sp*.14)*sp*dt*(1+VOID.pulse*1.7);
+  if(st.r<.04)st.r=rand(1.0,1.32);
+ }
+ VOID.pulseT-=dt;
+ if(VOID.pulseT<=0){VOID.pulseT=rand(1.1,2.1);VOID.pulse=1;}
+ VOID.pulse=Math.max(0,VOID.pulse-dt*2.1);
+ VOID.ringT-=dt;
+ if(VOID.ringT<=0){VOID.ringT=rand(.95,1.4);VOID.rings.push({r:.05,a:.5});}
+ for(let i=VOID.rings.length-1;i>=0;i--){
+  const rg=VOID.rings[i];rg.r+=dt*.5;rg.a-=dt*.28;
+  if(rg.a<=.01)VOID.rings.splice(i,1);
+ }
+ VOID.glitchT-=dt;
+ if(VOID.glitchNext>0)VOID.glitchNext-=dt;
+ if(VOID.glitchNext<=0&&VOID.glitchT<=0){
+  VOID.glitchT=rand(.08,.2);
+  VOID.glitchNext=rand(.6,1.7)*(p>.7?.55:1);
+  FLASH=Math.max(FLASH,.22);
+ }
+ if(VOID.lastP<.30&&p>=.30)SHAKE=Math.max(SHAKE,7);
+ if(VOID.lastP<.90&&p>=.90){SHAKE=Math.max(SHAKE,21);FLASH=Math.max(FLASH,.8);}
+ VOID.lastP=p;
+}
+/* 汇聚星流：符号沿螺旋轨道滑入奇点 */
+function voidStreams(c,t,veil,opt){
+ if(veil<=.03)return;
+ const S=VOID.sheet;if(!S)return;
+ const cx=opt.cx,cy=opt.cy,mm=opt.mm,R=mm*.50;
+ c.save();c.globalCompositeOperation="lighter";
+ for(const st of VOID.streams){
+  const r=st.r;
+  const a=st.a+t*.10+(1.25-r)*.85;
+  const x=cx+Math.cos(a)*r*R,y=cy+Math.sin(a)*r*R*.92;
+  const sz=5.5+14*(1.25-r);
+  const al=veil*(.15+.5*(1.25-r))*(.6+.4*Math.sin(t*3.1+st.ph));
+  const r2=Math.min(r+.055,1.35),a2=a-.07;
+  const x2=cx+Math.cos(a2)*r2*R,y2=cy+Math.sin(a2)*r2*R*.92;
+  c.globalAlpha=clamp(al*.5,0,1);
+  c.strokeStyle="#c4b5fd";c.lineWidth=Math.max(.8,sz*.11);
+  c.beginPath();c.moveTo(x2,y2);c.lineTo(x,y);c.stroke();
+  c.globalAlpha=clamp(al,0,1);
+  const gx=(st.g%S.cols)*S.cell,gy=Math.floor(st.g/S.cols)*S.cell;
+  c.save();c.translate(x,y);c.rotate(t*1.3+st.ph);
+  c.drawImage(S.cv,gx,gy,S.cell,S.cell,-sz/2,-sz/2,sz,sz);
+  c.restore();
+ }
+ c.restore();
+}
+/* 黑洞奇点：光冕 + 吸积环 + 亮缘（事件视界）+ 暗核 + 脉冲波 */
+function voidCore(c,t,veil,opt){
+ const p=opt.p,cx=opt.cx,cy=opt.cy,mm=opt.mm;
+ const grow=easeOut(clamp((p-.05)/.30,0,1));
+ if(grow<=.01)return;
+ const R=mm*.082*grow;
+ const pulse=1+.05*Math.sin(t*3.2)+.028*Math.sin(t*8.1);
+ const br=R*pulse;
+ c.save();
+ c.globalCompositeOperation="lighter";
+ /* ① 光冕（大范围柔光） */
+ const halo=c.createRadialGradient(cx,cy,br*.3,cx,cy,br*9);
+ halo.addColorStop(0,"rgba(233,213,255,.60)");
+ halo.addColorStop(.18,"rgba(167,139,250,.34)");
+ halo.addColorStop(.45,"rgba(124,58,237,.14)");
+ halo.addColorStop(.75,"rgba(76,29,149,.05)");
+ halo.addColorStop(1,"rgba(0,0,0,0)");
+ c.globalAlpha=veil;c.fillStyle=halo;
+ c.beginPath();c.arc(cx,cy,br*8,0,TAU);c.fill();
+ /* ② 吸积环 ×2（透视椭圆 / 反向自转） */
+ for(let i=0;i<2;i++){
+  const rr=br*(2.3+i*1.6),tilt=.30+i*.10;
+  const rot=t*(.30+i*.22)*(i?-1:1);
+  c.save();c.translate(cx,cy);
+  c.globalAlpha=veil*(.55-i*.16);
+  c.strokeStyle=i?"#a78bfa":"#ddd6fe";c.lineWidth=Math.max(1,R*.022);
+  c.setLineDash([2.5,13]);c.lineDashOffset=(i?-1:1)*t*46;
+  c.beginPath();c.ellipse(0,0,rr,rr*tilt,rot,0,TAU);c.stroke();
+  c.restore();
+ }
+ c.setLineDash([]);
+ /* ③ 亮缘（事件视界光圈） */
+ c.globalAlpha=clamp(veil*.34,0,1);c.strokeStyle="#a78bfa";c.lineWidth=Math.max(2.5,R*.16);
+ c.beginPath();c.arc(cx,cy,br*1.06,0,TAU);c.stroke();
+ c.globalAlpha=clamp(veil*.92,0,1);c.strokeStyle="#ffffff";c.lineWidth=Math.max(1.2,R*.05);
+ c.beginPath();c.arc(cx,cy,br*1.05,0,TAU);c.stroke();
+ c.globalAlpha=clamp(veil*.5,0,1);c.strokeStyle="#ddd6fe";c.lineWidth=Math.max(.9,R*.022);
+ c.beginPath();c.arc(cx,cy,br*1.32,0,TAU);c.stroke();
+ c.globalAlpha=clamp(veil*.22,0,1);c.lineWidth=Math.max(.7,R*.012);
+ c.beginPath();c.arc(cx,cy,br*1.66,0,TAU);c.stroke();
+ /* ④ 脉冲波 */
+ for(const rg of VOID.rings){
+  const rr=br*.6+rg.r*mm*.5;
+  c.globalAlpha=clamp(veil*rg.a*.68,0,1);
+  c.strokeStyle="#c4b5fd";c.lineWidth=1.6;
+  c.beginPath();c.arc(cx,cy,rr,0,TAU);c.stroke();
+  c.globalAlpha=clamp(veil*rg.a*.28,0,1);
+  c.lineWidth=1;
+  c.beginPath();c.arc(cx,cy,rr*.955,0,TAU);c.stroke();
+ }
+ /* ⑤ 暗核（吞噬一切） */
+ c.globalCompositeOperation="source-over";
+ c.globalAlpha=clamp(veil*.96,0,1);c.fillStyle="#020109";
+ c.beginPath();c.arc(cx,cy,br*.96,0,TAU);c.fill();
+ /* ⑤.5 环缘雾光（贴在事件视界外的辉光层） */
+ c.globalCompositeOperation="lighter";
+ const atm=c.createRadialGradient(cx,cy,br*.78,cx,cy,br*2.8);
+ atm.addColorStop(0,"rgba(196,181,253,0)");
+ atm.addColorStop(.16,"rgba(196,181,253,.36)");
+ atm.addColorStop(.5,"rgba(124,58,237,.11)");
+ atm.addColorStop(1,"rgba(0,0,0,0)");
+ c.globalAlpha=veil;c.fillStyle=atm;
+ c.beginPath();c.arc(cx,cy,br*2.8,0,TAU);c.fill();
+ /* ⑥ 核内裂隙弧光 */
+ c.globalCompositeOperation="lighter";
+ for(let i=0;i<3;i++){
+  const a0=t*(.5+i*.37)+i*2.3,sw=2.2+.9*Math.sin(t*(1.1+i*.3)+i);
+  c.globalAlpha=clamp(veil*(.75-i*.16),0,1);
+  c.strokeStyle=i?"#c4b5fd":"#ffffff";c.lineWidth=1.05;
+  c.beginPath();c.arc(cx,cy,br*(.5+i*.22),a0,a0+sw);c.stroke();
+ }
+ /* ⑦ 中心热斑 */
+ const cp=c.createRadialGradient(cx,cy,0,cx,cy,br*.72);
+ cp.addColorStop(0,"rgba(255,255,255,.95)");
+ cp.addColorStop(.4,"rgba(233,213,255,.38)");
+ cp.addColorStop(1,"rgba(0,0,0,0)");
+ c.globalAlpha=clamp(veil*.95,0,1);c.fillStyle=cp;
+ c.beginPath();c.arc(cx,cy,br*.72,0,TAU);c.fill();
+ c.restore();
+}
+/* 信息过载故障：横向切片错位（自绘读回 + 扫描线） */
+function voidGlitch(c,strength){
+ if(strength<=.02)return;
+ c.save();
+ c.setTransform(DPR,0,0,DPR,0,0);
+ const n=2+Math.floor(strength*13);
+ for(let i=0;i<n;i++){
+  const sy=rand(0,H-26),sh=rand(5,30);
+  const off=rand(-1,1)*(10+strength*26);
+  c.globalAlpha=1;
+  c.drawImage(cv,0,sy*DPR,cv.width,sh*DPR,off,sy,W,sh);
+ }
+ c.globalCompositeOperation="lighter";
+ c.globalAlpha=.12*strength;c.fillStyle="#fff";
+ for(let i=0;i<2;i++)c.fillRect(0,rand(0,H),W,rand(1,2.8));
+ c.globalAlpha=.05*strength;c.fillStyle="#a78bfa";
+ for(let i=0;i<3;i++)c.fillRect(0,rand(0,H),W,rand(2,8));
+ c.restore();
+}
+/* 符号场绘制：alpha 全局强度 · t 时间 · overload 过载增益 · streak 拖尾强度 */
+function voidDraw(c,alpha,t,overload,streak){
+ const S=VOID.sheet;if(!S||alpha<=.01)return;
+ const cx=W/2,cy=H/2,SP=Math.max(W,H)*.66;
+ c.save();c.globalCompositeOperation="lighter";
+ for(const pt of VOID.parts){
+  const depth=(pt.z-VOID.ZMIN)/(VOID.ZMAX-VOID.ZMIN);
+  const s=.62/(pt.z*.62+.26);
+  const dx=cx+pt.x*s*SP,dy=cy+pt.y*s*SP;
+  if(dx<-90||dx>W+90||dy<-90||dy>H+90)continue;
+  const sz=(12+52*(1-depth));
+  const near=clamp((pt.z-VOID.ZMIN)/(VOID.ZMIN*.85),0,1);
+  let a=alpha*(.20+.80*(1-depth))*near*(overload||1);
+  a*=.72+.28*Math.sin(t*pt.tw+pt.ph);
+  if(pt.fl&&Math.sin(t*13+pt.ph)>.86)a*=2.1;
+  if(a<=.012)continue;
+  if(streak>.02){
+   const pz2=Math.max(pt.pz,VOID.ZMIN+.001);
+   const sP=.62/(pz2*.62+.26);
+   const x2=cx+pt.x*sP*SP,y2=cy+pt.y*sP*SP;
+   c.globalAlpha=clamp(a*streak*.55,0,1);
+   c.strokeStyle="#c4b5fd";c.lineWidth=Math.max(.7,sz*.09);
+   c.beginPath();c.moveTo(x2,y2);c.lineTo(dx,dy);c.stroke();
+  }
+  c.globalAlpha=clamp(a,0,1);
+  const gx=(pt.g%S.cols)*S.cell,gy=Math.floor(pt.g/S.cols)*S.cell;
+  c.save();c.translate(dx,dy);c.rotate(pt.rot);
+  c.drawImage(S.cv,gx,gy,S.cell,S.cell,-sz/2,-sz/2,sz,sz);
+  c.restore();
+ }
+ c.restore();
+}
+/* 无量空处主绘制：展开光环 → 无限环 → 符号雨 → 星流 → 奇点 → 故障 → 白闪 */
+function drawVoidDomain(c,d){
+ const p=clamp(d.t/d.dur,0,1),t=d.t;
+ const cx=W/2,cy=H/2,mm=Math.min(W,H),MM=Math.max(W,H);
+ const inP=clamp(p/.11,0,1),outP=p>.90?clamp((p-.90)/.10,0,1):0;
+ const veil=Math.min(inP,1-outP);
+ const opt={p,cx,cy,mm};
+ /* ① 黑幕 + 深处紫辉 */
+ c.save();
+ c.globalAlpha=veil*.96;c.fillStyle="#04030a";c.fillRect(0,0,W,H);
+ if(veil>.02){
+  c.globalCompositeOperation="lighter";c.globalAlpha=veil*.5;
+  const bg=c.createRadialGradient(cx,cy,0,cx,cy,MM*.80);
+  bg.addColorStop(0,"rgba(124,58,237,.34)");
+  bg.addColorStop(.42,"rgba(76,29,149,.13)");
+  bg.addColorStop(1,"rgba(0,0,0,0)");
+  c.fillStyle=bg;c.fillRect(0,0,W,H);
+ }
+ c.restore();
+ /* ② 展开瞬间：屏障光环 + 巨型星纹 */
+ if(p<.20){
+  const k=easeOut(clamp(p/.20,0,1));
+  const rr=mm*(.12+.98*k);
+  c.save();c.globalCompositeOperation="lighter";
+  c.globalAlpha=clamp(veil*(1-k)*.55,0,1);
+  c.strokeStyle="#e9d5ff";c.lineWidth=2.4;
+  c.beginPath();c.arc(cx,cy,rr,0,TAU);c.stroke();
+  c.globalAlpha=clamp(veil*(1-k)*.3,0,1);
+  c.beginPath();c.arc(cx,cy,rr*.92,0,TAU);c.stroke();
+  const im=layer("hex","mix",260,36,23);
+  c.translate(cx,cy);c.rotate(k*1.4);
+  c.globalAlpha=clamp(veil*(1-k)*.7,0,1);
+  c.drawImage(im,-rr,-rr,rr*2,rr*2);
+  c.rotate(-k*2.2);
+  c.globalAlpha=clamp(veil*(1-k)*.4,0,1);
+  c.drawImage(im,-rr*.72,-rr*.72,rr*1.44,rr*1.44);
+  c.restore();
+ }
+ /* ③ 无限环（超大法阵呼吸层） */
+ if(veil>.05&&p>.14){
+  const eR=MM*.72;
+  c.save();c.globalCompositeOperation="lighter";
+  for(let i=0;i<3;i++){
+   const br2=1+.05*Math.sin(t*(.5+i*.27)+i*1.7);
+   const a2=t*(.24+i*.17)*(i%2?-1:1);
+   c.globalAlpha=clamp(veil*(.15-i*.032)*(.7+.3*Math.sin(t*.8+i)),0,1);
+   const im=layer(i===0?"ring":(i===1?"hex":"glyph"),d.scheme,eR*.5,36,i*17+5);
+   c.save();c.translate(cx,cy);c.rotate(a2);c.scale(br2,br2);
+   c.drawImage(im,-eR,-eR,eR*2,eR*2);c.restore();
+  }
+  c.restore();
+ }
+ /* ④ 符号雨（自转 + 拖尾 + 近景淡出） */
+ const vspd=voidSpeedOf(p);
+ const streak=clamp((Math.abs(vspd)-1.7)/5.5,0,1);
+ const overload=1+(VOID.glitchT>0?.85:0)+VOID.pulse*.45;
+ voidDraw(c,veil*clamp(p/.16,0,1),t,overload,streak);
+ /* ⑤ 汇聚星流 */
+ voidStreams(c,t,veil*clamp((p-.05)/.15,0,1),opt);
+ /* ⑥ 奇点 */
+ voidCore(c,t,veil,opt);
+ /* ⑦ 过载故障 */
+ voidGlitch(c,(VOID.glitchT>0&&veil>.3)?Math.min(1,VOID.glitchT/.16):0);
+ /* ⑧ 塌缩：双环收缩 */
+ if(p>.90){
+  const k=clamp((p-.90)/.10,0,1);
+  c.save();c.globalCompositeOperation="lighter";
+  c.globalAlpha=clamp(veil*(1-k)*.5,0,1);
+  c.strokeStyle="#e9d5ff";c.lineWidth=2.2;
+  c.beginPath();c.arc(cx,cy,mm*(.75-.6*k),0,TAU);c.stroke();
+  c.beginPath();c.arc(cx,cy,mm*(.52-.42*k),0,TAU);c.stroke();
+  c.restore();
+ }
+ /* ⑨ 展开 / 塌缩白闪 */
+ if(p<.09){c.save();c.globalAlpha=(1-p/.09)*.9;c.fillStyle="#fff";c.fillRect(0,0,W,H);c.restore();}
+ const wOut=p<.955?clamp(outP/.55,0,1):clamp((1-p)/.045,0,1);
+ if(wOut>0){c.save();c.globalAlpha=wOut*.92;c.fillStyle="#fff";c.fillRect(0,0,W,H);c.restore();}
+}
+/* 无量空处 · 台词 */
+const LINE={jp:"大丈夫、僕、最強だから",busy:false};
+function showLine(){
+ if(LINE.busy)return;LINE.busy=true;
+ const box=$("line"),a=$("lineJp");
+ a.textContent="";box.classList.add("on");
+ let i=0;
+ const t=setInterval(()=>{
+  a.textContent=LINE.jp.slice(0,++i);
+  if(i>=LINE.jp.length){
+   clearInterval(t);
+   setTimeout(()=>{box.classList.remove("on");LINE.busy=false;},3600);
+  }
+ },115);
+}
+function castVoid(dur){
+ FX.domain=null;
+ FX.void={t:0,dur:dur||13,scheme:"mix"};
+ voidInit(VOID.density);
+ FLASH=1;SHAKE=Math.max(SHAKE,22);
+ addShock(W/2,H/2,Math.min(W,H)*.55,"mix",1.5);
+ addShock(W/2,H/2,Math.min(W,H)*.34,"violet",1.1);
+ emit(W/2,H/2,120,{spd0:60,spd1:420,r0:1,r1:2.8,life0:.4,life1:1.1,k:1,c:"#e9d5ff",jitter:10});
+ showLine();
+}
+
+/* ───────── §7 背景：星空 + 极光 ───────── */
+const STARS=[];
+function initStars(){
+ STARS.length=0;
+ for(let i=0;i<260;i++)STARS.push({x:Math.random(),y:Math.random()*.85,
+  s:rand(.4,1.9),a:rand(.15,.75),tw:rand(.4,2.2),ph:rand(0,TAU)});
+}
+function drawBG(c,t){
+ const g=c.createRadialGradient(W/2,H*.58,20,W/2,H*.58,Math.max(W,H)*.8);
+ g.addColorStop(0,"#141030");g.addColorStop(.55,"#0a0718");g.addColorStop(1,"#05040c");
+ c.fillStyle=g;c.fillRect(0,0,W,H);
+ const P=PALETTE[CUR];
+ /* 漂移暗紫雾气（两大团缓动径向光） */
+ c.save();c.globalCompositeOperation="lighter";
+ for(let m=0;m<2;m++){
+  const mx=W*(.30+m*.42)+Math.sin(t*(.11+m*.07))*W*.13;
+  const my=H*(.46+m*.2)+Math.cos(t*(.09+m*.05))*H*.09;
+  const mr=Math.min(W,H)*(.42+m*.16);
+  const mg=c.createRadialGradient(mx,my,0,mx,my,mr);
+  mg.addColorStop(0,P.aura);mg.addColorStop(1,"rgba(0,0,0,0)");
+  c.globalAlpha=.075;c.fillStyle=mg;
+  c.beginPath();c.arc(mx,my,mr,0,TAU);c.fill();
+ }
+ c.restore();
+ for(let b=0;b<2;b++){                          // 极光带
+  c.save();c.globalCompositeOperation="lighter";c.globalAlpha=.055;
+  c.beginPath();
+  for(let x=0;x<=W;x+=14){
+   const y=H*(.30+b*.22)+Math.sin(x*.0032+t*(.22+b*.13)+b*2)*H*.075
+           +Math.sin(x*.0071-t*.17)*H*.028;
+   x?c.lineTo(x,y):c.moveTo(x,y);
+  }
+  c.strokeStyle=P.aura;c.lineWidth=44;c.stroke();
+  c.globalAlpha=.03;c.lineWidth=88;c.stroke();
+  c.restore();
+ }
+ c.save();c.globalCompositeOperation="lighter";
+ for(const s of STARS){
+  const a=s.a*(.55+.45*Math.sin(t*s.tw+s.ph));
+  c.globalAlpha=a;c.fillStyle="#dbeafe";
+  c.fillRect(s.x*W,s.y*H,s.s,s.s);
+ }
+ c.restore();
+}
+/* 环境星尘（常驻缓慢上浮） */
+let dustT=0;
+function ambientDust(dt){
+ dustT+=dt;
+ if(dustT>.09){
+  dustT=0;
+  const n=Math.max(1,Math.round(OPT.dust*.05));
+  for(let i=0;i<n;i++){
+   if(PT.list.length>OPT.dust*2.2)break;
+   emit(rand(0,W),H+10,1,{a:-Math.PI/2,spread:.6,spd0:14,spd1:46,
+    r0:.6,r1:1.9,life0:3.4,life1:6.5,k:2,c:PALETTE[CUR].ring,grav:-5,drag:.995});
+  }
+ }
+}
+
+/* ───────── §8 演出序列 ───────── */
+const SEQ=[
+ {n:"静谧",      s:"DORMANT",      d:4.0, enter(){}},
+ {n:"充能",      s:"CHARGING",     d:3.2, enter(){
+   addSigil(W/2,H*.56,Math.min(W,H)*.30,{dur:3.4,seed:7,base:.92,scheme:CUR});}},
+ {n:"领域展开",  s:"DOMAIN",       d:7.0, enter(){
+   castDomain(CUR,7.0);
+   addSigil(W/2,H*.56,Math.min(W,H)*.34,{dur:6.6,seed:23,base:1,scheme:CUR});}},
+ {n:"无量空处",  s:"UNLIMITED VOID",d:13.0,enter(){
+   castVoid(13);
+   setTimeout(()=>{addSigil(W/2,H*.56,Math.min(W,H)*.30,{dur:11,seed:7,base:1,scheme:"mix"});},1400);}},
+ {n:"超位魔法",  s:"OVERRANK",     d:4.6, enter(){
+   addNova(W/2,H*.56,Math.min(W,H)*.22,CUR);
+   for(let i=0;i<5;i++)setTimeout(()=>{
+    addSigil(rand(W*.2,W*.8),rand(H*.35,H*.7),rand(60,150),
+     {dur:2.4,scheme:Math.random()<.5?CUR:(Math.random()<.5?"gold":"violet")});
+   },i*160);}},
+ {n:"余韵",      s:"AFTERGLOW",    d:4.5, enter(){
+   emit(W/2,H*.62,70,{spd0:10,spd1:70,r0:1,r1:2.6,life0:2,life1:4.4,k:2,
+    c:PALETTE[CUR].star,jitter:W*.3,grav:-8});}}
+];
+let seqI=0,seqT=0,seqManual=false;
+function setStage(n,s){
+ const a=$("stageN"),b=$("stageS");
+ a.textContent=n;b.textContent=s;
+ a.style.color=PALETTE[CUR].ring;
+ a.style.opacity=1;b.style.opacity=1;
+ clearTimeout(a._h);
+ a._h=setTimeout(()=>{a.style.opacity=0;b.style.opacity=0;},2400);
+}
+function stepSeq(dt){
+ if(!OPT.auto||seqManual)return;
+ seqT+=dt;
+ const cur=SEQ[seqI];
+ if(seqT>=cur.d){
+  seqT=0;seqI=(seqI+1)%SEQ.length;
+  setStage(SEQ[seqI].n,SEQ[seqI].s);
+  SEQ[seqI].enter();
+ }
+}
+
+/* ───────── §9 渲染主循环 ───────── */
+const cv=$("cv"),ctx=cv.getContext("2d");
+let W=0,H=0,DPR=1;
+function resize(){
+ W=innerWidth;H=innerHeight;DPR=Math.min(devicePixelRatio||1,2);
+ cv.width=W*DPR;cv.height=H*DPR;cv.style.width=W+"px";cv.style.height=H+"px";
+ ctx.setTransform(DPR,0,0,DPR,0,0);
+ initStars();
+}
+addEventListener("resize",resize);resize();
+
+let last=0,fps=60,fpsN=0,fpsT=0;
+function frame(now){
+ requestAnimationFrame(frame);
+ const dt=Math.min(.05,(now-last)/1000)||.016;last=now;
+ fpsN++;fpsT+=dt;
+ if(fpsT>=.5){fps=Math.round(fpsN/fpsT);fpsN=0;fpsT=0;
+  $("fps").textContent=fps+" FPS · 粒子 "+PT.list.length+" · 缓存 "+CACHE.size;}
+
+ stepSeq(dt);ambientDust(dt);stepPT(dt);
+ for(let i=FX.sigils.length-1;i>=0;i--){FX.sigils[i].t+=dt;if(FX.sigils[i].t>=FX.sigils[i].dur)FX.sigils.splice(i,1);}
+ for(let i=FX.novas.length-1;i>=0;i--){FX.novas[i].t+=dt;if(FX.novas[i].t>=FX.novas[i].dur)FX.novas.splice(i,1);}
+ for(let i=FX.shocks.length-1;i>=0;i--){FX.shocks[i].t+=dt;if(FX.shocks[i].t>=FX.shocks[i].dur)FX.shocks.splice(i,1);}
+ for(let i=FX.pillars.length-1;i>=0;i--){FX.pillars[i].t+=dt;if(FX.pillars[i].t>=FX.pillars[i].dur)FX.pillars.splice(i,1);}
+ if(FX.domain){FX.domain.t+=dt;if(FX.domain.t>=FX.domain.dur)FX.domain=null;}
+ if(FX.void){FX.void.t+=dt;const vp=clamp(FX.void.t/FX.void.dur,0,1);voidStep(dt,voidSpeedOf(vp),vp);
+  if(FX.void.t>=FX.void.dur)FX.void=null;}
+
+ const T=now/1000;
+ ctx.setTransform(DPR,0,0,DPR,0,0);
+ ctx.clearRect(0,0,W,H);
+ /* 镜头：震动 + 呼吸缩放 */
+ let ox=0,oy=0;
+ if(SHAKE>0&&OPT.shake){ox=rand(-SHAKE,SHAKE);oy=rand(-SHAKE,SHAKE);SHAKE*=.88;if(SHAKE<.3)SHAKE=0;}
+ let zT=(FX.domain?1.025:1);
+ if(FX.void){const vp2=clamp(FX.void.t/FX.void.dur,0,1);zT=1.015+.075*easeIO(clamp(vp2/.9,0,1))-(vp2>.9?(vp2-.9)/.1*.05:0);}
+ ZOOM=lerp(ZOOM,zT+SHAKE*.0015,.08);
+ ctx.save();
+ ctx.translate(W/2+ox,H/2+oy);ctx.scale(ZOOM,ZOOM);ctx.translate(-W/2,-H/2);
+ drawBG(ctx,T);
+ if(FX.void)drawVoidDomain(ctx,FX.void);
+ if(FX.domain)drawDomain(ctx,FX.domain);
+ for(const p of FX.pillars)drawPillar(ctx,p);
+ for(const s of FX.sigils)drawMirror(ctx,s);
+ for(const s of FX.sigils)drawSigilLayers(ctx,s);
+ for(const n of FX.novas)drawNova(ctx,n);
+ for(const s of FX.shocks)drawShock(ctx,s);
+ drawPT(ctx);
+ /* 爆发色差：RGB 三通道错位叠加 */
+ if(OPT.chrom&&FLASH>.02){
+  ctx.globalCompositeOperation="lighter";ctx.globalAlpha=FLASH*.30;
+  const off=FLASH*11;
+  ctx.fillStyle="#ff2244";ctx.fillRect(-off,0,W,H);
+  ctx.fillStyle="#22aaff";ctx.fillRect(off,0,W,H);
+  ctx.globalAlpha=0;ctx.globalCompositeOperation="source-over";
+  FLASH*=.86;
+ }
+ ctx.restore();
+ /* 全屏闪白 */
+ if(FLASH>.02){
+  ctx.save();ctx.globalAlpha=FLASH*.45;ctx.fillStyle="#fff";ctx.fillRect(0,0,W,H);ctx.restore();
+ }
+ /* 暗角 */
+ const vg=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.32,W/2,H/2,Math.max(W,H)*.78);
+ vg.addColorStop(0,"rgba(0,0,0,0)");vg.addColorStop(1,"rgba(0,0,0,.62)");
+ ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+}
+
+/* ───────── §10 交互 ───────── */
+function $(id){return document.getElementById(id);}
+/* 配色色板 */
+(function(){
+ const box=$("swatch");
+ for(const k in PALETTE){
+  const b=document.createElement("div");
+  b.className="s-c"+(k===CUR?" sel":"");
+  b.style.background=PALETTE[k].ring;b.style.color=PALETTE[k].glow;
+  b.title=PALETTE[k].name;
+  b.onclick=()=>{CUR=k;box.querySelectorAll(".s-c").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");};
+  box.appendChild(b);
+ }
+})();
+function castAt(x,y){
+ const R=rand(Math.min(W,H)*.10,Math.min(W,H)*.20);
+ addSigil(x,y,R,{dur:rand(2,3.2),scheme:CUR,seed:Math.random()*97|0});
+ emit(x,y,26,{spd0:40,spd1:180,r0:.8,r1:2.4,life0:.5,life1:1.4,k:1,c:PALETTE[CUR].star,jitter:8});
+ addShock(x,y,R*.8,CUR,1.1);
+ ach("sigil.cast","初施魔法","✦");
+}
+cv.addEventListener("pointerdown",e=>{
+ seqManual=true;$("cAuto").checked=false;OPT.auto=false;
+ setStage("手动施放","MANUAL");
+ castAt(e.clientX,e.clientY);
+});
+$("bSigil").onclick=()=>{seqManual=true;$("cAuto").checked=false;OPT.auto=false;
+ setStage("法阵","SIGIL");castAt(rand(W*.25,W*.75),rand(H*.4,H*.66));};
+$("bDomain").onclick=()=>{seqManual=true;$("cAuto").checked=false;OPT.auto=false;
+ setStage("领域展开","DOMAIN");castDomain(CUR,7);addSigil(W/2,H*.56,Math.min(W,H)*.34,{dur:6.6,seed:23,base:1});
+ ach("sigil.domain","领域展开","◈");};
+$("bNova").onclick=()=>{seqManual=true;$("cAuto").checked=false;OPT.auto=false;
+ setStage("超位魔法","OVERRANK");addNova(W/2,H*.56,Math.min(W,H)*.22,CUR);
+ ach("sigil.overrank","超位咏唱","✹");};
+$("bVoid").onclick=()=>{seqManual=true;$("cAuto").checked=false;OPT.auto=false;
+ setStage("无量空处","UNLIMITED VOID");castVoid(13);
+ ach("sigil.void","无量空处","∞");};
+addEventListener("keydown",e=>{
+ if(e.code==="Space"){e.preventDefault();$("bDomain").onclick();}
+ else if(e.code==="KeyE"){$("bNova").onclick();}
+ else if(e.code==="KeyV"){$("bVoid").onclick();}
+ else if(e.code==="KeyH"){$("ui").classList.toggle("hide");}
+});
+$("toggle").onclick=()=>$("ui").classList.remove("hide");
+/* 参数绑定 */
+[["rGlyph","vGlyph","glyphN",v=>v,v=>v],
+ ["rSpin","vSpin","spin",v=>v/100,v=>v.toFixed(1)],
+ ["rGlow","vGlow","glow",v=>v/100,v=>v.toFixed(1)],
+ ["rDust","vDust","dust",v=>v,v=>v]].forEach(([rid,vid,key,conv,fmt2])=>{
+ const r=$(rid),v=$(vid);
+ r.oninput=()=>{const raw=+r.value;OPT[key]=conv(raw);v.textContent=fmt2(OPT[key]);};
+ v.textContent=fmt2(OPT[key]);
+});
+["cAuto","cMirror","cChrom","cShake","cBloom"].forEach(id=>{
+ const el=$(id),key=id.slice(1).replace("Auto","auto").replace("Mirror","mirror")
+   .replace("Chrom","chrom").replace("Shake","shake").replace("Bloom","bloom");
+ el.onchange=()=>{OPT[key]=el.checked;
+  if(key==="auto"&&el.checked){seqManual=false;seqI=0;seqT=0;
+   setStage(SEQ[0].n,SEQ[0].s);}};
+});
+
+/* 启动 */
+setStage(SEQ[0].n,SEQ[0].s);
+addSigil(W/2,H*.56,Math.min(W,H)*.26,{dur:3.6,seed:7,base:.9});
+requestAnimationFrame(frame);
+window.__SIGIL={PALETTE,OPT,FX,PT,CACHE,VOID,addSigil,addNova,castDomain,castVoid,layer,starPaths};
+</script>
+<!-- 返回主页（全站统一按钮 · 2026-09-29） -->
+<a class="wb-home" href="https://startian.top/" title="返回星恬的小站主页">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>主页</span>
+</a>
+</body>
+</html>
