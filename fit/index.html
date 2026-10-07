@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="函数拟合器：丢一堆散点进去，自动找出最像的函数。startian.top 出品">
+<meta name="description" content="函数拟合器：丢一堆散点进去，从 11 种函数模型（多项式 / 指数 / 幂 / 对数 / 反比 / 正弦 / 高斯…）里自动找出最像的那个。startian.top 出品">
 <meta name="theme-color" content="#0b1a16">
 <title>函数拟合器 · startian.top</title>
 <style>
@@ -39,6 +39,9 @@
   .data-row textarea:focus{border-color:#3ddba0}
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(10px);opacity:0;z-index:60;background:rgba(14,34,26,.95);border:1px solid rgba(90,220,170,.4);border-radius:999px;padding:11px 22px;font-size:13px;font-weight:700;transition:all .3s ease;pointer-events:none}
   .toast.show{opacity:1;transform:translateX(-50%)}
+  .btns .noise{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:#7fb8a2;font-weight:800;margin-left:auto;padding:0 2px}
+  .btns .noise input{width:92px;accent-color:#3ddba0;height:3px}
+  .btns .noise b{color:#5ff0c0;min-width:24px;text-align:right;font-variant-numeric:tabular-nums}
 /* —— 返回主页（全站统一 · 2026-09-29）—— */
 .wb-home{position:fixed;left:14px;bottom:14px;z-index:9990;display:inline-flex;align-items:center;gap:5px;
   padding:8px 13px 8px 10px;border-radius:999px;text-decoration:none;
@@ -55,7 +58,7 @@
 <body>
 <header>
   <h1>📈 函数拟合器</h1>
-  <span class="sub">丢一堆散点进去 · 自动找出最像的函数</span>
+  <span class="sub">丢一堆散点进去 · 11 种模型自动找出最像的函数</span>
   <a class="home" href="https://startian.top/">← 返回主页</a>
 </header>
 <main>
@@ -65,8 +68,13 @@
     <div class="btns">
       <button class="primary" id="btnLin" type="button">🎲 撒线性点</button>
       <button id="btnQuad" type="button">🎲 撒抛物线点</button>
+      <button id="btnCub" type="button">🎲 撒三次点</button>
       <button id="btnExp" type="button">🎲 撒指数点</button>
+      <button id="btnSin" type="button">🎲 撒正弦点</button>
+      <button id="btnGauss" type="button">🎲 撒钟形点</button>
+      <button id="btnRecip" type="button">🎲 撒反比点</button>
       <button id="btnClear" type="button">🧹 清空</button>
+      <label class="noise">噪声 <input type="range" id="noise" min="0" max="300" value="120"><b id="noiseV">1.2</b></label>
     </div>
     <p class="tip">点击画布加点 · 右键删除最近的点 · 也可以在下面粘贴数据（每行 x,y 或 x y）</p>
     <div class="data-row">
@@ -77,7 +85,7 @@
   <section class="card">
     <h2>FIT · 拟合结果（实时）</h2>
     <div class="fits" id="fits"></div>
-    <p class="tip" id="fitTip" style="margin-top:12px">至少需要 2 个点，多撒几个效果更明显。金色边框 = 当前最像的函数。</p>
+    <p class="tip" id="fitTip" style="margin-top:12px">点越多越准；金色边框 = 当前最像的函数（按调整 R² 排名，同分时更简单的函数优先）。</p>
   </section>
 </main>
 <div class="toast" id="toast"></div>
@@ -499,9 +507,9 @@ var I18N = (function () {
 })();
 
 /* ---- 短语表（中文原文 → English）---- */
-I18N.phrase({"函数拟合器 · startian.top": "Function Fitter · startian.top","📈 函数拟合器": "📈 Function Fitter","丢一堆散点进去 · 自动找出最像的函数": "Throw in a pile of scatter points · automatically find the closest function","← 返回主页": "← Back to home","SCATTER · 散点画布": "SCATTER · Scatter canvas","🎲 撒线性点": "🎲 Scatter linear points","🎲 撒抛物线点": "🎲 Scatter parabolic points","🎲 撒指数点": "🎲 Scatter exponential points","🧹 清空": "🧹 Clear","点击画布加点 · 右键删除最近的点 · 也可以在下面粘贴数据（每行 x,y 或 x y）": "Click the canvas to add points · right-click to delete the nearest point · you can also paste data below (x,y or x y per line)","导入": "Import","数据": "Data","FIT · 拟合结果（实时）": "FIT · Fit results (live)","至少需要 2 个点，多撒几个效果更明显。金色边框 = 当前最像的函数。": "At least 2 points are needed; more points make it clearer. Gold border = the closest-fitting function.","主页": "Home","返回星恬的小站主页": "Back to Startian's Little Site home","🏆 成就解锁：": "🏆 Achievement unlocked: ","数据侦探": "Data Detective","一次函数": "Linear function","二次函数": "Quadratic function","三次函数": "Cubic function","指数函数": "Exponential function","幂函数": "Power function","对数函数": "Logarithmic function","几乎完美吻合": "Almost a perfect fit","非常吻合": "A very close fit","比较吻合": "A fairly close fit","勉强": "Barely","找到最像的那个": "Found the closest one","🎲 撒了一把线性点": "🎲 Scattered a handful of linear points","🎲 撒了一把抛物线点": "🎲 Scattered a handful of parabolic points","🎲 撒了一把指数点": "🎲 Scattered a handful of exponential points","没认出数据…每行写成 1,2.1 这种": "Couldn't parse the data… write each line like 1,2.1","📥 导入了": "📥 Imported ","个点": " points","还差一点数据…（至少 2 个点）": "Not enough data yet… (at least 2 points)"});
+I18N.phrase({"函数拟合器 · startian.top": "Function Fitter · startian.top","📈 函数拟合器": "📈 Function Fitter","丢一堆散点进去 · 11 种模型自动找出最像的函数": "Throw in a pile of scatter points · let 11 models find the closest function","← 返回主页": "← Back to home","SCATTER · 散点画布": "SCATTER · Scatter canvas","🎲 撒线性点": "🎲 Scatter linear points","🎲 撒抛物线点": "🎲 Scatter parabolic points","🎲 撒指数点": "🎲 Scatter exponential points","🧹 清空": "🧹 Clear","点击画布加点 · 右键删除最近的点 · 也可以在下面粘贴数据（每行 x,y 或 x y）": "Click the canvas to add points · right-click to delete the nearest point · you can also paste data below (x,y or x y per line)","导入": "Import","数据": "Data","FIT · 拟合结果（实时）": "FIT · Fit results (live)","点越多越准；金色边框 = 当前最像的函数（按调整 R² 排名，同分时更简单的函数优先）。": "More points, better accuracy; gold border = the closest function (ranked by adjusted R²; simpler wins ties).","主页": "Home","返回星恬的小站主页": "Back to Startian's Little Site home","🏆 成就解锁：": "🏆 Achievement unlocked: ","数据侦探": "Data Detective","一次函数": "Linear function","二次函数": "Quadratic function","三次函数": "Cubic function","指数函数": "Exponential function","幂函数": "Power function","对数函数": "Logarithmic function","几乎完美吻合": "Almost a perfect fit","非常吻合": "A very close fit","比较吻合": "A fairly close fit","勉强": "Barely","找到最像的那个": "Found the closest one","🎲 撒了一把线性点": "🎲 Scattered a handful of linear points","🎲 撒了一把抛物线点": "🎲 Scattered a handful of parabolic points","🎲 撒了一把指数点": "🎲 Scattered a handful of exponential points","没认出数据…每行写成 1,2.1 这种": "Couldn't parse the data… write each line like 1,2.1","📥 导入了": "📥 Imported ","个点": " points","还差一点数据…（至少 2 个点）": "Not enough data yet… (at least 2 points)","🎲 撒三次点": "🎲 Scatter cubic points","🎲 撒正弦点": "🎲 Scatter sine points","🎲 撒钟形点": "🎲 Scatter bell points","🎲 撒反比点": "🎲 Scatter reciprocal points","🎲 撒了一把三次点": "🎲 Scattered cubic points","🎲 撒了一把正弦点": "🎲 Scattered sine points","🎲 撒了一把钟形点": "🎲 Scattered bell points","🎲 撒了一把反比点": "🎲 Scattered reciprocal points","噪声": "Noise"});
 /* ---- 数字/日期拼接规则 ---- */
-I18N.rules([["^🏆 一次函数：y = (.+)$", "🏆 Linear function: y = $1"], ["^🏆 二次函数：y = (.+)$", "🏆 Quadratic function: y = $1"], ["^🏆 三次函数：y = (.+)$", "🏆 Cubic function: y = $1"], ["^🏆 指数函数：y = (.+)$", "🏆 Exponential function: y = $1"], ["^🏆 幂函数：y = (.+)$", "🏆 Power function: y = $1"], ["^🏆 对数函数：y = (.+)$", "🏆 Logarithmic function: y = $1"], ["^一次函数：y = (.+)$", "Linear function: y = $1"], ["^二次函数：y = (.+)$", "Quadratic function: y = $1"], ["^三次函数：y = (.+)$", "Cubic function: y = $1"], ["^指数函数：y = (.+)$", "Exponential function: y = $1"], ["^幂函数：y = (.+)$", "Power function: y = $1"], ["^对数函数：y = (.+)$", "Logarithmic function: y = $1"]]);
+I18N.rules([["^🏆 一次函数：y = (.+)$","🏆 Linear function: y = $1"],["^🏆 二次函数：y = (.+)$","🏆 Quadratic function: y = $1"],["^🏆 三次函数：y = (.+)$","🏆 Cubic function: y = $1"],["^🏆 四次函数：y = (.+)$","🏆 Quartic function: y = $1"],["^🏆 指数函数：y = (.+)$","🏆 Exponential function: y = $1"],["^🏆 指数函数·偏移：y = (.+)$","🏆 Shifted exponential: y = $1"],["^🏆 幂函数：y = (.+)$","🏆 Power function: y = $1"],["^🏆 对数函数：y = (.+)$","🏆 Logarithmic function: y = $1"],["^🏆 反比函数：y = (.+)$","🏆 Reciprocal function: y = $1"],["^🏆 正弦函数：y = (.+)$","🏆 Sine function: y = $1"],["^🏆 高斯函数：y = (.+)$","🏆 Gaussian function: y = $1"],["^一次函数：y = (.+)$","Linear function: y = $1"],["^二次函数：y = (.+)$","Quadratic function: y = $1"],["^三次函数：y = (.+)$","Cubic function: y = $1"],["^四次函数：y = (.+)$","Quartic function: y = $1"],["^指数函数：y = (.+)$","Exponential function: y = $1"],["^指数函数·偏移：y = (.+)$","Shifted exponential: y = $1"],["^幂函数：y = (.+)$","Power function: y = $1"],["^对数函数：y = (.+)$","Logarithmic function: y = $1"],["^反比函数：y = (.+)$","Reciprocal function: y = $1"],["^正弦函数：y = (.+)$","Sine function: y = $1"],["^高斯函数：y = (.+)$","Gaussian function: y = $1"],["^调整 = (.+)$","Adj. R² = $1"]]);
 I18N.auto();
 /* ==== i18n-kit v1.2 end ==== */
 </script>
@@ -575,8 +583,13 @@ I18N.auto();
     return { x: B.x0 + sx / W * (B.x1 - B.x0), y: B.y0 + (H - sy) / H * (B.y1 - B.y0) };
   }
 
-  /* ============ 拟合引擎 ============ */
-  function solve(A, b) {   /* 高斯消元 */
+  /* ============ 拟合引擎 v2（11 种模型 · 数值稳定） ============
+     多项式 → Householder QR 最小二乘（x 先归一化，系数再展开回原坐标）
+     非线性 → 线性化初值 + Levenberg–Marquardt 精修（数值雅可比）
+     排名 → 按「调整 R²」（同分时更简单的模型优先） */
+  var PI2 = Math.PI * 2;
+
+  function solve(A, b) {   /* 高斯消元（LM 法方程用） */
     var n = b.length;
     for (var i = 0; i < n; i++) {
       var piv = i;
@@ -598,25 +611,108 @@ I18N.auto();
     }
     return x;
   }
-  function polyFit(n) {   /* y = a0 + a1 x + ... + an x^n */
-    if (pts.length < n + 1) return null;
-    var m = n + 1;
-    var M = [], v = [];
-    for (var r = 0; r < m; r++) {
-      M.push([]); v.push(0);
-      for (var c = 0; c < m; c++) {
-        var s = 0;
-        pts.forEach(function (p) { s += Math.pow(p.x, r + c); });
-        M[r].push(s);
-      }
+  function lstsq(M, y) {   /* Householder QR：min ||M x − y|| */
+    var n = M.length, m = M[0].length;
+    var R = [], z = y.slice();
+    for (var i = 0; i < n; i++) R.push(M[i].slice());
+    for (var k = 0; k < m; k++) {
       var s2 = 0;
-      pts.forEach(function (p) { s2 += p.y * Math.pow(p.x, r); });
-      v[r] = s2;
+      for (var i2 = k; i2 < n; i2++) s2 += R[i2][k] * R[i2][k];
+      s2 = Math.sqrt(s2);
+      if (s2 < 1e-13) continue;
+      var alpha = (R[k][k] >= 0 ? -1 : 1) * s2;
+      var v = new Array(n);
+      for (var i3 = 0; i3 < n; i3++) v[i3] = (i3 >= k) ? R[i3][k] : 0;
+      v[k] -= alpha;
+      var vv = 0;
+      for (var i4 = k; i4 < n; i4++) vv += v[i4] * v[i4];
+      if (vv < 1e-24) continue;
+      for (var j = k; j < m; j++) {
+        var dot = 0;
+        for (var i5 = k; i5 < n; i5++) dot += v[i5] * R[i5][j];
+        var f2 = 2 * dot / vv;
+        for (var i6 = k; i6 < n; i6++) R[i6][j] -= f2 * v[i6];
+      }
+      var dz = 0;
+      for (var i7 = k; i7 < n; i7++) dz += v[i7] * z[i7];
+      var fz = 2 * dz / vv;
+      for (var i8 = k; i8 < n; i8++) z[i8] -= fz * v[i8];
     }
-    var co = solve(M, v);
-    return co ? { co: co, fn: function (x) { return co.reduce(function (s, a, i) { return s + a * Math.pow(x, i); }, 0); } } : null;
+    var x = new Array(m);
+    for (var r = m - 1; r >= 0; r--) {
+      var sm = z[r];
+      for (var c = r + 1; c < m; c++) sm -= R[r][c] * x[c];
+      if (Math.abs(R[r][r]) < 1e-12) return null;
+      x[r] = sm / R[r][r];
+    }
+    for (var q = 0; q < m; q++) if (!isFinite(x[q])) return null;
+    return x;
   }
-  function linFit(xs, ys) {   /* 对给定成对数据做一次线性最小二乘 */
+  function sseOf(r) {
+    var s = 0;
+    for (var i = 0; i < r.length; i++) {
+      var v = r[i];
+      if (!isFinite(v)) return Infinity;
+      s += v * v;
+    }
+    return s;
+  }
+  function lm(refit, p0, maxIt) {   /* Levenberg–Marquardt */
+    var p = p0.slice(), m = p.length;
+    var r = refit(p), cost = sseOf(r);
+    if (!isFinite(cost)) return null;
+    var lambda = 1e-3;
+    maxIt = maxIt || 90;
+    for (var it = 0; it < maxIt; it++) {
+      var n = r.length, J = [];
+      for (var i = 0; i < n; i++) J.push(new Array(m).fill(0));
+      for (var j = 0; j < m; j++) {   /* 数值雅可比（中心差分；rP=p+h, rM=p−h，勿交换） */
+        var h = 1e-6 * Math.max(1, Math.abs(p[j]));
+        var p1 = p.slice(); p1[j] += h;
+        var p2 = p.slice(); p2[j] -= h;
+        var rP = refit(p1), rM = refit(p2);
+        if (!isFinite(sseOf(rP)) || !isFinite(sseOf(rM))) continue;
+        for (var i2 = 0; i2 < n; i2++) J[i2][j] = (rP[i2] - rM[i2]) / (2 * h);
+      }
+      var A = [], g = new Array(m).fill(0);
+      for (var a0 = 0; a0 < m; a0++) A.push(new Array(m).fill(0));
+      for (var i3 = 0; i3 < n; i3++) {
+        for (var a = 0; a < m; a++) {
+          g[a] += J[i3][a] * r[i3];
+          for (var b = a; b < m; b++) A[a][b] += J[i3][a] * J[i3][b];
+        }
+      }
+      for (var a2 = 0; a2 < m; a2++) for (var b2 = a2 + 1; b2 < m; b2++) A[b2][a2] = A[a2][b2];
+      var moved = false;
+      for (var trial = 0; trial < 8; trial++) {
+        var Ad = [], neg = [];
+        for (var a3 = 0; a3 < m; a3++) {
+          var row = new Array(m);
+          for (var b3 = 0; b3 < m; b3++) row[b3] = (a3 === b3) ? A[a3][b3] * (1 + lambda) + 1e-12 : A[a3][b3];
+          Ad.push(row);
+          neg.push(-g[a3]);
+        }
+        var d = solve(Ad, neg);
+        if (!d) { lambda *= 6; if (lambda > 1e10) break; continue; }
+        var pn = [], ok = true;
+        for (var k2 = 0; k2 < m; k2++) { pn.push(p[k2] + d[k2]); if (!isFinite(pn[k2])) ok = false; }
+        var cn = ok ? sseOf(refit(pn)) : Infinity;
+        if (cn < cost) {
+          var rel = (cost - cn) / (cost + 1e-300);
+          p = pn; r = refit(pn); cost = cn;
+          lambda = Math.max(1e-10, lambda * 0.4);
+          moved = true;
+          if (rel < 1e-13) it = maxIt;   /* 收敛 */
+          break;
+        }
+        lambda *= 7;
+        if (lambda > 1e10) break;
+      }
+      if (!moved) break;
+    }
+    return { p: p, cost: cost };
+  }
+  function linFit(xs, ys) {   /* 一次线性最小二乘 */
     var n = xs.length;
     if (n < 2) return null;
     var sx = 0, sy = 0, sxx = 0, sxy = 0;
@@ -627,16 +723,26 @@ I18N.auto();
     var b = (sy - a * sx) / n;
     return { a: a, b: b };
   }
+  function median(arr) {
+    var a = arr.slice().sort(function (x, y) { return x - y; });
+    var m = a.length >> 1;
+    return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+  }
   function r2(fn) {
-    var ys = pts.map(function (p) { return p.y; });
-    var mean = ys.reduce(function (s, v) { return s + v; }, 0) / ys.length;
+    var n = pts.length;
+    if (!n) return 0;
+    var mean = 0;
+    for (var i = 0; i < n; i++) mean += pts[i].y;
+    mean /= n;
     var ssr = 0, sst = 0;
-    pts.forEach(function (p) {
-      var e = p.y - fn(p.x);
+    for (var i2 = 0; i2 < n; i2++) {
+      var yv = fn(pts[i2].x);
+      if (!isFinite(yv)) return -Infinity;   /* 模型在该数据上无效 */
+      var e = pts[i2].y - yv;
       ssr += e * e;
-      sst += (p.y - mean) * (p.y - mean);
-    });
-    if (sst < 1e-12) return 1;
+      sst += (pts[i2].y - mean) * (pts[i2].y - mean);
+    }
+    if (sst < 1e-12) return ssr < 1e-12 ? 1 : 0;
     return Math.max(0, 1 - ssr / sst);
   }
   function fmt(v) {
@@ -645,48 +751,222 @@ I18N.auto();
     if (a >= 1e5 || (a < 1e-3 && a > 0)) return v.toExponential(2);
     return String(Math.round(v * 10000) / 10000);
   }
-  function fitAll() {
-    var out = [];
-    if (pts.length >= 2) {
-      var f1 = polyFit(1);
-      if (f1) out.push({ name: '一次函数', expr: 'y = ' + fmt(f1.co[1]) + ' x + ' + fmt(f1.co[0]), fn: f1.fn, n: 2 });
-      var f2 = pts.length >= 3 ? polyFit(2) : null;
-      if (f2) out.push({ name: '二次函数', expr: 'y = ' + fmt(f2.co[2]) + ' x² + ' + fmt(f2.co[1]) + ' x + ' + fmt(f2.co[0]), fn: f2.fn, n: 3 });
-      var f3 = pts.length >= 4 ? polyFit(3) : null;
-      if (f3) out.push({ name: '三次函数', expr: 'y = ' + fmt(f3.co[3]) + ' x³ + ' + fmt(f3.co[2]) + ' x² + ' + fmt(f3.co[1]) + ' x + ' + fmt(f3.co[0]), fn: f3.fn, n: 4 });
-      /* 指数 y = a e^(bx)（y>0 全正） */
-      if (pts.every(function (p) { return p.y > 1e-9; })) {
-        var lf = linFit(pts.map(function (p) { return p.x; }), pts.map(function (p) { return Math.log(p.y); }));
-        if (lf && Math.abs(lf.a) > 1e-9) {
-          out.push({
-            name: '指数函数', expr: 'y = ' + fmt(Math.exp(lf.b)) + ' · e^(' + fmt(lf.a) + ' x)',
-            fn: function (x) { return Math.exp(lf.b) * Math.exp(lf.a * x); }, n: 2
-          });
-        }
-      }
-      /* 幂 y = a x^b（x,y>0） */
-      if (pts.every(function (p) { return p.x > 1e-9 && p.y > 1e-9; })) {
-        var lf2 = linFit(pts.map(function (p) { return Math.log(p.x); }), pts.map(function (p) { return Math.log(p.y); }));
-        if (lf2) {
-          out.push({
-            name: '幂函数', expr: 'y = ' + fmt(Math.exp(lf2.b)) + ' · x^' + fmt(lf2.a),
-            fn: function (x) { return x <= 0 ? NaN : Math.exp(lf2.b) * Math.pow(x, lf2.a); }, n: 2
-          });
-        }
-      }
-      /* 对数 y = a ln x + b（x>0） */
-      if (pts.every(function (p) { return p.x > 1e-9; })) {
-        var lf3 = linFit(pts.map(function (p) { return Math.log(p.x); }), pts.map(function (p) { return p.y; }));
-        if (lf3) {
-          out.push({
-            name: '对数函数', expr: 'y = ' + fmt(lf3.a) + ' ln(x) + ' + fmt(lf3.b),
-            fn: function (x) { return x <= 0 ? NaN : lf3.a * Math.log(x) + lf3.b; }, n: 2
-          });
-        }
-      }
+  function binom(n, k) { var r = 1; for (var i = 0; i < k; i++) r = r * (n - i) / (i + 1); return r; }
+  function expandPoly(co, mx, sx) {   /* 归一化系数 → 原坐标系数 */
+    var deg = co.length - 1, out = new Array(deg + 1).fill(0);
+    for (var d = 0; d <= deg; d++) {
+      var c = co[d] / Math.pow(sx, d);
+      for (var k = 0; k <= d; k++) out[k] += c * binom(d, k) * Math.pow(-mx, d - k);
     }
-    out.forEach(function (f) { f.r2 = r2(f.fn); });
-    out.sort(function (a, b) { return b.r2 - a.r2; });
+    return out;
+  }
+  function polyExpr(co) {
+    var max = 0;
+    co.forEach(function (c) { max = Math.max(max, Math.abs(c)); });
+    var th = max * 2e-4 + 1e-12, out = '';
+    for (var d = co.length - 1; d >= 0; d--) {
+      var c = co[d];
+      if (Math.abs(c) < th) continue;
+      var t = fmt(Math.abs(c)) + (d === 0 ? '' : (d === 1 ? ' x' : (d === 2 ? ' x²' : (d === 3 ? ' x³' : (d === 4 ? ' x⁴' : ' x^' + d)))));
+      out += out ? (c < 0 ? ' − ' : ' + ') + t : (c < 0 ? '−' : '') + t;
+    }
+    if (!out) out = '0';
+    return 'y = ' + out;
+  }
+  function modelPoly(deg) {
+    if (pts.length < deg + 1) return null;
+    var xs = pts.map(function (p) { return p.x; });
+    var mx = 0;
+    xs.forEach(function (v) { mx += v; });
+    mx /= xs.length;
+    var sv = 0;
+    xs.forEach(function (v) { sv += (v - mx) * (v - mx); });
+    var sx = Math.sqrt(sv / xs.length);
+    if (!(sx > 1e-12)) return null;
+    var M = [], y = [];
+    pts.forEach(function (p) {
+      var t = (p.x - mx) / sx, row = [];
+      for (var d = 0; d <= deg; d++) row.push(Math.pow(t, d));
+      M.push(row); y.push(p.y);
+    });
+    var co = lstsq(M, y);
+    if (!co) return null;
+    var fn = function (x) {
+      var t = (x - mx) / sx, acc = 0;
+      for (var d = co.length - 1; d >= 0; d--) acc = acc * t + co[d];
+      return acc;
+    };
+    return { expr: polyExpr(expandPoly(co, mx, sx)), fn: fn, p: deg + 1 };
+  }
+  function expInit() {   /* y = a·e^(bx) 的线性化初值（按多数符号定向，容忍噪声负值） */
+    var posN = 0, negN = 0;
+    pts.forEach(function (p) { if (p.y > 1e-9) posN++; else if (p.y < -1e-9) negN++; });
+    if (!posN && !negN) return null;
+    var sgn = posN >= negN ? 1 : -1;
+    var xsE = [], lsE = [];
+    pts.forEach(function (p) { var ay = Math.abs(p.y); if (ay > 1e-9) { xsE.push(p.x); lsE.push(Math.log(ay)); } });
+    if (xsE.length < 2) return null;
+    var lf = linFit(xsE, lsE);
+    if (!lf || !isFinite(lf.a) || !isFinite(lf.b)) return null;
+    return [sgn * Math.exp(lf.b), lf.a];
+  }
+  function modelExp() {
+    if (pts.length < 3) return null;
+    var p0 = expInit(); if (!p0) return null;
+    var r = lm(function (p) { return pts.map(function (q) { return q.y - p[0] * Math.exp(p[1] * q.x); }); }, p0, 80);
+    if (!r) return null;
+    var a = r.p[0], b = r.p[1];
+    if (!isFinite(a) || !isFinite(b)) return null;
+    return { expr: 'y = ' + fmt(a) + ' · e^(' + fmt(b) + ' x)', fn: function (x) { return a * Math.exp(b * x); }, p: 2 };
+  }
+  function modelExpC() {
+    if (pts.length < 4) return null;
+    var p0 = expInit(); if (!p0) return null;
+    var c0 = median(pts.map(function (p) { return p.y; })) - median(pts.map(function (p) { return p0[0] * Math.exp(p0[1] * p.x); }));
+    var r = lm(function (p) { return pts.map(function (q) { return q.y - (p[0] * Math.exp(p[1] * q.x) + p[2]); }); }, [p0[0], p0[1], c0], 90);
+    if (!r) return null;
+    var a = r.p[0], b = r.p[1], c = r.p[2];
+    if (!isFinite(a) || !isFinite(b) || !isFinite(c)) return null;
+    return {
+      expr: 'y = ' + fmt(a) + ' · e^(' + fmt(b) + ' x)' + (c >= 0 ? ' + ' : ' − ') + fmt(Math.abs(c)),
+      fn: function (x) { return a * Math.exp(b * x) + c; }, p: 3
+    };
+  }
+  function modelPower() {   /* y = a·x^b（x>0；按多数符号定向，容忍噪声负值） */
+    if (pts.length < 3) return null;
+    if (!pts.every(function (p) { return p.x > 1e-9; })) return null;
+    var posN = 0, negN = 0;
+    pts.forEach(function (p) { if (p.y > 1e-9) posN++; else if (p.y < -1e-9) negN++; });
+    if (!posN && !negN) return null;
+    var sgn = posN >= negN ? 1 : -1;
+    var lx = [], ly = [];
+    pts.forEach(function (p) { var ay = Math.abs(p.y); if (ay > 1e-9) { lx.push(Math.log(p.x)); ly.push(Math.log(ay)); } });
+    if (lx.length < 2) return null;
+    var lf = linFit(lx, ly);
+    if (!lf) return null;
+    var r = lm(function (p) { return pts.map(function (q) { return q.y - p[0] * Math.pow(q.x, p[1]); }); }, [sgn * Math.exp(lf.b), lf.a], 80);
+    if (!r) return null;
+    var a = r.p[0], b = r.p[1];
+    if (!isFinite(a) || !isFinite(b)) return null;
+    return { expr: 'y = ' + fmt(a) + ' · x^' + fmt(b), fn: function (x) { return x <= 0 ? NaN : a * Math.pow(x, b); }, p: 2 };
+  }
+  function modelLog() {
+    if (pts.length < 3) return null;
+    if (!pts.every(function (p) { return p.x > 1e-9; })) return null;
+    var lf = linFit(pts.map(function (p) { return Math.log(p.x); }), pts.map(function (p) { return p.y; }));
+    if (!lf) return null;
+    var a = lf.a, b = lf.b;
+    return {
+      expr: 'y = ' + fmt(a) + ' ln(x)' + (b >= 0 ? ' + ' : ' − ') + fmt(Math.abs(b)),
+      fn: function (x) { return x <= 0 ? NaN : a * Math.log(x) + b; }, p: 2
+    };
+  }
+  function modelRecip() {
+    if (pts.length < 3) return null;
+    if (!pts.every(function (p) { return Math.abs(p.x) > 1e-9; })) return null;
+    var lf = linFit(pts.map(function (p) { return 1 / p.x; }), pts.map(function (p) { return p.y; }));
+    if (!lf) return null;
+    var a = lf.a, b = lf.b;
+    return {
+      expr: 'y = ' + fmt(a) + ' / x' + (b >= 0 ? ' + ' : ' − ') + fmt(Math.abs(b)),
+      fn: function (x) { return Math.abs(x) < 1e-12 ? NaN : a / x + b; }, p: 2
+    };
+  }
+  function modelSine() {
+    var n = pts.length;
+    if (n < 5) return null;
+    var xs = pts.map(function (p) { return p.x; });
+    var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs);
+    var span = x1 - x0;
+    if (span < 1e-6) return null;
+    var wLo = PI2 / (1.33 * span), wHi = PI2 / (0.4 * span);   /* 至少露出 ~0.75 个周期，防止退化成“斜线” */
+    var bestW = null, bestS = Infinity;
+    for (var ci = 0; ci <= 240; ci++) {   /* 频率粗扫 */
+      var w = wLo * Math.pow(wHi / wLo, ci / 240);
+      var M = [], yy = [];
+      for (var i = 0; i < n; i++) { M.push([Math.sin(w * xs[i]), Math.cos(w * xs[i]), 1]); yy.push(pts[i].y); }
+      var co = lstsq(M, yy);
+      if (!co) continue;
+      var ss = 0;
+      for (var i2 = 0; i2 < n; i2++) {
+        var e = pts[i2].y - (co[0] * Math.sin(w * xs[i2]) + co[1] * Math.cos(w * xs[i2]) + co[2]);
+        ss += e * e;
+      }
+      if (ss < bestS) { bestS = ss; bestW = w; }
+    }
+    if (bestW === null) return null;
+    var M2 = [], y2 = [];
+    for (var i3 = 0; i3 < n; i3++) { M2.push([Math.sin(bestW * xs[i3]), Math.cos(bestW * xs[i3]), 1]); y2.push(pts[i3].y); }
+    var c2 = lstsq(M2, y2);
+    if (!c2) return null;
+    var r = lm(function (p) {
+      return pts.map(function (q) { return q.y - (p[0] * Math.sin(p[2] * q.x) + p[1] * Math.cos(p[2] * q.x) + p[3]); });
+    }, [c2[0], c2[1], bestW, c2[2]], 140);
+    if (!r) return null;
+    var A = r.p[0], B = r.p[1], W = r.p[2], D = r.p[3];
+    if (W < 0) { W = -W; A = -A; }
+    var R = Math.sqrt(A * A + B * B), phi = Math.atan2(B, A);
+    if (!(R > 1e-9) || !isFinite(D)) return null;
+    return {
+      expr: 'y = ' + fmt(R) + ' sin(' + fmt(W) + ' x ' + (phi >= 0 ? '+ ' : '− ') + fmt(Math.abs(phi)) + ')' + (D >= 0 ? ' + ' : ' − ') + fmt(Math.abs(D)),
+      fn: function (x) { return R * Math.sin(W * x + phi) + D; }, p: 4
+    };
+  }
+  function modelGauss() {   /* y = a·e^(−(x−b)²/W) + c（带偏移：能贴住有底/有顶的钟形） */
+    var n = pts.length;
+    if (n < 5) return null;
+    var xs = pts.map(function (p) { return p.x; });
+    var ysG = pts.map(function (p) { return p.y; });
+    var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs);
+    var span = Math.max(1e-6, x1 - x0);
+    var yMax = Math.max.apply(null, ysG), yMin = Math.min.apply(null, ysG);
+    var med = median(ysG);
+    var peak = (yMax - med) >= (med - yMin);
+    var a0, b0, c0;
+    if (peak) { a0 = yMax - yMin; c0 = yMin; b0 = xs[ysG.indexOf(yMax)]; }
+    else { a0 = yMin - yMax; c0 = yMax; b0 = xs[ysG.indexOf(yMin)]; }
+    var r = lm(function (p) {
+      return pts.map(function (q) { var dd = q.x - p[1]; return q.y - (p[0] * Math.exp(-dd * dd / p[2]) + p[3]); });
+    }, [a0, b0, Math.pow(span / 4, 2), c0], 120);
+    if (!r) return null;
+    var A = r.p[0], B = r.p[1], W = r.p[2], Cc = r.p[3];
+    if (!(W > 1e-9) || !isFinite(Cc)) return null;
+    if (B < x0 - span * 0.3 || B > x1 + span * 0.3) return null;   /* 山包跑到数据区外＝不是钟形，剔除 */
+    if (A * (peak ? 1 : -1) < 0) return null;                       /* 峰形数据配负幅度＝乱配，剔除 */
+    return {
+      expr: 'y = ' + fmt(A) + ' · e^(−(x − ' + fmt(B) + ')² / ' + fmt(W) + ')' + (Cc >= 0 ? ' + ' : ' − ') + fmt(Math.abs(Cc)),
+      fn: function (x) { var dd = x - B; return A * Math.exp(-dd * dd / W) + Cc; }, p: 4
+    };
+  }
+  function fitAll() {
+    var n = pts.length, out = [];
+    if (n < 2) return out;
+    var trials = [
+      ['一次函数', function () { return modelPoly(1); }],
+      ['二次函数', function () { return n >= 3 ? modelPoly(2) : null; }],
+      ['三次函数', function () { return n >= 4 ? modelPoly(3) : null; }],
+      ['四次函数', function () { return n >= 5 ? modelPoly(4) : null; }],
+      ['指数函数', modelExp],
+      ['指数函数·偏移', modelExpC],
+      ['幂函数', modelPower],
+      ['对数函数', modelLog],
+      ['反比函数', modelRecip],
+      ['正弦函数', modelSine],
+      ['高斯函数', modelGauss]
+    ];
+    trials.forEach(function (t) {
+      var m = null;
+      try { m = t[1](); } catch (e) { m = null; }
+      if (!m) return;
+      var R2 = r2(m.fn);
+      if (!isFinite(R2)) return;
+      var denom = Math.max(1, n - m.p - 1);
+      m.name = t[0];
+      m.r2 = R2;
+      m.adj = Math.max(-9.9, 1 - (1 - R2) * (n - 1) / denom);
+      out.push(m);
+    });
+    out.sort(function (a, b) { return (b.adj - a.adj) || (a.p - b.p); });
     return out;
   }
 
@@ -772,7 +1052,7 @@ I18N.auto();
       wrap.innerHTML = fits.map(function (f) {
         return '<div class="fit' + (f === fits[0] ? ' best' : '') + '">' +
           '<div class="fn">' + (f === fits[0] ? '🏆 ' : '') + f.name + '：' + f.expr + '</div>' +
-          '<div class="meta"><span>R² = ' + f.r2.toFixed(4) + '</span><span>' + (f.r2 > 0.999 ? '几乎完美吻合' : f.r2 > 0.95 ? '非常吻合' : f.r2 > 0.8 ? '比较吻合' : '勉强') + '</span></div></div>';
+          '<div class="meta"><span>R² = ' + f.r2.toFixed(4) + '</span><span>调整 = ' + (f.adj <= -9 ? '—' : f.adj.toFixed(4)) + '</span><span>' + (f.r2 > 0.999 ? '几乎完美吻合' : f.r2 > 0.95 ? '非常吻合' : f.r2 > 0.8 ? '比较吻合' : '勉强') + '</span></div></div>';
       }).join('');
     }
   }
@@ -819,18 +1099,33 @@ I18N.auto();
     afterChange();
   });
 
-  function rand(gen, n) {
+  var NOISE = 1.2;   /* 噪声幅度（±） */
+  function rand(gen, n, x0, x1) {
+    x0 = (x0 === undefined) ? -5 : x0;
+    x1 = (x1 === undefined) ? 5 : x1;
     pts = [];
     for (var i = 0; i < n; i++) {
-      var x = -5 + i * 10 / (n - 1);
-      pts.push({ x: x, y: gen(x) + (Math.random() - 0.5) * 2.4 });
+      var x = (n === 1) ? (x0 + x1) / 2 : x0 + i * (x1 - x0) / (n - 1);
+      pts.push({ x: x, y: gen(x) + (Math.random() - 0.5) * 2 * NOISE });
     }
     afterChange();
   }
-  document.getElementById('btnLin').addEventListener('click', function () { rand(function (x) { return 1.4 * x + 2.2; }, 11); toast('🎲 撒了一把线性点'); });
-  document.getElementById('btnQuad').addEventListener('click', function () { rand(function (x) { return 0.6 * x * x - 1.2 * x + 1; }, 13); toast('🎲 撒了一把抛物线点'); });
-  document.getElementById('btnExp').addEventListener('click', function () { rand(function (x) { return 1.6 * Math.exp(0.42 * x); }, 11); toast('🎲 撒了一把指数点'); });
+  function scatterBtn(id, gen, n, x0, x1, tip) {
+    document.getElementById(id).addEventListener('click', function () { rand(gen, n, x0, x1); toast(tip); });
+  }
+  scatterBtn('btnLin',   function (x) { return 1.4 * x + 2.2; }, 11, -5, 5, '🎲 撒了一把线性点');
+  scatterBtn('btnQuad',  function (x) { return 0.6 * x * x - 1.2 * x + 1; }, 13, -5, 5, '🎲 撒了一把抛物线点');
+  scatterBtn('btnCub',   function (x) { return 0.08 * x * x * x - 0.2 * x * x + 0.6 * x + 1.5; }, 14, -5, 5, '🎲 撒了一把三次点');
+  scatterBtn('btnExp',   function (x) { return 1.6 * Math.exp(0.42 * x); }, 11, -5, 5, '🎲 撒了一把指数点');
+  scatterBtn('btnSin',   function (x) { return 3.2 * Math.sin(0.9 * x + 0.6) + 1.2; }, 21, -5, 5, '🎲 撒了一把正弦点');
+  scatterBtn('btnGauss', function (x) { var d = x - 0.8; return 6 * Math.exp(-d * d / 4) + 0.5; }, 21, -5, 5, '🎲 撒了一把钟形点');
+  scatterBtn('btnRecip', function (x) { return 5 / x + 1.5; }, 16, 0.6, 8, '🎲 撒了一把反比点');
   document.getElementById('btnClear').addEventListener('click', function () { pts = []; afterChange(); });
+  var noiseEl = document.getElementById('noise'), noiseVEl = document.getElementById('noiseV');
+  noiseEl.addEventListener('input', function () {
+    NOISE = noiseEl.value / 100;
+    noiseVEl.textContent = NOISE.toFixed(1);
+  });
   document.getElementById('btnParse').addEventListener('click', function () {
     var lines = document.getElementById('dataIn').value.split('\n');
     var got = [];
@@ -851,6 +1146,25 @@ I18N.auto();
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2200);
   }
+
+  /* —— 测试钩子（调试用） —— */
+  window.__fit = {
+    set: function (arr) {
+      pts = arr.map(function (p) { return Array.isArray(p) ? { x: +p[0], y: +p[1] } : { x: +p.x, y: +p.y }; });
+      afterChange();
+    },
+    add: function (x, y) { pts.push({ x: x, y: y }); afterChange(); },
+    clear: function () { pts = []; afterChange(); },
+    count: function () { return pts.length; },
+    noise: function (v) { noiseEl.value = Math.round(v * 100); noiseEl.dispatchEvent(new Event('input')); },
+    scatter: function (k) {
+      var m = { lin: 'btnLin', quad: 'btnQuad', cub: 'btnCub', exp: 'btnExp', sin: 'btnSin', gauss: 'btnGauss', recip: 'btnRecip' };
+      if (m[k]) document.getElementById(m[k]).click();
+    },
+    fits: function () {
+      return fitAll().map(function (f) { return { name: f.name, expr: f.expr, r2: f.r2, adj: f.adj, p: f.p }; });
+    }
+  };
 
   fit();
   /* 开场给一把示例数据 */
