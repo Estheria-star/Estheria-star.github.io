@@ -103,6 +103,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://startian.top/sigil/</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://startian.top/mood/</loc>
     <lastmod>2026-10-04</lastmod>
     <changefreq>monthly</changefreq>
