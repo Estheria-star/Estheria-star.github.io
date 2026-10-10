@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>服务协议与隐私政策（整活版）· 星恬</title>
+    <meta name="description" content="一个假装正经的「服务协议与隐私政策」整活小页面：认真读完、点下「同意并继续」，会收获一点小小的惊喜（笑）。纯前端实现，点开即玩。">
+    <meta name="author" content="星恬">
+    <link rel="canonical" href="https://zhenghuo.startian.top/">
+    <meta property="og:title" content="服务协议与隐私政策（整活版）">
+    <meta property="og:description" content="认真读完、点下「同意并继续」，会收获一点小小的惊喜（笑）">
+    <meta property="og:url" content="https://zhenghuo.startian.top/">
+    <meta property="og:type" content="website">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background: #000;
+            overflow: hidden;
+        }
+
+        /* 弹窗遮罩 */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+
+        /* 弹窗 */
+        .dialog {
+            width: 85%;
+            max-width: 400px;
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .dialog h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .dialog p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        /* 按钮 */
+        #agreeBtn {
+            width: 100%;
+            height: 45px;
+            border-radius: 22px;
+            background: #07c160;
+            color: white;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+
+        #agreeBtn:active {
+            opacity: 0.9;
+        }
+
+        /* 视频容器 */
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            display: none;
+        }
+
+        /* iframe 铺满全屏 */
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* 隐藏 */
+        .hide {
+            display: none !important;
+        }
+
+        /* 显示 */
+        .show {
+            display: block !important;
+        }
+    /* —— 返回主页（全站统一 · 2026-09-29）—— */
+.wb-home{position:fixed;left:14px;bottom:14px;z-index:9990;display:inline-flex;align-items:center;gap:5px;
+  padding:8px 13px 8px 10px;border-radius:999px;text-decoration:none;
+  background:rgba(17,24,39,.55);color:#fff;font-size:12.5px;font-weight:600;letter-spacing:.3px;
+  -webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.14);box-shadow:0 6px 18px rgba(0,0,0,.18);
+  transition:background .2s,transform .2s,box-shadow .2s}
+.wb-home:hover{background:rgba(17,24,39,.78);transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.26)}
+.wb-home:active{transform:translateY(0)}
+.wb-home svg{width:13px;height:13px;flex:0 0 auto}
+@media (max-width:620px){ .wb-home{left:10px;bottom:10px;padding:7px 11px 7px 9px;font-size:12px} }
+</style>
+</head>
+
+<body>
+    <!-- 弹窗 -->
+    <div id="overlay" class="overlay">
+        <div class="dialog">
+            <h3>隐私协议</h3>
+            <p>点击同意后即可继续使用服务</p>
+            <button id="agreeBtn">同意并继续</button>
+        </div>
+    </div>
+
+    <!-- 视频区域（iframe嵌入） -->
+    <div id="videoContainer" class="video-container">
+        <iframe 
+            src="https://www.bilibili.com/video/BV1GJ411x7h7/?spm_id_from=333.337.search-card.all.click&vd_source=53954458a5ec43fb73b2ce0aa8f4e859"
+            allow="autoplay"
+            allowfullscreen>
+        </iframe>
+    </div>
+
+    <script>
+/* ==== i18n-kit v1.2 begin ==== */
+/* ══════════════════════════════════════════════════════════
+   🌐 多语言 i18n Kit（startian.top 全站共享 · v1.2 · 2026-10-04）
+   · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
+   · 自动识别：首次访问按 navigator.language（zh 开头 → 中文，其余 → English）
+   · 两种接入模式（可混用）：
+     ① 短语表模式（推荐，低侵入）：I18N.phrase({ '中文原文': 'English', ... })
+        自动扫描文本节点 / title / placeholder / aria-label / alt，动态插入的文本也自动翻译
+     ② 标注模式：data-i18n / data-i18n-html / data-i18n-title / data-i18n-aria / data-i18n-ph / data-i18n-alt
+   · 子树上加 data-i18n-skip 可整体跳过（用户输入内容、ARG 谜题原文等）
+   · API：I18N.t(k[,vars]) · I18N.tOr(k,fb) · I18N.tr(原文) · I18N.set(lang) · I18N.lang()
+          · I18N.phrase(map) · I18N.scan(root) · I18N.apply(root) · I18N.onChange(fn)
+          · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n)
+   · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
+   ══════════════════════════════════════════════════════════ */
+var I18N = (function () {
+  'use strict';
+  var LS = 'st_lang';
+  var FALLBACK = 'zh';
+  var lang = FALLBACK;
+  var dict = { zh: {}, en: {} };
+  var phrase = {};      /* 短语表：中文原文（归一化）→ 译文 */
+  var listeners = [];
+  var bd = {};          /* boot data：原文快照等 */
+
+  /* ---- 基础词典（全站通用词条） ---- */
+  dict.zh['common.home'] = '主页';
+  dict.en['common.home'] = 'Home';
+  dict.zh['common.homeTitle'] = '返回星恬的小站主页';
+  dict.en['common.homeTitle'] = "Back to Startian's homepage";
+  dict.zh['common.close'] = '关闭';
+  dict.en['common.close'] = 'Close';
+  dict.zh['common.cancel'] = '取消';
+  dict.en['common.cancel'] = 'Cancel';
+
+  /* ---- 存储与识别 ---- */
+  function norm(v) {
+    v = String(v || '').toLowerCase();
+    if (v.indexOf('zh') === 0) return 'zh';
+    if (v.indexOf('en') === 0) return 'en';
+    return null;
+  }
+  function readCookie() {
+    try { var m = document.cookie.match(/(?:^|;\s*)st_lang=([^;]*)/); return m ? decodeURIComponent(m[1]) : null; }
+    catch (e) { return null; }
+  }
+  function readLS() { try { return localStorage.getItem(LS); } catch (e) { return null; } }
+  function persist(v) {
+    try { localStorage.setItem(LS, v); } catch (e) {}
+    try { document.cookie = 'st_lang=' + encodeURIComponent(v) + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax'; } catch (e) {}
+  }
+  function detect() {
+    var s = norm(readCookie()) || norm(readLS());
+    if (s) return s;
+    var n = norm(navigator.language || navigator.userLanguage);
+    return n || FALLBACK;
+  }
+
+  /* ---- 文案 ---- */
+  /* tRaw：查词典（当前语言 → zh 兜底），查不到返回 null（= 保持原文） */
+  function tRaw(key) {
+    var v = (dict[lang] && dict[lang][key] != null) ? dict[lang][key] : null;
+    if (v == null) v = (dict[FALLBACK] && dict[FALLBACK][key] != null) ? dict[FALLBACK][key] : null;
+    return v;
+  }
+  function t(key, vars) {
+    var v = tRaw(key);
+    if (v == null) return key;
+    if (vars) v = String(v).replace(/\{(\w+)\}/g, function (m, k) { return (vars[k] != null) ? vars[k] : m; });
+    return v;
+  }
+  /* tOr：查不到时用传入的兜底值（页面 JS 动态文案用这个） */
+  function tOr(key, fallback) {
+    var v = tRaw(key);
+    return (v == null) ? fallback : v;
+  }
+  function add(obj) {
+    if (!obj) return;
+    ['zh', 'en'].forEach(function (k) {
+      if (obj[k]) for (var key in obj[k]) dict[k][key] = obj[k][key];
+    });
+  }
+  /* tr：短语表直译（原文进，译文出；zh 侧原样返回）-JS 动态文案直接用 */
+  function tr(s) {
+    if (lang === 'zh') return s;
+    var v = lookup(normText(s));
+    return (v == null) ? s : v;
+  }
+  function addPhrase(map) {
+    if (!map) return;
+    for (var k in map) { if (map[k] != null) phrase[normText(k)] = String(map[k]); }
+  }
+  /* 规则表：[[/正则/, '替换（可用 $1）'], ...] - 处理「已复习 3」「12 天有记录」这类数字拼接 */
+  var rules = [];
+  function addRules(list) {
+    if (!list) return;
+    for (var i = 0; i < list.length; i++) {
+      try {
+        var re = (list[i][0] instanceof RegExp) ? list[i][0] : new RegExp(list[i][0]);
+        rules.push([re, String(list[i][1])]);
+      } catch (e) {}
+    }
+  }
+  function lookup(t) {
+    var v = phrase[t];
+    if (v != null) return v;
+    for (var i = 0; i < rules.length; i++) {
+      try { if (rules[i][0].test(t)) return t.replace(rules[i][0], rules[i][1]); } catch (e) {}
+    }
+    return null;
+  }
+
+  /* ---- 短语表扫描（静态 + 动态） ---- */
+  function normText(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
+  var PTAGS = ['title', 'placeholder', 'aria-label', 'alt'];
+  function translText(node) {
+    var raw = node.nodeValue;
+    if (!raw) return;
+    var rec = node.__i18nR;
+    if (rec) {
+      if (lang === 'zh') {
+        if (raw === rec.en) { node.nodeValue = rec.orig; delete node.__i18nR; }
+        else if (raw !== rec.orig) { delete node.__i18nR; }
+        return;
+      }
+      if (raw === rec.en) return;
+      if (raw === rec.orig) { node.nodeValue = rec.en; return; }
+      delete node.__i18nR;
+    }
+    var out = lookup(normText(raw));
+    if (out == null) return;
+    if (lang === 'en') { if (raw !== out) { node.__i18nR = { orig: raw, en: out }; node.nodeValue = out; } }
+  }
+  function translAttrs(el) {
+    if (!el.getAttribute) return;
+    for (var i = 0; i < PTAGS.length; i++) {
+      var a = PTAGS[i], v = el.getAttribute(a);
+      if (v == null || v === '') continue;
+      var rec = el.__i18nA && el.__i18nA[a];
+      if (rec) {
+        if (lang === 'zh') {
+          if (v === rec.en) { el.setAttribute(a, rec.orig); delete el.__i18nA[a]; }
+          else if (v !== rec.orig) { delete el.__i18nA[a]; }
+          continue;
+        }
+        if (v === rec.en) continue;
+        if (v === rec.orig) { el.setAttribute(a, rec.en); continue; }
+        delete el.__i18nA[a];
+      }
+      var out = lookup(normText(v));
+      if (out == null) continue;
+      if (lang === 'en') {
+        if (v !== out) { if (!el.__i18nA) el.__i18nA = {}; el.__i18nA[a] = { orig: v, en: out }; el.setAttribute(a, out); }
+      }
+    }
+  }
+  function scanNode(node) {
+    if (!node) return;
+    if (node.nodeType === 9) node = node.documentElement || node.body;   /* 文档节点 → 转元素 */
+    if (!node) return;
+    if (node.nodeType === 3) { translText(node); return; }
+    if (node.nodeType !== 1) return;
+    var tag = node.tagName;
+    if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'NOSCRIPT') return;
+    if (node.hasAttribute('data-i18n-skip')) return;
+    translAttrs(node);
+    for (var c = node.firstChild; c; c = c.nextSibling) scanNode(c);
+  }
+  function scan(root) { try { scanNode(root || document.body || document.documentElement); } catch (e) {} }
+  /* 动态内容自动翻译（MutationObserver，逐节点增量，无重扫） */
+  var moOn = false;
+  function auto(root) {
+    if (moOn || typeof MutationObserver === 'undefined') return;
+    var target = root || document.body;
+    if (!target) {   /* head 提前注入时 body 还没解析出来，等 DOM ready */
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { auto(root); });
+      return;
+    }
+    moOn = true;
+    try {
+      var mo = new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          var m = muts[i];
+          try {
+            if (m.type === 'characterData') translText(m.target);
+            else if (m.type === 'attributes') translAttrs(m.target);
+            else if (m.type === 'childList') {
+              for (var j = 0; j < m.addedNodes.length; j++) scanNode(m.addedNodes[j]);
+            }
+          } catch (e) {}
+        }
+      });
+      mo.observe(target, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: PTAGS });
+    } catch (e) {}
+  }
+
+  /* ---- 日期 / 数字 ---- */
+  var MN_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var WD_ZH = '日一二三四五六';
+  var WD_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  function fmtDate(d, opt) {
+    if (typeof d === 'string') { var a = d.split('-'); d = new Date(+a[0], (+a[1] || 1) - 1, +a[2] || 1); }
+    if (!(d instanceof Date) || isNaN(d.getTime())) return '';
+    opt = opt || {};
+    var s;
+    if (lang === 'zh') {
+      s = d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日';
+      if (opt.weekday) s += ' · 星期' + WD_ZH.charAt(d.getDay());
+    } else {
+      s = MN_EN[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+      if (opt.weekday) s += ' · ' + WD_EN[d.getDay()];
+    }
+    return s;
+  }
+  function fmtNum(n) {
+    try { return Number(n).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US'); }
+    catch (e) { return String(n); }
+  }
+
+  /* ---- DOM 标注应用（标注模式；词条缺失时恢复原文 - 保证切回中文能还原） ---- */
+  function apply(root) {
+    root = root || document;
+    try {
+      var i, list, v, el;
+      list = root.querySelectorAll('[data-i18n]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrig == null) el.__i18nOrig = el.textContent;
+        v = tRaw(el.getAttribute('data-i18n'));
+        el.textContent = (v != null) ? v : el.__i18nOrig;
+      }
+      list = root.querySelectorAll('[data-i18n-html]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigHTML == null) el.__i18nOrigHTML = el.innerHTML;
+        v = tRaw(el.getAttribute('data-i18n-html'));
+        el.innerHTML = (v != null) ? v : el.__i18nOrigHTML;
+      }
+      list = root.querySelectorAll('[data-i18n-title]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigTitle == null) el.__i18nOrigTitle = el.title;
+        v = tRaw(el.getAttribute('data-i18n-title'));
+        el.title = (v != null) ? v : el.__i18nOrigTitle;
+      }
+      list = root.querySelectorAll('[data-i18n-aria]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAria == null) el.__i18nOrigAria = el.getAttribute('aria-label') || '';
+        v = tRaw(el.getAttribute('data-i18n-aria'));
+        el.setAttribute('aria-label', (v != null) ? v : el.__i18nOrigAria);
+      }
+      list = root.querySelectorAll('[data-i18n-ph]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigPh == null) el.__i18nOrigPh = el.placeholder || '';
+        v = tRaw(el.getAttribute('data-i18n-ph'));
+        el.placeholder = (v != null) ? v : el.__i18nOrigPh;
+      }
+      list = root.querySelectorAll('[data-i18n-alt]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAlt == null) el.__i18nOrigAlt = el.getAttribute('alt') || '';
+        v = tRaw(el.getAttribute('data-i18n-alt'));
+        el.setAttribute('alt', (v != null) ? v : el.__i18nOrigAlt);
+      }
+      /* 标题（短语表优先，其次 page.title 词条） */
+      if (!bd.__origTitle) bd.__origTitle = document.title;
+      var tv = lookup(normText(bd.__origTitle));
+      if (tv == null) tv = tRaw('page.title');
+      if (tv != null) { document.title = (lang === 'en') ? tv : bd.__origTitle; bd.__titleTouched = true; }
+      else if (bd.__titleTouched) { document.title = bd.__origTitle; }
+      document.documentElement.lang = (lang === 'zh') ? 'zh-CN' : 'en';
+      syncSwitch();
+    } catch (e) {}
+  }
+
+  function applyLang(v) {
+    lang = v;
+    persist(v);
+    apply(document);
+    scan(document);
+    for (var i = 0; i < listeners.length; i++) { try { listeners[i](lang); } catch (e) {} }
+    try {
+      var live = document.getElementById('i18n-live');
+      if (live) live.textContent = (lang === 'zh') ? '已切换到中文' : 'Switched to English';
+    } catch (e) {}
+  }
+  /* 切换转场（仿主页主题转场）：黑幕淡入 → 光晕从切换器扩散 → 幕中换语言 → 揭幕；可打断；尊重 reduced-motion */
+  var tid = 0, stage = null;
+  function ensureStage() {
+    if (stage) return stage;
+    var ov = document.createElement('div'); ov.className = 'i18n-veil';
+    var hl = document.createElement('div'); hl.className = 'i18n-halo';
+    var host = document.body || document.documentElement;
+    host.appendChild(ov); host.appendChild(hl);
+    stage = { ov: ov, hl: hl };
+    return stage;
+  }
+  function set(v) {
+    v = norm(v);
+    if (!v) return;
+    if (v === lang) { apply(document); scan(document); return; }
+    var calm = true;
+    try { calm = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) {}
+    if (!calm || !document.body) { applyLang(v); return; }
+    try {
+      var st = ensureStage(), my = ++tid;
+      var x = (window.innerWidth || 360) - 80, y = (window.innerHeight || 640) - 34;
+      try { if (swEl) { var r = swEl.getBoundingClientRect(); x = r.left + r.width / 2; y = r.top + r.height / 2; } } catch (e) {}
+      st.ov.style.setProperty('--ix', x + 'px'); st.ov.style.setProperty('--iy', y + 'px');
+      st.hl.style.setProperty('--ix', x + 'px'); st.hl.style.setProperty('--iy', y + 'px');
+      st.ov.classList.remove('out'); st.ov.classList.add('on'); st.ov.style.display = 'block';
+      st.hl.classList.remove('go'); void st.hl.offsetWidth; st.hl.classList.add('go');
+      setTimeout(function () {
+        if (my !== tid) return;
+        applyLang(v);
+        st.ov.classList.remove('on'); st.ov.classList.add('out');
+        setTimeout(function () {
+          if (my !== tid) return;
+          st.ov.style.display = 'none'; st.ov.classList.remove('out');
+        }, 520);
+      }, 430);
+    } catch (e) { applyLang(v); }
+  }
+  function onChange(fn) { if (typeof fn === 'function') listeners.push(fn); }
+  function getLang() { return lang; }
+
+  /* ---- 切换入口（右下角胶囊，自动注入） ---- */
+  var SW_CSS = '.i18n-sw{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:9992;display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:rgba(17,24,39,.74);-webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);border:1px solid rgba(255,255,255,.26);box-shadow:0 6px 20px rgba(0,0,0,.28);font-family:inherit}' +
+    '.i18n-sw:hover{background:rgba(17,24,39,.86);border-color:rgba(255,255,255,.38)}' +
+    '.i18n-gl{font-size:13px;line-height:1;padding:0 5px 0 8px;opacity:.95;pointer-events:none}' +
+    '.i18n-sw button{border:0;background:transparent;color:rgba(255,255,255,.78);font-size:12px;font-weight:700;letter-spacing:.4px;padding:6px 11px;border-radius:999px;cursor:pointer;font-family:inherit;transition:all .18s ease;line-height:1}' +
+    '.i18n-sw button:hover{color:#fff;background:rgba(255,255,255,.12)}' +
+    '.i18n-sw button:focus-visible{outline:2px solid #7dd3fc;outline-offset:1px}' +
+    '.i18n-sw button.on{background:rgba(255,255,255,.92);color:#1f2937;box-shadow:0 2px 8px rgba(0,0,0,.25)}' +
+    '.i18n-sw button:active{transform:translateY(1px)}' +
+    '.i18n-veil{position:fixed;inset:0;z-index:9990;pointer-events:none;display:none;opacity:0;background:#060a16;transition:opacity .42s ease}' +
+    '.i18n-veil.on{opacity:1}' +
+    '.i18n-veil.out{opacity:0;transition:opacity .5s cubic-bezier(.2,.8,.3,1)}' +
+    '.i18n-halo{position:fixed;z-index:9991;left:var(--ix,92%);top:var(--iy,93%);width:14px;height:14px;border-radius:50%;box-sizing:border-box;pointer-events:none;display:none;border:2px solid rgba(198,226,255,.95);box-shadow:0 0 24px 6px rgba(137,194,255,.6),0 0 70px 20px rgba(137,194,255,.3),inset 0 0 20px rgba(198,226,255,.5)}' +
+    '.i18n-halo.go{display:block;animation:i18nHalo .85s cubic-bezier(.16,.7,.3,1) forwards}' +
+    '@keyframes i18nHalo{0%{opacity:0;transform:translate(-50%,-50%) scale(.01)}22%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(58)}}' +
+    '.i18n-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}' +
+    '@media (max-width:620px){.i18n-sw{right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px))}.i18n-sw button{padding:5px 9px;font-size:11.5px}}';
+
+  var swEl = null;
+  function buildSwitch() {
+    try {
+      if (!document.body) return;
+      var exist = document.querySelector('.i18n-sw');
+      if (exist) { swEl = exist; syncSwitch(); return; }
+      var st = document.createElement('style');
+      st.textContent = SW_CSS;
+      (document.head || document.documentElement).appendChild(st);
+      var wrap = document.createElement('div');
+      wrap.className = 'i18n-sw';
+      wrap.setAttribute('role', 'group');
+      wrap.setAttribute('aria-label', '切换语言 / Switch language');
+      wrap.setAttribute('title', '切换语言 / Switch language');
+      var gl = document.createElement('span');
+      gl.className = 'i18n-gl';
+      gl.textContent = '🌐';
+      gl.setAttribute('aria-hidden', 'true');
+      wrap.appendChild(gl);
+      [['zh', '中文'], ['en', 'English']].forEach(function (p) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('data-lang', p[0]);
+        b.textContent = p[1];
+        b.addEventListener('click', function () { set(p[0]); });
+        wrap.appendChild(b);
+      });
+      var live = document.createElement('span');
+      live.id = 'i18n-live';
+      live.className = 'i18n-sr';
+      live.setAttribute('aria-live', 'polite');
+      wrap.appendChild(live);
+      document.body.appendChild(wrap);
+      swEl = wrap;
+      syncSwitch();
+    } catch (e) {}
+  }
+  function syncSwitch() {
+    try {
+      if (!swEl) return;
+      var bs = swEl.querySelectorAll('button[data-lang]');
+      for (var i = 0; i < bs.length; i++) {
+        var on = bs[i].getAttribute('data-lang') === lang;
+        bs[i].classList.toggle('on', on);
+        bs[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    } catch (e) {}
+  }
+
+  /* ---- 启动 ---- */
+  lang = detect();
+  function boot() {
+    buildSwitch();
+    apply(document);
+    scan(document);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+
+  return {
+    t: t, tOr: tOr, tr: tr, set: set, apply: apply, scan: scan, auto: auto,
+    phrase: addPhrase, rules: addRules, add: add, lang: getLang, onChange: onChange,
+    fmtDate: fmtDate, fmtNum: fmtNum
+  };
+})();
+
+/* ---- 短语表（中文原文 → English）---- */
+I18N.phrase({"服务协议与隐私政策（整活版）· 星恬": "Terms of Service and Privacy Policy (Just for Fun version) · Startian","隐私协议": "Privacy Policy","点击同意后即可继续使用服务": "Click agree to continue using the service","同意并继续": "Agree and continue","主页": "Home","返回星恬的小站主页": "Back to Startian's Little Site home","上当一次": "Fooled once","🏆 成就解锁：": "🏆 Achievement unlocked: "});
+I18N.auto();
+/* ==== i18n-kit v1.2 end ==== */
+</script>
+<script>
+        const agreeBtn = document.getElementById('agreeBtn');
+        const overlay = document.getElementById('overlay');
+        const videoContainer = document.getElementById('videoContainer');
+
+        agreeBtn.onclick = function () {
+            // 隐藏弹窗
+            overlay.classList.add('hide');
+            // 显示视频
+            videoContainer.classList.add('show');
+        }
+    </script>
+<script>
+(function () {
+'use strict';
+/* ══════════════════════════════════════════════════════════
+   🏆 跨站成就 STAch（startian.top 全站共享；cookie .startian.top + localStorage 兜底）
+   v34 修复：本站此前未接入 STAch，"上当一次"到访成就永远无法解锁
+   ══════════════════════════════════════════════════════════ */
+var STAch = (function () {
+    var KEY = 'st_ach';
+    function readCookie() {
+        var m = document.cookie.match(/(?:^|;\s*)st_ach=([^;]*)/);
+        if (!m) return null;
+        try { return JSON.parse(decodeURIComponent(m[1])) || []; } catch (e) { return null; }
+    }
+    function writeCookie(list) {
+        try {
+            var v = encodeURIComponent(JSON.stringify(list));
+            if (v.length < 3800) document.cookie = 'st_ach=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+        } catch (e) {}
+    }
+    var list = readCookie();
+    if (!list) { try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { list = []; } }
+    if (!Array.isArray(list)) list = [];
+    function save() {
+        try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+        writeCookie(list);
+    }
+    function unlock(id, name, ico) {
+        if (list.indexOf(id) >= 0) return false;
+        list.push(id);
+        save();
+        try {
+            var el = document.createElement('div');
+            el.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9999;background:rgba(22,26,48,.94);color:#fff;border:1px solid rgba(140,170,255,.42);border-radius:999px;padding:12px 22px;font:700 13.5px/1.4 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:86vw';
+            el.textContent = I18N.tr('🏆 成就解锁：') + (ico ? ico + ' ' : '') + I18N.tr(name || id);
+            document.body.appendChild(el);
+            requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+            setTimeout(function () {
+                el.style.opacity = '0';
+                el.style.transform = 'translateX(-50%) translateY(16px)';
+                setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+            }, 3200);
+        } catch (e) {}
+        return true;
+    }
+    return { list: function () { return list.slice(); }, has: function (id) { return list.indexOf(id) >= 0; }, unlock: unlock };
+})();
+window.STAch = STAch;
+setTimeout(function () { STAch.unlock('site.zhenghuo', '上当一次', '😏'); }, 600);
+})();
+</script>
+<!-- 返回主页（全站统一按钮 · 2026-09-29） -->
+<a class="wb-home" href="https://startian.top/" title="返回星恬的小站主页">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>主页</span>
+</a></body>
+</html>
