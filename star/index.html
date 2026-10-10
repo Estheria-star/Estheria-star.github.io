@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="无限星空生成器：输入种子编号生成一片独一无二的星空，往任何方向拖动都无限延伸；可缩放探索、下载做壁纸，种子+视角可分享。startian.top 出品">
+<meta name="theme-color" content="#070b18">
+<title>无限星空生成器 · 种子生成 · startian.top</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#070b18}
+  canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+  canvas.dragging{cursor:grabbing}
+  .bar{
+    position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:5;
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;
+    background:rgba(10,16,34,.62);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);
+    border:1px solid rgba(120,150,255,.22);border-radius:999px;padding:10px 14px;
+    box-shadow:0 16px 44px rgba(0,0,0,.5);
+  }
+  .seed{
+    font-family:ui-monospace,Consolas,monospace;font-size:13px;font-weight:700;color:#cdd8ff;
+    letter-spacing:.6px;padding:0 6px;white-space:nowrap;
+  }
+  .seed b{color:#8fd0ff;cursor:pointer;border-bottom:1px dashed rgba(143,208,255,.45);padding-bottom:1px;transition:color .2s}
+  .seed b:hover{color:#c9e6ff}
+  .seed input{width:74px;background:rgba(6,10,22,.9);border:1px solid rgba(130,160,255,.55);border-radius:8px;color:#8fd0ff;font:inherit;font-weight:700;padding:2px 6px;outline:none;text-align:center}
+  button{
+    border:1px solid rgba(130,160,255,.35);border-radius:999px;padding:9px 16px;
+    font-size:13px;font-weight:800;font-family:inherit;cursor:pointer;color:#e8eeff;
+    background:linear-gradient(180deg,rgba(90,130,255,.32),rgba(60,90,200,.28));
+    transition:transform .15s ease,border-color .2s ease,box-shadow .2s ease;white-space:nowrap;
+  }
+  button:hover{border-color:rgba(160,190,255,.7);transform:translateY(-1px);box-shadow:0 8px 22px rgba(70,110,255,.25)}
+  button:active{transform:translateY(1px)}
+  button.primary{
+    background:linear-gradient(180deg,#6d8dff,#4262d8);color:#fff;border-color:transparent;
+    box-shadow:0 6px 0 #2a3d8f,0 14px 28px rgba(70,110,255,.4);
+  }
+  button.primary:active{box-shadow:0 2px 0 #2a3d8f}
+  .home{
+    position:fixed;left:16px;bottom:16px;z-index:5;text-decoration:none;font-size:12.5px;font-weight:700;
+    color:#bcd0ff;background:rgba(12,18,38,.72);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    border:1px solid rgba(120,150,255,.25);border-radius:999px;padding:10px 16px;
+    transition:border-color .2s ease,transform .2s ease;
+  }
+  .home:hover{border-color:rgba(160,190,255,.6);transform:translateY(-2px)}
+  .hint{
+    position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:4;
+    font-size:11.5px;color:rgba(180,196,240,.6);white-space:nowrap;pointer-events:none;
+  }
+  .zoom{
+    position:fixed;right:16px;bottom:62px;z-index:5;display:flex;flex-direction:column;gap:8px;
+  }
+  .zoom button{width:42px;height:42px;padding:0;font-size:17px;border-radius:14px;display:grid;place-items:center}
+  .toast{
+    position:fixed;left:50%;top:78px;transform:translateX(-50%) translateY(-8px);opacity:0;z-index:6;
+    background:rgba(14,22,46,.9);border:1px solid rgba(130,160,255,.35);border-radius:999px;
+    padding:9px 18px;font-size:12.5px;font-weight:700;color:#e8eeff;
+    transition:opacity .3s ease,transform .3s ease;pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%)}
+  @media (max-width:680px){
+    .bar{top:12px;left:12px;right:12px;transform:none;border-radius:20px;padding:10px}
+    .hint{display:none}
+  }
+</style>
+</head>
+<body>
+<canvas id="sky"></canvas>
+<div class="bar">
+  <span class="seed">星空 <b id="seedNo">#0000</b></span>
+  <button class="primary" id="btnNew" type="button">✨ 生成新星空</button>
+  <button id="btnWall" type="button">⬇ 下载壁纸</button>
+  <button id="btnShare" type="button">🔗 分享这颗</button>
+</div>
+<div class="zoom">
+  <button id="btnIn" type="button" title="放大">＋</button>
+  <button id="btnOut" type="button" title="缩小">－</button>
+  <button id="btnHome" type="button" title="回到原点">⌖</button>
+</div>
+<a class="home" href="https://startian.top/">← 返回主页</a>
+<div class="hint">∞ 无限星空：往任意方向拖动都有新的星 · 滚轮缩放 · 点种子号可改 · 「分享这颗」连视角一起发</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==== i18n-kit v1.2 begin ==== */
+/* ══════════════════════════════════════════════════════════
+   🌐 多语言 i18n Kit（startian.top 全站共享 · v1.2 · 2026-10-04）
+   · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
+   · 自动识别：首次访问按 navigator.language（zh 开头 → 中文，其余 → English）
+   · 两种接入模式（可混用）：
+     ① 短语表模式（推荐，低侵入）：I18N.phrase({ '中文原文': 'English', ... })
+        自动扫描文本节点 / title / placeholder / aria-label / alt，动态插入的文本也自动翻译
+     ② 标注模式：data-i18n / data-i18n-html / data-i18n-title / data-i18n-aria / data-i18n-ph / data-i18n-alt
+   · 子树上加 data-i18n-skip 可整体跳过（用户输入内容、ARG 谜题原文等）
+   · API：I18N.t(k[,vars]) · I18N.tOr(k,fb) · I18N.tr(原文) · I18N.set(lang) · I18N.lang()
+          · I18N.phrase(map) · I18N.scan(root) · I18N.apply(root) · I18N.onChange(fn)
+          · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n)
+   · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
+   ══════════════════════════════════════════════════════════ */
+var I18N = (function () {
+  'use strict';
+  var LS = 'st_lang';
+  var FALLBACK = 'zh';
+  var lang = FALLBACK;
+  var dict = { zh: {}, en: {} };
+  var phrase = {};      /* 短语表：中文原文（归一化）→ 译文 */
+  var listeners = [];
+  var bd = {};          /* boot data：原文快照等 */
+
+  /* ---- 基础词典（全站通用词条） ---- */
+  dict.zh['common.home'] = '主页';
+  dict.en['common.home'] = 'Home';
+  dict.zh['common.homeTitle'] = '返回星恬的小站主页';
+  dict.en['common.homeTitle'] = "Back to Startian's homepage";
+  dict.zh['common.close'] = '关闭';
+  dict.en['common.close'] = 'Close';
+  dict.zh['common.cancel'] = '取消';
+  dict.en['common.cancel'] = 'Cancel';
+
+  /* ---- 存储与识别 ---- */
+  function norm(v) {
+    v = String(v || '').toLowerCase();
+    if (v.indexOf('zh') === 0) return 'zh';
+    if (v.indexOf('en') === 0) return 'en';
+    return null;
+  }
+  function readCookie() {
+    try { var m = document.cookie.match(/(?:^|;\s*)st_lang=([^;]*)/); return m ? decodeURIComponent(m[1]) : null; }
+    catch (e) { return null; }
+  }
+  function readLS() { try { return localStorage.getItem(LS); } catch (e) { return null; } }
+  function persist(v) {
+    try { localStorage.setItem(LS, v); } catch (e) {}
+    try { document.cookie = 'st_lang=' + encodeURIComponent(v) + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax'; } catch (e) {}
+  }
+  function detect() {
+    var s = norm(readCookie()) || norm(readLS());
+    if (s) return s;
+    var n = norm(navigator.language || navigator.userLanguage);
+    return n || FALLBACK;
+  }
+
+  /* ---- 文案 ---- */
+  /* tRaw：查词典（当前语言 → zh 兜底），查不到返回 null（= 保持原文） */
+  function tRaw(key) {
+    var v = (dict[lang] && dict[lang][key] != null) ? dict[lang][key] : null;
+    if (v == null) v = (dict[FALLBACK] && dict[FALLBACK][key] != null) ? dict[FALLBACK][key] : null;
+    return v;
+  }
+  function t(key, vars) {
+    var v = tRaw(key);
+    if (v == null) return key;
+    if (vars) v = String(v).replace(/\{(\w+)\}/g, function (m, k) { return (vars[k] != null) ? vars[k] : m; });
+    return v;
+  }
+  /* tOr：查不到时用传入的兜底值（页面 JS 动态文案用这个） */
+  function tOr(key, fallback) {
+    var v = tRaw(key);
+    return (v == null) ? fallback : v;
+  }
+  function add(obj) {
+    if (!obj) return;
+    ['zh', 'en'].forEach(function (k) {
+      if (obj[k]) for (var key in obj[k]) dict[k][key] = obj[k][key];
+    });
+  }
+  /* tr：短语表直译（原文进，译文出；zh 侧原样返回）-JS 动态文案直接用 */
+  function tr(s) {
+    if (lang === 'zh') return s;
+    var v = lookup(normText(s));
+    return (v == null) ? s : v;
+  }
+  function addPhrase(map) {
+    if (!map) return;
+    for (var k in map) { if (map[k] != null) phrase[normText(k)] = String(map[k]); }
+  }
+  /* 规则表：[[/正则/, '替换（可用 $1）'], ...] - 处理「已复习 3」「12 天有记录」这类数字拼接 */
+  var rules = [];
+  function addRules(list) {
+    if (!list) return;
+    for (var i = 0; i < list.length; i++) {
+      try {
+        var re = (list[i][0] instanceof RegExp) ? list[i][0] : new RegExp(list[i][0]);
+        rules.push([re, String(list[i][1])]);
+      } catch (e) {}
+    }
+  }
+  function lookup(t) {
+    var v = phrase[t];
+    if (v != null) return v;
+    for (var i = 0; i < rules.length; i++) {
+      try { if (rules[i][0].test(t)) return t.replace(rules[i][0], rules[i][1]); } catch (e) {}
+    }
+    return null;
+  }
+
+  /* ---- 短语表扫描（静态 + 动态） ---- */
+  function normText(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
+  var PTAGS = ['title', 'placeholder', 'aria-label', 'alt'];
+  function translText(node) {
+    var raw = node.nodeValue;
+    if (!raw) return;
+    var rec = node.__i18nR;
+    if (rec) {
+      if (lang === 'zh') {
+        if (raw === rec.en) { node.nodeValue = rec.orig; delete node.__i18nR; }
+        else if (raw !== rec.orig) { delete node.__i18nR; }
+        return;
+      }
+      if (raw === rec.en) return;
+      if (raw === rec.orig) { node.nodeValue = rec.en; return; }
+      delete node.__i18nR;
+    }
+    var out = lookup(normText(raw));
+    if (out == null) return;
+    if (lang === 'en') { if (raw !== out) { node.__i18nR = { orig: raw, en: out }; node.nodeValue = out; } }
+  }
+  function translAttrs(el) {
+    if (!el.getAttribute) return;
+    for (var i = 0; i < PTAGS.length; i++) {
+      var a = PTAGS[i], v = el.getAttribute(a);
+      if (v == null || v === '') continue;
+      var rec = el.__i18nA && el.__i18nA[a];
+      if (rec) {
+        if (lang === 'zh') {
+          if (v === rec.en) { el.setAttribute(a, rec.orig); delete el.__i18nA[a]; }
+          else if (v !== rec.orig) { delete el.__i18nA[a]; }
+          continue;
+        }
+        if (v === rec.en) continue;
+        if (v === rec.orig) { el.setAttribute(a, rec.en); continue; }
+        delete el.__i18nA[a];
+      }
+      var out = lookup(normText(v));
+      if (out == null) continue;
+      if (lang === 'en') {
+        if (v !== out) { if (!el.__i18nA) el.__i18nA = {}; el.__i18nA[a] = { orig: v, en: out }; el.setAttribute(a, out); }
+      }
+    }
+  }
+  function scanNode(node) {
+    if (!node) return;
+    if (node.nodeType === 9) node = node.documentElement || node.body;   /* 文档节点 → 转元素 */
+    if (!node) return;
+    if (node.nodeType === 3) { translText(node); return; }
+    if (node.nodeType !== 1) return;
+    var tag = node.tagName;
+    if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'NOSCRIPT') return;
+    if (node.hasAttribute('data-i18n-skip')) return;
+    translAttrs(node);
+    for (var c = node.firstChild; c; c = c.nextSibling) scanNode(c);
+  }
+  function scan(root) { try { scanNode(root || document.body || document.documentElement); } catch (e) {} }
+  /* 动态内容自动翻译（MutationObserver，逐节点增量，无重扫） */
+  var moOn = false;
+  function auto(root) {
+    if (moOn || typeof MutationObserver === 'undefined') return;
+    var target = root || document.body;
+    if (!target) {   /* head 提前注入时 body 还没解析出来，等 DOM ready */
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { auto(root); });
+      return;
+    }
+    moOn = true;
+    try {
+      var mo = new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          var m = muts[i];
+          try {
+            if (m.type === 'characterData') translText(m.target);
+            else if (m.type === 'attributes') translAttrs(m.target);
+            else if (m.type === 'childList') {
+              for (var j = 0; j < m.addedNodes.length; j++) scanNode(m.addedNodes[j]);
+            }
+          } catch (e) {}
+        }
+      });
+      mo.observe(target, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: PTAGS });
+    } catch (e) {}
+  }
+
+  /* ---- 日期 / 数字 ---- */
+  var MN_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var WD_ZH = '日一二三四五六';
+  var WD_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  function fmtDate(d, opt) {
+    if (typeof d === 'string') { var a = d.split('-'); d = new Date(+a[0], (+a[1] || 1) - 1, +a[2] || 1); }
+    if (!(d instanceof Date) || isNaN(d.getTime())) return '';
+    opt = opt || {};
+    var s;
+    if (lang === 'zh') {
+      s = d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日';
+      if (opt.weekday) s += ' · 星期' + WD_ZH.charAt(d.getDay());
+    } else {
+      s = MN_EN[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+      if (opt.weekday) s += ' · ' + WD_EN[d.getDay()];
+    }
+    return s;
+  }
+  function fmtNum(n) {
+    try { return Number(n).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US'); }
+    catch (e) { return String(n); }
+  }
+
+  /* ---- DOM 标注应用（标注模式；词条缺失时恢复原文 - 保证切回中文能还原） ---- */
+  function apply(root) {
+    root = root || document;
+    try {
+      var i, list, v, el;
+      list = root.querySelectorAll('[data-i18n]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrig == null) el.__i18nOrig = el.textContent;
+        v = tRaw(el.getAttribute('data-i18n'));
+        el.textContent = (v != null) ? v : el.__i18nOrig;
+      }
+      list = root.querySelectorAll('[data-i18n-html]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigHTML == null) el.__i18nOrigHTML = el.innerHTML;
+        v = tRaw(el.getAttribute('data-i18n-html'));
+        el.innerHTML = (v != null) ? v : el.__i18nOrigHTML;
+      }
+      list = root.querySelectorAll('[data-i18n-title]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigTitle == null) el.__i18nOrigTitle = el.title;
+        v = tRaw(el.getAttribute('data-i18n-title'));
+        el.title = (v != null) ? v : el.__i18nOrigTitle;
+      }
+      list = root.querySelectorAll('[data-i18n-aria]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAria == null) el.__i18nOrigAria = el.getAttribute('aria-label') || '';
+        v = tRaw(el.getAttribute('data-i18n-aria'));
+        el.setAttribute('aria-label', (v != null) ? v : el.__i18nOrigAria);
+      }
+      list = root.querySelectorAll('[data-i18n-ph]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigPh == null) el.__i18nOrigPh = el.placeholder || '';
+        v = tRaw(el.getAttribute('data-i18n-ph'));
+        el.placeholder = (v != null) ? v : el.__i18nOrigPh;
+      }
+      list = root.querySelectorAll('[data-i18n-alt]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAlt == null) el.__i18nOrigAlt = el.getAttribute('alt') || '';
+        v = tRaw(el.getAttribute('data-i18n-alt'));
+        el.setAttribute('alt', (v != null) ? v : el.__i18nOrigAlt);
+      }
+      /* 标题（短语表优先，其次 page.title 词条） */
+      if (!bd.__origTitle) bd.__origTitle = document.title;
+      var tv = lookup(normText(bd.__origTitle));
+      if (tv == null) tv = tRaw('page.title');
+      if (tv != null) { document.title = (lang === 'en') ? tv : bd.__origTitle; bd.__titleTouched = true; }
+      else if (bd.__titleTouched) { document.title = bd.__origTitle; }
+      document.documentElement.lang = (lang === 'zh') ? 'zh-CN' : 'en';
+      syncSwitch();
+    } catch (e) {}
+  }
+
+  function applyLang(v) {
+    lang = v;
+    persist(v);
+    apply(document);
+    scan(document);
+    for (var i = 0; i < listeners.length; i++) { try { listeners[i](lang); } catch (e) {} }
+    try {
+      var live = document.getElementById('i18n-live');
+      if (live) live.textContent = (lang === 'zh') ? '已切换到中文' : 'Switched to English';
+    } catch (e) {}
+  }
+  /* 切换转场（仿主页主题转场）：黑幕淡入 → 光晕从切换器扩散 → 幕中换语言 → 揭幕；可打断；尊重 reduced-motion */
+  var tid = 0, stage = null;
+  function ensureStage() {
+    if (stage) return stage;
+    var ov = document.createElement('div'); ov.className = 'i18n-veil';
+    var hl = document.createElement('div'); hl.className = 'i18n-halo';
+    var host = document.body || document.documentElement;
+    host.appendChild(ov); host.appendChild(hl);
+    stage = { ov: ov, hl: hl };
+    return stage;
+  }
+  function set(v) {
+    v = norm(v);
+    if (!v) return;
+    if (v === lang) { apply(document); scan(document); return; }
+    var calm = true;
+    try { calm = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) {}
+    if (!calm || !document.body) { applyLang(v); return; }
+    try {
+      var st = ensureStage(), my = ++tid;
+      var x = (window.innerWidth || 360) - 80, y = (window.innerHeight || 640) - 34;
+      try { if (swEl) { var r = swEl.getBoundingClientRect(); x = r.left + r.width / 2; y = r.top + r.height / 2; } } catch (e) {}
+      st.ov.style.setProperty('--ix', x + 'px'); st.ov.style.setProperty('--iy', y + 'px');
+      st.hl.style.setProperty('--ix', x + 'px'); st.hl.style.setProperty('--iy', y + 'px');
+      st.ov.classList.remove('out'); st.ov.classList.add('on'); st.ov.style.display = 'block';
+      st.hl.classList.remove('go'); void st.hl.offsetWidth; st.hl.classList.add('go');
+      setTimeout(function () {
+        if (my !== tid) return;
+        applyLang(v);
+        st.ov.classList.remove('on'); st.ov.classList.add('out');
+        setTimeout(function () {
+          if (my !== tid) return;
+          st.ov.style.display = 'none'; st.ov.classList.remove('out');
+        }, 520);
+      }, 430);
+    } catch (e) { applyLang(v); }
+  }
+  function onChange(fn) { if (typeof fn === 'function') listeners.push(fn); }
+  function getLang() { return lang; }
+
+  /* ---- 切换入口（右下角胶囊，自动注入） ---- */
+  var SW_CSS = '.i18n-sw{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:9992;display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:rgba(17,24,39,.74);-webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);border:1px solid rgba(255,255,255,.26);box-shadow:0 6px 20px rgba(0,0,0,.28);font-family:inherit}' +
+    '.i18n-sw:hover{background:rgba(17,24,39,.86);border-color:rgba(255,255,255,.38)}' +
+    '.i18n-gl{font-size:13px;line-height:1;padding:0 5px 0 8px;opacity:.95;pointer-events:none}' +
+    '.i18n-sw button{border:0;background:transparent;color:rgba(255,255,255,.78);font-size:12px;font-weight:700;letter-spacing:.4px;padding:6px 11px;border-radius:999px;cursor:pointer;font-family:inherit;transition:all .18s ease;line-height:1}' +
+    '.i18n-sw button:hover{color:#fff;background:rgba(255,255,255,.12)}' +
+    '.i18n-sw button:focus-visible{outline:2px solid #7dd3fc;outline-offset:1px}' +
+    '.i18n-sw button.on{background:rgba(255,255,255,.92);color:#1f2937;box-shadow:0 2px 8px rgba(0,0,0,.25)}' +
+    '.i18n-sw button:active{transform:translateY(1px)}' +
+    '.i18n-veil{position:fixed;inset:0;z-index:9990;pointer-events:none;display:none;opacity:0;background:#060a16;transition:opacity .42s ease}' +
+    '.i18n-veil.on{opacity:1}' +
+    '.i18n-veil.out{opacity:0;transition:opacity .5s cubic-bezier(.2,.8,.3,1)}' +
+    '.i18n-halo{position:fixed;z-index:9991;left:var(--ix,92%);top:var(--iy,93%);width:14px;height:14px;border-radius:50%;box-sizing:border-box;pointer-events:none;display:none;border:2px solid rgba(198,226,255,.95);box-shadow:0 0 24px 6px rgba(137,194,255,.6),0 0 70px 20px rgba(137,194,255,.3),inset 0 0 20px rgba(198,226,255,.5)}' +
+    '.i18n-halo.go{display:block;animation:i18nHalo .85s cubic-bezier(.16,.7,.3,1) forwards}' +
+    '@keyframes i18nHalo{0%{opacity:0;transform:translate(-50%,-50%) scale(.01)}22%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(58)}}' +
+    '.i18n-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}' +
+    '@media (max-width:620px){.i18n-sw{right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px))}.i18n-sw button{padding:5px 9px;font-size:11.5px}}';
+
+  var swEl = null;
+  function buildSwitch() {
+    try {
+      if (!document.body) return;
+      var exist = document.querySelector('.i18n-sw');
+      if (exist) { swEl = exist; syncSwitch(); return; }
+      var st = document.createElement('style');
+      st.textContent = SW_CSS;
+      (document.head || document.documentElement).appendChild(st);
+      var wrap = document.createElement('div');
+      wrap.className = 'i18n-sw';
+      wrap.setAttribute('role', 'group');
+      wrap.setAttribute('aria-label', '切换语言 / Switch language');
+      wrap.setAttribute('title', '切换语言 / Switch language');
+      var gl = document.createElement('span');
+      gl.className = 'i18n-gl';
+      gl.textContent = '🌐';
+      gl.setAttribute('aria-hidden', 'true');
+      wrap.appendChild(gl);
+      [['zh', '中文'], ['en', 'English']].forEach(function (p) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('data-lang', p[0]);
+        b.textContent = p[1];
+        b.addEventListener('click', function () { set(p[0]); });
+        wrap.appendChild(b);
+      });
+      var live = document.createElement('span');
+      live.id = 'i18n-live';
+      live.className = 'i18n-sr';
+      live.setAttribute('aria-live', 'polite');
+      wrap.appendChild(live);
+      document.body.appendChild(wrap);
+      swEl = wrap;
+      syncSwitch();
+    } catch (e) {}
+  }
+  function syncSwitch() {
+    try {
+      if (!swEl) return;
+      var bs = swEl.querySelectorAll('button[data-lang]');
+      for (var i = 0; i < bs.length; i++) {
+        var on = bs[i].getAttribute('data-lang') === lang;
+        bs[i].classList.toggle('on', on);
+        bs[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    } catch (e) {}
+  }
+
+  /* ---- 启动 ---- */
+  lang = detect();
+  function boot() {
+    buildSwitch();
+    apply(document);
+    scan(document);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+
+  return {
+    t: t, tOr: tOr, tr: tr, set: set, apply: apply, scan: scan, auto: auto,
+    phrase: addPhrase, rules: addRules, add: add, lang: getLang, onChange: onChange,
+    fmtDate: fmtDate, fmtNum: fmtNum
+  };
+})();
+
+/* ---- 短语表（中文原文 → English）---- */
+I18N.phrase({"无限星空生成器 · 种子生成 · startian.top": "Infinite Starfield Generator · Seed generation · startian.top","星空": "Starfield","✨ 生成新星空": "✨ Generate new starfield","⬇ 下载壁纸": "⬇ Download wallpaper","🔗 分享这颗": "🔗 Share this one","← 返回主页": "← Back to home","∞ 无限星空：往任意方向拖动都有新的星 · 滚轮缩放 · 点种子号可改 · 「分享这颗」连视角一起发": "∞ Infinite Starfield: drag in any direction for new stars · scroll to zoom · click the seed number to change it · “Share this one” sends the view too","放大": "Zoom in","缩小": "Zoom out","回到原点": "Back to origin","🏆 成就解锁：": "🏆 Achievement unlocked: ","摘星人": "Star Picker","星空感": "Starfield feel","星光感": "Starlight feel","正常视野内的星团不被摊平": "Star clusters stay unflattened in normal view","就在附近！": "It's nearby!","还有 ≈": "Still ≈ ","缩放目标": "Zoom target","记号还在（这篇日志已经收过了）": "The mark is still there (this log was already collected)","⌖ 回到原点": "⌖ Back to origin","✨ 星空 #": "✨ Starfield #","点一下，输入星空编号": "Click to enter a starfield number","已就位": "Ready","⬇️ 壁纸已下载（1920×1080，含当前视角）": "⬇️ Wallpaper downloaded (1920×1080, current view included)","把星空带回家": "Take the starfield home","（部署后可用）": "(available after deploy)","🔗 链接已复制：我的星空 #": "🔗 Link copied: my starfield #","（含视角）": "(view included)","我的星空 #": "My starfield #","复活了星空 #": "Revived starfield #","📜 找到一篇日志（去主页头像连点 7 下看全文）": "📜 Found a log (tap the homepage avatar 7 times to read it)"});
+I18N.auto();
+/* ==== i18n-kit v1.2 end ==== */
+</script>
+<script>
+(function () {
+  'use strict';
+  /* ============================================================
+     🏆 跨站成就 SDK（startian.top 全站共享；cookie + localStorage 兜底）
+     ============================================================ */
+  var STAch = (function () {
+    var KEY = 'st_ach';
+    function readCookie() {
+      var m = document.cookie.match(/(?:^|;\s*)st_ach=([^;]*)/);
+      if (!m) return null;
+      try { return JSON.parse(decodeURIComponent(m[1])) || []; } catch (e) { return null; }
+    }
+    function writeCookie(list) {
+      try {
+        var v = encodeURIComponent(JSON.stringify(list));
+        if (v.length < 3800) document.cookie = 'st_ach=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+      } catch (e) {}
+    }
+    var list = readCookie();
+    if (!list) { try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { list = []; } }
+    if (!Array.isArray(list)) list = [];
+    function save() {
+      try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+      writeCookie(list);
+    }
+    function unlock(id, name, ico) {
+      if (list.indexOf(id) >= 0) return false;
+      list.push(id);
+      save();
+      try {
+        var el = document.createElement('div');
+        el.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9999;background:rgba(22,26,48,.94);color:#fff;border:1px solid rgba(140,170,255,.42);border-radius:999px;padding:12px 22px;font:700 13.5px/1.4 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:86vw';
+        el.textContent = I18N.tr('🏆 成就解锁：') + (ico ? ico + ' ' : '') + I18N.tr(name || id);
+        document.body.appendChild(el);
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        setTimeout(function () {
+          el.style.opacity = '0';
+          el.style.transform = 'translateX(-50%) translateY(16px)';
+          setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+        }, 3200);
+      } catch (e) {}
+      return true;
+    }
+    return { list: function () { return list.slice(); }, has: function (id) { return list.indexOf(id) >= 0; }, unlock: unlock };
+  })();
+  window.STAch = STAch;
+  setTimeout(function () { STAch.unlock('site.star', '摘星人', '✨'); }, 600);
+
+  var cv = document.getElementById('sky');
+  var ctx = cv.getContext('2d');
+  var dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  /* ============================================================
+     🌌 无限星空引擎（Minecraft 式分块生成）
+     —— 世界划分为 512×512 的区块（chunk），每块由 hash(seed, cx, cy) 独立生成
+     —— 同一颗种子：同一坐标永远同一片星空；往任何方向拖动，无限延伸
+     —— 区块数据按需生成 + LRU 缓存；缩太远时自动抽样（LOD），绘制量恒定
+     ============================================================ */
+  var CHUNK = 512;                 /* 区块边长（世界单位） */
+  /* 调色板：由种子派生（换种子 = 换宇宙气质）；refreshPalette() 刷新 */
+  var STAR_COLS = ['255,255,255', '210,225,255', '255,240,220', '200,220,255', '255,225,240'];
+  var HUES = [[120, 130, 255], [90, 200, 255], [210, 130, 240], [80, 220, 200], [150, 120, 255]];
+  function hsl2rgb(h, s, l) {
+    var r, g, b;
+    if (s === 0) { r = g = b = l; }
+    else {
+      function hq(p2, q2, t) {
+        if (t < 0) t += 1; if (t > 1) t -= 1;
+        if (t < 1 / 6) return p2 + (q2 - p2) * 6 * t;
+        if (t < 1 / 2) return q2;
+        if (t < 2 / 3) return p2 + (q2 - p2) * (2 / 3 - t) * 6;
+        return p2;
+      }
+      var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      var p = 2 * l - q;
+      r = hq(p, q, h + 1 / 3); g = hq(p, q, h); b = hq(p, q, h - 1 / 3);
+    }
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+  }
+  /* 种子 → 调色板：star[0] 恒为近白（保留"星空感"），其余 4 色按种子派生
+     —— 高亮度 + 低饱和 → 任何色相都保持"星光感"（不会出现土褐/荧光怪色） */
+  function seedPalette(seed) {
+    var r = mulberry32((seed ^ 0x5f3759df) >>> 0);
+    var base = r() * 360, spread = 60 + r() * 110, sat = 0.22 + r() * 0.3;
+    var star = ['255,255,255'], i;
+    for (i = 1; i < 5; i++) {
+      var h = ((base + (r() - 0.5) * spread) % 360 + 360) % 360;
+      var c = hsl2rgb(h / 360, sat * (0.7 + r() * 0.5), 0.72 + r() * 0.22);
+      star.push(c[0] + ',' + c[1] + ',' + c[2]);
+    }
+    var hues = [];
+    for (i = 0; i < 5; i++) {
+      var h2 = ((base + (r() - 0.5) * (spread + 50)) % 360 + 360) % 360;
+      hues.push(hsl2rgb(h2 / 360, 0.45 + r() * 0.25, 0.62 + r() * 0.18));
+    }
+    return { star: star, hues: hues };
+  }
+  function refreshPalette() {
+    var p = seedPalette(curSeed);
+    STAR_COLS = p.star;
+    HUES = p.hues;
+    nebSprites = {};      /* 颜色变了，sprite 缓存作废 */
+    haloSprites = {};
+    galaxySprite = null;
+  }
+  var chunkCache = {};             /* "seed:cx,cy" → 区块数据 */
+  var chunkLRU = [];               /* 缓存淘汰顺序 */
+  var CACHE_MAX = 900;
+
+  /* 确定性混合哈希：同一 (seed, cx, cy) 永远得到同一随机序列 */
+  function mixHash(seed, cx, cy) {
+    var h = (seed | 0) ^ 0x9e3779b9;
+    h = Math.imul(h ^ (cx | 0), 0x85ebca6b);
+    h = Math.imul(h ^ (cy | 0), 0xc2b2ae35);
+    h ^= h >>> 16; h = Math.imul(h, 0x45d9f3b);
+    h ^= h >>> 16;
+    return h >>> 0;
+  }
+
+  function mkStar(rnd, x0, y0, rMin, rMax, aMin, aMax) {
+    var c = STAR_COLS[(rnd() * STAR_COLS.length) | 0];
+    var a = aMin + rnd() * (aMax - aMin);
+    return {
+      x: x0 + rnd() * CHUNK,
+      y: y0 + rnd() * CHUNK,
+      r: rMin + rnd() * (rMax - rMin),
+      a: a,
+      c: c,
+      css: 'rgba(' + c + ',' + a.toFixed(2) + ')',   /* 预存完整颜色串：绘制时零拼接 */
+      raw: 'rgb(' + c + ')',                          /* 纯色串：闪烁星用（alpha 走 globalAlpha） */
+      h: rnd(),
+      tw: 0.5 + rnd() * 2.2,                          /* 闪烁频率（rad/s） */
+      ph: rnd() * 6.2832                              /* 闪烁相位（避免整片同步呼吸） */
+    };
+  }
+  function byCss(p, q) { return p.css < q.css ? -1 : (p.css > q.css ? 1 : 0); }
+
+  /* 生成一个区块（纯函数：只依赖 seed/cx/cy，无副作用）
+     —— 含「地貌分型」：低频噪声决定密度（星团 / 普通 / 空洞） */
+  function genChunk(seed, cx, cy) {
+    var rnd = mulberry32(mixHash(seed, cx, cy));
+    var x0 = cx * CHUNK, y0 = cy * CHUNK;
+    var data = { nebs: [], s1: [], s2: [], s3: [], me: null, galaxy: null, dens: 1, total: 0 };
+    var i;
+
+    /* ① 区块性格：双层低频噪声混合（相邻区块平滑过渡） */
+    var nf1 = Math.sin(cx * 0.62 + seed * 0.31) * Math.cos(cy * 0.58 - seed * 0.23) * 0.5 + 0.5;
+    var nf2 = Math.sin(cx * 1.31 - seed * 0.17) * Math.cos(cy * 1.27 + seed * 0.4) * 0.5 + 0.5;
+    var nf = nf1 * 0.7 + nf2 * 0.3;
+    var dens = 0.42 + 2.4 * nf * nf;   /* 分布调优：均值 ≈1.1，星团 ~16%，空洞 ~14% */
+    if (dens < 0.42) dens = 0.42;      /* 空洞下限 */
+    data.dens = dens;
+
+    /* ② 星云（星团几乎必有 + 更亮；空洞极稀有） */
+    var nebP = dens > 1.8 ? 0.8 : (dens < 0.6 ? 0.1 : 0.42);
+    if (rnd() < nebP) {
+      var n = rnd() < 0.28 ? 2 : 1;
+      for (i = 0; i < n; i++) {
+        data.nebs.push({
+          x: x0 + (rnd() * 1.5 - 0.25) * CHUNK,
+          y: y0 + (rnd() * 1.5 - 0.25) * CHUNK,
+          r: 130 + rnd() * 260,
+          col: HUES[(rnd() * HUES.length) | 0],
+          a: (0.07 + rnd() * 0.1) * (dens > 1.8 ? 1.5 : 1)
+        });
+      }
+    }
+    /* ③ 三层星星：数量随地貌密度缩放 */
+    var n1 = (160 * dens) | 0, n2 = (60 * dens) | 0, n3 = (18 * dens) | 0;
+    for (i = 0; i < n1; i++) data.s1.push(mkStar(rnd, x0, y0, 0.4, 0.9, 0.25, 0.55));
+    for (i = 0; i < n2; i++) data.s2.push(mkStar(rnd, x0, y0, 0.8, 1.6, 0.5, 0.85));
+    for (i = 0; i < n3; i++) data.s3.push(mkStar(rnd, x0, y0, 1.5, 2.6, 0.85, 1));
+    data.s1.sort(byCss); data.s2.sort(byCss); data.s3.sort(byCss);
+    data.total = n1 + n2 + n3;
+    /* ④ 流星（少数区块有；period/phase 驱动划过动画） */
+    if (rnd() < 0.16) {
+      data.me = {
+        x: x0 + rnd() * CHUNK,
+        y: y0 + rnd() * CHUNK * 0.6,
+        len: 90 + rnd() * 130,
+        ang: Math.PI * 0.75 + (rnd() - 0.5) * 0.3,
+        period: 6 + rnd() * 14,
+        ph: rnd()
+      };
+    }
+    /* ⑤ 稀有天体：螺旋星系（约 1.2%） */
+    if (rnd() < 0.012) {
+      data.galaxy = {
+        x: x0 + rnd() * CHUNK,
+        y: y0 + rnd() * CHUNK,
+        r: 180 + rnd() * 260,
+        rot: rnd() * 6.2832,
+        a: 0.55 + rnd() * 0.4
+      };
+    }
+    return data;
+  }
+
+  function getChunk(seed, cx, cy) {
+    var key = seed + ':' + cx + ',' + cy;
+    var c = chunkCache[key];
+    if (c) return c;
+    c = genChunk(seed, cx, cy);
+    chunkCache[key] = c;
+    chunkLRU.push(key);
+    if (chunkLRU.length > CACHE_MAX) {
+      for (var i = 0; i < 220; i++) delete chunkCache[chunkLRU.shift()];
+    }
+    return c;
+  }
+  function clearChunks() { chunkCache = {}; chunkLRU = []; }
+
+  /* 光晕 sprite：每种星色预渲染一次，drawImage 比逐颗 createRadialGradient 快一个量级 */
+  var haloSprites = {};
+  function haloSprite(cp) {
+    var sp = haloSprites[cp];
+    if (sp) return sp;
+    var sz = 64, c = document.createElement('canvas');
+    c.width = c.height = sz;
+    var g2 = c.getContext('2d');
+    var gr = g2.createRadialGradient(sz / 2, sz / 2, 0, sz / 2, sz / 2, sz / 2);
+    gr.addColorStop(0, 'rgba(' + cp + ',0.55)');
+    gr.addColorStop(0.45, 'rgba(' + cp + ',0.16)');
+    gr.addColorStop(1, 'rgba(' + cp + ',0)');
+    g2.fillStyle = gr;
+    g2.fillRect(0, 0, sz, sz);
+    haloSprites[cp] = c;
+    return c;
+  }
+
+  /* 星云 sprite：每种色调预渲染一次（全强度），绘制时 globalAlpha 缩放（比每帧 createRadialGradient 快得多） */
+  var nebSprites = {};
+  function nebSprite(col) {
+    var key = col[0] + ',' + col[1] + ',' + col[2];
+    var sp = nebSprites[key];
+    if (sp) return sp;
+    var sz = 160, c = document.createElement('canvas');
+    c.width = c.height = sz;
+    var g2 = c.getContext('2d');
+    var gr = g2.createRadialGradient(sz / 2, sz / 2, 0, sz / 2, sz / 2, sz / 2);
+    gr.addColorStop(0, 'rgba(' + key + ',1)');
+    gr.addColorStop(0.45, 'rgba(' + key + ',0.32)');
+    gr.addColorStop(1, 'rgba(' + key + ',0)');
+    g2.fillStyle = gr;
+    g2.fillRect(0, 0, sz, sz);
+    nebSprites[key] = c;
+    return c;
+  }
+
+  /* 螺旋星系 sprite：每宇宙一张（颜色随调色板），绘制时旋转/缩放复用 */
+  var galaxySprite = null;
+  function getGalaxySprite() {
+    if (galaxySprite) return galaxySprite;
+    var sz = 256, c = document.createElement('canvas');
+    c.width = c.height = sz;
+    var g2 = c.getContext('2d');
+    var ctr = sz / 2;
+    var rnd2 = mulberry32(0x9e3779b9);
+    /* 核球 */
+    var core = g2.createRadialGradient(ctr, ctr, 0, ctr, ctr, sz * 0.16);
+    core.addColorStop(0, 'rgba(255,246,232,0.95)');
+    core.addColorStop(0.55, 'rgba(' + HUES[0][0] + ',' + HUES[0][1] + ',' + HUES[0][2] + ',0.4)');
+    core.addColorStop(1, 'rgba(0,0,0,0)');
+    g2.fillStyle = core;
+    g2.fillRect(0, 0, sz, sz);
+    /* 两条螺旋臂（粒子沿对数螺线分布 + 抖动） */
+    g2.globalCompositeOperation = 'lighter';
+    var armCol = HUES[1][0] + ',' + HUES[1][1] + ',' + HUES[1][2];
+    var armCol2 = HUES[3][0] + ',' + HUES[3][1] + ',' + HUES[3][2];
+    for (var i = 0; i < 380; i++) {
+      var t = Math.pow(rnd2(), 0.55);
+      var r = t * sz * 0.45;
+      var arm = (i % 2) * Math.PI;
+      var th = r * 0.09 + arm + (rnd2() - 0.5) * 1.0;
+      var x = ctr + Math.cos(th) * r;
+      var y = ctr + Math.sin(th) * r * 0.42;
+      var a = (1 - t * 0.75) * 0.4 + 0.05;
+      var cc = t < 0.35 ? '255,246,232' : (rnd2() < 0.5 ? armCol : armCol2);
+      g2.fillStyle = 'rgba(' + cc + ',' + a.toFixed(2) + ')';
+      var pr = 0.6 + rnd2() * 1.4;
+      g2.beginPath(); g2.arc(x, y, pr, 0, 6.2832); g2.fill();
+    }
+    galaxySprite = c;
+    return c;
+  }
+
+  /* —— 视角：平移（CSS 像素）+ 缩放 —— */
+  var view = { x: 0, y: 0, s: 1 };
+  var curSeed = 1;
+  var W = 0, H = 0;
+  var MIN_S = 0.2, MAX_S = 20;   /* 缩放范围：0.2 ≈ 视野 12800 世界单位宽（无限拖动） */
+
+  /* —— 绘制：按视口遍历区块（数据按需生成、缓存复用） —— */
+  var MIN_SR = 0.8;   /* 星星屏幕半径下限（px） */
+  var MAX_SR = 8;     /* 上限 */
+  var T = 0;          /* 全局时钟（秒）：常驻循环驱动；测试可用 __sky.setTime 固定 */
+  var par = { x: 0, y: 0 };   /* 视差（归一化 -1 ~ 1，由 mousemove 更新） */
+  var lastStats = { chunks: 0, drawn: 0, ms: 0 };
+  function render(g, W2, H2, seed, v) {
+    var t0 = performance.now();
+    var s = v.s;
+
+    /* 背景（屏幕空间固定渐变） */
+    var bgGrad = g.createLinearGradient(0, 0, 0, H2);
+    bgGrad.addColorStop(0, '#05070f');
+    bgGrad.addColorStop(0.55, '#080d1e');
+    bgGrad.addColorStop(1, '#0a0f26');
+    g.fillStyle = bgGrad;
+    g.fillRect(0, 0, W2, H2);
+
+    /* 可见世界范围（padding 一个区块，供星云/星芒溢出衔接） */
+    var pad = CHUNK * 1.05;
+    var wx0 = (0 - W2 / 2 - v.x) / s + W2 / 2 - pad;
+    var wx1 = (W2 - W2 / 2 - v.x) / s + W2 / 2 + pad;
+    var wy0 = (0 - H2 / 2 - v.y) / s + H2 / 2 - pad;
+    var wy1 = (H2 - H2 / 2 - v.y) / s + H2 / 2 + pad;
+    var cx0 = Math.floor(wx0 / CHUNK), cx1 = Math.floor(wx1 / CHUNK);
+    var cy0 = Math.floor(wy0 / CHUNK), cy1 = Math.floor(wy1 / CHUNK);
+
+    /* 收集可见区块（分型后密度不一，用精确总量做 LOD 预算） */
+    var vis = [];
+    var totalStars = 0;
+    for (var cy = cy0; cy <= cy1; cy++) {
+      for (var cx = cx0; cx <= cx1; cx++) {
+        var chx = getChunk(seed, cx, cy);
+        vis.push(chx);
+        totalStars += chx.total;
+      }
+    }
+    lastStats.chunks = vis.length;
+
+    /* LOD：总量超预算才抽样（预算 16000 保证"正常视野内的星团不被摊平"；
+       缩到很小时才启动，亮星层少抽、暗星层多抽） */
+    var stepSmall = 1, stepBig = 1;
+    if (totalStars > 16000) {
+      stepSmall = Math.ceil(totalStars / 16000);
+      stepBig = stepSmall > 2 ? 2 : 1;
+    }
+
+    /* 视差偏移（世界单位 = 屏幕像素 / 缩放；星云比星星飘得多 → 纵深） */
+    var pdx = par.x * 12 / s, pdy = par.y * 12 / s;
+    var sdx = par.x * 3.5 / s, sdy = par.y * 3.5 / s;
+
+    var i, k, ch, st;
+    var drawn = 0;
+
+    /* ① 星云（视差大层） */
+    g.save();
+    g.translate(W2 / 2 + v.x, H2 / 2 + v.y);
+    g.scale(s, s);
+    g.translate(-W2 / 2 + pdx, -H2 / 2 + pdy);
+    g.globalCompositeOperation = 'lighter';
+    for (k = 0; k < vis.length; k++) {
+      ch = vis[k];
+      for (i = 0; i < ch.nebs.length; i++) {
+        var nb = ch.nebs[i];
+        g.globalAlpha = nb.a;
+        g.drawImage(nebSprite(nb.col), nb.x - nb.r, nb.y - nb.r, nb.r * 2, nb.r * 2);
+      }
+    }
+    g.globalAlpha = 1;
+    g.globalCompositeOperation = 'source-over';
+    g.restore();
+
+    /* ② 天体层（星星 + 星系 + 流星；视差小） */
+    g.save();
+    g.translate(W2 / 2 + v.x, H2 / 2 + v.y);
+    g.scale(s, s);
+    g.translate(-W2 / 2 + sdx, -H2 / 2 + sdy);
+
+    /* 2a 螺旋星系（盘状天体，垫底） */
+    for (k = 0; k < vis.length; k++) {
+      ch = vis[k];
+      if (!ch.galaxy) continue;
+      var gal = ch.galaxy;
+      g.save();
+      g.translate(gal.x, gal.y);
+      g.rotate(gal.rot);
+      g.globalAlpha = gal.a;
+      g.drawImage(getGalaxySprite(), -gal.r, -gal.r, gal.r * 2, gal.r * 2);
+      g.restore();
+    }
+    g.globalAlpha = 1;
+
+    /* 2b 星星三层：s1 静态（css 预存、最省）；s2/s3 中 h<0.7 的星随时间闪烁 */
+    var layers = [['s1', stepSmall, 0, false], ['s2', stepSmall, 0.5, true], ['s3', stepBig, 0.55, true]];
+    var lastCss = '', lastRaw = '';
+    for (var li = 0; li < layers.length; li++) {
+      var lk = layers[li][0], stp = layers[li][1], haloT = layers[li][2], canTw = layers[li][3];
+      for (k = 0; k < vis.length; k++) {
+        ch = vis[k];
+        var arr = ch[lk];
+        for (i = 0; i < arr.length; i += stp) {
+          st = arr[i];
+          var sr = st.r * s;
+          if (sr < MIN_SR) sr = MIN_SR;
+          else if (sr > MAX_SR) sr = MAX_SR;
+          var wr = sr / s;   /* 世界单位半径 */
+          var twk = canTw && st.h < 0.7;
+          var twf = 1;
+          if (twk) twf = 0.6 + 0.4 * Math.sin(T * st.tw + st.ph);
+          /* 光晕（与星点同步闪烁） */
+          if (haloT > 0 && st.h < haloT && sr > 1.18) {
+            var hr = wr * 5;
+            g.globalCompositeOperation = 'lighter';
+            if (twk) g.globalAlpha = twf;
+            g.drawImage(haloSprite(st.c), st.x - hr, st.y - hr, hr * 2, hr * 2);
+            g.globalCompositeOperation = 'source-over';
+            if (twk) g.globalAlpha = 1;
+          }
+          if (twk) {
+            /* 闪烁星：纯色 + 逐颗 alpha（无 css 抖动） */
+            if (st.raw !== lastRaw) { g.fillStyle = st.raw; lastRaw = st.raw; }
+            g.globalAlpha = st.a * twf;
+          } else {
+            if (st.css !== lastCss) { g.fillStyle = st.css; lastCss = st.css; }
+          }
+          if (sr <= 1.5) {
+            g.fillRect(st.x - wr, st.y - wr, wr * 2, wr * 2);
+          } else {
+            g.beginPath(); g.arc(st.x, st.y, wr, 0, Math.PI * 2); g.fill();
+          }
+          if (twk) g.globalAlpha = 1;
+          drawn++;
+          /* 星芒（很大的亮星，同步闪烁） */
+          if (lk === 's3' && sr > 2.4 && st.h < 0.45) {
+            var sp = Math.min(wr * 7, MAX_SR * 2.2 / s);
+            g.globalAlpha = st.a * 0.5 * twf;
+            g.globalCompositeOperation = 'lighter';
+            g.fillRect(st.x - sp, st.y - wr * 0.22, sp * 2, wr * 0.44);
+            g.fillRect(st.x - wr * 0.22, st.y - sp, wr * 0.44, sp * 2);
+            g.globalCompositeOperation = 'source-over';
+            g.globalAlpha = 1;
+          }
+        }
+      }
+    }
+
+    /* 2c 流星（周期划过：u∈[0,0.18) 为划过窗口） */
+    g.globalCompositeOperation = 'lighter';
+    for (k = 0; k < vis.length; k++) {
+      ch = vis[k];
+      if (!ch.me) continue;
+      var me = ch.me;
+      var u = ((T / me.period + me.ph) % 1 + 1) % 1;
+      if (u < 0.18) {
+        var tt = u / 0.18;
+        var prog = tt * 900 - 450;
+        var hx = me.x + Math.cos(me.ang) * prog;
+        var hy = me.y - Math.sin(me.ang) * prog;
+        var ex = hx - Math.cos(me.ang) * me.len;
+        var ey = hy + Math.sin(me.ang) * me.len;
+        var mg = g.createLinearGradient(hx, hy, ex, ey);
+        mg.addColorStop(0, 'rgba(220,235,255,' + (0.9 * (1 - tt * tt)).toFixed(2) + ')');
+        mg.addColorStop(1, 'rgba(220,235,255,0)');
+        g.strokeStyle = mg;
+        g.lineWidth = 1.8 / s;
+        g.beginPath(); g.moveTo(hx, hy); g.lineTo(ex, ey); g.stroke();
+      }
+    }
+    g.globalAlpha = 1;
+    g.globalCompositeOperation = 'source-over';
+    g.restore();
+    /* —— 🔮 ARG：月光星云（种子 1818 的记号） —— */
+    try {
+      if (seed === 1818) {
+        var agx = -10011, agy = 2845;
+        /* 与页面 worldAt 口径一致：世界 X 的屏幕位置（物理像素） */
+        var dprR = W2 / window.innerWidth;
+        var asx = (agx * dprR - W2 / 2) * s + v.x + W2 / 2;
+        var asy = (agy * dprR - H2 / 2) * s + v.y + H2 / 2;
+        var arad = Math.max(46, 90 * s);
+        if (asx > -arad * 3 && asx < W2 + arad * 3 && asy > -arad * 3 && asy < H2 + arad * 3) {
+          g.save();
+          g.globalCompositeOperation = 'lighter';
+          var ag2 = g.createRadialGradient(asx, asy, 1, asx, asy, arad);
+          ag2.addColorStop(0, 'rgba(238,244,255,.95)');
+          ag2.addColorStop(0.25, 'rgba(198,214,240,.5)');
+          ag2.addColorStop(0.6, 'rgba(150,170,220,.16)');
+          ag2.addColorStop(1, 'rgba(150,170,220,0)');
+          g.fillStyle = ag2;
+          g.fillRect(asx - arad, asy - arad, arad * 2, arad * 2);
+          /* 月相 */
+          var mr = Math.max(5, 11 * Math.min(1.6, Math.max(0.55, s)));
+          g.fillStyle = '#eef4ff';
+          g.beginPath(); g.arc(asx, asy, mr, 0, 6.2832); g.fill();
+          g.fillStyle = '#0a0f26';
+          g.beginPath(); g.arc(asx + mr * 0.42, asy - mr * 0.3, mr * 0.92, 0, 6.2832); g.fill();
+          /* 字母 E */
+          g.fillStyle = 'rgba(238,244,255,.94)';
+          g.font = '800 ' + Math.max(13, Math.min(30, 20 * s)) + 'px system-ui,sans-serif';
+          g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText('E', asx, asy + arad * 0.58);
+          /* 呼吸环 */
+          var apul = 1 + 0.12 * Math.sin(T * 2.2);
+          g.strokeStyle = 'rgba(198,214,240,.5)';
+          g.lineWidth = Math.max(1.2, 1.6 / s);
+          g.beginPath(); g.arc(asx, asy, Math.max(15, 26 * s) * apul, 0, 6.2832); g.stroke();
+          g.restore();
+        } else {
+          /* 记号在屏幕外：贴边一枚小月牙，朝它慢慢拖 */
+          var mg2 = Math.round(64 * (W2 / window.innerWidth));
+          var onScr = asx > mg2 && asx < W2 - mg2 && asy > mg2 && asy < H2 - mg2;
+          if (!onScr) {
+            var ccx = W2 / 2, ccy = H2 / 2;
+            var ddx = asx - ccx, ddy = asy - ccy;
+            var kk2 = Math.min((W2 / 2 - mg2) / Math.max(1, Math.abs(ddx)), (H2 / 2 - mg2) / Math.max(1, Math.abs(ddy)));
+            var tx2 = ccx + ddx * kk2, ty2 = ccy + ddy * kk2;
+            var pp2 = 0.5 + 0.5 * Math.abs(Math.sin((typeof T !== 'undefined' ? T : 0) * 1.4));
+            var rr = Math.max(13, 17 * (W2 / window.innerWidth));   /* 按 CSS 像素定半径，任何屏幕都够醒目 */
+            g.save();
+            g.globalCompositeOperation = 'lighter';
+            g.globalAlpha = 0.5 + 0.3 * pp2;
+            var hg2 = g.createRadialGradient(tx2, ty2, 2, tx2, ty2, rr * 4.2);
+            hg2.addColorStop(0, 'rgba(214,228,255,.85)');
+            hg2.addColorStop(0.35, 'rgba(198,214,240,.4)');
+            hg2.addColorStop(1, 'rgba(198,214,240,0)');
+            g.fillStyle = hg2;
+            g.fillRect(tx2 - rr * 4.2, ty2 - rr * 4.2, rr * 8.4, rr * 8.4);
+            /* 呼吸环 */
+            g.globalAlpha = 0.35 + 0.4 * pp2;
+            g.strokeStyle = 'rgba(214,228,255,.85)';
+            g.lineWidth = 2;
+            g.beginPath(); g.arc(tx2, ty2, rr * 1.9 * (1 + 0.14 * pp2), 0, 6.2832); g.stroke();
+            g.globalAlpha = 1;
+            g.globalCompositeOperation = 'source-over';
+            /* 小月牙 */
+            g.fillStyle = '#f2f7ff';
+            g.beginPath(); g.arc(tx2, ty2, rr, 0, 6.2832); g.fill();
+            g.fillStyle = 'rgba(8,12,28,.99)';
+            g.beginPath(); g.arc(tx2 + rr * 0.5, ty2 - rr * 0.28, rr * 0.88, 0, 6.2832); g.fill();
+            /* 距离提示 */
+            var cxw = (-v.x / (W2 / window.innerWidth)) / s + (W2 / (W2 / window.innerWidth)) / 2;
+            var cyw = (-v.y / (W2 / window.innerWidth)) / s + (H2 / (W2 / window.innerWidth)) / 2;
+            var dw = Math.hypot(cxw - (-10011), cyw - 2845);
+            var dtxt = dw < 260 ? '就在附近！' : (dw >= 1000 ? '还有 ≈ ' + (dw / 1000).toFixed(1) + 'k' : '还有 ≈ ' + Math.round(dw));
+            var fs = Math.max(12, 12.5 * (W2 / window.innerWidth));
+            g.font = '800 ' + fs + 'px system-ui,sans-serif';
+            g.textAlign = 'center';
+            g.fillStyle = 'rgba(233,240,255,.95)';
+            g.shadowColor = 'rgba(8,12,28,.9)';
+            g.shadowBlur = 6;
+            var lx = Math.max(56 * (W2 / window.innerWidth), Math.min(W2 - 56 * (W2 / window.innerWidth), tx2));
+            var ly = ty2 + rr + fs * 1.35;
+            if (ly > H2 - fs * 1.4) ly = ty2 - rr - fs * 1.2;
+            g.fillText(dtxt, lx, ly);
+            g.shadowBlur = 0;
+            g.restore();
+          }
+        }
+      }
+    } catch (eA) {}
+    lastStats.drawn = drawn;
+    lastStats.ms = performance.now() - t0;
+  }
+
+  function displaySeed() { document.getElementById('seedNo').textContent = '#' + String(curSeed).padStart(4, '0'); }
+
+  /* —— 渲染调度：常驻循环（驱动时间轴动画）+ 交互即时渲染（共享节流防重复） —— */
+  var slowFrame = false, lastFrameTs = 0;
+  function renderFrame() {
+    render(ctx, cv.width, cv.height, curSeed, { x: view.x * dpr, y: view.y * dpr, s: view.s });
+    slowFrame = lastStats.ms > 13;   /* 渲染偏重 → 后续自动降帧（60 → 30fps） */
+  }
+  function draw() {                   /* 交互路径：立即渲染（8ms 节流） */
+    var now = performance.now();
+    if (now - lastFrameTs < 8) return;
+    lastFrameTs = now;
+    renderFrame();
+  }
+  var REDUCE = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var lastLoopT = 0;
+  function loop(ts) {
+    requestAnimationFrame(loop);
+    var gap = slowFrame ? 33 : 15;
+    if (ts - lastFrameTs < gap) return;
+    var dt = lastLoopT ? Math.min(0.05, (ts - lastLoopT) / 1000) : 1 / 60;
+    lastLoopT = ts;
+    T = ts * 0.001;
+    lastFrameTs = ts;
+    stepZoom(dt);     /* 平滑缩放推进（每帧逼近目标） */
+    renderFrame();
+  }
+  if (!REDUCE) requestAnimationFrame(loop);
+
+  function fit() {
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.round(W * dpr);
+    cv.height = Math.round(H * dpr);
+    draw();
+  }
+
+  function saveUrl() {
+    try {
+      var need = (view.s !== 1 || view.x || view.y);
+      history.replaceState(null, '', '?seed=' + curSeed +
+        (need ? '&v=' + Math.round(view.x) + ',' + Math.round(view.y) + ',' + view.s.toFixed(3) : ''));
+    } catch (e) {}
+  }
+
+  function newSky(seed) {
+    curSeed = seed || (Math.floor(Math.random() * 9999) + 1);
+    view.x = 0; view.y = 0; view.s = 1;
+    clearChunks();
+    refreshPalette();      /* 换种子 = 换宇宙气质（重新派生调色板） */
+    displaySeed();
+    fit();
+    saveUrl();
+  }
+
+  /* —— 缩放 v4：目标值 + 指数缓动（tau≈0.14s）——
+     · 平滑：滚轮只改"缩放目标"，主循环逐帧逼近，无突兀跳变、无过冲
+     · 细腻：单档 ≈ 11%，单事件上限 ±25%（跨设备/跨浏览器手感一致）
+     · 直觉：锚点严格保持（光标下的星不漂移）——
+       修复旧版锚点漂移：正确式为 v' = r·v + (1-r)·A（旧式在 view.x/y ≠ 0 时会滑移） */
+  var zt = { s: 1, ax: 0, ay: 0, active: false };
+  var WHEEL_K = 0.0012, ZOOM_TAU = 0.14;
+
+  function applyScale(ns, px, py) {          /* 以屏幕点 (px,py) 为锚的精确缩放 */
+    var rr = ns / view.s;
+    view.x = (px - W / 2) * (1 - rr) + rr * view.x;
+    view.y = (py - H / 2) * (1 - rr) + rr * view.y;
+    view.s = ns;
+  }
+  function setZoomTarget(ns, px, py) {
+    zt.s = Math.max(MIN_S, Math.min(MAX_S, ns));
+    zt.ax = px; zt.ay = py;
+    if (REDUCE) { zt.active = false; applyScale(zt.s, px, py); draw(); return; }
+    zt.active = true;
+  }
+  function wheelZoom(e) {
+    var d = e.deltaY || 0;
+    if (e.deltaMode === 1) d *= 16;          /* 行模式 → 像素 */
+    else if (e.deltaMode === 2) d *= 400;    /* 页模式 → 像素 */
+    d = Math.max(-260, Math.min(260, d));    /* 单事件上限：防设备差异导致突变 */
+    var base = zt.active ? zt.s : view.s;    /* 连续滚动叠加在目标上（手感连续） */
+    setZoomTarget(base * Math.exp(-d * WHEEL_K), e.clientX, e.clientY);
+  }
+  function zoomBy(f) {                       /* 缩放按钮：屏幕中心为锚 */
+    var base = zt.active ? zt.s : view.s;
+    setZoomTarget(base * f, W / 2, H / 2);
+  }
+  function stepZoom(dt) {                    /* 主循环逐帧逼近目标（指数缓动） */
+    if (!zt.active) return;
+    var k = 1 - Math.exp(-dt / ZOOM_TAU);
+    var ns = view.s + (zt.s - view.s) * k;
+    if (Math.abs(zt.s - ns) < zt.s * 0.002) { ns = zt.s; zt.active = false; }
+    applyScale(ns, zt.ax, zt.ay);
+  }
+
+  /* —— 指针：单指拖动平移 / 双指捏合缩放 + 平移 —— */
+  var ptrs = new Map();
+  var pinchBase = null;
+  cv.addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    /* —— 🔮 ARG：点到月光星云即收集日志 1 —— */
+    try {
+      if (curSeed === 1818) {
+        var cwx = (e.clientX - W / 2 - view.x) / view.s + W / 2;
+        var cwy = (e.clientY - H / 2 - view.y) / view.s + H / 2;
+        var cdist = Math.hypot(cwx - (-10011), cwy - 2845) * view.s;
+        if (cdist < Math.max(70, 130 * view.s)) {
+          if (window.ARG && ARG.collect('log1')) {
+            ARG.toast && ARG.toast('📜 找到一篇日志 · 星空（一个字母：E）');
+          } else if (window.ARG) {
+            ARG.toast && ARG.toast('记号还在（这篇日志已经收过了）');
+          }
+        }
+      }
+    } catch (eA) {}
+    zt.active = false;   /* 抓取操作打断平滑缩放（符合直觉：手接管） */
+    try { cv.setPointerCapture(e.pointerId); } catch (er) {}
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (ptrs.size === 2) {
+      var arr = Array.from(ptrs.values());
+      pinchBase = {
+        d: Math.max(1, Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y)),
+        cx: (arr[0].x + arr[1].x) / 2, cy: (arr[0].y + arr[1].y) / 2,
+        s: view.s, vx: view.x, vy: view.y
+      };
+    }
+    cv.classList.add('dragging');
+  });
+  cv.addEventListener('pointermove', function (e) {
+    if (!ptrs.has(e.pointerId)) return;
+    var prev = ptrs.get(e.pointerId);
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (ptrs.size === 1) {
+      view.x += e.clientX - prev.x;
+      view.y += e.clientY - prev.y;
+      draw();
+    } else if (ptrs.size === 2 && pinchBase) {
+      var arr = Array.from(ptrs.values());
+      var d = Math.max(1, Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y));
+      var cx = (arr[0].x + arr[1].x) / 2, cy = (arr[0].y + arr[1].y) / 2;
+      var k = (Math.max(MIN_S, Math.min(MAX_S, pinchBase.s * d / pinchBase.d))) / pinchBase.s;
+      var Cx = W / 2, Cy = H / 2;
+      view.s = pinchBase.s * k;
+      /* 锚点保持（同 applyScale 的正确式：v' = k·v + (1-k)·A）+ 中点平移 */
+      view.x = k * pinchBase.vx + (1 - k) * (pinchBase.cx - Cx) + (cx - pinchBase.cx);
+      view.y = k * pinchBase.vy + (1 - k) * (pinchBase.cy - Cy) + (cy - pinchBase.cy);
+      draw();
+    }
+  });
+  function ptrUp(e) {
+    ptrs.delete(e.pointerId);
+    if (ptrs.size < 2) pinchBase = null;
+    if (ptrs.size === 0) { cv.classList.remove('dragging'); saveUrl(); }
+  }
+  cv.addEventListener('pointerup', ptrUp);
+  cv.addEventListener('pointercancel', ptrUp);
+
+  cv.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    wheelZoom(e);   /* 只设目标，缓动由主循环执行（平滑细腻） */
+    clearTimeout(cv._wt);
+    cv._wt = setTimeout(saveUrl, 400);
+  }, { passive: false });
+
+  /* —— 鼠标视差：星云层漂移大于星星层 → 空间纵深 —— */
+  window.addEventListener('mousemove', function (e) {
+    par.x = (e.clientX / Math.max(1, W) - 0.5) * 2;
+    par.y = (e.clientY / Math.max(1, H) - 0.5) * 2;
+    if (REDUCE) draw();   /* 无动画模式下也需要重绘一次 */
+  }, { passive: true });
+
+  document.getElementById('btnIn').addEventListener('click', function () { zoomBy(1.25); saveUrl(); });
+  document.getElementById('btnOut').addEventListener('click', function () { zoomBy(0.8); saveUrl(); });
+  document.getElementById('btnHome').addEventListener('click', function () {
+    zt.active = false;
+    view.x = 0; view.y = 0; view.s = 1;
+    draw(); saveUrl();
+    toast('⌖ 回到原点');
+  });
+
+  var toastEl = document.getElementById('toast'), toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2400);
+  }
+
+  document.getElementById('btnNew').addEventListener('click', function () {
+    newSky();
+    toast('✨ 星空 #' + String(curSeed).padStart(4, '0'));
+  });
+
+  /* —— 点星空编号就地改种子（也能输入别人分享的编号） —— */
+  (function () {
+    var el = document.getElementById('seedNo');
+    el.title = '点一下，输入星空编号';
+    el.addEventListener('click', function () {
+      if (el.querySelector('input')) return;
+      var inp = document.createElement('input');
+      inp.value = String(curSeed);
+      inp.maxLength = 5;
+      inp.setAttribute('inputmode', 'numeric');
+      el.textContent = '';
+      el.appendChild(inp);
+      inp.focus(); inp.select();
+      var done = false;
+      function finish(apply) {
+        if (done) return;
+        done = true;
+        var v = apply ? parseInt(inp.value, 10) : NaN;
+        if (isFinite(v) && v > 0) {
+          curSeed = v % 100000;
+          view.x = 0; view.y = 0; view.s = 1;
+          clearChunks();
+          refreshPalette();
+          displaySeed();
+          fit();
+          saveUrl();
+          toast('✨ 星空 #' + String(curSeed).padStart(4, '0') + ' 已就位');
+        } else {
+          displaySeed();
+        }
+      }
+      inp.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') finish(true);
+        else if (e.key === 'Escape') finish(false);
+        e.stopPropagation();
+      });
+      inp.addEventListener('blur', function () { finish(true); });
+      inp.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
+    });
+  })();
+
+  document.getElementById('btnWall').addEventListener('click', function () {
+    var w = 1920, h = 1080;
+    var off = document.createElement('canvas');
+    off.width = w; off.height = h;
+    /* 壁纸按当前视角等比映射（含平移与缩放） */
+    var sx = w / W, sy = h / H;
+    render(off.getContext('2d'), w, h, curSeed, { x: view.x * sx, y: view.y * sy, s: view.s * sx });
+    off.toBlob(function (blob) {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'starfield-' + String(curSeed).padStart(4, '0') + '-1920x1080.png';
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+      toast('⬇️ 壁纸已下载（1920×1080，含当前视角）');
+      try { STAch.unlock('star.wall', '把星空带回家', '🖼️'); } catch (e) {}
+    }, 'image/png');
+  });
+
+  document.getElementById('btnShare').addEventListener('click', function () {
+    var need = (view.s !== 1 || view.x || view.y);
+    var url = location.origin + location.pathname + '?seed=' + curSeed +
+      (need ? '&v=' + Math.round(view.x) + ',' + Math.round(view.y) + ',' + view.s.toFixed(3) : '');
+    if (location.protocol === 'file:') url = '（部署后可用）' + url;
+    function done() { toast('🔗 链接已复制：我的星空 #' + String(curSeed).padStart(4, '0') + '（含视角）'); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(done, fallback);
+    } else fallback();
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = url;
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { toast('我的星空 #' + String(curSeed).padStart(4, '0')); }
+      document.body.removeChild(ta);
+    }
+  });
+
+  window.addEventListener('resize', fit);
+
+  /* 测试钩子（供自动化验收；不影响页面功能） */
+  window.__sky = {
+    seed: function () { return curSeed; },
+    setSeed: function (n) { newSky(n); },
+    view: view,
+    chunk: function (cx, cy) { return JSON.stringify(getChunk(curSeed, cx, cy)); },
+    chunkCount: function () { return Object.keys(chunkCache).length; },
+    clearChunks: clearChunks,
+    stats: function () { return { chunks: lastStats.chunks, drawn: lastStats.drawn, ms: +lastStats.ms.toFixed(2) }; },
+    size: function () { return { W: W, H: H, dpr: dpr }; },
+    pan: function (dx, dy) { view.x += dx; view.y += dy; draw(); return { x: view.x, y: view.y }; },
+    zoom: function (f) { applyScale(Math.max(MIN_S, Math.min(MAX_S, view.s * f)), W / 2, H / 2); draw(); return view.s; },
+    /* —— 平滑缩放（v4）测试钩子 —— */
+    zoomBy: function (f) { zoomBy(f); return { s: +view.s.toFixed(5), target: +zt.s.toFixed(5), active: zt.active }; },
+    wheel: function (dy, px, py, mode) {
+      wheelZoom({ deltaY: dy, deltaMode: mode || 0, clientX: px == null ? W / 2 : px, clientY: py == null ? H / 2 : py });
+      return { s: +view.s.toFixed(5), target: +zt.s.toFixed(5), active: zt.active };
+    },
+    stepZoom: function (ms, steps) {
+      var n = steps || Math.max(1, Math.round(ms / 16.7));
+      for (var i = 0; i < n; i++) stepZoom((ms / 1000) / n);
+      return { s: +view.s.toFixed(5), target: +zt.s.toFixed(5), active: zt.active };
+    },
+    zoomState: function () { return { s: +view.s.toFixed(5), target: +zt.s.toFixed(5), active: zt.active }; },
+    worldAt: function (sx, sy) { return { x: (sx - W / 2 - view.x) / view.s + W / 2, y: (sy - H / 2 - view.y) / view.s + H / 2 }; },
+    /* 时间轴控制（测试用）：固定/读取全局时钟 */
+    setTime: function (t) { T = t; return T; },
+    time: function () { return +T.toFixed(3); },
+    setParallax: function (x, y) { par.x = x; par.y = y; return par; },
+    /* 同步渲染一帧并返回耗时（测试专用：hidden 页面 rAF 冻结时用） */
+    renderNow: function () {
+      render(ctx, cv.width, cv.height, curSeed, { x: view.x * dpr, y: view.y * dpr, s: view.s });
+      return { ms: +lastStats.ms.toFixed(2), chunks: lastStats.chunks, drawn: lastStats.drawn };
+    }
+  };
+
+  /* 初始化：URL（seed + 视角） */
+  var q = new URLSearchParams(location.search);
+  var s = parseInt(q.get('seed') || '', 10);
+  curSeed = isFinite(s) && s > 0 ? (s % 100000) : (Math.floor(Math.random() * 9999) + 1);
+  refreshPalette();   /* 按最终种子派生调色板（须在首次渲染前） */
+  var vq = (q.get('v') || '').split(',').map(parseFloat);
+  if (vq.length === 3 && vq.every(isFinite)) {
+    view.x = vq[0]; view.y = vq[1]; view.s = Math.max(MIN_S, Math.min(MAX_S, vq[2]));
+  }
+  displaySeed();
+  fit();
+  if (isFinite(s) && s > 0) toast('复活了星空 #' + String(curSeed).padStart(4, '0'));
+})();
+</script>
+
+<script>
+/* ============================================================
+   🔮 ARG · 精简进度机（星空站）2026-10-03
+   与主页共用 st_arg（cookie .startian.top + localStorage 兜底）
+   ============================================================ */
+(function () {
+  'use strict';
+  var KEY = 'st_arg';
+  if (window.ARG && window.ARG.collect) return;   /* 主页已注入时复用 */
+  function readState() {
+    var raw = null;
+    try { var m = document.cookie.match(/(?:^|;\s*)st_arg=([^;]*)/); if (m) raw = decodeURIComponent(m[1]); } catch (e) {}
+    if (!raw) { try { raw = localStorage.getItem(KEY); } catch (e) {} }
+    try { var d = JSON.parse(raw || '{}'); if (!d || typeof d !== 'object') d = {}; if (!Array.isArray(d.logs)) d.logs = []; return d; }
+    catch (e) { return { logs: [] }; }
+  }
+  var state = readState();
+  function save() {
+    var raw = JSON.stringify(state);
+    try { localStorage.setItem(KEY, raw); } catch (e) {}
+    try {
+      var v = encodeURIComponent(raw);
+      if (v.length < 3800) document.cookie = 'st_arg=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+    } catch (e) {}
+  }
+  var toastTimer = 0;
+  window.ARG = {
+    has: function (id) { return state.logs.indexOf(id) >= 0; },
+    count: function () { return state.logs.length; },
+    collect: function (id) {
+      if (state.logs.indexOf(id) >= 0) return false;
+      state.logs.push(id); save();
+      this.toast('📜 找到一篇日志（去主页头像连点 7 下看全文）');
+      return true;
+    },
+    reset: function () { state = { logs: [] }; save(); },
+    toast: function (msg) {
+      try {
+        var el = document.getElementById('__arg_toast');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = '__arg_toast';
+          el.style.cssText = 'position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9994;background:rgba(12,17,32,.96);color:#eef4ff;border:1px solid rgba(198,214,240,.4);border-radius:999px;padding:12px 24px;font:700 13px/1.5 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.5);transition:all .45s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:88vw;text-align:center';
+          document.body.appendChild(el);
+        }
+        el.textContent = msg;
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { el.style.opacity = '0'; el.style.transform = 'translateX(-50%) translateY(16px)'; }, 3000);
+      } catch (e) {}
+    }
+  };
+})();
+</script></body>
+</html>

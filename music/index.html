@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="函数音乐：把数学函数画成声波，不同函数不同音色，图形跟着跳。startian.top 出品">
+<meta name="theme-color" content="#12081c">
+<title>函数音乐 · startian.top</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;background:radial-gradient(1200px 700px at 50% -100px, #251238 0%, #150a22 45%, #0c0616 100%);color:#f0e8ff;font-family:'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif}
+  header{display:flex;align-items:center;gap:14px;padding:18px 24px;flex-wrap:wrap}
+  header h1{font-size:19px;margin:0;letter-spacing:.5px;background:linear-gradient(100deg,#f0e8ff 20%,#c084fc 45%,#f472b6 60%,#f0e8ff 85%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  header .sub{font-size:12px;color:#9d86c9;font-weight:600}
+  .home{margin-left:auto;text-decoration:none;font-size:12.5px;font-weight:700;color:#e0cfff;border:1px solid rgba(190,150,255,.3);border-radius:999px;padding:9px 16px;background:rgba(24,14,40,.7);transition:border-color .2s,transform .2s}
+  .home:hover{border-color:rgba(210,170,255,.7);transform:translateY(-1px)}
+  main{max-width:1000px;margin:0 auto;padding:6px 24px 70px;display:flex;flex-direction:column;gap:18px}
+  .card{background:rgba(28,16,46,.66);border:1px solid rgba(160,120,220,.24);border-radius:22px;padding:18px 20px;box-shadow:0 18px 44px rgba(0,0,0,.35);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+  .card h2{margin:0 0 12px;font-size:13px;letter-spacing:2px;color:#9d86c9;font-weight:800}
+  #wave{width:100%;height:220px;display:block;border-radius:16px;background:rgba(12,6,22,.6);border:1px solid rgba(160,120,220,.18)}
+  .fx{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{
+    border:1px solid rgba(180,140,240,.3);border-radius:999px;padding:8px 14px;font-size:12.5px;font-weight:700;
+    color:#e0cfff;background:rgba(50,28,80,.5);cursor:pointer;font-family:inherit;transition:all .18s ease;
+  }
+  .chip:hover{border-color:rgba(210,170,255,.75);transform:translateY(-1px)}
+  .chip.on{border-color:#c084fc;background:linear-gradient(180deg,rgba(150,80,230,.5),rgba(110,50,190,.45));color:#fff;box-shadow:0 6px 18px rgba(160,90,240,.35)}
+  .input-row{display:flex;gap:10px;margin-top:12px}
+  .input-row input{
+    flex:1;border:1.5px solid rgba(180,140,240,.3);border-radius:12px;padding:11px 14px;font-size:13.5px;
+    font-family:ui-monospace,Consolas,monospace;color:#f0e8ff;background:rgba(14,8,26,.7);outline:none;
+  }
+  .input-row input:focus{border-color:#c084fc}
+  .btn{
+    border:0;border-radius:12px;padding:11px 20px;font-size:13.5px;font-weight:800;font-family:inherit;cursor:pointer;
+    color:#fff;background:linear-gradient(100deg,#a855f7,#ec4899);box-shadow:0 5px 0 #5b21b6,0 12px 24px rgba(150,80,240,.35);
+    transition:transform .15s ease,box-shadow .2s ease;
+  }
+  .btn:active{transform:translateY(2px);box-shadow:0 2px 0 #5b21b6}
+  .btn.ghost{background:rgba(50,28,80,.5);border:1.5px solid rgba(180,140,240,.35);color:#e0cfff;box-shadow:none}
+  .btn.ghost:hover{border-color:rgba(210,170,255,.75)}
+  .piano{display:flex;gap:7px;margin-top:6px;flex-wrap:wrap}
+  .key{
+    flex:1;min-width:56px;height:120px;border-radius:0 0 14px 14px;border:1px solid rgba(180,140,240,.4);
+    background:linear-gradient(180deg,#f2ecff,#d8c8f5);cursor:pointer;position:relative;
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:9px;gap:1px;
+    font-size:12px;font-weight:800;color:#4a2d78;font-family:inherit;
+    transition:all .09s ease;user-select:none;-webkit-user-select:none;touch-action:none;
+  }
+  .key .kn{font-size:23px;font-weight:900;line-height:1;letter-spacing:.5px}
+  .key .kn sup{font-size:12px;position:relative;top:-8px;left:1px;opacity:.85}
+  .key .kname{font-size:9.5px;font-weight:700;opacity:.5;letter-spacing:1px}
+  .key:hover{background:linear-gradient(180deg,#ffffff,#e8dcff)}
+  .key.press{background:linear-gradient(180deg,#c084fc,#a855f7);color:#fff;transform:translateY(3px);box-shadow:0 0 24px rgba(190,120,255,.7)}
+  .key small{position:absolute;top:8px;left:0;right:0;text-align:center;font-size:10px;opacity:.65;font-weight:700}
+  .tip{font-size:11.5px;color:#9d86c9;margin-top:10px;line-height:1.8}
+  .toast{
+    position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(10px);opacity:0;z-index:9;
+    background:rgba(28,16,46,.95);border:1px solid rgba(190,150,255,.4);border-radius:999px;
+    padding:11px 22px;font-size:13px;font-weight:700;color:#f0e8ff;transition:all .3s ease;pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%)}
+  @media (max-width:640px){
+    .key{min-width:38px;height:96px;font-size:11px}
+    #wave{height:170px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🎵 函数音乐</h1>
+  <span class="sub">把函数画成声波 · 不同函数不同音色 · 图形跟着跳</span>
+  <a class="home" href="https://startian.top/">← 返回主页</a>
+</header>
+<main>
+  <section class="card">
+    <h2>WAVEFORM · 一个周期的波形</h2>
+    <canvas id="wave"></canvas>
+    <div class="fx">
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="input-row">
+      <input id="finput" value="sin(t) + 0.5*sin(2*t)" spellcheck="false" placeholder="f(t)，t ∈ [-π, π]，如 sin(t) + 0.3*sin(5*t)">
+      <button class="btn ghost" id="btnApply" type="button">应用函数</button>
+    </div>
+    <p class="tip">这就是「音色」的形状：正弦是纯音，方波是游戏机味，锯齿是合成器味，随便叠几层三角/正弦就是新乐器。</p>
+  </section>
+
+  <section class="card">
+    <h2>KEYBOARD · 用这个音色弹一弹</h2>
+    <div class="piano" id="piano"></div>
+    <div class="fx" style="margin-top:14px">
+      <button class="btn" id="btnTune" type="button">▶ 试听一小段</button>
+      <button class="btn ghost" id="btnStart" type="button">🔊 开启声音</button>
+      <span class="tip" style="margin:0">简谱对照：1 2 3 4 5 6 7 = do re mi fa sol la si · 电脑键盘 A S D F G H J K 也能弹 · 第一次要先「开启声音」</span>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==== i18n-kit v1.2 begin ==== */
+/* ══════════════════════════════════════════════════════════
+   🌐 多语言 i18n Kit（startian.top 全站共享 · v1.2 · 2026-10-04）
+   · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
+   · 自动识别：首次访问按 navigator.language（zh 开头 → 中文，其余 → English）
+   · 两种接入模式（可混用）：
+     ① 短语表模式（推荐，低侵入）：I18N.phrase({ '中文原文': 'English', ... })
+        自动扫描文本节点 / title / placeholder / aria-label / alt，动态插入的文本也自动翻译
+     ② 标注模式：data-i18n / data-i18n-html / data-i18n-title / data-i18n-aria / data-i18n-ph / data-i18n-alt
+   · 子树上加 data-i18n-skip 可整体跳过（用户输入内容、ARG 谜题原文等）
+   · API：I18N.t(k[,vars]) · I18N.tOr(k,fb) · I18N.tr(原文) · I18N.set(lang) · I18N.lang()
+          · I18N.phrase(map) · I18N.scan(root) · I18N.apply(root) · I18N.onChange(fn)
+          · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n)
+   · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
+   ══════════════════════════════════════════════════════════ */
+var I18N = (function () {
+  'use strict';
+  var LS = 'st_lang';
+  var FALLBACK = 'zh';
+  var lang = FALLBACK;
+  var dict = { zh: {}, en: {} };
+  var phrase = {};      /* 短语表：中文原文（归一化）→ 译文 */
+  var listeners = [];
+  var bd = {};          /* boot data：原文快照等 */
+
+  /* ---- 基础词典（全站通用词条） ---- */
+  dict.zh['common.home'] = '主页';
+  dict.en['common.home'] = 'Home';
+  dict.zh['common.homeTitle'] = '返回星恬的小站主页';
+  dict.en['common.homeTitle'] = "Back to Startian's homepage";
+  dict.zh['common.close'] = '关闭';
+  dict.en['common.close'] = 'Close';
+  dict.zh['common.cancel'] = '取消';
+  dict.en['common.cancel'] = 'Cancel';
+
+  /* ---- 存储与识别 ---- */
+  function norm(v) {
+    v = String(v || '').toLowerCase();
+    if (v.indexOf('zh') === 0) return 'zh';
+    if (v.indexOf('en') === 0) return 'en';
+    return null;
+  }
+  function readCookie() {
+    try { var m = document.cookie.match(/(?:^|;\s*)st_lang=([^;]*)/); return m ? decodeURIComponent(m[1]) : null; }
+    catch (e) { return null; }
+  }
+  function readLS() { try { return localStorage.getItem(LS); } catch (e) { return null; } }
+  function persist(v) {
+    try { localStorage.setItem(LS, v); } catch (e) {}
+    try { document.cookie = 'st_lang=' + encodeURIComponent(v) + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax'; } catch (e) {}
+  }
+  function detect() {
+    var s = norm(readCookie()) || norm(readLS());
+    if (s) return s;
+    var n = norm(navigator.language || navigator.userLanguage);
+    return n || FALLBACK;
+  }
+
+  /* ---- 文案 ---- */
+  /* tRaw：查词典（当前语言 → zh 兜底），查不到返回 null（= 保持原文） */
+  function tRaw(key) {
+    var v = (dict[lang] && dict[lang][key] != null) ? dict[lang][key] : null;
+    if (v == null) v = (dict[FALLBACK] && dict[FALLBACK][key] != null) ? dict[FALLBACK][key] : null;
+    return v;
+  }
+  function t(key, vars) {
+    var v = tRaw(key);
+    if (v == null) return key;
+    if (vars) v = String(v).replace(/\{(\w+)\}/g, function (m, k) { return (vars[k] != null) ? vars[k] : m; });
+    return v;
+  }
+  /* tOr：查不到时用传入的兜底值（页面 JS 动态文案用这个） */
+  function tOr(key, fallback) {
+    var v = tRaw(key);
+    return (v == null) ? fallback : v;
+  }
+  function add(obj) {
+    if (!obj) return;
+    ['zh', 'en'].forEach(function (k) {
+      if (obj[k]) for (var key in obj[k]) dict[k][key] = obj[k][key];
+    });
+  }
+  /* tr：短语表直译（原文进，译文出；zh 侧原样返回）-JS 动态文案直接用 */
+  function tr(s) {
+    if (lang === 'zh') return s;
+    var v = lookup(normText(s));
+    return (v == null) ? s : v;
+  }
+  function addPhrase(map) {
+    if (!map) return;
+    for (var k in map) { if (map[k] != null) phrase[normText(k)] = String(map[k]); }
+  }
+  /* 规则表：[[/正则/, '替换（可用 $1）'], ...] - 处理「已复习 3」「12 天有记录」这类数字拼接 */
+  var rules = [];
+  function addRules(list) {
+    if (!list) return;
+    for (var i = 0; i < list.length; i++) {
+      try {
+        var re = (list[i][0] instanceof RegExp) ? list[i][0] : new RegExp(list[i][0]);
+        rules.push([re, String(list[i][1])]);
+      } catch (e) {}
+    }
+  }
+  function lookup(t) {
+    var v = phrase[t];
+    if (v != null) return v;
+    for (var i = 0; i < rules.length; i++) {
+      try { if (rules[i][0].test(t)) return t.replace(rules[i][0], rules[i][1]); } catch (e) {}
+    }
+    return null;
+  }
+
+  /* ---- 短语表扫描（静态 + 动态） ---- */
+  function normText(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
+  var PTAGS = ['title', 'placeholder', 'aria-label', 'alt'];
+  function translText(node) {
+    var raw = node.nodeValue;
+    if (!raw) return;
+    var rec = node.__i18nR;
+    if (rec) {
+      if (lang === 'zh') {
+        if (raw === rec.en) { node.nodeValue = rec.orig; delete node.__i18nR; }
+        else if (raw !== rec.orig) { delete node.__i18nR; }
+        return;
+      }
+      if (raw === rec.en) return;
+      if (raw === rec.orig) { node.nodeValue = rec.en; return; }
+      delete node.__i18nR;
+    }
+    var out = lookup(normText(raw));
+    if (out == null) return;
+    if (lang === 'en') { if (raw !== out) { node.__i18nR = { orig: raw, en: out }; node.nodeValue = out; } }
+  }
+  function translAttrs(el) {
+    if (!el.getAttribute) return;
+    for (var i = 0; i < PTAGS.length; i++) {
+      var a = PTAGS[i], v = el.getAttribute(a);
+      if (v == null || v === '') continue;
+      var rec = el.__i18nA && el.__i18nA[a];
+      if (rec) {
+        if (lang === 'zh') {
+          if (v === rec.en) { el.setAttribute(a, rec.orig); delete el.__i18nA[a]; }
+          else if (v !== rec.orig) { delete el.__i18nA[a]; }
+          continue;
+        }
+        if (v === rec.en) continue;
+        if (v === rec.orig) { el.setAttribute(a, rec.en); continue; }
+        delete el.__i18nA[a];
+      }
+      var out = lookup(normText(v));
+      if (out == null) continue;
+      if (lang === 'en') {
+        if (v !== out) { if (!el.__i18nA) el.__i18nA = {}; el.__i18nA[a] = { orig: v, en: out }; el.setAttribute(a, out); }
+      }
+    }
+  }
+  function scanNode(node) {
+    if (!node) return;
+    if (node.nodeType === 9) node = node.documentElement || node.body;   /* 文档节点 → 转元素 */
+    if (!node) return;
+    if (node.nodeType === 3) { translText(node); return; }
+    if (node.nodeType !== 1) return;
+    var tag = node.tagName;
+    if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'NOSCRIPT') return;
+    if (node.hasAttribute('data-i18n-skip')) return;
+    translAttrs(node);
+    for (var c = node.firstChild; c; c = c.nextSibling) scanNode(c);
+  }
+  function scan(root) { try { scanNode(root || document.body || document.documentElement); } catch (e) {} }
+  /* 动态内容自动翻译（MutationObserver，逐节点增量，无重扫） */
+  var moOn = false;
+  function auto(root) {
+    if (moOn || typeof MutationObserver === 'undefined') return;
+    var target = root || document.body;
+    if (!target) {   /* head 提前注入时 body 还没解析出来，等 DOM ready */
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { auto(root); });
+      return;
+    }
+    moOn = true;
+    try {
+      var mo = new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          var m = muts[i];
+          try {
+            if (m.type === 'characterData') translText(m.target);
+            else if (m.type === 'attributes') translAttrs(m.target);
+            else if (m.type === 'childList') {
+              for (var j = 0; j < m.addedNodes.length; j++) scanNode(m.addedNodes[j]);
+            }
+          } catch (e) {}
+        }
+      });
+      mo.observe(target, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: PTAGS });
+    } catch (e) {}
+  }
+
+  /* ---- 日期 / 数字 ---- */
+  var MN_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var WD_ZH = '日一二三四五六';
+  var WD_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  function fmtDate(d, opt) {
+    if (typeof d === 'string') { var a = d.split('-'); d = new Date(+a[0], (+a[1] || 1) - 1, +a[2] || 1); }
+    if (!(d instanceof Date) || isNaN(d.getTime())) return '';
+    opt = opt || {};
+    var s;
+    if (lang === 'zh') {
+      s = d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日';
+      if (opt.weekday) s += ' · 星期' + WD_ZH.charAt(d.getDay());
+    } else {
+      s = MN_EN[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+      if (opt.weekday) s += ' · ' + WD_EN[d.getDay()];
+    }
+    return s;
+  }
+  function fmtNum(n) {
+    try { return Number(n).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US'); }
+    catch (e) { return String(n); }
+  }
+
+  /* ---- DOM 标注应用（标注模式；词条缺失时恢复原文 - 保证切回中文能还原） ---- */
+  function apply(root) {
+    root = root || document;
+    try {
+      var i, list, v, el;
+      list = root.querySelectorAll('[data-i18n]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrig == null) el.__i18nOrig = el.textContent;
+        v = tRaw(el.getAttribute('data-i18n'));
+        el.textContent = (v != null) ? v : el.__i18nOrig;
+      }
+      list = root.querySelectorAll('[data-i18n-html]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigHTML == null) el.__i18nOrigHTML = el.innerHTML;
+        v = tRaw(el.getAttribute('data-i18n-html'));
+        el.innerHTML = (v != null) ? v : el.__i18nOrigHTML;
+      }
+      list = root.querySelectorAll('[data-i18n-title]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigTitle == null) el.__i18nOrigTitle = el.title;
+        v = tRaw(el.getAttribute('data-i18n-title'));
+        el.title = (v != null) ? v : el.__i18nOrigTitle;
+      }
+      list = root.querySelectorAll('[data-i18n-aria]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAria == null) el.__i18nOrigAria = el.getAttribute('aria-label') || '';
+        v = tRaw(el.getAttribute('data-i18n-aria'));
+        el.setAttribute('aria-label', (v != null) ? v : el.__i18nOrigAria);
+      }
+      list = root.querySelectorAll('[data-i18n-ph]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigPh == null) el.__i18nOrigPh = el.placeholder || '';
+        v = tRaw(el.getAttribute('data-i18n-ph'));
+        el.placeholder = (v != null) ? v : el.__i18nOrigPh;
+      }
+      list = root.querySelectorAll('[data-i18n-alt]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAlt == null) el.__i18nOrigAlt = el.getAttribute('alt') || '';
+        v = tRaw(el.getAttribute('data-i18n-alt'));
+        el.setAttribute('alt', (v != null) ? v : el.__i18nOrigAlt);
+      }
+      /* 标题（短语表优先，其次 page.title 词条） */
+      if (!bd.__origTitle) bd.__origTitle = document.title;
+      var tv = lookup(normText(bd.__origTitle));
+      if (tv == null) tv = tRaw('page.title');
+      if (tv != null) { document.title = (lang === 'en') ? tv : bd.__origTitle; bd.__titleTouched = true; }
+      else if (bd.__titleTouched) { document.title = bd.__origTitle; }
+      document.documentElement.lang = (lang === 'zh') ? 'zh-CN' : 'en';
+      syncSwitch();
+    } catch (e) {}
+  }
+
+  function applyLang(v) {
+    lang = v;
+    persist(v);
+    apply(document);
+    scan(document);
+    for (var i = 0; i < listeners.length; i++) { try { listeners[i](lang); } catch (e) {} }
+    try {
+      var live = document.getElementById('i18n-live');
+      if (live) live.textContent = (lang === 'zh') ? '已切换到中文' : 'Switched to English';
+    } catch (e) {}
+  }
+  /* 切换转场（仿主页主题转场）：黑幕淡入 → 光晕从切换器扩散 → 幕中换语言 → 揭幕；可打断；尊重 reduced-motion */
+  var tid = 0, stage = null;
+  function ensureStage() {
+    if (stage) return stage;
+    var ov = document.createElement('div'); ov.className = 'i18n-veil';
+    var hl = document.createElement('div'); hl.className = 'i18n-halo';
+    var host = document.body || document.documentElement;
+    host.appendChild(ov); host.appendChild(hl);
+    stage = { ov: ov, hl: hl };
+    return stage;
+  }
+  function set(v) {
+    v = norm(v);
+    if (!v) return;
+    if (v === lang) { apply(document); scan(document); return; }
+    var calm = true;
+    try { calm = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) {}
+    if (!calm || !document.body) { applyLang(v); return; }
+    try {
+      var st = ensureStage(), my = ++tid;
+      var x = (window.innerWidth || 360) - 80, y = (window.innerHeight || 640) - 34;
+      try { if (swEl) { var r = swEl.getBoundingClientRect(); x = r.left + r.width / 2; y = r.top + r.height / 2; } } catch (e) {}
+      st.ov.style.setProperty('--ix', x + 'px'); st.ov.style.setProperty('--iy', y + 'px');
+      st.hl.style.setProperty('--ix', x + 'px'); st.hl.style.setProperty('--iy', y + 'px');
+      st.ov.classList.remove('out'); st.ov.classList.add('on'); st.ov.style.display = 'block';
+      st.hl.classList.remove('go'); void st.hl.offsetWidth; st.hl.classList.add('go');
+      setTimeout(function () {
+        if (my !== tid) return;
+        applyLang(v);
+        st.ov.classList.remove('on'); st.ov.classList.add('out');
+        setTimeout(function () {
+          if (my !== tid) return;
+          st.ov.style.display = 'none'; st.ov.classList.remove('out');
+        }, 520);
+      }, 430);
+    } catch (e) { applyLang(v); }
+  }
+  function onChange(fn) { if (typeof fn === 'function') listeners.push(fn); }
+  function getLang() { return lang; }
+
+  /* ---- 切换入口（右下角胶囊，自动注入） ---- */
+  var SW_CSS = '.i18n-sw{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:9992;display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:rgba(17,24,39,.74);-webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);border:1px solid rgba(255,255,255,.26);box-shadow:0 6px 20px rgba(0,0,0,.28);font-family:inherit}' +
+    '.i18n-sw:hover{background:rgba(17,24,39,.86);border-color:rgba(255,255,255,.38)}' +
+    '.i18n-gl{font-size:13px;line-height:1;padding:0 5px 0 8px;opacity:.95;pointer-events:none}' +
+    '.i18n-sw button{border:0;background:transparent;color:rgba(255,255,255,.78);font-size:12px;font-weight:700;letter-spacing:.4px;padding:6px 11px;border-radius:999px;cursor:pointer;font-family:inherit;transition:all .18s ease;line-height:1}' +
+    '.i18n-sw button:hover{color:#fff;background:rgba(255,255,255,.12)}' +
+    '.i18n-sw button:focus-visible{outline:2px solid #7dd3fc;outline-offset:1px}' +
+    '.i18n-sw button.on{background:rgba(255,255,255,.92);color:#1f2937;box-shadow:0 2px 8px rgba(0,0,0,.25)}' +
+    '.i18n-sw button:active{transform:translateY(1px)}' +
+    '.i18n-veil{position:fixed;inset:0;z-index:9990;pointer-events:none;display:none;opacity:0;background:#060a16;transition:opacity .42s ease}' +
+    '.i18n-veil.on{opacity:1}' +
+    '.i18n-veil.out{opacity:0;transition:opacity .5s cubic-bezier(.2,.8,.3,1)}' +
+    '.i18n-halo{position:fixed;z-index:9991;left:var(--ix,92%);top:var(--iy,93%);width:14px;height:14px;border-radius:50%;box-sizing:border-box;pointer-events:none;display:none;border:2px solid rgba(198,226,255,.95);box-shadow:0 0 24px 6px rgba(137,194,255,.6),0 0 70px 20px rgba(137,194,255,.3),inset 0 0 20px rgba(198,226,255,.5)}' +
+    '.i18n-halo.go{display:block;animation:i18nHalo .85s cubic-bezier(.16,.7,.3,1) forwards}' +
+    '@keyframes i18nHalo{0%{opacity:0;transform:translate(-50%,-50%) scale(.01)}22%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(58)}}' +
+    '.i18n-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}' +
+    '@media (max-width:620px){.i18n-sw{right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px))}.i18n-sw button{padding:5px 9px;font-size:11.5px}}';
+
+  var swEl = null;
+  function buildSwitch() {
+    try {
+      if (!document.body) return;
+      var exist = document.querySelector('.i18n-sw');
+      if (exist) { swEl = exist; syncSwitch(); return; }
+      var st = document.createElement('style');
+      st.textContent = SW_CSS;
+      (document.head || document.documentElement).appendChild(st);
+      var wrap = document.createElement('div');
+      wrap.className = 'i18n-sw';
+      wrap.setAttribute('role', 'group');
+      wrap.setAttribute('aria-label', '切换语言 / Switch language');
+      wrap.setAttribute('title', '切换语言 / Switch language');
+      var gl = document.createElement('span');
+      gl.className = 'i18n-gl';
+      gl.textContent = '🌐';
+      gl.setAttribute('aria-hidden', 'true');
+      wrap.appendChild(gl);
+      [['zh', '中文'], ['en', 'English']].forEach(function (p) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('data-lang', p[0]);
+        b.textContent = p[1];
+        b.addEventListener('click', function () { set(p[0]); });
+        wrap.appendChild(b);
+      });
+      var live = document.createElement('span');
+      live.id = 'i18n-live';
+      live.className = 'i18n-sr';
+      live.setAttribute('aria-live', 'polite');
+      wrap.appendChild(live);
+      document.body.appendChild(wrap);
+      swEl = wrap;
+      syncSwitch();
+    } catch (e) {}
+  }
+  function syncSwitch() {
+    try {
+      if (!swEl) return;
+      var bs = swEl.querySelectorAll('button[data-lang]');
+      for (var i = 0; i < bs.length; i++) {
+        var on = bs[i].getAttribute('data-lang') === lang;
+        bs[i].classList.toggle('on', on);
+        bs[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    } catch (e) {}
+  }
+
+  /* ---- 启动 ---- */
+  lang = detect();
+  function boot() {
+    buildSwitch();
+    apply(document);
+    scan(document);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+
+  return {
+    t: t, tOr: tOr, tr: tr, set: set, apply: apply, scan: scan, auto: auto,
+    phrase: addPhrase, rules: addRules, add: add, lang: getLang, onChange: onChange,
+    fmtDate: fmtDate, fmtNum: fmtNum
+  };
+})();
+
+/* ---- 短语表（中文原文 → English）---- */
+I18N.phrase({"函数音乐 · startian.top": "Function Music · startian.top","🎵 函数音乐": "🎵 Function Music","把函数画成声波 · 不同函数不同音色 · 图形跟着跳": "Turn a function into a sound wave · different curves, different timbres · the graph dances along","← 返回主页": "← Back to home","WAVEFORM · 一个周期的波形": "WAVEFORM · one cycle of the wave","应用函数": "Apply function","这就是「音色」的形状：正弦是纯音，方波是游戏机味，锯齿是合成器味，随便叠几层三角/正弦就是新乐器。": "This is what timbre looks like: a sine is pure, a square sounds like a game console, a saw has that synth edge — stack a few triangles or sines and you have a new instrument.","KEYBOARD · 用这个音色弹一弹": "KEYBOARD · play with this timbre","▶ 试听一小段": "▶ Play a short sample","🔊 开启声音": "🔊 Enable sound","简谱对照：1 2 3 4 5 6 7 = do re mi fa sol la si · 电脑键盘 A S D F G H J K 也能弹 · 第一次要先「开启声音」": "Numbered notation: 1 2 3 4 5 6 7 = do re mi fa sol la si · you can also play with keys A S D F G H J K · press \"Enable sound\" first","f(t)，t ∈ [-π, π]，如 sin(t) + 0.3*sin(5*t)": "f(t), t ∈ [-π, π], e.g. sin(t) + 0.3*sin(5*t)","🏆 成就解锁：": "🏆 Achievement unlocked: ","频率玩家": "Frequency Player","这个浏览器不支持 Web Audio": "This browser doesn't support Web Audio","纯正弦": "Pure sine","方波感": "Square-ish","锯齿": "Sawtooth","三角": "Triangle","风琴": "Organ","金属": "Metallic","混沌雾": "Chaos haze","阶梯": "Stepped","函数在这附近算不出数": "The function can't be evaluated near here","这个函数有点问题：": "Something looks off with this function: ","🎼 音色已换成：": "🎼 Timbre switched to: ","音色实验": "Timbre Lab","🔊 声音已开启，弹吧": "🔊 Sound is on — go ahead and play","📜 找到一篇日志（去主页头像连点 7 下看全文）": "📜 Found a log entry (tap the avatar on the homepage 7 times to read it)","📜 原来是这首……（找到一篇日志 · 函数音乐）": "📜 So this is the tune… (log entry found · Function Music)","简谱": "Numbered Notation","（高音）": " (high)","🎼 已切换到「": "🎼 Switched to “","」：": "”: "});
+I18N.auto();
+/* ==== i18n-kit v1.2 end ==== */
+</script>
+<script>
+(function () {
+  'use strict';
+  /* ============ 🏆 跨站成就 SDK ============ */
+  var STAch = (function () {
+    var KEY = 'st_ach';
+    function readCookie() {
+      var m = document.cookie.match(/(?:^|;\s*)st_ach=([^;]*)/);
+      if (!m) return null;
+      try { return JSON.parse(decodeURIComponent(m[1])) || []; } catch (e) { return null; }
+    }
+    function writeCookie(list) {
+      try {
+        var v = encodeURIComponent(JSON.stringify(list));
+        if (v.length < 3800) document.cookie = 'st_ach=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+      } catch (e) {}
+    }
+    var list = readCookie();
+    if (!list) { try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { list = []; } }
+    if (!Array.isArray(list)) list = [];
+    function save() {
+      try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+      writeCookie(list);
+    }
+    function unlock(id, name, ico) {
+      if (list.indexOf(id) >= 0) return false;
+      list.push(id);
+      save();
+      try {
+        var el = document.createElement('div');
+        el.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9999;background:rgba(38,18,60,.95);color:#fff;border:1px solid rgba(190,150,255,.45);border-radius:999px;padding:12px 22px;font:700 13.5px/1.4 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:86vw';
+        el.textContent = I18N.tr('🏆 成就解锁：') + (ico ? ico + ' ' : '') + I18N.tr(name || id);
+        document.body.appendChild(el);
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        setTimeout(function () {
+          el.style.opacity = '0';
+          el.style.transform = 'translateX(-50%) translateY(16px)';
+          setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+        }, 3200);
+      } catch (e) {}
+      return true;
+    }
+    return { list: function () { return list.slice(); }, has: function (id) { return list.indexOf(id) >= 0; }, unlock: unlock };
+  })();
+  window.STAch = STAch;
+  setTimeout(function () { STAch.unlock('site.music', '频率玩家', '🎵'); }, 600);
+
+  /* ============ 音频 ============ */
+  var actx = null;
+  var master = null;
+  function ensureAudio() {
+    if (actx) { if (actx.state === 'suspended') actx.resume(); return true; }
+    try {
+      actx = new (window.AudioContext || window.webkitAudioContext)();
+      master = actx.createGain();
+      master.gain.value = 0.16;
+      master.connect(actx.destination);
+      return true;
+    } catch (e) { toast('这个浏览器不支持 Web Audio'); return false; }
+  }
+
+  /* 函数 → 一个周期采样（t ∈ [-π, π)） */
+  var N = 256;
+  function sampleWave(fn) {
+    var s = new Float32Array(N);
+    var peak = 0;
+    for (var i = 0; i < N; i++) {
+      var t = (i / N) * 2 * Math.PI - Math.PI;
+      var v = fn(t);
+      if (!isFinite(v)) v = 0;
+      s[i] = v;
+      peak = Math.max(peak, Math.abs(v));
+    }
+    if (peak > 1e-6) for (var j = 0; j < N; j++) s[j] /= peak;
+    return s;
+  }
+  /* 采样 → PeriodicWave（DFT 前 N/2 谐波） */
+  function waveToPeriodic(samples) {
+    var half = N / 2;
+    var real = new Float32Array(half), imag = new Float32Array(half);
+    for (var k = 1; k < half; k++) {
+      var re = 0, im = 0;
+      for (var n = 0; n < N; n++) {
+        var ang = 2 * Math.PI * k * n / N;
+        re += samples[n] * Math.cos(ang);
+        im -= samples[n] * Math.sin(ang);
+      }
+      real[k] = 2 * re / N;
+      imag[k] = 2 * im / N;
+    }
+    return actx.createPeriodicWave(real, imag, { disableNormalization: false });
+  }
+
+  /* 预设函数（t ∈ [-π, π]） */
+  var PRESETS = [
+    { name: '纯正弦', src: 'sin(t)' },
+    { name: '方波感', src: 'sign(sin(t))' },
+    { name: '锯齿', src: '2*(t/PI) - sign(t)' },
+    { name: '三角', src: '(2/PI)*asin(sin(t))' },
+    { name: '风琴', src: 'sin(t) + 0.5*sin(2*t) + 0.25*sin(3*t)' },
+    { name: '金属', src: 'sin(t) + 0.6*sin(3.7*t) + 0.4*sin(7.1*t)' },
+    { name: '混沌雾', src: 'sin(t) * sin(7*t + sin(3*t))' },
+    { name: '阶梯', src: 'floor(3*sin(t))/3' }
+  ];
+
+  var SAFE = 'sin cos tan asin acos atan sinh cosh tanh abs sign floor ceil round exp log sqrt pow min max PI E random';
+  function compile(src) {
+    var defs = SAFE.split(' ').map(function (n) { return 'var ' + n + ' = Math.' + n + ';'; }).join('');
+    var f = new Function('t', defs + ' return (' + src + ');');
+    /* 抽样校验 */
+    for (var i = 0; i < 16; i++) {
+      var v = f((i / 16) * 2 * Math.PI - Math.PI);
+      if (typeof v !== 'number' || !isFinite(v)) throw new Error('函数在这附近算不出数');
+    }
+    return f;
+  }
+
+  var curFn = null, curSrc = 'sin(t)', curWave = null, waveSamples = null;
+
+  function applySource(src, silent) {
+    var fn;
+    try { fn = compile(src); }
+    catch (e) { toast('这个函数有点问题：' + e.message); return false; }
+    curFn = fn;
+    curSrc = src;
+    waveSamples = sampleWave(fn);
+    if (actx) curWave = waveToPeriodic(waveSamples);
+    drawWave(0);
+    if (!silent) toast('🎼 音色已换成：' + src);
+    return true;
+  }
+
+  /* ============ 波形绘制（播放时起伏）============ */
+  var wcv = document.getElementById('wave');
+  var wctx = wcv.getContext('2d');
+  var dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+  var animPhase = 0, animAmp = 0;
+
+  function fitWave() {
+    wcv.width = wcv.clientWidth * dpr;
+    wcv.height = wcv.clientHeight * dpr;
+    drawWave(0);
+  }
+  function drawWave(t) {
+    var W = wcv.width, H = wcv.height;
+    wctx.clearRect(0, 0, W, H);
+    if (!waveSamples) return;
+    /* 网格 */
+    wctx.strokeStyle = 'rgba(160,120,220,.14)';
+    wctx.lineWidth = 1;
+    wctx.beginPath();
+    wctx.moveTo(0, H / 2); wctx.lineTo(W, H / 2);
+    wctx.stroke();
+    for (var gx = 0; gx <= 8; gx++) {
+      wctx.beginPath();
+      wctx.moveTo(W * gx / 8, 0); wctx.lineTo(W * gx / 8, H);
+      wctx.stroke();
+    }
+    /* 波形 */
+    var amp = (H * 0.36) * (1 + animAmp * 0.35);
+    var grad = wctx.createLinearGradient(0, 0, W, 0);
+    grad.addColorStop(0, '#a855f7');
+    grad.addColorStop(0.5, '#ec4899');
+    grad.addColorStop(1, '#22d3ee');
+    wctx.strokeStyle = grad;
+    wctx.lineWidth = 2.5 * dpr;
+    wctx.shadowColor = 'rgba(190,120,255,' + (0.35 + animAmp * 0.4) + ')';
+    wctx.shadowBlur = 14 * (0.4 + animAmp);
+    wctx.beginPath();
+    var steps = 256;
+    for (var i = 0; i <= steps; i++) {
+      var idx = i % N;
+      var v = waveSamples[idx] * (1 + 0 + 0);
+      /* 播放时轻微波动：叠加相位移动的发光轨迹 */
+      var y = H / 2 - v * amp;
+      if (i === 0) wctx.moveTo(0, y);
+      else wctx.lineTo(W * i / steps, y);
+    }
+    wctx.stroke();
+    wctx.shadowBlur = 0;
+  }
+
+  var waveRaf = false;
+  function animateWave(active) {
+    if (!active) { animAmp = 0; drawWave(0); return; }
+    if (waveRaf) return;
+    waveRaf = true;
+    var t0 = performance.now();
+    function frame(t) {
+      if (performance.now() - t0 > 0 && !activeVoices.size && !melodyPlaying) {
+        waveRaf = false;
+        animAmp = 0;
+        drawWave(0);
+        return;
+      }
+      animPhase += 0.12;
+      animAmp = 0.5 + 0.5 * Math.sin(animPhase);
+      drawWave(animPhase);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* ============ 发声 ============ */
+  var activeVoices = new Map();   /* note -> voice */
+  function midiFreq(n) { return 261.625565 * Math.pow(2, n / 12); }
+
+  function playNote(note, vel) {
+    if (!ensureAudio()) return;
+    if (activeVoices.has(note)) return;
+    if (!curWave) curWave = waveToPeriodic(waveSamples);
+    var osc = actx.createOscillator();
+    osc.setPeriodicWave(curWave);
+    osc.frequency.value = midiFreq(note);
+    var g = actx.createGain();
+    var v = (vel || 0.9) * 0.9;
+    g.gain.setValueAtTime(0.0001, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(v, actx.currentTime + 0.015);
+    g.gain.exponentialRampToValueAtTime(v * 0.55, actx.currentTime + 0.18);
+    osc.connect(g); g.connect(master);
+    osc.start();
+    activeVoices.set(note, { osc: osc, g: g });
+    animateWave(true);
+  }
+  function stopNote(note) {
+    var vc = activeVoices.get(note);
+    if (!vc) return;
+    activeVoices.delete(note);
+    try {
+      vc.g.gain.cancelScheduledValues(actx.currentTime);
+      vc.g.gain.setValueAtTime(Math.max(0.0001, vc.g.gain.value), actx.currentTime);
+      vc.g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + 0.28);
+      vc.osc.stop(actx.currentTime + 0.32);
+    } catch (e) {}
+  }
+
+  /* ============ 钢琴 UI ============ */
+  /* 简谱数字：1 2 3 4 5 6 7 = do re mi fa sol la si（⁺ 键为高音 1，带音点） */
+  var KEYS = [
+    { note: 0, name: 'C', kb: 'KeyA', num: '1' }, { note: 2, name: 'D', kb: 'KeyS', num: '2' },
+    { note: 4, name: 'E', kb: 'KeyD', num: '3' }, { note: 5, name: 'F', kb: 'KeyF', num: '4' },
+    { note: 7, name: 'G', kb: 'KeyG', num: '5' }, { note: 9, name: 'A', kb: 'KeyH', num: '6' },
+    { note: 11, name: 'B', kb: 'KeyJ', num: '7' }, { note: 12, name: 'C⁺', kb: 'KeyK', num: '1', up: true }
+  ];
+  var piano = document.getElementById('piano');
+  piano.innerHTML = KEYS.map(function (k, i) {
+    var numHtml = k.num + (k.up ? '<sup>·</sup>' : '');
+    return '<div class="key" data-note="' + k.note + '" data-i="' + i + '" title="简谱 ' + k.num + (k.up ? '（高音）' : '') + ' · ' + k.name + '">' +
+      '<small>' + k.kb.replace('Key', '') + '</small><b class="kn">' + numHtml + '</b><span class="kname">' + k.name + '</span></div>';
+  }).join('');
+  var noteKeyByI = {};
+  KEYS.forEach(function (k, i) { noteKeyByI[i] = k.note; });
+
+  function pressByIndex(i) {
+    var el = piano.querySelector('[data-i="' + i + '"]');
+    if (!el || el.classList.contains('press')) return;
+    el.classList.add('press');
+    playNote(KEYS[i].note, 0.95);
+    try { STAch.unlock('music.play', '音色实验', '🎵'); } catch (e) {}
+  }
+  function releaseByIndex(i) {
+    var el = piano.querySelector('[data-i="' + i + '"]');
+    if (el) el.classList.remove('press');
+    stopNote(KEYS[i].note);
+  }
+
+  [].forEach.call(piano.querySelectorAll('.key'), function (el) {
+    el.addEventListener('pointerdown', function (e) { e.preventDefault(); pressByIndex(+el.getAttribute('data-i')); });
+    el.addEventListener('pointerup', function () { releaseByIndex(+el.getAttribute('data-i')); });
+    el.addEventListener('pointerleave', function () { releaseByIndex(+el.getAttribute('data-i')); });
+    el.addEventListener('pointercancel', function () { releaseByIndex(+el.getAttribute('data-i')); });
+  });
+
+  var kbDown = {};
+  document.addEventListener('keydown', function (e) {
+    if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+    var tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea') return;
+    for (var i = 0; i < KEYS.length; i++) {
+      if (KEYS[i].kb === e.code && !kbDown[e.code]) { kbDown[e.code] = 1; pressByIndex(i); break; }
+    }
+  });
+  document.addEventListener('keyup', function (e) {
+    if (!kbDown[e.code]) return;
+    delete kbDown[e.code];
+    for (var i = 0; i < KEYS.length; i++) if (KEYS[i].kb === e.code) { releaseByIndex(i); break; }
+  });
+
+  /* ============ 试听小段 ============ */
+  var melodyPlaying = false;
+  function melodyRun(seq) {
+    /* 用调度循环重写：每拍前进一步 */
+    var i = 0;
+    function next() {
+      if (i >= seq.length) { melodyPlaying = false; return; }
+      var n = seq[i], dur = 190;
+      try {
+        if (!curWave) curWave = waveToPeriodic(waveSamples);
+        var osc = actx.createOscillator();
+        osc.setPeriodicWave(curWave);
+        osc.frequency.value = midiFreq(n);
+        var g = actx.createGain();
+        g.gain.setValueAtTime(0.0001, actx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.8, actx.currentTime + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur / 1000 + 0.12);
+        osc.connect(g); g.connect(master);
+        osc.start(); osc.stop(actx.currentTime + dur / 1000 + 0.2);
+      } catch (e) {}
+      var ki = -1;
+      for (var j = 0; j < KEYS.length; j++) if (KEYS[j].note === n % 12 && n < 13) ki = j;
+      if (ki >= 0) {
+        var el = piano.querySelector('[data-i="' + ki + '"]');
+        if (el) { el.classList.add('press'); (function (ee) { setTimeout(function () { ee.classList.remove('press'); }, dur); })(el); }
+      }
+      animateWave(true);
+      i++;
+      setTimeout(next, dur);
+    }
+    melodyPlaying = true;
+    next();
+    animateWave(true);
+    try { STAch.unlock('music.play', '音色实验', '🎵'); } catch (e) {}
+  }
+
+  document.getElementById('btnTune').addEventListener('click', function () {
+    if (!ensureAudio()) return;
+    melodyRun([0, 4, 7, 12, 7, 4, 0, 7, 4, 2, 0, -1 + 12, 0]);
+  });
+  document.getElementById('btnStart').addEventListener('click', function () {
+    if (ensureAudio()) toast('🔊 声音已开启，弹吧');
+  });
+
+  /* ============ 预设 chips ============ */
+  var chips = document.getElementById('chips');
+  chips.innerHTML = PRESETS.map(function (p, i) {
+    return '<button class="chip' + (i === 0 ? ' on' : '') + '" type="button" data-i="' + i + '">' + p.name + '</button>';
+  }).join('');
+  chips.addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    [].forEach.call(chips.querySelectorAll('.chip'), function (x) { x.classList.remove('on'); });
+    b.classList.add('on');
+    var p = PRESETS[+b.getAttribute('data-i')];
+    document.getElementById('finput').value = p.src;
+    applySource(p.src, true);
+    toast('🎼 已切换到「' + p.name + '」：' + p.src);
+  });
+  document.getElementById('btnApply').addEventListener('click', function () {
+    var src = document.getElementById('finput').value.trim();
+    if (!src) return;
+    if (applySource(src)) {
+      [].forEach.call(chips.querySelectorAll('.chip'), function (x) { x.classList.remove('on'); });
+      try { STAch.unlock('music.play', '音色实验', '🎵'); } catch (e) {}
+    }
+  });
+  document.getElementById('finput').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') document.getElementById('btnApply').click();
+  });
+
+  var toastEl = document.getElementById('toast'), toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2600);
+  }
+
+  /* 初始化 */
+  window.addEventListener('resize', fitWave);
+  fitWave();
+  applySource('sin(t)', true);
+})();
+</script>
+
+<script>
+/* ============================================================
+   🔮 ARG · 精简进度机（2026-10-03）与主页共用 st_arg
+   ============================================================ */
+(function () {
+  'use strict';
+  var KEY = 'st_arg';
+  if (window.ARG && window.ARG.collect) return;
+  function readState() {
+    var raw = null;
+    try { var m = document.cookie.match(/(?:^|;\s*)st_arg=([^;]*)/); if (m) raw = decodeURIComponent(m[1]); } catch (e) {}
+    if (!raw) { try { raw = localStorage.getItem(KEY); } catch (e) {} }
+    try { var d = JSON.parse(raw || '{}'); if (!d || typeof d !== 'object') d = {}; if (!Array.isArray(d.logs)) d.logs = []; return d; }
+    catch (e) { return { logs: [] }; }
+  }
+  var state = readState();
+  function save() {
+    var raw = JSON.stringify(state);
+    try { localStorage.setItem(KEY, raw); } catch (e) {}
+    try {
+      var v = encodeURIComponent(raw);
+      if (v.length < 3800) document.cookie = 'st_arg=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+    } catch (e) {}
+  }
+  var toastTimer = 0;
+  window.ARG = {
+    has: function (id) { return state.logs.indexOf(id) >= 0; },
+    count: function () { return state.logs.length; },
+    collect: function (id) {
+      if (state.logs.indexOf(id) >= 0) return false;
+      state.logs.push(id); save();
+      this.toast('📜 找到一篇日志（去主页头像连点 7 下看全文）');
+      return true;
+    },
+    reset: function () { state = { logs: [] }; save(); },
+    toast: function (msg) {
+      try {
+        var el = document.getElementById('__arg_toast');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = '__arg_toast';
+          el.style.cssText = 'position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9994;background:rgba(12,17,32,.96);color:#eef4ff;border:1px solid rgba(198,214,240,.4);border-radius:999px;padding:12px 24px;font:700 13px/1.5 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.5);transition:all .45s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:88vw;text-align:center';
+          document.body.appendChild(el);
+        }
+        el.textContent = msg;
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { el.style.opacity = '0'; el.style.transform = 'translateX(-50%) translateY(16px)'; }, 3000);
+      } catch (e) {}
+    }
+  };
+})();
+</script>
+
+<script>
+/* 🔮 ARG · 函数音乐：聆听星空的旋律（《小星星》开头） */
+(function () {
+  'use strict';
+  var KMAP = { KeyA: 0, KeyS: 2, KeyD: 4, KeyF: 5, KeyG: 7, KeyH: 9, KeyJ: 11, KeyK: 12 };
+  var TARGET = [0, 0, 7, 7, 9, 9, 7];   /* C C G G A A G */
+  var seq = [];
+  function feed(note) {
+    seq.push(note);
+    if (seq.length > 16) seq.shift();
+    var t = seq.slice(-7).join(',');
+    if (t === TARGET.join(',')) {
+      if (window.ARG.collect('log5')) window.ARG.toast('📜 原来是这首……（找到一篇日志 · 函数音乐）');
+    }
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+    var tag = (e.target && e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea') return;
+    if (KMAP[e.code] !== undefined) feed(KMAP[e.code]);
+  });
+  /* 🖱 鼠标（触摸）点琴键也要算——琴键上有 data-note，照读就行
+     之前只监听了键盘，鼠标点破天也进不了判定序列 */
+  document.addEventListener('pointerdown', function (e) {
+    var el = e.target;
+    var keyEl = el && el.closest ? el.closest('#piano .key') : null;
+    if (!keyEl) return;
+    var note = parseInt(keyEl.getAttribute('data-note'), 10);
+    if (isFinite(note)) feed(note);
+  }, true);
+  window.__musicARG = { feed: feed, reset: function () { seq = []; } };
+})();
+</script></body>
+</html>

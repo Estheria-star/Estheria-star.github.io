@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="配色实验室：选两色，实时预览整套 UI，一键导出 CSS 变量。startian.top 出品">
+<meta name="theme-color" content="#eef8ff">
+<title>配色实验室 · startian.top</title>
+<style>
+  :root{
+    --bg1:#eef8ff; --bg2:#d9edff; --card:#ffffff; --tint:#f2f9ff;
+    --line:#c9e3f5; --line2:#dceefb;
+    --ink:#153046; --ink2:#3f6485; --ink3:#7195b3;
+    --accent:#3f7fd6; --accent-deep:#245ea8;
+    --glass-nav:rgba(250,253,255,.82);
+    --sh-sm:0 1px 2px rgba(20,50,80,.06), 0 10px 28px rgba(30,80,130,.1);
+    --sh-lg:0 2px 4px rgba(20,50,80,.08), 0 24px 50px rgba(30,80,130,.14);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;min-height:100vh;font-family:'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+    color:var(--ink);
+    background:radial-gradient(1400px 700px at 50% -120px, var(--bg2) 0%, var(--bg1) 45%, var(--bg1) 100%);
+    transition:background .3s ease,color .2s ease;
+  }
+  header{
+    position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:14px;
+    padding:14px 22px;background:var(--glass-nav);
+    -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  header h1{font-size:17px;margin:0;letter-spacing:.5px}
+  header .sub{font-size:12px;color:var(--ink3);font-weight:600}
+  .back{
+    margin-left:auto;text-decoration:none;font-size:12.5px;font-weight:700;color:var(--accent-deep);
+    border:1px solid var(--line);border-radius:999px;padding:7px 14px;background:var(--card);
+    transition:border-color .2s ease,transform .2s ease;
+  }
+  .back:hover{border-color:var(--accent);transform:translateY(-1px)}
+  main{
+    max-width:1180px;margin:0 auto;padding:26px 22px 60px;
+    display:grid;grid-template-columns:300px 1fr;gap:22px;align-items:start;
+  }
+  @media (max-width:900px){ main{grid-template-columns:1fr} }
+  .panel{
+    background:var(--card);border:1px solid var(--line);border-radius:20px;
+    box-shadow:var(--sh-sm);padding:18px;transition:background .3s ease,border-color .3s ease;
+  }
+  .panel h2{font-size:13px;letter-spacing:1px;color:var(--ink3);margin:0 0 14px;font-weight:800}
+  .clr-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .clr-row label{flex:1;font-size:13px;font-weight:700;color:var(--ink2)}
+  .clr-row input[type=color]{
+    width:52px;height:34px;padding:0;border:1.5px solid var(--line);border-radius:10px;
+    background:var(--card);cursor:pointer;
+  }
+  .clr-row input[type=color]::-webkit-color-swatch-wrapper{padding:3px}
+  .clr-row input[type=color]::-webkit-color-swatch{border:0;border-radius:6px}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:7px;
+    border:0;border-radius:12px;padding:11px 14px;font-size:13px;font-weight:800;
+    font-family:inherit;cursor:pointer;transition:transform .15s ease,box-shadow .2s ease,background .2s ease;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn-p{
+    flex:1;color:#fff;
+    background:linear-gradient(180deg,var(--accent),var(--accent-deep));
+    box-shadow:0 4px 0 rgba(0,0,0,.22),0 12px 22px rgba(0,0,0,.18);
+  }
+  .btn-g{
+    flex:1;color:var(--accent-deep);background:var(--tint);border:1.5px solid var(--line);
+  }
+  .btn-g:hover{border-color:var(--accent)}
+  .btn-row{display:flex;gap:10px;margin-top:4px}
+  .arg-moonchip{margin-top:10px;font-size:12.5px;font-weight:700;color:#aebef5;background:rgba(120,140,220,.1);border:1px dashed rgba(130,160,255,.35);border-radius:10px;padding:8px 12px;letter-spacing:.4px}
+  .tip{font-size:11.5px;line-height:1.7;color:var(--ink3);margin-top:12px}
+  /* —— 预览样板间 —— */
+  .pv-nav{
+    display:flex;align-items:center;gap:12px;padding:12px 16px;
+    background:var(--glass-nav);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;
+  }
+  .pv-logo{width:30px;height:30px;border-radius:50%;background:linear-gradient(150deg,var(--accent),var(--accent-deep))}
+  .pv-brand{font-size:14px;font-weight:800}
+  .pv-nav a{margin-left:auto;font-size:12px;font-weight:700;color:var(--ink2);text-decoration:none;padding:6px 10px;border-radius:9px}
+  .pv-nav a:hover{color:var(--accent-deep);background:var(--tint)}
+  .pv-body{border:1px solid var(--line);border-radius:0 0 20px 20px;background:var(--bg1);padding:24px 20px;display:flex;flex-direction:column;gap:18px}
+  .pv-eyebrow{font-size:11px;font-weight:800;letter-spacing:2px;color:var(--ink3)}
+  .pv-h1{
+    margin:6px 0 0;font-size:30px;font-weight:900;letter-spacing:.5px;line-height:1.25;
+    background:linear-gradient(110deg,var(--ink) 20%,var(--accent) 45%,var(--accent-deep) 55%,var(--ink) 75%);
+    background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .pv-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:620px){ .pv-cards{grid-template-columns:1fr} }
+  .pv-card{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;
+    box-shadow:var(--sh-sm);transition:border-color .2s ease,transform .2s ease;
+  }
+  .pv-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .pv-tag{
+    display:inline-block;font-size:10.5px;font-weight:800;color:var(--accent-deep);
+    background:var(--tint);border:1px solid var(--line);border-radius:999px;padding:2px 9px;margin-bottom:8px;
+  }
+  .pv-card h3{margin:0 0 6px;font-size:14.5px}
+  .pv-card p{margin:0;font-size:12px;line-height:1.65;color:var(--ink2)}
+  .pv-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .pv-input{
+    flex:1;min-width:140px;background:var(--card);border:1.5px solid var(--line);border-radius:11px;
+    padding:10px 12px;font-size:13px;color:var(--ink);outline:none;font-family:inherit;
+  }
+  .pv-input:focus{border-color:var(--accent)}
+  .pv-chip{font-size:11.5px;font-weight:700;background:var(--tint);border:1px solid var(--line);border-radius:999px;padding:5px 12px;color:var(--ink2)}
+  /* —— 导出 —— */
+  #cssOut{
+    margin:0;padding:14px;border-radius:14px;background:var(--tint);border:1px solid var(--line);
+    font-family:ui-monospace,Consolas,monospace;font-size:12px;line-height:1.8;color:var(--ink);
+    overflow:auto;max-height:300px;white-space:pre;
+  }
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);opacity:0;
+    background:var(--glass-nav);border:1px solid var(--line);border-radius:999px;
+    padding:10px 20px;font-size:13px;font-weight:700;color:var(--ink);box-shadow:var(--sh-lg);
+    transition:opacity .3s ease,transform .3s ease;pointer-events:none;z-index:99;
+    -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎨 配色实验室</h1>
+  <span class="sub">选两色 · 实时预览 · 导出 CSS 变量</span>
+  <a class="back" href="https://startian.top/">← 返回主页</a>
+</header>
+<main>
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <section class="panel">
+      <h2>调色盘</h2>
+      <div class="clr-row"><label>底色（背景）</label><input type="color" id="cBg" value="#eef8ff"></div>
+      <div class="clr-row"><label>主色（点缀）</label><input type="color" id="cAc" value="#3f7fd6"></div>
+      <div class="btn-row">
+        <button class="btn btn-p" id="btnRand" type="button">🎲 随机灵感</button>
+        <button class="btn btn-g" id="btnReset" type="button">↺ 重置</button>
+        <button class="btn btn-g" id="argMoon" type="button" title="……某个很深很深的夜里调出来的">🌙 深夜的灵感</button>
+      </div>
+      <div class="arg-moonchip" id="argMoonChip" style="display:none"></div>
+      <p class="tip">文字黑白会根据底色明暗自动判定；卡片、线条、按钮、阴影、玻璃导航全部由这两色派生。深色底也能玩。</p>
+    </section>
+    <section class="panel">
+      <h2>导出</h2>
+      <div class="btn-row" style="margin-bottom:12px">
+        <button class="btn btn-p" id="btnCopy" type="button">复制 CSS</button>
+        <button class="btn btn-g" id="btnDl" type="button">下载 .css</button>
+      </div>
+      <pre id="cssOut"></pre>
+    </section>
+  </div>
+
+  <section class="panel" style="padding:0;overflow:hidden">
+    <div class="pv-nav">
+      <div class="pv-logo"></div>
+      <span class="pv-brand">样板间 · 你的配色长这样</span>
+      <a href="javascript:void(0)">首页</a>
+    </div>
+    <div class="pv-body">
+      <div>
+        <div class="pv-eyebrow">DEMO PREVIEW</div>
+        <div class="pv-h1">这是大标题的样子</div>
+      </div>
+      <div class="pv-cards">
+        <div class="pv-card">
+          <span class="pv-tag">卡片标签</span>
+          <h3>一张小卡片</h3>
+          <p>正文文字的颜色、卡片背景、边框与阴影，都从你的两个颜色推算出来，改一下底色试试。</p>
+        </div>
+        <div class="pv-card">
+          <span class="pv-tag">另一个标签</span>
+          <h3>再加一张</h3>
+          <p>悬停卡片、聚焦输入框都会有主色反馈——这就是导出后在项目里用的效果。</p>
+        </div>
+      </div>
+      <div class="pv-row">
+        <input class="pv-input" placeholder="输入框试试聚焦效果…">
+        <span class="pv-chip">标签胶囊</span>
+        <span class="pv-chip">✏️ 小徽章</span>
+      </div>
+      <div class="pv-row">
+        <button class="btn btn-p" style="flex:0 0 auto;min-width:130px" type="button">主按钮</button>
+        <button class="btn btn-g" style="flex:0 0 auto;min-width:110px" type="button">次按钮</button>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==== i18n-kit v1.2 begin ==== */
+/* ══════════════════════════════════════════════════════════
+   🌐 多语言 i18n Kit（startian.top 全站共享 · v1.2 · 2026-10-04）
+   · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
+   · 自动识别：首次访问按 navigator.language（zh 开头 → 中文，其余 → English）
+   · 两种接入模式（可混用）：
+     ① 短语表模式（推荐，低侵入）：I18N.phrase({ '中文原文': 'English', ... })
+        自动扫描文本节点 / title / placeholder / aria-label / alt，动态插入的文本也自动翻译
+     ② 标注模式：data-i18n / data-i18n-html / data-i18n-title / data-i18n-aria / data-i18n-ph / data-i18n-alt
+   · 子树上加 data-i18n-skip 可整体跳过（用户输入内容、ARG 谜题原文等）
+   · API：I18N.t(k[,vars]) · I18N.tOr(k,fb) · I18N.tr(原文) · I18N.set(lang) · I18N.lang()
+          · I18N.phrase(map) · I18N.scan(root) · I18N.apply(root) · I18N.onChange(fn)
+          · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n)
+   · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
+   ══════════════════════════════════════════════════════════ */
+var I18N = (function () {
+  'use strict';
+  var LS = 'st_lang';
+  var FALLBACK = 'zh';
+  var lang = FALLBACK;
+  var dict = { zh: {}, en: {} };
+  var phrase = {};      /* 短语表：中文原文（归一化）→ 译文 */
+  var listeners = [];
+  var bd = {};          /* boot data：原文快照等 */
+
+  /* ---- 基础词典（全站通用词条） ---- */
+  dict.zh['common.home'] = '主页';
+  dict.en['common.home'] = 'Home';
+  dict.zh['common.homeTitle'] = '返回星恬的小站主页';
+  dict.en['common.homeTitle'] = "Back to Startian's homepage";
+  dict.zh['common.close'] = '关闭';
+  dict.en['common.close'] = 'Close';
+  dict.zh['common.cancel'] = '取消';
+  dict.en['common.cancel'] = 'Cancel';
+
+  /* ---- 存储与识别 ---- */
+  function norm(v) {
+    v = String(v || '').toLowerCase();
+    if (v.indexOf('zh') === 0) return 'zh';
+    if (v.indexOf('en') === 0) return 'en';
+    return null;
+  }
+  function readCookie() {
+    try { var m = document.cookie.match(/(?:^|;\s*)st_lang=([^;]*)/); return m ? decodeURIComponent(m[1]) : null; }
+    catch (e) { return null; }
+  }
+  function readLS() { try { return localStorage.getItem(LS); } catch (e) { return null; } }
+  function persist(v) {
+    try { localStorage.setItem(LS, v); } catch (e) {}
+    try { document.cookie = 'st_lang=' + encodeURIComponent(v) + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax'; } catch (e) {}
+  }
+  function detect() {
+    var s = norm(readCookie()) || norm(readLS());
+    if (s) return s;
+    var n = norm(navigator.language || navigator.userLanguage);
+    return n || FALLBACK;
+  }
+
+  /* ---- 文案 ---- */
+  /* tRaw：查词典（当前语言 → zh 兜底），查不到返回 null（= 保持原文） */
+  function tRaw(key) {
+    var v = (dict[lang] && dict[lang][key] != null) ? dict[lang][key] : null;
+    if (v == null) v = (dict[FALLBACK] && dict[FALLBACK][key] != null) ? dict[FALLBACK][key] : null;
+    return v;
+  }
+  function t(key, vars) {
+    var v = tRaw(key);
+    if (v == null) return key;
+    if (vars) v = String(v).replace(/\{(\w+)\}/g, function (m, k) { return (vars[k] != null) ? vars[k] : m; });
+    return v;
+  }
+  /* tOr：查不到时用传入的兜底值（页面 JS 动态文案用这个） */
+  function tOr(key, fallback) {
+    var v = tRaw(key);
+    return (v == null) ? fallback : v;
+  }
+  function add(obj) {
+    if (!obj) return;
+    ['zh', 'en'].forEach(function (k) {
+      if (obj[k]) for (var key in obj[k]) dict[k][key] = obj[k][key];
+    });
+  }
+  /* tr：短语表直译（原文进，译文出；zh 侧原样返回）-JS 动态文案直接用 */
+  function tr(s) {
+    if (lang === 'zh') return s;
+    var v = lookup(normText(s));
+    return (v == null) ? s : v;
+  }
+  function addPhrase(map) {
+    if (!map) return;
+    for (var k in map) { if (map[k] != null) phrase[normText(k)] = String(map[k]); }
+  }
+  /* 规则表：[[/正则/, '替换（可用 $1）'], ...] - 处理「已复习 3」「12 天有记录」这类数字拼接 */
+  var rules = [];
+  function addRules(list) {
+    if (!list) return;
+    for (var i = 0; i < list.length; i++) {
+      try {
+        var re = (list[i][0] instanceof RegExp) ? list[i][0] : new RegExp(list[i][0]);
+        rules.push([re, String(list[i][1])]);
+      } catch (e) {}
+    }
+  }
+  function lookup(t) {
+    var v = phrase[t];
+    if (v != null) return v;
+    for (var i = 0; i < rules.length; i++) {
+      try { if (rules[i][0].test(t)) return t.replace(rules[i][0], rules[i][1]); } catch (e) {}
+    }
+    return null;
+  }
+
+  /* ---- 短语表扫描（静态 + 动态） ---- */
+  function normText(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
+  var PTAGS = ['title', 'placeholder', 'aria-label', 'alt'];
+  function translText(node) {
+    var raw = node.nodeValue;
+    if (!raw) return;
+    var rec = node.__i18nR;
+    if (rec) {
+      if (lang === 'zh') {
+        if (raw === rec.en) { node.nodeValue = rec.orig; delete node.__i18nR; }
+        else if (raw !== rec.orig) { delete node.__i18nR; }
+        return;
+      }
+      if (raw === rec.en) return;
+      if (raw === rec.orig) { node.nodeValue = rec.en; return; }
+      delete node.__i18nR;
+    }
+    var out = lookup(normText(raw));
+    if (out == null) return;
+    if (lang === 'en') { if (raw !== out) { node.__i18nR = { orig: raw, en: out }; node.nodeValue = out; } }
+  }
+  function translAttrs(el) {
+    if (!el.getAttribute) return;
+    for (var i = 0; i < PTAGS.length; i++) {
+      var a = PTAGS[i], v = el.getAttribute(a);
+      if (v == null || v === '') continue;
+      var rec = el.__i18nA && el.__i18nA[a];
+      if (rec) {
+        if (lang === 'zh') {
+          if (v === rec.en) { el.setAttribute(a, rec.orig); delete el.__i18nA[a]; }
+          else if (v !== rec.orig) { delete el.__i18nA[a]; }
+          continue;
+        }
+        if (v === rec.en) continue;
+        if (v === rec.orig) { el.setAttribute(a, rec.en); continue; }
+        delete el.__i18nA[a];
+      }
+      var out = lookup(normText(v));
+      if (out == null) continue;
+      if (lang === 'en') {
+        if (v !== out) { if (!el.__i18nA) el.__i18nA = {}; el.__i18nA[a] = { orig: v, en: out }; el.setAttribute(a, out); }
+      }
+    }
+  }
+  function scanNode(node) {
+    if (!node) return;
+    if (node.nodeType === 9) node = node.documentElement || node.body;   /* 文档节点 → 转元素 */
+    if (!node) return;
+    if (node.nodeType === 3) { translText(node); return; }
+    if (node.nodeType !== 1) return;
+    var tag = node.tagName;
+    if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'NOSCRIPT') return;
+    if (node.hasAttribute('data-i18n-skip')) return;
+    translAttrs(node);
+    for (var c = node.firstChild; c; c = c.nextSibling) scanNode(c);
+  }
+  function scan(root) { try { scanNode(root || document.body || document.documentElement); } catch (e) {} }
+  /* 动态内容自动翻译（MutationObserver，逐节点增量，无重扫） */
+  var moOn = false;
+  function auto(root) {
+    if (moOn || typeof MutationObserver === 'undefined') return;
+    var target = root || document.body;
+    if (!target) {   /* head 提前注入时 body 还没解析出来，等 DOM ready */
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { auto(root); });
+      return;
+    }
+    moOn = true;
+    try {
+      var mo = new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          var m = muts[i];
+          try {
+            if (m.type === 'characterData') translText(m.target);
+            else if (m.type === 'attributes') translAttrs(m.target);
+            else if (m.type === 'childList') {
+              for (var j = 0; j < m.addedNodes.length; j++) scanNode(m.addedNodes[j]);
+            }
+          } catch (e) {}
+        }
+      });
+      mo.observe(target, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: PTAGS });
+    } catch (e) {}
+  }
+
+  /* ---- 日期 / 数字 ---- */
+  var MN_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var WD_ZH = '日一二三四五六';
+  var WD_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  function fmtDate(d, opt) {
+    if (typeof d === 'string') { var a = d.split('-'); d = new Date(+a[0], (+a[1] || 1) - 1, +a[2] || 1); }
+    if (!(d instanceof Date) || isNaN(d.getTime())) return '';
+    opt = opt || {};
+    var s;
+    if (lang === 'zh') {
+      s = d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日';
+      if (opt.weekday) s += ' · 星期' + WD_ZH.charAt(d.getDay());
+    } else {
+      s = MN_EN[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+      if (opt.weekday) s += ' · ' + WD_EN[d.getDay()];
+    }
+    return s;
+  }
+  function fmtNum(n) {
+    try { return Number(n).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US'); }
+    catch (e) { return String(n); }
+  }
+
+  /* ---- DOM 标注应用（标注模式；词条缺失时恢复原文 - 保证切回中文能还原） ---- */
+  function apply(root) {
+    root = root || document;
+    try {
+      var i, list, v, el;
+      list = root.querySelectorAll('[data-i18n]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrig == null) el.__i18nOrig = el.textContent;
+        v = tRaw(el.getAttribute('data-i18n'));
+        el.textContent = (v != null) ? v : el.__i18nOrig;
+      }
+      list = root.querySelectorAll('[data-i18n-html]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigHTML == null) el.__i18nOrigHTML = el.innerHTML;
+        v = tRaw(el.getAttribute('data-i18n-html'));
+        el.innerHTML = (v != null) ? v : el.__i18nOrigHTML;
+      }
+      list = root.querySelectorAll('[data-i18n-title]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigTitle == null) el.__i18nOrigTitle = el.title;
+        v = tRaw(el.getAttribute('data-i18n-title'));
+        el.title = (v != null) ? v : el.__i18nOrigTitle;
+      }
+      list = root.querySelectorAll('[data-i18n-aria]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAria == null) el.__i18nOrigAria = el.getAttribute('aria-label') || '';
+        v = tRaw(el.getAttribute('data-i18n-aria'));
+        el.setAttribute('aria-label', (v != null) ? v : el.__i18nOrigAria);
+      }
+      list = root.querySelectorAll('[data-i18n-ph]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigPh == null) el.__i18nOrigPh = el.placeholder || '';
+        v = tRaw(el.getAttribute('data-i18n-ph'));
+        el.placeholder = (v != null) ? v : el.__i18nOrigPh;
+      }
+      list = root.querySelectorAll('[data-i18n-alt]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAlt == null) el.__i18nOrigAlt = el.getAttribute('alt') || '';
+        v = tRaw(el.getAttribute('data-i18n-alt'));
+        el.setAttribute('alt', (v != null) ? v : el.__i18nOrigAlt);
+      }
+      /* 标题（短语表优先，其次 page.title 词条） */
+      if (!bd.__origTitle) bd.__origTitle = document.title;
+      var tv = lookup(normText(bd.__origTitle));
+      if (tv == null) tv = tRaw('page.title');
+      if (tv != null) { document.title = (lang === 'en') ? tv : bd.__origTitle; bd.__titleTouched = true; }
+      else if (bd.__titleTouched) { document.title = bd.__origTitle; }
+      document.documentElement.lang = (lang === 'zh') ? 'zh-CN' : 'en';
+      syncSwitch();
+    } catch (e) {}
+  }
+
+  function applyLang(v) {
+    lang = v;
+    persist(v);
+    apply(document);
+    scan(document);
+    for (var i = 0; i < listeners.length; i++) { try { listeners[i](lang); } catch (e) {} }
+    try {
+      var live = document.getElementById('i18n-live');
+      if (live) live.textContent = (lang === 'zh') ? '已切换到中文' : 'Switched to English';
+    } catch (e) {}
+  }
+  /* 切换转场（仿主页主题转场）：黑幕淡入 → 光晕从切换器扩散 → 幕中换语言 → 揭幕；可打断；尊重 reduced-motion */
+  var tid = 0, stage = null;
+  function ensureStage() {
+    if (stage) return stage;
+    var ov = document.createElement('div'); ov.className = 'i18n-veil';
+    var hl = document.createElement('div'); hl.className = 'i18n-halo';
+    var host = document.body || document.documentElement;
+    host.appendChild(ov); host.appendChild(hl);
+    stage = { ov: ov, hl: hl };
+    return stage;
+  }
+  function set(v) {
+    v = norm(v);
+    if (!v) return;
+    if (v === lang) { apply(document); scan(document); return; }
+    var calm = true;
+    try { calm = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) {}
+    if (!calm || !document.body) { applyLang(v); return; }
+    try {
+      var st = ensureStage(), my = ++tid;
+      var x = (window.innerWidth || 360) - 80, y = (window.innerHeight || 640) - 34;
+      try { if (swEl) { var r = swEl.getBoundingClientRect(); x = r.left + r.width / 2; y = r.top + r.height / 2; } } catch (e) {}
+      st.ov.style.setProperty('--ix', x + 'px'); st.ov.style.setProperty('--iy', y + 'px');
+      st.hl.style.setProperty('--ix', x + 'px'); st.hl.style.setProperty('--iy', y + 'px');
+      st.ov.classList.remove('out'); st.ov.classList.add('on'); st.ov.style.display = 'block';
+      st.hl.classList.remove('go'); void st.hl.offsetWidth; st.hl.classList.add('go');
+      setTimeout(function () {
+        if (my !== tid) return;
+        applyLang(v);
+        st.ov.classList.remove('on'); st.ov.classList.add('out');
+        setTimeout(function () {
+          if (my !== tid) return;
+          st.ov.style.display = 'none'; st.ov.classList.remove('out');
+        }, 520);
+      }, 430);
+    } catch (e) { applyLang(v); }
+  }
+  function onChange(fn) { if (typeof fn === 'function') listeners.push(fn); }
+  function getLang() { return lang; }
+
+  /* ---- 切换入口（右下角胶囊，自动注入） ---- */
+  var SW_CSS = '.i18n-sw{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:9992;display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:rgba(17,24,39,.74);-webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);border:1px solid rgba(255,255,255,.26);box-shadow:0 6px 20px rgba(0,0,0,.28);font-family:inherit}' +
+    '.i18n-sw:hover{background:rgba(17,24,39,.86);border-color:rgba(255,255,255,.38)}' +
+    '.i18n-gl{font-size:13px;line-height:1;padding:0 5px 0 8px;opacity:.95;pointer-events:none}' +
+    '.i18n-sw button{border:0;background:transparent;color:rgba(255,255,255,.78);font-size:12px;font-weight:700;letter-spacing:.4px;padding:6px 11px;border-radius:999px;cursor:pointer;font-family:inherit;transition:all .18s ease;line-height:1}' +
+    '.i18n-sw button:hover{color:#fff;background:rgba(255,255,255,.12)}' +
+    '.i18n-sw button:focus-visible{outline:2px solid #7dd3fc;outline-offset:1px}' +
+    '.i18n-sw button.on{background:rgba(255,255,255,.92);color:#1f2937;box-shadow:0 2px 8px rgba(0,0,0,.25)}' +
+    '.i18n-sw button:active{transform:translateY(1px)}' +
+    '.i18n-veil{position:fixed;inset:0;z-index:9990;pointer-events:none;display:none;opacity:0;background:#060a16;transition:opacity .42s ease}' +
+    '.i18n-veil.on{opacity:1}' +
+    '.i18n-veil.out{opacity:0;transition:opacity .5s cubic-bezier(.2,.8,.3,1)}' +
+    '.i18n-halo{position:fixed;z-index:9991;left:var(--ix,92%);top:var(--iy,93%);width:14px;height:14px;border-radius:50%;box-sizing:border-box;pointer-events:none;display:none;border:2px solid rgba(198,226,255,.95);box-shadow:0 0 24px 6px rgba(137,194,255,.6),0 0 70px 20px rgba(137,194,255,.3),inset 0 0 20px rgba(198,226,255,.5)}' +
+    '.i18n-halo.go{display:block;animation:i18nHalo .85s cubic-bezier(.16,.7,.3,1) forwards}' +
+    '@keyframes i18nHalo{0%{opacity:0;transform:translate(-50%,-50%) scale(.01)}22%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(58)}}' +
+    '.i18n-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}' +
+    '@media (max-width:620px){.i18n-sw{right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px))}.i18n-sw button{padding:5px 9px;font-size:11.5px}}';
+
+  var swEl = null;
+  function buildSwitch() {
+    try {
+      if (!document.body) return;
+      var exist = document.querySelector('.i18n-sw');
+      if (exist) { swEl = exist; syncSwitch(); return; }
+      var st = document.createElement('style');
+      st.textContent = SW_CSS;
+      (document.head || document.documentElement).appendChild(st);
+      var wrap = document.createElement('div');
+      wrap.className = 'i18n-sw';
+      wrap.setAttribute('role', 'group');
+      wrap.setAttribute('aria-label', '切换语言 / Switch language');
+      wrap.setAttribute('title', '切换语言 / Switch language');
+      var gl = document.createElement('span');
+      gl.className = 'i18n-gl';
+      gl.textContent = '🌐';
+      gl.setAttribute('aria-hidden', 'true');
+      wrap.appendChild(gl);
+      [['zh', '中文'], ['en', 'English']].forEach(function (p) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('data-lang', p[0]);
+        b.textContent = p[1];
+        b.addEventListener('click', function () { set(p[0]); });
+        wrap.appendChild(b);
+      });
+      var live = document.createElement('span');
+      live.id = 'i18n-live';
+      live.className = 'i18n-sr';
+      live.setAttribute('aria-live', 'polite');
+      wrap.appendChild(live);
+      document.body.appendChild(wrap);
+      swEl = wrap;
+      syncSwitch();
+    } catch (e) {}
+  }
+  function syncSwitch() {
+    try {
+      if (!swEl) return;
+      var bs = swEl.querySelectorAll('button[data-lang]');
+      for (var i = 0; i < bs.length; i++) {
+        var on = bs[i].getAttribute('data-lang') === lang;
+        bs[i].classList.toggle('on', on);
+        bs[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    } catch (e) {}
+  }
+
+  /* ---- 启动 ---- */
+  lang = detect();
+  function boot() {
+    buildSwitch();
+    apply(document);
+    scan(document);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+
+  return {
+    t: t, tOr: tOr, tr: tr, set: set, apply: apply, scan: scan, auto: auto,
+    phrase: addPhrase, rules: addRules, add: add, lang: getLang, onChange: onChange,
+    fmtDate: fmtDate, fmtNum: fmtNum
+  };
+})();
+
+/* ---- 短语表（中文原文 → English）---- */
+I18N.phrase({"配色实验室 · startian.top": "Color Lab · startian.top","🎨 配色实验室": "🎨 Color Lab","选两色 · 实时预览 · 导出 CSS 变量": "Pick two colors · Live preview · Export CSS variables","← 返回主页": "← Back to home","调色盘": "Palette","底色（背景）": "Base color (background)","主色（点缀）": "Accent color","🎲 随机灵感": "🎲 Random inspiration","↺ 重置": "↺ Reset","🌙 深夜的灵感": "🌙 Late-night inspiration","文字黑白会根据底色明暗自动判定；卡片、线条、按钮、阴影、玻璃导航全部由这两色派生。深色底也能玩。": "Black or white text is chosen automatically from the base color's brightness; cards, lines, buttons, shadows, and the glassy nav are all derived from these two colors. Dark backgrounds work too.","导出": "Export","复制 CSS": "Copy CSS","下载 .css": "Download .css","样板间 · 你的配色长这样": "Showcase · This is how your palette looks","首页": "Home","这是大标题的样子": "This is what a big heading looks like","卡片标签": "Card tag","一张小卡片": "A little card","正文文字的颜色、卡片背景、边框与阴影，都从你的两个颜色推算出来，改一下底色试试。": "Body text color, card background, borders and shadows are all derived from your two colors — try changing the base color.","另一个标签": "Another tag","再加一张": "Add one more","悬停卡片、聚焦输入框都会有主色反馈——这就是导出后在项目里用的效果。": "Hovering cards and focusing inputs both give accent-color feedback — this is how it looks in your project after export.","标签胶囊": "Pill tag","✏️ 小徽章": "✏️ Little badge","主按钮": "Primary button","次按钮": "Secondary button","……某个很深很深的夜里调出来的": "…conjured up on some very, very deep night","输入框试试聚焦效果…": "Try focusing the input…","🏆 成就解锁：": "🏆 Achievement unlocked: ","调色师": "Colorist","配色实验室 ·": "Color Lab ·","✓ 已复制 CSS 变量": "✓ CSS variables copied","配色输出": "Palette output","复制失败，请手动选择代码块": "Copy failed — please select the code block manually","⬇️ 已下载 CSS 文件": "⬇️ CSS file downloaded","做到一半": "Halfway through","✓ 就是这组颜色": "✓ That's the color set","配色实验室": "Color Lab"});
+I18N.auto();
+/* ==== i18n-kit v1.2 end ==== */
+</script>
+<script>
+(function () {
+  'use strict';
+/* ============================================================
+   🏆 跨站成就 SDK（startian.top 全站共享；cookie + localStorage 兜底）
+   ============================================================ */
+var STAch = (function () {
+  var KEY = 'st_ach';
+  function readCookie() {
+    var m = document.cookie.match(/(?:^|;\s*)st_ach=([^;]*)/);
+    if (!m) return null;
+    try { return JSON.parse(decodeURIComponent(m[1])) || []; } catch (e) { return null; }
+  }
+  function writeCookie(list) {
+    try {
+      var v = encodeURIComponent(JSON.stringify(list));
+      if (v.length < 3800) document.cookie = 'st_ach=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+    } catch (e) {}
+  }
+  var list = readCookie();
+  if (!list) { try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { list = []; } }
+  if (!Array.isArray(list)) list = [];
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+    writeCookie(list);
+  }
+  function unlock(id, name, ico) {
+    if (list.indexOf(id) >= 0) return false;
+    list.push(id);
+    save();
+    try {
+      var el = document.createElement('div');
+      el.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9999;background:rgba(22,26,48,.94);color:#fff;border:1px solid rgba(140,170,255,.42);border-radius:999px;padding:12px 22px;font:700 13.5px/1.4 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:86vw';
+      el.textContent = I18N.tr('🏆 成就解锁：') + (ico ? ico + ' ' : '') + I18N.tr(name || id);
+      document.body.appendChild(el);
+      requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+      setTimeout(function () {
+        el.style.opacity = '0';
+        el.style.transform = 'translateX(-50%) translateY(16px)';
+        setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+      }, 3200);
+    } catch (e) {}
+    return true;
+  }
+  return { list: function () { return list.slice(); }, has: function (id) { return list.indexOf(id) >= 0; }, unlock: unlock };
+})();
+window.STAch = STAch;
+setTimeout(function () { STAch.unlock('site.colorlab', '调色师', '🎨'); }, 600);
+
+  /* ===== 颜色工具（与主页 ThemeKit 同款算法） ===== */
+  function hex2rgb(h) {
+    h = String(h).replace('#', '');
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    var n = parseInt(h, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function rgb2hex(r) {
+    return '#' + r.map(function (v) {
+      var x = Math.round(Math.max(0, Math.min(255, v))).toString(16);
+      return x.length < 2 ? '0' + x : x;
+    }).join('');
+  }
+  function mixc(a, b, t) {
+    var A = hex2rgb(a), B = hex2rgb(b);
+    return rgb2hex(A.map(function (v, i) { return v + (B[i] - v) * t; }));
+  }
+  function lumc(hex) { var r = hex2rgb(hex); return (0.299 * r[0] + 0.587 * r[1] + 0.114 * r[2]) / 255; }
+  function rgbaStr(hex, a) { var r = hex2rgb(hex); return 'rgba(' + r[0] + ',' + r[1] + ',' + r[2] + ',' + a + ')'; }
+
+  function resolve(bg, ac) {
+    var dark = lumc(bg) < 0.45;
+    var ink = dark ? mixc(bg, '#ffffff', 0.92) : mixc(bg, '#000000', 0.88);
+    var ink2 = dark ? mixc(bg, '#ffffff', 0.66) : mixc(bg, '#000000', 0.58);
+    var ink3 = dark ? mixc(bg, '#ffffff', 0.44) : mixc(bg, '#000000', 0.4);
+    var card = dark ? mixc(bg, '#ffffff', 0.07) : mixc(bg, '#ffffff', 0.85);
+    var tint = dark ? mixc(bg, '#ffffff', 0.13) : mixc(bg, '#ffffff', 0.55);
+    var line = dark ? mixc(bg, '#ffffff', 0.22) : mixc(bg, '#000000', 0.14);
+    var line2 = dark ? mixc(bg, '#ffffff', 0.15) : mixc(bg, '#000000', 0.09);
+    var adeep = dark ? mixc(ac, '#ffffff', 0.25) : mixc(ac, '#000000', 0.28);
+    return {
+      '--bg1': bg, '--bg2': mixc(bg, adeep, dark ? 0.14 : 0.08),
+      '--card': card, '--tint': tint, '--line': line, '--line2': line2,
+      '--ink': ink, '--ink2': ink2, '--ink3': ink3,
+      '--accent': ac, '--accent-deep': adeep,
+      '--glass-nav': rgbaStr(mixc(bg, '#ffffff', dark ? 0.06 : 0.72), 0.82),
+      '--sh-sm': '0 1px 2px rgba(0,0,0,' + (dark ? 0.4 : 0.05) + '), 0 10px 28px rgba(0,0,0,' + (dark ? 0.45 : 0.1) + ')',
+      '--sh-lg': '0 2px 4px rgba(0,0,0,' + (dark ? 0.5 : 0.08) + '), 0 24px 50px rgba(0,0,0,' + (dark ? 0.55 : 0.14) + ')',
+      '__dark': dark
+    };
+  }
+
+  var PRESETS = [
+    ['#eef8ff', '#3f7fd6'], ['#fdf2f8', '#db2777'], ['#f0fdf4', '#16a34a'],
+    ['#fefce8', '#ca8a04'], ['#faf5ff', '#9333ea'], ['#fff7ed', '#ea580c'],
+    ['#161226', '#a78bfa'], ['#0f172a', '#38bdf8'], ['#1c1917', '#f59e0b'],
+    ['#0d1f1a', '#2dd4bf'], ['#1a0f14', '#fb7185'], ['#111827', '#4ade80']
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var root = document.documentElement;
+  var out = $('cssOut');
+
+  function apply(bg, ac) {
+    var rv = resolve(bg, ac);
+    Object.keys(rv).forEach(function (k) { if (k !== '__dark') root.style.setProperty(k, rv[k]); });
+    /* 导出文本 */
+    var lines = [':root {'];
+    Object.keys(rv).forEach(function (k) {
+      if (k === '__dark') return;
+      lines.push('  ' + k + ': ' + rv[k] + ';');
+    });
+    lines.push('}');
+    out.textContent = lines.join('\n');
+    /* 主题色/标题 */
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', bg);
+    document.title = I18N.tr('配色实验室') + ' · ' + bg + ' / ' + ac + ' · startian.top';
+  }
+
+  try { I18N.onChange(function () { apply($('cBg').value, $('cAc').value); }); } catch (e) {}
+  $('cBg').addEventListener('input', function () { apply(this.value, $('cAc').value); });
+  $('cAc').addEventListener('input', function () { apply($('cBg').value, this.value); });
+  $('btnRand').addEventListener('click', function () {
+    var p = PRESETS[Math.floor(Math.random() * PRESETS.length)];
+    $('cBg').value = p[0]; $('cAc').value = p[1];
+    apply(p[0], p[1]);
+    toast('🎲 ' + p[0] + ' / ' + p[1]);
+  });
+  $('btnReset').addEventListener('click', function () {
+    $('cBg').value = '#eef8ff'; $('cAc').value = '#3f7fd6';
+    apply('#eef8ff', '#3f7fd6');
+  });
+  $('btnCopy').addEventListener('click', function () {
+    var text = out.textContent;
+    function done() { toast('✓ 已复制 CSS 变量'); try { STAch.unlock('colorlab.export', '配色输出', '📤'); } catch (e) {} }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallback(); });
+    } else fallback();
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { toast('复制失败，请手动选择代码块'); }
+      document.body.removeChild(ta);
+    }
+  });
+  $('btnDl').addEventListener('click', function () {
+    var blob = new Blob(['/* 配色实验室 · startian.top 导出\n * 用法：把这段放进 :root{} 或 html[data-theme="你的主题名"]\n */\n' + out.textContent + '\n'], { type: 'text/css' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'palette-' + $('cBg').value.replace('#', '') + '-' + $('cAc').value.replace('#', '') + '.css';
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
+    toast('⬇️ 已下载 CSS 文件');
+    try { STAch.unlock('colorlab.export', '配色输出', '📤'); } catch (e) {}
+  });
+
+  var toastEl = $('toast'), toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2200);
+  }
+
+  /* 初始：从 URL 参数恢复配色（分享友好） */
+  var q = new URLSearchParams(location.search);
+  var initBg = q.get('bg') || '#eef8ff', initAc = q.get('ac') || '#3f7fd6';
+  if (/^#?[0-9a-fA-F]{6}$/.test(initBg.replace('#', ''))) initBg = '#' + initBg.replace('#', '');
+  if (/^#?[0-9a-fA-F]{6}$/.test(initAc.replace('#', ''))) initAc = '#' + initAc.replace('#', '');
+  $('cBg').value = initBg; $('cAc').value = initAc;
+  apply(initBg, initAc);
+})();
+</script>
+
+<script>
+/* ============================================================
+   🔮 ARG · 精简进度机（2026-10-03）与主页共用 st_arg
+   ============================================================ */
+(function () {
+  'use strict';
+  var KEY = 'st_arg';
+  if (window.ARG && window.ARG.collect) return;
+  function readState() {
+    var raw = null;
+    try { var m = document.cookie.match(/(?:^|;\s*)st_arg=([^;]*)/); if (m) raw = decodeURIComponent(m[1]); } catch (e) {}
+    if (!raw) { try { raw = localStorage.getItem(KEY); } catch (e) {} }
+    try { var d = JSON.parse(raw || '{}'); if (!d || typeof d !== 'object') d = {}; if (!Array.isArray(d.logs)) d.logs = []; return d; }
+    catch (e) { return { logs: [] }; }
+  }
+  var state = readState();
+  function save() {
+    var raw = JSON.stringify(state);
+    try { localStorage.setItem(KEY, raw); } catch (e) {}
+    try {
+      var v = encodeURIComponent(raw);
+      if (v.length < 3800) document.cookie = 'st_arg=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+    } catch (e) {}
+  }
+  var toastTimer = 0;
+  window.ARG = {
+    has: function (id) { return state.logs.indexOf(id) >= 0; },
+    count: function () { return state.logs.length; },
+    collect: function (id) {
+      if (state.logs.indexOf(id) >= 0) return false;
+      state.logs.push(id); save();
+      this.toast('📜 找到一篇日志（去主页头像连点 7 下看全文）');
+      return true;
+    },
+    reset: function () { state = { logs: [] }; save(); },
+    toast: function (msg) {
+      try {
+        var el = document.getElementById('__arg_toast');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = '__arg_toast';
+          el.style.cssText = 'position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9994;background:rgba(12,17,32,.96);color:#eef4ff;border:1px solid rgba(198,214,240,.4);border-radius:999px;padding:12px 24px;font:700 13px/1.5 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.5);transition:all .45s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:88vw;text-align:center';
+          document.body.appendChild(el);
+        }
+        el.textContent = msg;
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { el.style.opacity = '0'; el.style.transform = 'translateX(-50%) translateY(16px)'; }, 3000);
+      } catch (e) {}
+    }
+  };
+})();
+</script>
+
+<script>
+/* 🔮 ARG · 配色实验室：深夜的蓝配月光（感知判定 v2：不再死抠色号） */
+(function () {
+  'use strict';
+  function hex2rgb(h) {
+    h = String(h || '').replace('#', '');
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+  }
+  /* 深夜的蓝：深 + 偏蓝（人眼说了算：#0a0f26 ~ #1c2c50 这一带都算） */
+  function isBlue(c) {
+    if (isNaN(c[0])) return false;
+    var sum = c[0] + c[1] + c[2];
+    return c[0] <= 55 && c[1] <= 70 && c[2] <= 110 && c[2] > c[0] && sum < 200;
+  }
+  /* 月光：很浅、接近中性的白（#fff、#f0f0f0、#eef4ff、#e0e6f0 都算） */
+  function isMoon(c) {
+    if (isNaN(c[0])) return false;
+    var mn = Math.min(c[0], c[1], c[2]), mx = Math.max(c[0], c[1], c[2]);
+    return mn >= 195 && (mx - mn) <= 60;
+  }
+  var chip = document.getElementById('argMoonChip');
+  function check() {
+    var bEl = document.getElementById('cBg'), aEl = document.getElementById('cAc');
+    if (!bEl || !aEl) return;
+    var bg = bEl.value, ac = aEl.value;
+    var B = hex2rgb(bg), A = hex2rgb(ac);
+    var okBlue = isBlue(B) || isBlue(A);
+    var okMoon = isMoon(A) || isMoon(B);
+    /* 实时提示：只有"做到一半"才出现（保持谜题感） */
+    if (chip) {
+      var txt = '';
+      if (okBlue && !okMoon) {
+        var mnBest = Math.max(Math.min(A[0], A[1], A[2]), Math.min(B[0], B[1], B[2]));
+        txt = mnBest >= 150 ? '🌙 就差一点点，再浅一些…' : '🌙 还差一抹月光';
+      } else if (!okBlue && okMoon) {
+        txt = '🌙 月光有了……还差一片夜色';
+      }
+      if (chip.textContent !== txt) chip.textContent = txt;
+      chip.style.display = txt ? '' : 'none';
+    }
+    if (okBlue && okMoon) {
+      if (window.ARG.collect('log6')) window.ARG.toast('📜 深夜的蓝，月光的光……（找到一篇日志 · 配色实验室）');
+      if (chip) { chip.textContent = '✓ 就是这组颜色'; chip.style.display = ''; }
+    }
+  }
+  ['cBg', 'cAc'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) { el.addEventListener('input', check); el.addEventListener('change', check); }
+  });
+  var argMoonBtn = document.getElementById('argMoon');
+  if (argMoonBtn) argMoonBtn.addEventListener('click', function () {
+    var b = document.getElementById('cBg');
+    if (!b) return;
+    b.value = '#0a0f26';
+    b.dispatchEvent(new Event('input', { bubbles: true }));
+    setTimeout(function () {
+      if (window.ARG.has('log6')) return;
+      window.ARG.toast('夜空铺好了……还差一抹月光（调浅「主色」试试）');
+    }, 80);
+  });
+  window.__colorlabARG = {
+    check: check,
+    set: function (bg, ac) {
+      var a = document.getElementById('cBg'), b = document.getElementById('cAc');
+      if (a) { a.value = bg; a.dispatchEvent(new Event('input', { bubbles: true })); }
+      if (b) { b.value = ac; b.dispatchEvent(new Event('input', { bubbles: true })); }
+      check();
+    }
+  };
+})();
+</script></body>
+</html>

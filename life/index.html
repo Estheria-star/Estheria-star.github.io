@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="康威生命游戏花园：撒种子看细胞生长，能存「物种」、能让两个物种对撞。startian.top 出品">
+<meta name="theme-color" content="#081018">
+<title>生命游戏花园 · startian.top</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#081018}
+  canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair;user-select:none;-webkit-user-select:none}
+  .bar{
+    position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:5;
+    display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:center;max-width:94vw;
+    background:rgba(8,20,26,.68);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);
+    border:1px solid rgba(80,220,180,.22);border-radius:999px;padding:9px 13px;
+    box-shadow:0 16px 44px rgba(0,0,0,.5);
+  }
+  .stat{
+    font-family:ui-monospace,Consolas,monospace;font-size:12px;font-weight:700;color:#bfe9dd;
+    padding:0 6px;white-space:nowrap;letter-spacing:.4px;
+  }
+  .stat b{color:#5ff0c0}
+  button{
+    border:1px solid rgba(90,220,180,.32);border-radius:999px;padding:8px 14px;
+    font-size:12.5px;font-weight:800;font-family:inherit;cursor:pointer;color:#e2fff5;
+    background:linear-gradient(180deg,rgba(50,200,150,.28),rgba(30,150,110,.24));
+    transition:transform .15s ease,border-color .2s ease,box-shadow .2s ease;white-space:nowrap;
+  }
+  button:hover{border-color:rgba(110,240,200,.7);transform:translateY(-1px)}
+  button:active{transform:translateY(1px)}
+  button.primary{
+    background:linear-gradient(180deg,#3ddba0,#1b9e6e);color:#04211a;border-color:transparent;
+    box-shadow:0 5px 0 #0f5f42,0 12px 24px rgba(40,200,150,.35);
+  }
+  button.primary:active{box-shadow:0 2px 0 #0f5f42}
+  select{
+    border:1px solid rgba(90,220,180,.32);border-radius:999px;padding:8px 12px;font-size:12.5px;font-weight:700;
+    font-family:inherit;color:#e2fff5;background:rgba(10,30,26,.9);cursor:pointer;outline:none;
+  }
+  .home{
+    position:fixed;left:16px;bottom:16px;z-index:5;text-decoration:none;font-size:12.5px;font-weight:700;
+    color:#a8e8d8;background:rgba(8,22,28,.72);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    border:1px solid rgba(90,220,180,.28);border-radius:999px;padding:10px 16px;
+    transition:border-color .2s ease,transform .2s ease;
+  }
+  .home:hover{border-color:rgba(110,240,200,.6);transform:translateY(-2px)}
+  .hint{
+    position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:4;font-size:11.5px;
+    color:rgba(180,230,215,.55);white-space:nowrap;pointer-events:none;
+  }
+  .toast{
+    position:fixed;left:50%;top:76px;transform:translateX(-50%) translateY(-8px);opacity:0;z-index:6;
+    background:rgba(8,26,24,.92);border:1px solid rgba(90,220,180,.35);border-radius:999px;
+    padding:9px 18px;font-size:12.5px;font-weight:700;color:#e2fff5;
+    transition:opacity .3s ease,transform .3s ease;pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%)}
+  .sp-list{
+    position:fixed;right:14px;top:88px;z-index:5;display:flex;flex-direction:column;gap:7px;max-height:60vh;overflow:auto;
+  }
+  .sp-list button{font-size:11.5px;padding:7px 12px;border-radius:12px;text-align:left}
+  @media (max-width:720px){
+    .bar{top:10px;left:10px;right:10px;transform:none;border-radius:18px;padding:8px}
+    .hint{display:none}
+    .sp-list{top:auto;bottom:70px}
+  }
+
+/* 🔮 ARG · 他留下的种子（可发现的线索） */
+.arg-seed{position:fixed;right:14px;bottom:56px;width:46px;height:46px;display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:6px;border-radius:13px;background:rgba(10,16,32,.6);border:1px solid rgba(130,160,255,.32);opacity:.78;transition:opacity .25s,transform .25s;cursor:help;z-index:6}
+.arg-seed:hover{opacity:1;transform:translateY(-2px)}
+.arg-seed i{border-radius:50%;background:transparent}
+.arg-seed i.on{background:#8fd0ff;box-shadow:0 0 7px rgba(143,208,255,.85)}
+</style>
+</head>
+<body>
+<canvas id="garden"></canvas>
+<div class="bar">
+  <span class="stat">第 <b id="gen">0</b> 代</span>
+  <span class="stat">活细胞 <b id="alive">0</b></span>
+  <button class="primary" id="btnPlay" type="button">▶ 生长</button>
+  <button id="btnRand" type="button">🌱 撒种子</button>
+  <button id="btnClear" type="button">🧹 清空</button>
+  <select id="selPattern">
+    <option value="">✳ 种植图案…</option>
+    <option value="glider">滑翔机</option>
+    <option value="lwss">轻型飞船</option>
+    <option value="pulsar">脉冲星</option>
+    <option value="rpent">R-五连</option>
+  </select>
+  <select id="selSpeed">
+    <option value="8">×1</option>
+    <option value="16" selected>×2</option>
+    <option value="32">×4</option>
+    <option value="64">×8</option>
+  </select>
+  <button id="btnSave" type="button">💾 存物种</button>
+  <button id="btnCollide" type="button">⚔ 物种对撞</button>
+</div>
+<div class="sp-list" id="spList"></div>
+<a class="home" href="https://startian.top/">← 返回主页</a>
+<div class="arg-seed" id="argSeed" title="他留下的一颗种子（五格，试试照着摆出来）" role="img" aria-label="一颗五格的种子">
+  <i></i><i class="on"></i><i class="on"></i>
+  <i class="on"></i><i class="on"></i><i></i>
+  <i></i><i class="on"></i><i></i>
+</div>
+<div class="hint">拖动平移 · 滚轮缩放 · 按住鼠标画细胞 · 选「种植图案」后点网格放置 · 右键擦除</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==== i18n-kit v1.2 begin ==== */
+/* ══════════════════════════════════════════════════════════
+   🌐 多语言 i18n Kit（startian.top 全站共享 · v1.2 · 2026-10-04）
+   · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
+   · 自动识别：首次访问按 navigator.language（zh 开头 → 中文，其余 → English）
+   · 两种接入模式（可混用）：
+     ① 短语表模式（推荐，低侵入）：I18N.phrase({ '中文原文': 'English', ... })
+        自动扫描文本节点 / title / placeholder / aria-label / alt，动态插入的文本也自动翻译
+     ② 标注模式：data-i18n / data-i18n-html / data-i18n-title / data-i18n-aria / data-i18n-ph / data-i18n-alt
+   · 子树上加 data-i18n-skip 可整体跳过（用户输入内容、ARG 谜题原文等）
+   · API：I18N.t(k[,vars]) · I18N.tOr(k,fb) · I18N.tr(原文) · I18N.set(lang) · I18N.lang()
+          · I18N.phrase(map) · I18N.scan(root) · I18N.apply(root) · I18N.onChange(fn)
+          · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n)
+   · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
+   ══════════════════════════════════════════════════════════ */
+var I18N = (function () {
+  'use strict';
+  var LS = 'st_lang';
+  var FALLBACK = 'zh';
+  var lang = FALLBACK;
+  var dict = { zh: {}, en: {} };
+  var phrase = {};      /* 短语表：中文原文（归一化）→ 译文 */
+  var listeners = [];
+  var bd = {};          /* boot data：原文快照等 */
+
+  /* ---- 基础词典（全站通用词条） ---- */
+  dict.zh['common.home'] = '主页';
+  dict.en['common.home'] = 'Home';
+  dict.zh['common.homeTitle'] = '返回星恬的小站主页';
+  dict.en['common.homeTitle'] = "Back to Startian's homepage";
+  dict.zh['common.close'] = '关闭';
+  dict.en['common.close'] = 'Close';
+  dict.zh['common.cancel'] = '取消';
+  dict.en['common.cancel'] = 'Cancel';
+
+  /* ---- 存储与识别 ---- */
+  function norm(v) {
+    v = String(v || '').toLowerCase();
+    if (v.indexOf('zh') === 0) return 'zh';
+    if (v.indexOf('en') === 0) return 'en';
+    return null;
+  }
+  function readCookie() {
+    try { var m = document.cookie.match(/(?:^|;\s*)st_lang=([^;]*)/); return m ? decodeURIComponent(m[1]) : null; }
+    catch (e) { return null; }
+  }
+  function readLS() { try { return localStorage.getItem(LS); } catch (e) { return null; } }
+  function persist(v) {
+    try { localStorage.setItem(LS, v); } catch (e) {}
+    try { document.cookie = 'st_lang=' + encodeURIComponent(v) + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax'; } catch (e) {}
+  }
+  function detect() {
+    var s = norm(readCookie()) || norm(readLS());
+    if (s) return s;
+    var n = norm(navigator.language || navigator.userLanguage);
+    return n || FALLBACK;
+  }
+
+  /* ---- 文案 ---- */
+  /* tRaw：查词典（当前语言 → zh 兜底），查不到返回 null（= 保持原文） */
+  function tRaw(key) {
+    var v = (dict[lang] && dict[lang][key] != null) ? dict[lang][key] : null;
+    if (v == null) v = (dict[FALLBACK] && dict[FALLBACK][key] != null) ? dict[FALLBACK][key] : null;
+    return v;
+  }
+  function t(key, vars) {
+    var v = tRaw(key);
+    if (v == null) return key;
+    if (vars) v = String(v).replace(/\{(\w+)\}/g, function (m, k) { return (vars[k] != null) ? vars[k] : m; });
+    return v;
+  }
+  /* tOr：查不到时用传入的兜底值（页面 JS 动态文案用这个） */
+  function tOr(key, fallback) {
+    var v = tRaw(key);
+    return (v == null) ? fallback : v;
+  }
+  function add(obj) {
+    if (!obj) return;
+    ['zh', 'en'].forEach(function (k) {
+      if (obj[k]) for (var key in obj[k]) dict[k][key] = obj[k][key];
+    });
+  }
+  /* tr：短语表直译（原文进，译文出；zh 侧原样返回）-JS 动态文案直接用 */
+  function tr(s) {
+    if (lang === 'zh') return s;
+    var v = lookup(normText(s));
+    return (v == null) ? s : v;
+  }
+  function addPhrase(map) {
+    if (!map) return;
+    for (var k in map) { if (map[k] != null) phrase[normText(k)] = String(map[k]); }
+  }
+  /* 规则表：[[/正则/, '替换（可用 $1）'], ...] - 处理「已复习 3」「12 天有记录」这类数字拼接 */
+  var rules = [];
+  function addRules(list) {
+    if (!list) return;
+    for (var i = 0; i < list.length; i++) {
+      try {
+        var re = (list[i][0] instanceof RegExp) ? list[i][0] : new RegExp(list[i][0]);
+        rules.push([re, String(list[i][1])]);
+      } catch (e) {}
+    }
+  }
+  function lookup(t) {
+    var v = phrase[t];
+    if (v != null) return v;
+    for (var i = 0; i < rules.length; i++) {
+      try { if (rules[i][0].test(t)) return t.replace(rules[i][0], rules[i][1]); } catch (e) {}
+    }
+    return null;
+  }
+
+  /* ---- 短语表扫描（静态 + 动态） ---- */
+  function normText(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
+  var PTAGS = ['title', 'placeholder', 'aria-label', 'alt'];
+  function translText(node) {
+    var raw = node.nodeValue;
+    if (!raw) return;
+    var rec = node.__i18nR;
+    if (rec) {
+      if (lang === 'zh') {
+        if (raw === rec.en) { node.nodeValue = rec.orig; delete node.__i18nR; }
+        else if (raw !== rec.orig) { delete node.__i18nR; }
+        return;
+      }
+      if (raw === rec.en) return;
+      if (raw === rec.orig) { node.nodeValue = rec.en; return; }
+      delete node.__i18nR;
+    }
+    var out = lookup(normText(raw));
+    if (out == null) return;
+    if (lang === 'en') { if (raw !== out) { node.__i18nR = { orig: raw, en: out }; node.nodeValue = out; } }
+  }
+  function translAttrs(el) {
+    if (!el.getAttribute) return;
+    for (var i = 0; i < PTAGS.length; i++) {
+      var a = PTAGS[i], v = el.getAttribute(a);
+      if (v == null || v === '') continue;
+      var rec = el.__i18nA && el.__i18nA[a];
+      if (rec) {
+        if (lang === 'zh') {
+          if (v === rec.en) { el.setAttribute(a, rec.orig); delete el.__i18nA[a]; }
+          else if (v !== rec.orig) { delete el.__i18nA[a]; }
+          continue;
+        }
+        if (v === rec.en) continue;
+        if (v === rec.orig) { el.setAttribute(a, rec.en); continue; }
+        delete el.__i18nA[a];
+      }
+      var out = lookup(normText(v));
+      if (out == null) continue;
+      if (lang === 'en') {
+        if (v !== out) { if (!el.__i18nA) el.__i18nA = {}; el.__i18nA[a] = { orig: v, en: out }; el.setAttribute(a, out); }
+      }
+    }
+  }
+  function scanNode(node) {
+    if (!node) return;
+    if (node.nodeType === 9) node = node.documentElement || node.body;   /* 文档节点 → 转元素 */
+    if (!node) return;
+    if (node.nodeType === 3) { translText(node); return; }
+    if (node.nodeType !== 1) return;
+    var tag = node.tagName;
+    if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'NOSCRIPT') return;
+    if (node.hasAttribute('data-i18n-skip')) return;
+    translAttrs(node);
+    for (var c = node.firstChild; c; c = c.nextSibling) scanNode(c);
+  }
+  function scan(root) { try { scanNode(root || document.body || document.documentElement); } catch (e) {} }
+  /* 动态内容自动翻译（MutationObserver，逐节点增量，无重扫） */
+  var moOn = false;
+  function auto(root) {
+    if (moOn || typeof MutationObserver === 'undefined') return;
+    var target = root || document.body;
+    if (!target) {   /* head 提前注入时 body 还没解析出来，等 DOM ready */
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { auto(root); });
+      return;
+    }
+    moOn = true;
+    try {
+      var mo = new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          var m = muts[i];
+          try {
+            if (m.type === 'characterData') translText(m.target);
+            else if (m.type === 'attributes') translAttrs(m.target);
+            else if (m.type === 'childList') {
+              for (var j = 0; j < m.addedNodes.length; j++) scanNode(m.addedNodes[j]);
+            }
+          } catch (e) {}
+        }
+      });
+      mo.observe(target, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: PTAGS });
+    } catch (e) {}
+  }
+
+  /* ---- 日期 / 数字 ---- */
+  var MN_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var WD_ZH = '日一二三四五六';
+  var WD_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  function fmtDate(d, opt) {
+    if (typeof d === 'string') { var a = d.split('-'); d = new Date(+a[0], (+a[1] || 1) - 1, +a[2] || 1); }
+    if (!(d instanceof Date) || isNaN(d.getTime())) return '';
+    opt = opt || {};
+    var s;
+    if (lang === 'zh') {
+      s = d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日';
+      if (opt.weekday) s += ' · 星期' + WD_ZH.charAt(d.getDay());
+    } else {
+      s = MN_EN[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+      if (opt.weekday) s += ' · ' + WD_EN[d.getDay()];
+    }
+    return s;
+  }
+  function fmtNum(n) {
+    try { return Number(n).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US'); }
+    catch (e) { return String(n); }
+  }
+
+  /* ---- DOM 标注应用（标注模式；词条缺失时恢复原文 - 保证切回中文能还原） ---- */
+  function apply(root) {
+    root = root || document;
+    try {
+      var i, list, v, el;
+      list = root.querySelectorAll('[data-i18n]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrig == null) el.__i18nOrig = el.textContent;
+        v = tRaw(el.getAttribute('data-i18n'));
+        el.textContent = (v != null) ? v : el.__i18nOrig;
+      }
+      list = root.querySelectorAll('[data-i18n-html]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigHTML == null) el.__i18nOrigHTML = el.innerHTML;
+        v = tRaw(el.getAttribute('data-i18n-html'));
+        el.innerHTML = (v != null) ? v : el.__i18nOrigHTML;
+      }
+      list = root.querySelectorAll('[data-i18n-title]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigTitle == null) el.__i18nOrigTitle = el.title;
+        v = tRaw(el.getAttribute('data-i18n-title'));
+        el.title = (v != null) ? v : el.__i18nOrigTitle;
+      }
+      list = root.querySelectorAll('[data-i18n-aria]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAria == null) el.__i18nOrigAria = el.getAttribute('aria-label') || '';
+        v = tRaw(el.getAttribute('data-i18n-aria'));
+        el.setAttribute('aria-label', (v != null) ? v : el.__i18nOrigAria);
+      }
+      list = root.querySelectorAll('[data-i18n-ph]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigPh == null) el.__i18nOrigPh = el.placeholder || '';
+        v = tRaw(el.getAttribute('data-i18n-ph'));
+        el.placeholder = (v != null) ? v : el.__i18nOrigPh;
+      }
+      list = root.querySelectorAll('[data-i18n-alt]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAlt == null) el.__i18nOrigAlt = el.getAttribute('alt') || '';
+        v = tRaw(el.getAttribute('data-i18n-alt'));
+        el.setAttribute('alt', (v != null) ? v : el.__i18nOrigAlt);
+      }
+      /* 标题（短语表优先，其次 page.title 词条） */
+      if (!bd.__origTitle) bd.__origTitle = document.title;
+      var tv = lookup(normText(bd.__origTitle));
+      if (tv == null) tv = tRaw('page.title');
+      if (tv != null) { document.title = (lang === 'en') ? tv : bd.__origTitle; bd.__titleTouched = true; }
+      else if (bd.__titleTouched) { document.title = bd.__origTitle; }
+      document.documentElement.lang = (lang === 'zh') ? 'zh-CN' : 'en';
+      syncSwitch();
+    } catch (e) {}
+  }
+
+  function applyLang(v) {
+    lang = v;
+    persist(v);
+    apply(document);
+    scan(document);
+    for (var i = 0; i < listeners.length; i++) { try { listeners[i](lang); } catch (e) {} }
+    try {
+      var live = document.getElementById('i18n-live');
+      if (live) live.textContent = (lang === 'zh') ? '已切换到中文' : 'Switched to English';
+    } catch (e) {}
+  }
+  /* 切换转场（仿主页主题转场）：黑幕淡入 → 光晕从切换器扩散 → 幕中换语言 → 揭幕；可打断；尊重 reduced-motion */
+  var tid = 0, stage = null;
+  function ensureStage() {
+    if (stage) return stage;
+    var ov = document.createElement('div'); ov.className = 'i18n-veil';
+    var hl = document.createElement('div'); hl.className = 'i18n-halo';
+    var host = document.body || document.documentElement;
+    host.appendChild(ov); host.appendChild(hl);
+    stage = { ov: ov, hl: hl };
+    return stage;
+  }
+  function set(v) {
+    v = norm(v);
+    if (!v) return;
+    if (v === lang) { apply(document); scan(document); return; }
+    var calm = true;
+    try { calm = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) {}
+    if (!calm || !document.body) { applyLang(v); return; }
+    try {
+      var st = ensureStage(), my = ++tid;
+      var x = (window.innerWidth || 360) - 80, y = (window.innerHeight || 640) - 34;
+      try { if (swEl) { var r = swEl.getBoundingClientRect(); x = r.left + r.width / 2; y = r.top + r.height / 2; } } catch (e) {}
+      st.ov.style.setProperty('--ix', x + 'px'); st.ov.style.setProperty('--iy', y + 'px');
+      st.hl.style.setProperty('--ix', x + 'px'); st.hl.style.setProperty('--iy', y + 'px');
+      st.ov.classList.remove('out'); st.ov.classList.add('on'); st.ov.style.display = 'block';
+      st.hl.classList.remove('go'); void st.hl.offsetWidth; st.hl.classList.add('go');
+      setTimeout(function () {
+        if (my !== tid) return;
+        applyLang(v);
+        st.ov.classList.remove('on'); st.ov.classList.add('out');
+        setTimeout(function () {
+          if (my !== tid) return;
+          st.ov.style.display = 'none'; st.ov.classList.remove('out');
+        }, 520);
+      }, 430);
+    } catch (e) { applyLang(v); }
+  }
+  function onChange(fn) { if (typeof fn === 'function') listeners.push(fn); }
+  function getLang() { return lang; }
+
+  /* ---- 切换入口（右下角胶囊，自动注入） ---- */
+  var SW_CSS = '.i18n-sw{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:9992;display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:rgba(17,24,39,.74);-webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);border:1px solid rgba(255,255,255,.26);box-shadow:0 6px 20px rgba(0,0,0,.28);font-family:inherit}' +
+    '.i18n-sw:hover{background:rgba(17,24,39,.86);border-color:rgba(255,255,255,.38)}' +
+    '.i18n-gl{font-size:13px;line-height:1;padding:0 5px 0 8px;opacity:.95;pointer-events:none}' +
+    '.i18n-sw button{border:0;background:transparent;color:rgba(255,255,255,.78);font-size:12px;font-weight:700;letter-spacing:.4px;padding:6px 11px;border-radius:999px;cursor:pointer;font-family:inherit;transition:all .18s ease;line-height:1}' +
+    '.i18n-sw button:hover{color:#fff;background:rgba(255,255,255,.12)}' +
+    '.i18n-sw button:focus-visible{outline:2px solid #7dd3fc;outline-offset:1px}' +
+    '.i18n-sw button.on{background:rgba(255,255,255,.92);color:#1f2937;box-shadow:0 2px 8px rgba(0,0,0,.25)}' +
+    '.i18n-sw button:active{transform:translateY(1px)}' +
+    '.i18n-veil{position:fixed;inset:0;z-index:9990;pointer-events:none;display:none;opacity:0;background:#060a16;transition:opacity .42s ease}' +
+    '.i18n-veil.on{opacity:1}' +
+    '.i18n-veil.out{opacity:0;transition:opacity .5s cubic-bezier(.2,.8,.3,1)}' +
+    '.i18n-halo{position:fixed;z-index:9991;left:var(--ix,92%);top:var(--iy,93%);width:14px;height:14px;border-radius:50%;box-sizing:border-box;pointer-events:none;display:none;border:2px solid rgba(198,226,255,.95);box-shadow:0 0 24px 6px rgba(137,194,255,.6),0 0 70px 20px rgba(137,194,255,.3),inset 0 0 20px rgba(198,226,255,.5)}' +
+    '.i18n-halo.go{display:block;animation:i18nHalo .85s cubic-bezier(.16,.7,.3,1) forwards}' +
+    '@keyframes i18nHalo{0%{opacity:0;transform:translate(-50%,-50%) scale(.01)}22%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(58)}}' +
+    '.i18n-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}' +
+    '@media (max-width:620px){.i18n-sw{right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px))}.i18n-sw button{padding:5px 9px;font-size:11.5px}}';
+
+  var swEl = null;
+  function buildSwitch() {
+    try {
+      if (!document.body) return;
+      var exist = document.querySelector('.i18n-sw');
+      if (exist) { swEl = exist; syncSwitch(); return; }
+      var st = document.createElement('style');
+      st.textContent = SW_CSS;
+      (document.head || document.documentElement).appendChild(st);
+      var wrap = document.createElement('div');
+      wrap.className = 'i18n-sw';
+      wrap.setAttribute('role', 'group');
+      wrap.setAttribute('aria-label', '切换语言 / Switch language');
+      wrap.setAttribute('title', '切换语言 / Switch language');
+      var gl = document.createElement('span');
+      gl.className = 'i18n-gl';
+      gl.textContent = '🌐';
+      gl.setAttribute('aria-hidden', 'true');
+      wrap.appendChild(gl);
+      [['zh', '中文'], ['en', 'English']].forEach(function (p) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('data-lang', p[0]);
+        b.textContent = p[1];
+        b.addEventListener('click', function () { set(p[0]); });
+        wrap.appendChild(b);
+      });
+      var live = document.createElement('span');
+      live.id = 'i18n-live';
+      live.className = 'i18n-sr';
+      live.setAttribute('aria-live', 'polite');
+      wrap.appendChild(live);
+      document.body.appendChild(wrap);
+      swEl = wrap;
+      syncSwitch();
+    } catch (e) {}
+  }
+  function syncSwitch() {
+    try {
+      if (!swEl) return;
+      var bs = swEl.querySelectorAll('button[data-lang]');
+      for (var i = 0; i < bs.length; i++) {
+        var on = bs[i].getAttribute('data-lang') === lang;
+        bs[i].classList.toggle('on', on);
+        bs[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    } catch (e) {}
+  }
+
+  /* ---- 启动 ---- */
+  lang = detect();
+  function boot() {
+    buildSwitch();
+    apply(document);
+    scan(document);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+
+  return {
+    t: t, tOr: tOr, tr: tr, set: set, apply: apply, scan: scan, auto: auto,
+    phrase: addPhrase, rules: addRules, add: add, lang: getLang, onChange: onChange,
+    fmtDate: fmtDate, fmtNum: fmtNum
+  };
+})();
+
+/* ---- 短语表（中文原文 → English）---- */
+I18N.phrase({"生命游戏花园 · startian.top": "Game of Life Garden · startian.top","第": "Gen ","活细胞": "Live cells","▶ 生长": "▶ Grow","🌱 撒种子": "🌱 Sow seeds","🧹 清空": "🧹 Clear","✳ 种植图案…": "✳ Plant a pattern…","滑翔机": "Glider","轻型飞船": "Lightweight spaceship","脉冲星": "Pulsar","R-五连": "R-pentomino","💾 存物种": "💾 Save species","⚔ 物种对撞": "⚔ Species collision","← 返回主页": "← Back to home","拖动平移 · 滚轮缩放 · 按住鼠标画细胞 · 选「种植图案」后点网格放置 · 右键擦除": "Drag to pan · scroll to zoom · hold the mouse to draw cells · pick “Plant a pattern”, then click the grid to place · right-click to erase","他留下的一颗种子（五格，试试照着摆出来）": "The seed he left (five cells, try to lay it out)","一颗五格的种子": "A five-cell seed","🏆 成就解锁：": "🏆 Achievement unlocked: ","播种者": "Sower","🕊 世界已稳定（第": "🕊 World stabilized (Gen ","代）": ")","⏸ 暂停": "⏸ Pause","干净的 3×3 窗口": "A clean 3×3 window","📜 一颗小小的种子，它好像活了……（找到一篇日志 · 生命游戏）": "📜 A tiny little seed, it seems to have come alive… (found a log · Game of Life)","「他留下的种子」——就是这五个点的样子，照着摆出来": "“The seed he left” — it looks just like these five dots, copy the shape","✳ 点击网格放置「": "✳ Click the grid to place “","🧬 已放置物种「": "🧬 Placed species “","生命造物": "Life Form","先撒点种子再保存吧": "Sow some seeds before saving","物种": "Species","💾 已保存「": "💾 Saved “","细胞）": " cells)","播种者之手": "Sower's Hand","至少要有两个物种才能对撞（先各画一个再存）": "You need at least two species to collide them (draw and save each one first)","」——开撞！": "” — let the collision begin!","物种碰撞实验": "Species collision experiment","🌱 撒下了一片种子": "🌱 Sowed a patch of seeds","📜 找到一篇日志（去主页头像连点 7 下看全文）": "📜 Found a log (tap the homepage avatar 7 times to read it)"});
+/* ---- 数字/日期拼接规则 ---- */
+I18N.rules([["^代$", ""], ["^🧬 物种(\\d+)\\((\\d+) 细胞\\)$", "🧬 Species $1 ($2 cells)"], ["^🧬 (.+)\\((\\d+) 细胞\\)$", "🧬 $1 ($2 cells)"]]);
+I18N.auto();
+/* ==== i18n-kit v1.2 end ==== */
+</script>
+<script>
+(function () {
+  'use strict';
+  /* ============ 🏆 跨站成就 SDK ============ */
+  var STAch = (function () {
+    var KEY = 'st_ach';
+    function readCookie() {
+      var m = document.cookie.match(/(?:^|;\s*)st_ach=([^;]*)/);
+      if (!m) return null;
+      try { return JSON.parse(decodeURIComponent(m[1])) || []; } catch (e) { return null; }
+    }
+    function writeCookie(list) {
+      try {
+        var v = encodeURIComponent(JSON.stringify(list));
+        if (v.length < 3800) document.cookie = 'st_ach=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+      } catch (e) {}
+    }
+    var list = readCookie();
+    if (!list) { try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { list = []; } }
+    if (!Array.isArray(list)) list = [];
+    function save() {
+      try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+      writeCookie(list);
+    }
+    function unlock(id, name, ico) {
+      if (list.indexOf(id) >= 0) return false;
+      list.push(id);
+      save();
+      try {
+        var el = document.createElement('div');
+        el.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9999;background:rgba(12,32,28,.95);color:#fff;border:1px solid rgba(90,220,180,.45);border-radius:999px;padding:12px 22px;font:700 13.5px/1.4 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:86vw';
+        el.textContent = I18N.tr('🏆 成就解锁：') + (ico ? ico + ' ' : '') + I18N.tr(name || id);
+        document.body.appendChild(el);
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        setTimeout(function () {
+          el.style.opacity = '0';
+          el.style.transform = 'translateX(-50%) translateY(16px)';
+          setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+        }, 3200);
+      } catch (e) {}
+      return true;
+    }
+    return { list: function () { return list.slice(); }, has: function (id) { return list.indexOf(id) >= 0; }, unlock: unlock };
+  })();
+  window.STAch = STAch;
+  setTimeout(function () { STAch.unlock('site.life', '播种者', '🦠'); }, 600);
+
+  /* ============ 世界 ============ */
+  var cv = document.getElementById('garden');
+  var ctx = cv.getContext('2d');
+  var dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+  var W = 0, H = 0;
+  var CELL = 14;                      /* 基准格子像素 */
+  var view = { x: 0, y: 0, s: 1 };    /* 平移 + 缩放 */
+  var GW = 0, GH = 0;                 /* 世界格子尺寸 */
+  var cur = null, nxt = null, age = null;
+  var running = false, gen = 0;
+  var speed = 16;                     /* 代/秒 */
+  var lastStep = 0;
+
+  function worldSize() {
+    GW = Math.ceil(W / CELL * 3 / view.s) + 8;
+    GH = Math.ceil(H / CELL * 3 / view.s) + 8;
+    GW = Math.min(GW, 2200); GH = Math.min(GH, 2200);
+  }
+  function resizeWorld(keep) {
+    var oc = cur, oa = age, oGW = GW, oGH = GH;
+    worldSize();
+    cur = new Uint8Array(GW * GH);
+    nxt = new Uint8Array(GW * GH);
+    age = new Uint16Array(GW * GH);
+    if (keep && oc) {
+      for (var y = 0; y < Math.min(oGH, GH); y++) {
+        for (var x = 0; x < Math.min(oGW, GW); x++) {
+          cur[y * GW + x] = oc[y * oGW + x];
+          age[y * GW + x] = oa[y * oGW + x];
+        }
+      }
+    }
+  }
+
+  /* 屏幕 ↔ 格子坐标 */
+  function scr2cell(px, py) {
+    var cx = W / 2 + view.x, cy = H / 2 + view.y;
+    var gx = Math.floor((px - cx) / (CELL * view.s) + GW / 2);
+    var gy = Math.floor((py - cy) / (CELL * view.s) + GH / 2);
+    return { x: gx, y: gy };
+  }
+  function cell2scr(gx, gy) {
+    var cx = W / 2 + view.x, cy = H / 2 + view.y;
+    return { x: cx + (gx - GW / 2) * CELL * view.s, y: cy + (gy - GH / 2) * CELL * view.s };
+  }
+
+  /* ============ 演化（B3/S23）============ */
+  function step() {
+    var changed = 0;
+    for (var y = 0; y < GH; y++) {
+      for (var x = 0; x < GW; x++) {
+        var i = y * GW + x;
+        var n = 0;
+        for (var dy = -1; dy <= 1; dy++) {
+          var yy = y + dy; if (yy < 0 || yy >= GH) continue;
+          for (var dx = -1; dx <= 1; dx++) {
+            if (!dx && !dy) continue;
+            var xx = x + dx; if (xx < 0 || xx >= GW) continue;
+            n += cur[yy * GW + xx];
+          }
+        }
+        var a = cur[i];
+        var na = a ? ((n === 2 || n === 3) ? 1 : 0) : (n === 3 ? 1 : 0);
+        nxt[i] = na;
+        if (na) { age[i] = a ? Math.min(65535, age[i] + 1) : 1; }
+        if (na !== a) changed++;
+      }
+    }
+    var t = cur; cur = nxt; nxt = t;
+    gen++;
+    if (changed === 0) { running = false; updatePlayBtn(); toast('🕊 世界已稳定（第 ' + gen + ' 代）'); }
+    return changed;
+  }
+
+  /* ============ 渲染 ============ */
+  function draw() {
+    ctx.fillStyle = '#081018';
+    ctx.fillRect(0, 0, cv.width, cv.height);
+    var cs = CELL * view.s * dpr;
+    /* 网格线（够大时才画） */
+    if (cs >= 20) {
+      ctx.strokeStyle = 'rgba(70,160,140,.10)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      var o = cell2scr(0, 0);
+      var sx0 = o.x * dpr, sy0 = o.y * dpr;
+      for (var gx = 0; gx <= GW; gx++) {
+        var px = sx0 + gx * cs;
+        if (px < -10 || px > cv.width + 10) continue;
+        ctx.moveTo(px, Math.max(0, sy0)); ctx.lineTo(px, Math.min(cv.height, sy0 + GH * cs));
+      }
+      for (var gy = 0; gy <= GH; gy++) {
+        var py = sy0 + gy * cs;
+        if (py < -10 || py > cv.height + 10) continue;
+        ctx.moveTo(Math.max(0, sx0), py); ctx.lineTo(Math.min(cv.width, sx0 + GW * cs), py);
+      }
+      ctx.stroke();
+    }
+    /* 细胞：新生青绿 → 老年紫（按年龄渐变）+ 轻发光 */
+    var r = cs * 0.34;
+    for (var y = 0; y < GH; y++) {
+      for (var x = 0; x < GW; x++) {
+        var i = y * GW + x;
+        if (!cur[i]) continue;
+        var p = cell2scr(x, y);
+        var px2 = (p.x + cs / 2 / dpr) * dpr, py2 = (p.y + cs / 2 / dpr) * dpr;
+        if (px2 < -20 || px2 > cv.width + 20 || py2 < -20 || py2 > cv.height + 20) continue;
+        var a2 = Math.min(1, age[i] / 14);
+        var rr = Math.round(60 + 130 * (1 - a2));
+        var gg = Math.round(235 - 70 * a2);
+        var bb = Math.round(170 + 60 * a2);
+        ctx.fillStyle = 'rgba(' + rr + ',' + gg + ',' + bb + ',' + (0.95 - 0.35 * a2).toFixed(2) + ')';
+        if (age[i] === 1) {
+          ctx.beginPath(); ctx.arc(px2, py2, r * 1.8, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(95,240,192,.22)';
+          ctx.fill();
+          ctx.fillStyle = 'rgba(150,255,220,1)';
+        }
+        ctx.beginPath(); ctx.arc(px2, py2, r, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  }
+
+  function updateStats() {
+    var n = 0;
+    for (var i = 0; i < cur.length; i++) if (cur[i]) n++;
+    document.getElementById('gen').textContent = gen;
+    document.getElementById('alive').textContent = n;
+    return n;
+  }
+
+  var rafActive = false;
+  function loop(ts) {
+    if (running && ts - lastStep >= 1000 / speed) {
+      lastStep = ts;
+      step();
+      draw();
+      updateStats();
+    }
+    if (rafActive) requestAnimationFrame(loop);
+  }
+  function startLoop() { if (!rafActive) { rafActive = true; requestAnimationFrame(loop); } }
+
+  function updatePlayBtn() {
+    document.getElementById('btnPlay').textContent = running ? '⏸ 暂停' : '▶ 生长';
+  }
+
+  /* ============ 图案库 ============ */
+  var PATTERNS = {
+    glider: [[1,0],[2,1],[0,2],[1,2],[2,2]],
+    lwss: [[1,0],[4,0],[0,1],[0,2],[4,2],[0,3],[1,3],[2,3],[3,3]],
+    pulsar: (function () {
+      var p = [];
+      var arms = [[2,0],[3,0],[4,0],[8,0],[9,0],[10,0],[0,2],[5,2],[7,2],[12,2],[0,3],[5,3],[7,3],[12,3],[0,4],[5,4],[7,4],[12,4],[2,5],[3,5],[4,5],[8,5],[9,5],[10,5]];
+      arms.forEach(function (a) { p.push([a[0], a[1]]); });
+      arms.forEach(function (a) { p.push([a[1], a[0]]); });
+      arms.forEach(function (a) { p.push([12 - a[0], 12 - a[1]]); });
+      arms.forEach(function (a) { p.push([12 - a[1], 12 - a[0]]); });
+      return p;
+    })(),
+    rpent: [[1,0],[2,0],[0,1],[1,1],[1,2]]
+  };
+  var plantMode = '';
+
+  /* ============ 交互 ============ */
+  var ptrs = new Map();
+  var dragging = false, painting = false, erasing = false, moved = false, lastPt = null;
+  var pinchBase = null;
+
+  cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+  cv.addEventListener('pointerdown', function (e) {
+    try { cv.setPointerCapture(e.pointerId); } catch (er) {}
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (ptrs.size === 2) {
+      var arr = Array.from(ptrs.values());
+      pinchBase = {
+        d: Math.max(1, Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y)),
+        cx: (arr[0].x + arr[1].x) / 2, cy: (arr[0].y + arr[1].y) / 2,
+        s: view.s, vx: view.x, vy: view.y
+      };
+      painting = false;
+      return;
+    }
+    moved = false;
+    lastPt = { x: e.clientX, y: e.clientY };
+    if (plantMode) return;   /* 种植模式：按下即放置，由 up 处理 */
+    if (e.button === 2) { erasing = true; painting = true; }
+    else { erasing = false; painting = true; }
+    paintAt(e.clientX, e.clientY);
+  });
+
+  /* 🔮 ARG · 五格小种子（R-pentomino）检测 v2：
+   棋盘任何"干净的 3×3 窗口"里出现种子形状（8 向旋转/镜像）即触发；
+   不再要求全盘恰好 5 格——棋盘上还有别的细胞也能触发 */
+  var ARG_SEED_SHAPES = (function () {
+    var base = [[1, 0], [2, 0], [0, 1], [1, 1], [1, 2]];
+    var seen = {}, out = [];
+    var t = base;
+    for (var r = 0; r < 4; r++) {
+      [t, t.map(function (p) { return [-p[0], p[1]]; })].forEach(function (v) {
+        var mx = 9, my = 9;
+        v.forEach(function (p) { if (p[0] < mx) mx = p[0]; if (p[1] < my) my = p[1]; });
+        var cells = v.map(function (p) { return [p[0] - mx, p[1] - my]; })
+          .sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+        var key = cells.map(function (p) { return p.join(','); }).join(';');
+        if (seen[key]) return;
+        seen[key] = 1;
+        var aliveSet = {};
+        cells.forEach(function (p) { aliveSet[p[0] + ',' + p[1]] = 1; });
+        var dead = [];
+        for (var x = 0; x < 3; x++) for (var y = 0; y < 3; y++) if (!aliveSet[x + ',' + y]) dead.push([x, y]);
+        out.push({ alive: cells, dead: dead });
+      });
+      t = t.map(function (p) { return [p[1], -p[0]]; });
+    }
+    return out;
+  })();
+  var __argSeedT = 0;
+  function __argAlive(x, y) {
+    if (x < 0 || y < 0 || x >= GW || y >= GH) return false;
+    return !!cur[y * GW + x];
+  }
+  function argCheckSeed() {
+    try {
+      var found = false;
+      for (var i = 0; i < cur.length && !found; i++) {
+        if (!cur[i]) continue;
+        var ax = i % GW, ay = (i / GW) | 0;
+        for (var sh_i = 0; sh_i < ARG_SEED_SHAPES.length && !found; sh_i++) {
+          var sh = ARG_SEED_SHAPES[sh_i];
+          for (var k = 0; k < 5 && !found; k++) {
+            var bx = ax - sh.alive[k][0], by = ay - sh.alive[k][1];
+            if (bx < 0 || by < 0 || bx + 2 >= GW || by + 2 >= GH) continue;
+            var ok = true;
+            for (var m = 0; m < 5; m++) {
+              if (!__argAlive(bx + sh.alive[m][0], by + sh.alive[m][1])) { ok = false; break; }
+            }
+            if (!ok) continue;
+            for (var d = 0; d < 4; d++) {
+              if (__argAlive(bx + sh.dead[d][0], by + sh.dead[d][1])) { ok = false; break; }
+            }
+            if (ok) found = true;
+          }
+        }
+      }
+      if (found && window.ARG && !ARG.has('log7')) {
+        if (ARG.collect('log7')) ARG.toast('📜 一颗小小的种子，它好像活了……（找到一篇日志 · 生命游戏）');
+      }
+    } catch (e) {}
+  }
+  function argCheckSeedSoon() { clearTimeout(__argSeedT); __argSeedT = setTimeout(argCheckSeed, 150); }
+  function paintAt(px, py) {
+    var c = scr2cell(px, py);
+    if (c.x < 0 || c.y < 0 || c.x >= GW || c.y >= GH) return;
+    var i = c.y * GW + c.x;
+    cur[i] = erasing ? 0 : 1;
+    if (!erasing) age[i] = 1;
+    draw();
+    argCheckSeedSoon();
+  }
+
+  cv.addEventListener('pointermove', function (e) {
+    if (!ptrs.has(e.pointerId)) return;
+    var prev = ptrs.get(e.pointerId);
+    var dx = e.clientX - prev.x, dy = e.clientY - prev.y;
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (Math.abs(e.clientX - (lastPt ? lastPt.x : e.clientX)) > 2 || Math.abs(dy) > 2) moved = true;
+    if (ptrs.size === 2 && pinchBase) {
+      var arr = Array.from(ptrs.values());
+      var d = Math.max(1, Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y));
+      var cx = (arr[0].x + arr[1].x) / 2, cy = (arr[0].y + arr[1].y) / 2;
+      var k = (Math.max(0.35, Math.min(3, pinchBase.s * d / pinchBase.d))) / pinchBase.s;
+      var Cx = W / 2, Cy = H / 2;
+      view.s = pinchBase.s * k;
+      view.x = pinchBase.vx + (cx - pinchBase.cx) + (pinchBase.cx - Cx) * (1 - k);
+      view.y = pinchBase.vy + (cy - pinchBase.cy) + (pinchBase.cy - Cy) * (1 - k);
+      draw();
+      return;
+    }
+    if (painting) {
+      paintAt(e.clientX, e.clientY);
+      return;
+    }
+    /* 平移画布 */
+    view.x += dx;
+    view.y += dy;
+    draw();
+  });
+
+  function ptrUp(e) {
+    var wasMoved = moved;
+    ptrs.delete(e.pointerId);
+    if (ptrs.size < 2) pinchBase = null;
+    if (plantMode && !wasMoved && !pinching()) {
+      var c = scr2cell(e.clientX, e.clientY);
+      plantAt(c.x, c.y, PATTERNS[plantMode]);
+      plantMode = '';
+      document.getElementById('selPattern').value = '';
+    }
+    painting = false;
+    erasing = false;
+    if (ptrs.size === 0) {
+      if (!wasMoved) { /* 单击无移动：保留刚画的细胞 */ }
+      updateStats();
+    }
+  }
+  function pinching() { return ptrs.size >= 2; }
+  cv.addEventListener('pointerup', ptrUp);
+  cv.addEventListener('pointercancel', function (e) { ptrs.delete(e.pointerId); painting = false; });
+
+  cv.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    var before = view.s;
+    var next = Math.max(0.35, Math.min(3, before * Math.exp(-e.deltaY * 0.0016)));
+    if (next === before) return;
+    var cx = W / 2, cy = H / 2;
+    view.x += (before - next) * (e.clientX - cx);
+    view.y += (before - next) * (e.clientY - cy);
+    view.s = next;
+    if (view.s > 1.4 && GW * CELL * view.s > 3 * W) resizeWorld(true);
+    draw();
+  }, { passive: false });
+
+  /* 放置图案（以 c 为中心） */
+  function plantAt(cx, cy, pat) {
+    if (!pat) return;
+    var minx = 1e9, miny = 1e9, maxx = -1e9, maxy = -1e9;
+    pat.forEach(function (p) { minx = Math.min(minx, p[0]); miny = Math.min(miny, p[1]); maxx = Math.max(maxx, p[0]); maxy = Math.max(maxy, p[1]); });
+    var ox = cx - Math.round((minx + maxx) / 2), oy = cy - Math.round((miny + maxy) / 2);
+    pat.forEach(function (p) {
+      var x = ox + p[0], y = oy + p[1];
+      if (x < 2 || y < 2 || x >= GW - 2 || y >= GH - 2) return;
+      cur[y * GW + x] = 1;
+      age[y * GW + x] = 1;
+    });
+    draw(); updateStats();
+    argCheckSeedSoon();
+  }
+  /* 🔮 ARG 测试钩子（闭包内，可访问网格） */
+  window.__lifeARG = {
+    check: argCheckSeed,
+    setCells: function (list) {
+      var cx = Math.floor(GW / 2), cy = Math.floor(GH / 2);
+      for (var i = 0; i < cur.length; i++) { cur[i] = 0; age[i] = 0; }
+      list.forEach(function (p) {
+        var x = cx + p[0], y = cy + p[1];
+        if (x >= 0 && x < GW && y >= 0 && y < GH) { cur[y * GW + x] = 1; age[y * GW + x] = 1; }
+      });
+      draw(); updateStats();
+      argCheckSeed();
+      return true;
+    },
+    placePattern: function (list) {
+      var cx = Math.floor(GW / 2), cy = Math.floor(GH / 2);
+      for (var i = 0; i < cur.length; i++) { cur[i] = 0; age[i] = 0; }
+      list.forEach(function (p) {
+        var x = cx + p[0], y = cy + p[1];
+        if (x >= 0 && x < GW && y >= 0 && y < GH) { cur[y * GW + x] = 1; age[y * GW + x] = 1; }
+      });
+      draw(); updateStats();
+      argCheckSeed();
+      return true;
+    },
+    aliveCells: function () {
+      var out = [];
+      for (var i = 0; i < cur.length; i++) if (cur[i]) out.push([i % GW, Math.floor(i / GW)]);
+      return out;
+    }
+  };
+  var sBadge = document.getElementById('argSeed');
+  if (sBadge) sBadge.addEventListener('click', function () {
+    try { if (window.ARG) ARG.toast('「他留下的种子」——就是这五个点的样子，照着摆出来'); } catch (e) {}
+  });
+
+  document.getElementById('selPattern').addEventListener('change', function () {
+    plantMode = this.value;
+    if (plantMode) toast('✳ 点击网格放置「' + this.selectedOptions[0].textContent + '」');
+  });
+
+  /* ============ 物种保存 / 对撞 ============ */
+  var SPKEY = 'life_species_v1';
+  function loadSpecies() { try { return JSON.parse(localStorage.getItem(SPKEY) || '[]'); } catch (e) { return []; } }
+  function saveSpecies(list) { try { localStorage.setItem(SPKEY, JSON.stringify(list)); } catch (e) {} }
+  function speciesSnapshot() {
+    var alive = [];
+    for (var i = 0; i < cur.length; i++) if (cur[i]) alive.push([i % GW, Math.floor(i / GW)]);
+    if (!alive.length) return null;
+    var minx = 1e9, miny = 1e9;
+    alive.forEach(function (p) { minx = Math.min(minx, p[0]); miny = Math.min(miny, p[1]); });
+    var norm = alive.map(function (p) { return [p[0] - minx, p[1] - miny]; });
+    return { cells: norm, n: norm.length };
+  }
+
+  function renderSpList() {
+    var list = loadSpecies();
+    var wrap = document.getElementById('spList');
+    wrap.innerHTML = list.map(function (sp, i) {
+      return '<button type="button" data-sp="' + i + '" title="点击放置物种">🧬 ' + sp.name + '(' + sp.n + ' 细胞)</button>';
+    }).join('');
+  }
+  document.getElementById('spList').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-sp]');
+    if (!b) return;
+    var list = loadSpecies();
+    var sp = list[+b.getAttribute('data-sp')];
+    if (!sp) return;
+    plantAt(Math.floor(GW / 2), Math.floor(GH / 2), sp.cells);
+    toast('🧬 已放置物种「' + sp.name + '」');
+    try { STAch.unlock('life.pattern', '生命造物', '🧬'); } catch (er) {}
+  });
+
+  document.getElementById('btnSave').addEventListener('click', function () {
+    var snap = speciesSnapshot();
+    if (!snap) { toast('先撒点种子再保存吧'); return; }
+    var list = loadSpecies();
+    var name = '物种' + (list.length + 1);
+    list.push({ name: name, cells: snap.cells, n: snap.n, at: Date.now() });
+    saveSpecies(list.slice(-24));
+    renderSpList();
+    toast('💾 已保存「' + name + '」（' + snap.n + ' 细胞）');
+    try { STAch.unlock('life.seed', '播种者之手', '🌱'); } catch (e) {}
+  });
+
+  document.getElementById('btnCollide').addEventListener('click', function () {
+    var list = loadSpecies();
+    if (list.length < 2) { toast('至少要有两个物种才能对撞（先各画一个再存）'); return; }
+    /* 取最近两个：左 A 右 B，水平镜像，向中间出发 */
+    var A = list[list.length - 2], B = list[list.length - 1];
+    for (var i = 0; i < cur.length; i++) { cur[i] = 0; age[i] = 0; }
+    gen = 0;
+    var midY = Math.floor(GH / 2);
+    var ax = Math.floor(GW * 0.22), bx = Math.floor(GW * 0.78);
+    placeMirrored(A.cells, ax, midY, false);
+    placeMirrored(B.cells, bx, midY, true);
+    running = true; updatePlayBtn(); startLoop();
+    draw(); updateStats();
+    toast('⚔ 「' + A.name + '」 vs 「' + B.name + '」——开撞！');
+    try { STAch.unlock('life.collide', '物种碰撞实验', '⚔'); } catch (e) {}
+  });
+  function placeMirrored(cells, cx, cy, mirror) {
+    var maxx = 0, maxy = 0;
+    cells.forEach(function (p) { maxx = Math.max(maxx, p[0]); maxy = Math.max(maxy, p[1]); });
+    cells.forEach(function (p) {
+      var x = cx + (mirror ? (maxx - p[0]) : p[0]);
+      var y = cy - Math.round(maxy / 2) + p[1];
+      if (x < 2 || y < 2 || x >= GW - 2 || y >= GH - 2) return;
+      cur[y * GW + x] = 1;
+      age[y * GW + x] = 1;
+    });
+  }
+
+  /* ============ 顶栏按钮 ============ */
+  document.getElementById('btnPlay').addEventListener('click', function () {
+    running = !running;
+    updatePlayBtn();
+    if (running) { lastStep = 0; startLoop(); }
+  });
+  document.getElementById('btnRand').addEventListener('click', function () {
+    for (var i = 0; i < cur.length; i++) {
+      cur[i] = Math.random() < 0.18 ? 1 : 0;
+      age[i] = cur[i] ? 1 : 0;
+    }
+    gen = 0;
+    draw(); updateStats();
+    toast('🌱 撒下了一片种子');
+  });
+  document.getElementById('btnClear').addEventListener('click', function () {
+    cur.fill(0); age.fill(0); gen = 0;
+    running = false; updatePlayBtn();
+    draw(); updateStats();
+  });
+  document.getElementById('selSpeed').addEventListener('change', function () { speed = +this.value; });
+
+  var toastEl = document.getElementById('toast'), toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2600);
+  }
+
+  /* ============ 初始化 ============ */
+  function fit() {
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.round(W * dpr);
+    cv.height = Math.round(H * dpr);
+    resizeWorld(true);
+    draw();
+  }
+  window.addEventListener('resize', fit);
+  fit();
+  /* 开局撒一小片种子 + 一个滑翔机 */
+  for (var i = 0; i < cur.length; i++) { cur[i] = Math.random() < 0.12 ? 1 : 0; }
+  plantAt(Math.floor(GW * 0.5), Math.floor(GH * 0.42), PATTERNS.glider);
+  updateStats();
+  renderSpList();
+  startLoop();
+})();
+</script>
+
+<script>
+/* 🔮 ARG · 精简进度机（2026-10-03）与主页共用 st_arg */
+(function () {
+  'use strict';
+  var KEY = 'st_arg';
+  if (window.ARG && window.ARG.collect) return;
+  function readState() {
+    var raw = null;
+    try { var m = document.cookie.match(/(?:^|;\s*)st_arg=([^;]*)/); if (m) raw = decodeURIComponent(m[1]); } catch (e) {}
+    if (!raw) { try { raw = localStorage.getItem(KEY); } catch (e) {} }
+    try { var d = JSON.parse(raw || '{}'); if (!d || typeof d !== 'object') d = {}; if (!Array.isArray(d.logs)) d.logs = []; return d; }
+    catch (e) { return { logs: [] }; }
+  }
+  var state = readState();
+  function save() {
+    var raw = JSON.stringify(state);
+    try { localStorage.setItem(KEY, raw); } catch (e) {}
+    try {
+      var v = encodeURIComponent(raw);
+      if (v.length < 3800) document.cookie = 'st_arg=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+    } catch (e) {}
+  }
+  var toastTimer = 0;
+  window.ARG = {
+    has: function (id) { return state.logs.indexOf(id) >= 0; },
+    count: function () { return state.logs.length; },
+    collect: function (id) {
+      if (state.logs.indexOf(id) >= 0) return false;
+      state.logs.push(id); save();
+      this.toast('📜 找到一篇日志（去主页头像连点 7 下看全文）');
+      return true;
+    },
+    reset: function () { state = { logs: [] }; save(); },
+    toast: function (msg) {
+      try {
+        var el = document.getElementById('__arg_toast');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = '__arg_toast';
+          el.style.cssText = 'position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9994;background:rgba(12,17,32,.96);color:#eef4ff;border:1px solid rgba(198,214,240,.4);border-radius:999px;padding:12px 24px;font:700 13px/1.5 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.5);transition:all .45s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:88vw;text-align:center';
+          document.body.appendChild(el);
+        }
+        el.textContent = msg;
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { el.style.opacity = '0'; el.style.transform = 'translateX(-50%) translateY(16px)'; }, 3000);
+      } catch (e) {}
+    }
+  };
+})();
+</script></body>
+</html>

@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="AI 给今天的你打分：每次刷新生成一张今日份诊断报告，像体检单。startian.top 出品">
+<meta name="theme-color" content="#0f1a2e">
+<title>今日份诊断报告 · startian.top</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;background:radial-gradient(1100px 600px at 50% -80px, #1b2c4a 0%, #101a30 45%, #0a1122 100%);color:#eef4ff;font-family:'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif}
+  .wrap{max-width:720px;margin:0 auto;padding:30px 22px 70px;display:flex;flex-direction:column;gap:16px}
+  .head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .head h1{font-size:20px;margin:0;letter-spacing:.5px}
+  .head .sub{font-size:12px;color:#8ba0c8;font-weight:600}
+  .home{margin-left:auto;text-decoration:none;font-size:12.5px;font-weight:700;color:#cfe0ff;border:1px solid rgba(130,160,230,.3);border-radius:999px;padding:9px 16px;background:rgba(20,30,54,.7);transition:border-color .2s,transform .2s}
+  .home:hover{border-color:rgba(160,190,255,.7);transform:translateY(-1px)}
+  .report{
+    background:rgba(23,34,60,.72);border:1px solid rgba(120,150,220,.26);border-radius:24px;
+    padding:26px 26px 22px;box-shadow:0 26px 64px rgba(0,0,0,.5);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    position:relative;overflow:hidden;
+  }
+  .report::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#38bdf8,#818cf8,#c084fc,#f472b6)}
+  .r-head{display:flex;align-items:baseline;gap:12px;border-bottom:1px dashed rgba(130,160,220,.3);padding-bottom:14px;margin-bottom:16px;flex-wrap:wrap}
+  .r-title{font-size:17px;font-weight:900;letter-spacing:1px}
+  .r-title small{font-size:11px;color:#8ba0c8;font-weight:700;letter-spacing:2px;display:block;margin-top:3px}
+  .r-date{margin-left:auto;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;color:#9fb4e0}
+  .r-id{font-size:11px;color:#6d80aa;font-family:ui-monospace,Consolas,monospace}
+  .rows{display:flex;flex-direction:column;gap:11px}
+  .row{display:grid;grid-template-columns:76px 1fr 44px;align-items:center;gap:12px}
+  .row .k{font-size:13px;font-weight:800;color:#dbe6ff}
+  .bar{height:10px;border-radius:999px;background:rgba(10,16,32,.85);border:1px solid rgba(120,150,220,.2);overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:999px;width:0;transition:width .9s cubic-bezier(.25,.9,.3,1)}
+  .row .v{font-family:ui-monospace,Consolas,monospace;font-size:13.5px;font-weight:800;text-align:right}
+  .row .cm{grid-column:2 / 4;font-size:11.5px;color:#8ba0c8;line-height:1.6;margin-top:-4px}
+  .sum{margin-top:18px;border-top:1px dashed rgba(130,160,220,.3);padding-top:14px}
+  .sum .st{font-size:13.5px;line-height:2;color:#cdd9f2}
+  .sum .st b{color:#8fd0ff}
+  .grade{
+    display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:20px;
+    font-size:28px;font-weight:900;float:right;margin-left:14px;
+    background:linear-gradient(150deg,#38bdf8,#818cf8);box-shadow:0 12px 28px rgba(90,130,255,.4);color:#fff;
+  }
+  .sign{margin-top:14px;text-align:right;font-size:12px;color:#7d90ba;line-height:1.9}
+  .btns{display:flex;gap:12px;flex-wrap:wrap}
+  .btn{
+    border:0;border-radius:14px;padding:13px 22px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;
+    color:#fff;background:linear-gradient(100deg,#38bdf8,#6366f1,#a855f7);box-shadow:0 6px 0 #2b3a8f,0 14px 30px rgba(90,120,255,.4);
+    transition:transform .15s ease,box-shadow .2s ease;
+  }
+  .btn:active{transform:translateY(2px);box-shadow:0 2px 0 #2b3a8f}
+  .btn.ghost{background:rgba(30,44,80,.6);border:1.5px solid rgba(130,160,230,.35);box-shadow:none;color:#cfe0ff}
+  .btn.ghost:hover{border-color:rgba(160,190,255,.8)}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(10px);opacity:0;z-index:60;background:rgba(20,30,56,.95);border:1px solid rgba(130,160,255,.4);border-radius:999px;padding:11px 22px;font-size:13px;font-weight:700;transition:all .3s ease;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+  @media (max-width:560px){
+    .row{grid-template-columns:64px 1fr 40px;gap:9px}
+    .report{padding:20px 18px}
+  }
+/* —— 返回主页（全站统一 · 2026-09-29）—— */
+.wb-home{position:fixed;left:14px;bottom:14px;z-index:9990;display:inline-flex;align-items:center;gap:5px;
+  padding:8px 13px 8px 10px;border-radius:999px;text-decoration:none;
+  background:rgba(17,24,39,.55);color:#fff;font-size:12.5px;font-weight:600;letter-spacing:.3px;
+  -webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.14);box-shadow:0 6px 18px rgba(0,0,0,.18);
+  transition:background .2s,transform .2s,box-shadow .2s}
+.wb-home:hover{background:rgba(17,24,39,.78);transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.26)}
+.wb-home:active{transform:translateY(0)}
+.wb-home svg{width:13px;height:13px;flex:0 0 auto}
+@media (max-width:620px){ .wb-home{left:10px;bottom:10px;padding:7px 11px 7px 9px;font-size:12px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <h1>🩺 今日份诊断报告</h1>
+    <span class="sub">每次刷新都是一份新的 · 同一天永远同一份</span>
+    <a class="home" href="https://startian.top/">← 返回主页</a>
+  </div>
+  <div class="report" id="report">
+    <div class="r-head">
+      <div class="r-title">STAR 综合状态体检单<small>DAILY DIAGNOSTIC REPORT</small></div>
+      <div class="r-date" id="rDate"></div>
+      <div class="r-id" id="rId" style="width:100%"></div>
+    </div>
+    <div class="rows" id="rows"></div>
+    <div class="sum">
+      <div class="grade" id="grade">A</div>
+      <div class="st" id="summary"></div>
+      <div class="sign">主检医师：月月 🌙<br>本报告由随机算法开具 · 仅供开心 · 不作任何医疗建议</div>
+    </div>
+  </div>
+  <div class="btns">
+    <button class="btn" id="btnReroll" type="button">🔁 换一份（今日变体）</button>
+    <button class="btn ghost" id="btnSave" type="button">⬇ 保存报告图</button>
+    <button class="btn ghost" id="btnShare" type="button">🔗 分享</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==== i18n-kit v1.2 begin ==== */
+/* ══════════════════════════════════════════════════════════
+   🌐 多语言 i18n Kit（startian.top 全站共享 · v1.2 · 2026-10-04）
+   · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
+   · 自动识别：首次访问按 navigator.language（zh 开头 → 中文，其余 → English）
+   · 两种接入模式（可混用）：
+     ① 短语表模式（推荐，低侵入）：I18N.phrase({ '中文原文': 'English', ... })
+        自动扫描文本节点 / title / placeholder / aria-label / alt，动态插入的文本也自动翻译
+     ② 标注模式：data-i18n / data-i18n-html / data-i18n-title / data-i18n-aria / data-i18n-ph / data-i18n-alt
+   · 子树上加 data-i18n-skip 可整体跳过（用户输入内容、ARG 谜题原文等）
+   · API：I18N.t(k[,vars]) · I18N.tOr(k,fb) · I18N.tr(原文) · I18N.set(lang) · I18N.lang()
+          · I18N.phrase(map) · I18N.scan(root) · I18N.apply(root) · I18N.onChange(fn)
+          · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n)
+   · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
+   ══════════════════════════════════════════════════════════ */
+var I18N = (function () {
+  'use strict';
+  var LS = 'st_lang';
+  var FALLBACK = 'zh';
+  var lang = FALLBACK;
+  var dict = { zh: {}, en: {} };
+  var phrase = {};      /* 短语表：中文原文（归一化）→ 译文 */
+  var listeners = [];
+  var bd = {};          /* boot data：原文快照等 */
+
+  /* ---- 基础词典（全站通用词条） ---- */
+  dict.zh['common.home'] = '主页';
+  dict.en['common.home'] = 'Home';
+  dict.zh['common.homeTitle'] = '返回星恬的小站主页';
+  dict.en['common.homeTitle'] = "Back to Startian's homepage";
+  dict.zh['common.close'] = '关闭';
+  dict.en['common.close'] = 'Close';
+  dict.zh['common.cancel'] = '取消';
+  dict.en['common.cancel'] = 'Cancel';
+
+  /* ---- 存储与识别 ---- */
+  function norm(v) {
+    v = String(v || '').toLowerCase();
+    if (v.indexOf('zh') === 0) return 'zh';
+    if (v.indexOf('en') === 0) return 'en';
+    return null;
+  }
+  function readCookie() {
+    try { var m = document.cookie.match(/(?:^|;\s*)st_lang=([^;]*)/); return m ? decodeURIComponent(m[1]) : null; }
+    catch (e) { return null; }
+  }
+  function readLS() { try { return localStorage.getItem(LS); } catch (e) { return null; } }
+  function persist(v) {
+    try { localStorage.setItem(LS, v); } catch (e) {}
+    try { document.cookie = 'st_lang=' + encodeURIComponent(v) + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax'; } catch (e) {}
+  }
+  function detect() {
+    var s = norm(readCookie()) || norm(readLS());
+    if (s) return s;
+    var n = norm(navigator.language || navigator.userLanguage);
+    return n || FALLBACK;
+  }
+
+  /* ---- 文案 ---- */
+  /* tRaw：查词典（当前语言 → zh 兜底），查不到返回 null（= 保持原文） */
+  function tRaw(key) {
+    var v = (dict[lang] && dict[lang][key] != null) ? dict[lang][key] : null;
+    if (v == null) v = (dict[FALLBACK] && dict[FALLBACK][key] != null) ? dict[FALLBACK][key] : null;
+    return v;
+  }
+  function t(key, vars) {
+    var v = tRaw(key);
+    if (v == null) return key;
+    if (vars) v = String(v).replace(/\{(\w+)\}/g, function (m, k) { return (vars[k] != null) ? vars[k] : m; });
+    return v;
+  }
+  /* tOr：查不到时用传入的兜底值（页面 JS 动态文案用这个） */
+  function tOr(key, fallback) {
+    var v = tRaw(key);
+    return (v == null) ? fallback : v;
+  }
+  function add(obj) {
+    if (!obj) return;
+    ['zh', 'en'].forEach(function (k) {
+      if (obj[k]) for (var key in obj[k]) dict[k][key] = obj[k][key];
+    });
+  }
+  /* tr：短语表直译（原文进，译文出；zh 侧原样返回）-JS 动态文案直接用 */
+  function tr(s) {
+    if (lang === 'zh') return s;
+    var v = lookup(normText(s));
+    return (v == null) ? s : v;
+  }
+  function addPhrase(map) {
+    if (!map) return;
+    for (var k in map) { if (map[k] != null) phrase[normText(k)] = String(map[k]); }
+  }
+  /* 规则表：[[/正则/, '替换（可用 $1）'], ...] - 处理「已复习 3」「12 天有记录」这类数字拼接 */
+  var rules = [];
+  function addRules(list) {
+    if (!list) return;
+    for (var i = 0; i < list.length; i++) {
+      try {
+        var re = (list[i][0] instanceof RegExp) ? list[i][0] : new RegExp(list[i][0]);
+        rules.push([re, String(list[i][1])]);
+      } catch (e) {}
+    }
+  }
+  function lookup(t) {
+    var v = phrase[t];
+    if (v != null) return v;
+    for (var i = 0; i < rules.length; i++) {
+      try { if (rules[i][0].test(t)) return t.replace(rules[i][0], rules[i][1]); } catch (e) {}
+    }
+    return null;
+  }
+
+  /* ---- 短语表扫描（静态 + 动态） ---- */
+  function normText(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
+  var PTAGS = ['title', 'placeholder', 'aria-label', 'alt'];
+  function translText(node) {
+    var raw = node.nodeValue;
+    if (!raw) return;
+    var rec = node.__i18nR;
+    if (rec) {
+      if (lang === 'zh') {
+        if (raw === rec.en) { node.nodeValue = rec.orig; delete node.__i18nR; }
+        else if (raw !== rec.orig) { delete node.__i18nR; }
+        return;
+      }
+      if (raw === rec.en) return;
+      if (raw === rec.orig) { node.nodeValue = rec.en; return; }
+      delete node.__i18nR;
+    }
+    var out = lookup(normText(raw));
+    if (out == null) return;
+    if (lang === 'en') { if (raw !== out) { node.__i18nR = { orig: raw, en: out }; node.nodeValue = out; } }
+  }
+  function translAttrs(el) {
+    if (!el.getAttribute) return;
+    for (var i = 0; i < PTAGS.length; i++) {
+      var a = PTAGS[i], v = el.getAttribute(a);
+      if (v == null || v === '') continue;
+      var rec = el.__i18nA && el.__i18nA[a];
+      if (rec) {
+        if (lang === 'zh') {
+          if (v === rec.en) { el.setAttribute(a, rec.orig); delete el.__i18nA[a]; }
+          else if (v !== rec.orig) { delete el.__i18nA[a]; }
+          continue;
+        }
+        if (v === rec.en) continue;
+        if (v === rec.orig) { el.setAttribute(a, rec.en); continue; }
+        delete el.__i18nA[a];
+      }
+      var out = lookup(normText(v));
+      if (out == null) continue;
+      if (lang === 'en') {
+        if (v !== out) { if (!el.__i18nA) el.__i18nA = {}; el.__i18nA[a] = { orig: v, en: out }; el.setAttribute(a, out); }
+      }
+    }
+  }
+  function scanNode(node) {
+    if (!node) return;
+    if (node.nodeType === 9) node = node.documentElement || node.body;   /* 文档节点 → 转元素 */
+    if (!node) return;
+    if (node.nodeType === 3) { translText(node); return; }
+    if (node.nodeType !== 1) return;
+    var tag = node.tagName;
+    if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'NOSCRIPT') return;
+    if (node.hasAttribute('data-i18n-skip')) return;
+    translAttrs(node);
+    for (var c = node.firstChild; c; c = c.nextSibling) scanNode(c);
+  }
+  function scan(root) { try { scanNode(root || document.body || document.documentElement); } catch (e) {} }
+  /* 动态内容自动翻译（MutationObserver，逐节点增量，无重扫） */
+  var moOn = false;
+  function auto(root) {
+    if (moOn || typeof MutationObserver === 'undefined') return;
+    var target = root || document.body;
+    if (!target) {   /* head 提前注入时 body 还没解析出来，等 DOM ready */
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { auto(root); });
+      return;
+    }
+    moOn = true;
+    try {
+      var mo = new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          var m = muts[i];
+          try {
+            if (m.type === 'characterData') translText(m.target);
+            else if (m.type === 'attributes') translAttrs(m.target);
+            else if (m.type === 'childList') {
+              for (var j = 0; j < m.addedNodes.length; j++) scanNode(m.addedNodes[j]);
+            }
+          } catch (e) {}
+        }
+      });
+      mo.observe(target, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: PTAGS });
+    } catch (e) {}
+  }
+
+  /* ---- 日期 / 数字 ---- */
+  var MN_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var WD_ZH = '日一二三四五六';
+  var WD_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  function fmtDate(d, opt) {
+    if (typeof d === 'string') { var a = d.split('-'); d = new Date(+a[0], (+a[1] || 1) - 1, +a[2] || 1); }
+    if (!(d instanceof Date) || isNaN(d.getTime())) return '';
+    opt = opt || {};
+    var s;
+    if (lang === 'zh') {
+      s = d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日';
+      if (opt.weekday) s += ' · 星期' + WD_ZH.charAt(d.getDay());
+    } else {
+      s = MN_EN[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+      if (opt.weekday) s += ' · ' + WD_EN[d.getDay()];
+    }
+    return s;
+  }
+  function fmtNum(n) {
+    try { return Number(n).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US'); }
+    catch (e) { return String(n); }
+  }
+
+  /* ---- DOM 标注应用（标注模式；词条缺失时恢复原文 - 保证切回中文能还原） ---- */
+  function apply(root) {
+    root = root || document;
+    try {
+      var i, list, v, el;
+      list = root.querySelectorAll('[data-i18n]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrig == null) el.__i18nOrig = el.textContent;
+        v = tRaw(el.getAttribute('data-i18n'));
+        el.textContent = (v != null) ? v : el.__i18nOrig;
+      }
+      list = root.querySelectorAll('[data-i18n-html]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigHTML == null) el.__i18nOrigHTML = el.innerHTML;
+        v = tRaw(el.getAttribute('data-i18n-html'));
+        el.innerHTML = (v != null) ? v : el.__i18nOrigHTML;
+      }
+      list = root.querySelectorAll('[data-i18n-title]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigTitle == null) el.__i18nOrigTitle = el.title;
+        v = tRaw(el.getAttribute('data-i18n-title'));
+        el.title = (v != null) ? v : el.__i18nOrigTitle;
+      }
+      list = root.querySelectorAll('[data-i18n-aria]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAria == null) el.__i18nOrigAria = el.getAttribute('aria-label') || '';
+        v = tRaw(el.getAttribute('data-i18n-aria'));
+        el.setAttribute('aria-label', (v != null) ? v : el.__i18nOrigAria);
+      }
+      list = root.querySelectorAll('[data-i18n-ph]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigPh == null) el.__i18nOrigPh = el.placeholder || '';
+        v = tRaw(el.getAttribute('data-i18n-ph'));
+        el.placeholder = (v != null) ? v : el.__i18nOrigPh;
+      }
+      list = root.querySelectorAll('[data-i18n-alt]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAlt == null) el.__i18nOrigAlt = el.getAttribute('alt') || '';
+        v = tRaw(el.getAttribute('data-i18n-alt'));
+        el.setAttribute('alt', (v != null) ? v : el.__i18nOrigAlt);
+      }
+      /* 标题（短语表优先，其次 page.title 词条） */
+      if (!bd.__origTitle) bd.__origTitle = document.title;
+      var tv = lookup(normText(bd.__origTitle));
+      if (tv == null) tv = tRaw('page.title');
+      if (tv != null) { document.title = (lang === 'en') ? tv : bd.__origTitle; bd.__titleTouched = true; }
+      else if (bd.__titleTouched) { document.title = bd.__origTitle; }
+      document.documentElement.lang = (lang === 'zh') ? 'zh-CN' : 'en';
+      syncSwitch();
+    } catch (e) {}
+  }
+
+  function applyLang(v) {
+    lang = v;
+    persist(v);
+    apply(document);
+    scan(document);
+    for (var i = 0; i < listeners.length; i++) { try { listeners[i](lang); } catch (e) {} }
+    try {
+      var live = document.getElementById('i18n-live');
+      if (live) live.textContent = (lang === 'zh') ? '已切换到中文' : 'Switched to English';
+    } catch (e) {}
+  }
+  /* 切换转场（仿主页主题转场）：黑幕淡入 → 光晕从切换器扩散 → 幕中换语言 → 揭幕；可打断；尊重 reduced-motion */
+  var tid = 0, stage = null;
+  function ensureStage() {
+    if (stage) return stage;
+    var ov = document.createElement('div'); ov.className = 'i18n-veil';
+    var hl = document.createElement('div'); hl.className = 'i18n-halo';
+    var host = document.body || document.documentElement;
+    host.appendChild(ov); host.appendChild(hl);
+    stage = { ov: ov, hl: hl };
+    return stage;
+  }
+  function set(v) {
+    v = norm(v);
+    if (!v) return;
+    if (v === lang) { apply(document); scan(document); return; }
+    var calm = true;
+    try { calm = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) {}
+    if (!calm || !document.body) { applyLang(v); return; }
+    try {
+      var st = ensureStage(), my = ++tid;
+      var x = (window.innerWidth || 360) - 80, y = (window.innerHeight || 640) - 34;
+      try { if (swEl) { var r = swEl.getBoundingClientRect(); x = r.left + r.width / 2; y = r.top + r.height / 2; } } catch (e) {}
+      st.ov.style.setProperty('--ix', x + 'px'); st.ov.style.setProperty('--iy', y + 'px');
+      st.hl.style.setProperty('--ix', x + 'px'); st.hl.style.setProperty('--iy', y + 'px');
+      st.ov.classList.remove('out'); st.ov.classList.add('on'); st.ov.style.display = 'block';
+      st.hl.classList.remove('go'); void st.hl.offsetWidth; st.hl.classList.add('go');
+      setTimeout(function () {
+        if (my !== tid) return;
+        applyLang(v);
+        st.ov.classList.remove('on'); st.ov.classList.add('out');
+        setTimeout(function () {
+          if (my !== tid) return;
+          st.ov.style.display = 'none'; st.ov.classList.remove('out');
+        }, 520);
+      }, 430);
+    } catch (e) { applyLang(v); }
+  }
+  function onChange(fn) { if (typeof fn === 'function') listeners.push(fn); }
+  function getLang() { return lang; }
+
+  /* ---- 切换入口（右下角胶囊，自动注入） ---- */
+  var SW_CSS = '.i18n-sw{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:9992;display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:rgba(17,24,39,.74);-webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);border:1px solid rgba(255,255,255,.26);box-shadow:0 6px 20px rgba(0,0,0,.28);font-family:inherit}' +
+    '.i18n-sw:hover{background:rgba(17,24,39,.86);border-color:rgba(255,255,255,.38)}' +
+    '.i18n-gl{font-size:13px;line-height:1;padding:0 5px 0 8px;opacity:.95;pointer-events:none}' +
+    '.i18n-sw button{border:0;background:transparent;color:rgba(255,255,255,.78);font-size:12px;font-weight:700;letter-spacing:.4px;padding:6px 11px;border-radius:999px;cursor:pointer;font-family:inherit;transition:all .18s ease;line-height:1}' +
+    '.i18n-sw button:hover{color:#fff;background:rgba(255,255,255,.12)}' +
+    '.i18n-sw button:focus-visible{outline:2px solid #7dd3fc;outline-offset:1px}' +
+    '.i18n-sw button.on{background:rgba(255,255,255,.92);color:#1f2937;box-shadow:0 2px 8px rgba(0,0,0,.25)}' +
+    '.i18n-sw button:active{transform:translateY(1px)}' +
+    '.i18n-veil{position:fixed;inset:0;z-index:9990;pointer-events:none;display:none;opacity:0;background:#060a16;transition:opacity .42s ease}' +
+    '.i18n-veil.on{opacity:1}' +
+    '.i18n-veil.out{opacity:0;transition:opacity .5s cubic-bezier(.2,.8,.3,1)}' +
+    '.i18n-halo{position:fixed;z-index:9991;left:var(--ix,92%);top:var(--iy,93%);width:14px;height:14px;border-radius:50%;box-sizing:border-box;pointer-events:none;display:none;border:2px solid rgba(198,226,255,.95);box-shadow:0 0 24px 6px rgba(137,194,255,.6),0 0 70px 20px rgba(137,194,255,.3),inset 0 0 20px rgba(198,226,255,.5)}' +
+    '.i18n-halo.go{display:block;animation:i18nHalo .85s cubic-bezier(.16,.7,.3,1) forwards}' +
+    '@keyframes i18nHalo{0%{opacity:0;transform:translate(-50%,-50%) scale(.01)}22%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(58)}}' +
+    '.i18n-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}' +
+    '@media (max-width:620px){.i18n-sw{right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px))}.i18n-sw button{padding:5px 9px;font-size:11.5px}}';
+
+  var swEl = null;
+  function buildSwitch() {
+    try {
+      if (!document.body) return;
+      var exist = document.querySelector('.i18n-sw');
+      if (exist) { swEl = exist; syncSwitch(); return; }
+      var st = document.createElement('style');
+      st.textContent = SW_CSS;
+      (document.head || document.documentElement).appendChild(st);
+      var wrap = document.createElement('div');
+      wrap.className = 'i18n-sw';
+      wrap.setAttribute('role', 'group');
+      wrap.setAttribute('aria-label', '切换语言 / Switch language');
+      wrap.setAttribute('title', '切换语言 / Switch language');
+      var gl = document.createElement('span');
+      gl.className = 'i18n-gl';
+      gl.textContent = '🌐';
+      gl.setAttribute('aria-hidden', 'true');
+      wrap.appendChild(gl);
+      [['zh', '中文'], ['en', 'English']].forEach(function (p) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('data-lang', p[0]);
+        b.textContent = p[1];
+        b.addEventListener('click', function () { set(p[0]); });
+        wrap.appendChild(b);
+      });
+      var live = document.createElement('span');
+      live.id = 'i18n-live';
+      live.className = 'i18n-sr';
+      live.setAttribute('aria-live', 'polite');
+      wrap.appendChild(live);
+      document.body.appendChild(wrap);
+      swEl = wrap;
+      syncSwitch();
+    } catch (e) {}
+  }
+  function syncSwitch() {
+    try {
+      if (!swEl) return;
+      var bs = swEl.querySelectorAll('button[data-lang]');
+      for (var i = 0; i < bs.length; i++) {
+        var on = bs[i].getAttribute('data-lang') === lang;
+        bs[i].classList.toggle('on', on);
+        bs[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    } catch (e) {}
+  }
+
+  /* ---- 启动 ---- */
+  lang = detect();
+  function boot() {
+    buildSwitch();
+    apply(document);
+    scan(document);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+
+  return {
+    t: t, tOr: tOr, tr: tr, set: set, apply: apply, scan: scan, auto: auto,
+    phrase: addPhrase, rules: addRules, add: add, lang: getLang, onChange: onChange,
+    fmtDate: fmtDate, fmtNum: fmtNum
+  };
+})();
+
+/* ---- 短语表（中文原文 → English）---- */
+I18N.phrase({"今日份诊断报告 · startian.top": "Daily Diagnosis · startian.top","🩺 今日份诊断报告": "🩺 Daily Diagnosis","每次刷新都是一份新的 · 同一天永远同一份": "Every refresh is a new one · the same day always gives the same report","← 返回主页": "← Back to home","STAR 综合状态体检单": "STAR Overall Status Checkup","主检医师：月月 🌙": "Attending physician: Yueyue 🌙","本报告由随机算法开具 · 仅供开心 · 不作任何医疗建议": "This report is issued by a random algorithm · For fun only · Not medical advice","🔁 换一份（今日变体）": "🔁 Get another (today's variant)","⬇ 保存报告图": "⬇ Save report image","🔗 分享": "🔗 Share","主页": "Home","返回星恬的小站主页": "Back to Startian's Little Site home","🏆 成就解锁：": "🏆 Achievement unlocked: ","体检常客": "Checkup Regular","精神状态": "Mental state","电量不足，建议立即补充奶茶": "Low on battery — grab a milk tea right away","看起来像刚重启过，还有点懵": "Looks like you just rebooted, still a bit dazed","大脑正在后台更新，请稍候": "Your brain is updating in the background, please wait","运转正常，偶尔走神": "Running normally, occasionally spacing out","状态在线，能扛住一门作业": "Status online, can handle one round of homework","脑子转得动，摸鱼效率尤佳": "Brain is working, extra efficient at slacking off","今天的你思路异常清晰": "Your mind is unusually clear today","精神小伙/姑娘，可以拆个难题庆祝一下": "Spirited guy/gal, go crack a tough problem to celebrate","专注力": "Focus","注意力滑得像块肥皂": "Your attention slips away like a bar of soap","十分钟看了五次手机（预测）": "Checked your phone five times in ten minutes (predicted)","书本翻开了，眼神在外面": "The book is open, your eyes are elsewhere","能连续专注一小会儿": "Can stay focused for a little while","效率尚可，建议番茄钟加持": "Efficiency is okay, a pomodoro timer would help","专注力拉满，建议立刻去干件正事": "Focus maxed out — go do something useful right now","欧气": "Gacha luck","今天抽卡建议观望": "Hold off on gacha pulls today","非酋气息浓烈，不宜抽奖": "Heavy bad-luck aura, not a day for draws","欧气余额不足，请谨慎出门": "Gacha luck balance low, go out with care","欧气平平，正常发挥": "Gacha luck is average, standard performance","运气凑合，能抢到食堂最后一份": "Luck is okay, enough to grab the last cafeteria portion","欧气爆棚！适合抽卡 / 抢票 / 表白（选一个）": "Gacha luck overload! Great for pulls / ticket grabs / confessions (pick one)","发量": "Hair volume","枕头上的头发比头上的多": "More hair on your pillow than on your head","写题可以，掉发不行，请早睡": "Solving problems is fine, losing hair is not — sleep early","每一根都珍贵，请温柔对待": "Every strand is precious, treat them gently","发量稳定，无需慌张": "Hair volume steady, no need to panic","还算浓密，问题不大": "Reasonably thick, no big deal","发量浓密到令人羡慕": "Hair thick enough to make others jealous","这发量，可以尝试熬夜（不建议）": "With this much hair you could pull an all-nighter (not recommended)","战斗力": "Combat power","战斗力低迷，请补充碳水和糖": "Combat power low — refuel with carbs and sugar","今日不宜硬刚难题": "Not a day to take on tough problems head-on","建议打一局五子棋找回自信": "Play a round of Gomoku to get your confidence back","战斗力中规中矩": "Combat power is so-so","能解决今天的作业量": "Can handle today's homework load","战斗力爆表，压轴题也可一战": "Combat power off the charts, even the final question is fair game","睡意": "Sleepiness","清醒得很（咖啡因立功）": "Wide awake (caffeine to thank)","睡意全无，适合搞创作": "Not sleepy at all, great for making things","有一点点困，可以撑住": "A little sleepy, but you can hold on","睡意爆棚！快去看枕头": "Sleepiness overload! Go find your pillow","眼皮已经在打架了，别硬撑": "Your eyelids are already drooping, don't force it","玄学值": "Mystic score","今日不宜相信直觉": "Don't trust your intuition today","第六感有点飘": "Your sixth sense is a bit off","直觉尚可使用": "Intuition is still usable","直觉准确度奇高，第一选择通常是对的": "Intuition accuracy is unusually high, your first pick is usually right","综合来看：今天状态【{g}】。{a}": "All things considered: today's state is 【{g}】. {a}","体检结论：【{g}】。{a}": "Checkup conclusion: 【{g}】. {a}","总体评估：【{g}】。{a}": "Overall assessment: 【{g}】. {a}","建议：喝口水，伸个懒腰，然后去把最想做的那个小项目点开。": "Suggestion: Have some water, stretch, then open the little project you most want to start.","建议：先完成一件最小的任务，今天就会顺起来。": "Suggestion: Finish the smallest task first, and the day will start flowing.","建议：对自己宽容一点，状态是曲线不是直线。": "Suggestion: Go easy on yourself — state is a curve, not a straight line.","建议：去 star 页面生成一颗星星，据说能回血。": "Suggestion: Go to the star page and generate a star, they say it restores HP.","建议：早点睡。真的。": "Suggestion: Go to bed early. Really.","建议：今天适合做点让自己开心的小事。": "Suggestion: A good day for small things that make you happy.","状态史诗级，建议截图留念。": "Epic state — take a screenshot to remember it.","相当不错的一天。": "A pretty good day.","稳稳的，正常发挥。": "Steady, right on form.","有点疲惫，需要关照一下自己。": "A bit tired, be kind to yourself.","今天的主题是：活着就行，明天再战。": "Today's theme: just stay alive, fight again tomorrow.","周日": "Sunday","周一": "Monday","周二": "Tuesday","周三": "Wednesday","周四": "Thursday","周五": "Friday","周六": "Saturday","报告编号 STAR-": "Report No. STAR-","· 综合分": " · Overall score ","级": " tier","建议：": "Suggestion: ","<b>建议：</b>": "<b>Suggestion: </b>","🔁 今日变体 #": "🔁 Today's variant #","综合分": "Overall score ","· 评级": " · Rating ","主检医师：月月 🌙 · startian.top/report · 仅供开心": "Attending physician: Yueyue 🌙 · startian.top/report · For fun only","⬇️ 报告图已保存": "⬇️ Report image saved","晒报告的人": "Report Sharer","🔗 链接已复制，喊朋友来做个体检": "🔗 Link copied — tell your friends to get a checkup","报告地址：": "Report link: ","🧠 精神状态": "🧠 Mental state","🎯 专注力": "🎯 Focus","🍀 欧气": "🍀 Gacha luck","💇 发量": "💇 Hair volume","⚔️ 战斗力": "⚔️ Combat power","😴 睡意": "😴 Sleepiness","🔮 玄学值": "🔮 Mystic score","先完成一件最小的任务，今天就会顺起来。": "Finish the smallest task first, and the day will start flowing.","· 生成于": " · generated at"});
+/* ---- 数字/日期拼接规则 ---- */
+I18N.rules([["^报告编号 (STAR-[\\w-]+) · 综合分 (\\d+)$", "Report No. $1 · Overall score $2"], ["^(\\d{4})-(\\d{2})-(\\d{2}) · 周日$", "$1-$2-$3 · Sun"], ["^(\\d{4})-(\\d{2})-(\\d{2}) · 周一$", "$1-$2-$3 · Mon"], ["^(\\d{4})-(\\d{2})-(\\d{2}) · 周二$", "$1-$2-$3 · Tue"], ["^(\\d{4})-(\\d{2})-(\\d{2}) · 周三$", "$1-$2-$3 · Wed"], ["^(\\d{4})-(\\d{2})-(\\d{2}) · 周四$", "$1-$2-$3 · Thu"], ["^(\\d{4})-(\\d{2})-(\\d{2}) · 周五$", "$1-$2-$3 · Fri"], ["^(\\d{4})-(\\d{2})-(\\d{2}) · 周六$", "$1-$2-$3 · Sat"]]);
+I18N.auto();
+/* ==== i18n-kit v1.2 end ==== */
+</script>
+<script>
+(function () {
+  'use strict';
+  /* ============ 🏆 跨站成就 SDK ============ */
+  var STAch = (function () {
+    var KEY = 'st_ach';
+    function readCookie() {
+      var m = document.cookie.match(/(?:^|;\s*)st_ach=([^;]*)/);
+      if (!m) return null;
+      try { return JSON.parse(decodeURIComponent(m[1])) || []; } catch (e) { return null; }
+    }
+    function writeCookie(list) {
+      try {
+        var v = encodeURIComponent(JSON.stringify(list));
+        if (v.length < 3800) document.cookie = 'st_ach=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+      } catch (e) {}
+    }
+    var list = readCookie();
+    if (!list) { try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { list = []; } }
+    if (!Array.isArray(list)) list = [];
+    function save() {
+      try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+      writeCookie(list);
+    }
+    function unlock(id, name, ico) {
+      if (list.indexOf(id) >= 0) return false;
+      list.push(id);
+      save();
+      try {
+        var el = document.createElement('div');
+        el.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9999;background:rgba(20,30,56,.95);color:#fff;border:1px solid rgba(140,170,255,.42);border-radius:999px;padding:12px 22px;font:700 13.5px/1.4 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:86vw';
+        el.textContent = I18N.tr('🏆 成就解锁：') + (ico ? ico + ' ' : '') + I18N.tr(name || id);
+        document.body.appendChild(el);
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        setTimeout(function () {
+          el.style.opacity = '0';
+          el.style.transform = 'translateX(-50%) translateY(16px)';
+          setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+        }, 3200);
+      } catch (e) {}
+      return true;
+    }
+    return { list: function () { return list.slice(); }, has: function (id) { return list.indexOf(id) >= 0; }, unlock: unlock };
+  })();
+  window.STAch = STAch;
+  setTimeout(function () { STAch.unlock('site.report', '体检常客', '🩺'); }, 600);
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function pick(rnd, arr) { return arr[Math.floor(rnd() * arr.length)]; }
+
+  var ITEMS = [
+    { k: '精神状态', ico: '🧠', low: ['电量不足，建议立即补充奶茶', '看起来像刚重启过，还有点懵', '大脑正在后台更新，请稍候'], mid: ['运转正常，偶尔走神', '状态在线，能扛住一门作业', '脑子转得动，摸鱼效率尤佳'], high: ['今天的你思路异常清晰', '精神小伙/姑娘，可以拆个难题庆祝一下'] },
+    { k: '专注力', ico: '🎯', low: ['注意力滑得像块肥皂', '十分钟看了五次手机（预测）', '书本翻开了，眼神在外面'], mid: ['能连续专注一小会儿', '效率尚可，建议番茄钟加持'], high: ['专注力拉满，建议立刻去干件正事'] },
+    { k: '欧气', ico: '🍀', low: ['今天抽卡建议观望', '非酋气息浓烈，不宜抽奖', '欧气余额不足，请谨慎出门'], mid: ['欧气平平，正常发挥', '运气凑合，能抢到食堂最后一份'], high: ['欧气爆棚！适合抽卡 / 抢票 / 表白（选一个）'] },
+    { k: '发量', ico: '💇', low: ['枕头上的头发比头上的多', '写题可以，掉发不行，请早睡', '每一根都珍贵，请温柔对待'], mid: ['发量稳定，无需慌张', '还算浓密，问题不大'], high: ['发量浓密到令人羡慕', '这发量，可以尝试熬夜（不建议）'] },
+    { k: '战斗力', ico: '⚔️', low: ['战斗力低迷，请补充碳水和糖', '今日不宜硬刚难题', '建议打一局五子棋找回自信'], mid: ['战斗力中规中矩', '能解决今天的作业量'], high: ['战斗力爆表，压轴题也可一战'] },
+    { k: '睡意', ico: '😴', low: ['清醒得很（咖啡因立功）', '睡意全无，适合搞创作'], mid: ['有一点点困，可以撑住'], high: ['睡意爆棚！快去看枕头', '眼皮已经在打架了，别硬撑'] },
+    { k: '玄学值', ico: '🔮', low: ['今日不宜相信直觉', '第六感有点飘'], mid: ['直觉尚可使用'], high: ['直觉准确度奇高，第一选择通常是对的'] }
+  ];
+
+  var SUMMARIES = [
+    '综合来看：今天状态【{g}】。{a}', '体检结论：【{g}】。{a}', '总体评估：【{g}】。{a}'
+  ];
+  var ADVICE = [
+    '建议：喝口水，伸个懒腰，然后去把最想做的那个小项目点开。',
+    '建议：先完成一件最小的任务，今天就会顺起来。',
+    '建议：对自己宽容一点，状态是曲线不是直线。',
+    '建议：去 star 页面生成一颗星星，据说能回血。',
+    '建议：早点睡。真的。',
+    '建议：今天适合做点让自己开心的小事。'
+  ];
+
+  var lastVariant = 0;
+
+  function build(variant) {
+    var d = new Date();
+    var ymd = d.getFullYear() + '-0' + (d.getMonth() + 1) + '-0' + d.getDate();
+    ymd = ymd.replace(/-0(\d\d)/g, '-$1');
+    var seedBase = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+    var rnd = mulberry32(seedBase * 100 + variant);
+
+    var rows = [], total = 0;
+    var html = '';
+    ITEMS.forEach(function (it, idx) {
+      var v = 42 + Math.floor(rnd() * 58);   /* 42-99 */
+      var cm = v < 60 ? pick(rnd, it.low) : (v < 82 ? pick(rnd, it.mid) : pick(rnd, it.high));
+      total += v;
+      var hue = v < 60 ? 'linear-gradient(90deg,#f87171,#fb923c)' : (v < 82 ? 'linear-gradient(90deg,#38bdf8,#818cf8)' : 'linear-gradient(90deg,#34d399,#38bdf8)');
+      html += '<div class="row">' +
+        '<span class="k">' + it.ico + ' ' + it.k + '</span>' +
+        '<span class="bar"><i data-w="' + v + '" style="background:' + hue + '"></i></span>' +
+        '<span class="v">' + v + '</span>' +
+        '<span class="cm">' + cm + '</span></div>';
+      rows.push({ k: it.k, v: v });
+    });
+    var avg = Math.round(total / ITEMS.length);
+    var grade = avg >= 88 ? 'S' : avg >= 78 ? 'A' : avg >= 66 ? 'B' : avg >= 54 ? 'C' : 'D';
+    var suf = { S: '状态史诗级，建议截图留念。', A: '相当不错的一天。', B: '稳稳的，正常发挥。', C: '有点疲惫，需要关照一下自己。', D: '今天的主题是：活着就行，明天再战。' }[grade];
+
+    document.getElementById('rDate').textContent = ymd + ' · ' + ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+    document.getElementById('rId').textContent = '报告编号 STAR-' + seedBase + '-' + (variant + 1) + ' · 综合分 ' + avg;
+    document.getElementById('rows').innerHTML = html;
+    document.getElementById('grade').textContent = grade;
+    document.getElementById('summary').innerHTML = I18N.tr(pick(rnd, SUMMARIES)).replace('{g}', grade + I18N.tr('级')).replace('{a}', I18N.tr(suf)) + '<br>' + I18N.tr(pick(rnd, ADVICE)).replace('建议：', '<b>' + I18N.tr('建议：') + '</b>');
+
+    /* 进度条动画 */
+    setTimeout(function () {
+      [].forEach.call(document.querySelectorAll('.bar i'), function (el) {
+        el.style.width = el.getAttribute('data-w') + '%';
+      });
+    }, 80);
+    return { ymd: ymd, avg: avg, grade: grade, rows: rows };
+  }
+
+  var toastEl = document.getElementById('toast'), toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2200);
+  }
+
+  var cur = build(0);
+
+  document.getElementById('btnReroll').addEventListener('click', function () {
+    lastVariant++;
+    cur = build(lastVariant);
+    document.getElementById('report').animate([{ opacity: .5 }, { opacity: 1 }], { duration: 320, easing: 'ease' });
+    toast('🔁 今日变体 #' + (lastVariant + 1));
+  });
+
+  /* 保存为图片 */
+  document.getElementById('btnSave').addEventListener('click', function () {
+    var W = 760, H = 120 + cur.rows.length * 46 + 210;
+    var cv = document.createElement('canvas');
+    var dp = 2;
+    cv.width = W * dp; cv.height = H * dp;
+    var g = cv.getContext('2d');
+    g.scale(dp, dp);
+    var grad = g.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, '#1b2c4a'); grad.addColorStop(1, '#0a1122');
+    g.fillStyle = grad; g.fillRect(0, 0, W, H);
+    /* 顶部彩条 */
+    var bar = g.createLinearGradient(0, 0, W, 0);
+    bar.addColorStop(0, '#38bdf8'); bar.addColorStop(.5, '#818cf8'); bar.addColorStop(1, '#c084fc');
+    g.fillStyle = bar; g.fillRect(0, 0, W, 6);
+    g.fillStyle = '#eef4ff';
+    g.font = '800 26px "Segoe UI","Microsoft YaHei",sans-serif';
+    g.fillText(I18N.tr('STAR 综合状态体检单'), 40, 66);
+    g.fillStyle = '#8ba0c8';
+    g.font = '700 14px "Segoe UI","Microsoft YaHei",sans-serif';
+    g.fillText(I18N.tr('DAILY DIAGNOSTIC REPORT · ') + cur.ymd, 40, 92);
+    g.font = '800 16px "Segoe UI","Microsoft YaHei",sans-serif';
+    var y0 = 138;
+    cur.rows.forEach(function (r, i) {
+      var y = y0 + i * 46;
+      g.fillStyle = '#dbe6ff'; g.font = '800 15px "Segoe UI","Microsoft YaHei",sans-serif';
+      g.fillText(I18N.tr(r.k), 40, y);
+      g.fillStyle = 'rgba(10,16,32,.9)';
+      g.fillRect(140, y - 13, 460, 14);
+      var col = r.v < 60 ? '#fb923c' : (r.v < 82 ? '#818cf8' : '#34d399');
+      g.fillStyle = col;
+      g.fillRect(140, y - 13, 460 * r.v / 100, 14);
+      g.fillStyle = '#eef4ff'; g.font = '800 15px ui-monospace,Consolas,monospace';
+      g.fillText(String(r.v), 620, y);
+    });
+    var yb = y0 + cur.rows.length * 46 + 18;
+    g.fillStyle = '#8ba0c8'; g.font = '700 14px "Segoe UI","Microsoft YaHei",sans-serif';
+    g.fillText(I18N.tr('综合分') + ' ' + cur.avg + I18N.tr(' · 评级') + ' ' + cur.grade, 40, yb);
+    g.fillStyle = '#7d90ba'; g.font = '600 13px "Segoe UI","Microsoft YaHei",sans-serif';
+    g.fillText(I18N.tr('主检医师：月月 🌙 · startian.top/report · 仅供开心'), 40, yb + 30);
+    g.fillStyle = 'rgba(130,160,220,.5)';
+    g.fillRect(40, yb + 48, W - 80, 1);
+    g.fillStyle = '#6d80aa'; g.font = '600 12px "Segoe UI","Microsoft YaHei",sans-serif';
+    g.fillText(I18N.tr('报告编号 STAR-') + cur.ymd.replace(/-/g, '') + I18N.tr('· 生成于') + ' ' + new Date().toLocaleString(), 40, yb + 70);
+    cv.toBlob(function (blob) {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'daily-report-' + cur.ymd + '.png';
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+      toast('⬇️ 报告图已保存');
+      try { STAch.unlock('report.save', '晒报告的人', '📸'); } catch (e) {}
+    }, 'image/png');
+  });
+
+  document.getElementById('btnShare').addEventListener('click', function () {
+    var url = 'https://startian.top/report/';
+    function done() { toast('🔗 链接已复制，喊朋友来做个体检'); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, fb);
+    else fb();
+    function fb() { toast('报告地址：' + url); }
+  });
+})();
+</script>
+<!-- 返回主页（全站统一按钮 · 2026-09-29） -->
+<a class="wb-home" href="https://startian.top/" title="返回星恬的小站主页">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>主页</span>
+</a></body>
+</html>

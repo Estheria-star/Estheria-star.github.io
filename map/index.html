@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="星恬的宇宙地图：14 颗作品星在宇宙里自由漂浮，彼此靠近时自动连线；去过的会亮起来，点击星星可展开「星图关系视图」。startian.top 全站导航">
+<meta name="theme-color" content="#05070f">
+<title>宇宙地图 · startian.top</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{
+    background:radial-gradient(1200px 700px at 50% -180px,#141b38 0%,#0a0f24 45%,#05070f 100%);
+    background-attachment:fixed;
+    color:#e8eeff;font-family:'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:
+      radial-gradient(1.2px 1.2px at 24px 32px, rgba(255,255,255,.55), transparent),
+      radial-gradient(1px 1px at 86px 128px, rgba(190,214,255,.42), transparent),
+      radial-gradient(1.6px 1.6px at 66px 168px, rgba(255,255,255,.32), transparent),
+      radial-gradient(1px 1px at 244px 188px, rgba(170,196,255,.45), transparent),
+      radial-gradient(1.3px 1.3px at 300px 100px, rgba(255,255,255,.28), transparent);
+    background-size:340px 260px;
+  }
+  .neb{position:fixed;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0}
+  .neb.a{width:430px;height:430px;left:-130px;top:-90px;background:radial-gradient(circle,#6d28d9,transparent 70%);opacity:.3}
+  .neb.b{width:470px;height:470px;right:-150px;top:110px;background:radial-gradient(circle,#0e7490,transparent 70%);opacity:.26}
+  .neb.c{width:400px;height:400px;left:32%;bottom:-180px;background:radial-gradient(circle,#b45309,transparent 70%);opacity:.16}
+
+  .wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:26px 20px 90px}
+
+  header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+  .hd-eyebrow{font-size:11px;letter-spacing:4px;font-weight:800;color:#7f8fc0;margin-bottom:5px}
+  h1{font-size:23px;margin:0 0 3px;letter-spacing:.5px}
+  .sub{font-size:12.5px;color:#8fa0c8;font-weight:600}
+  .hright{margin-left:auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .prog{display:flex;flex-direction:column;gap:5px;min-width:150px}
+  .prog .t{font-size:12.5px;font-weight:700;color:#b9c6e8}
+  .prog .t b{color:#ffd97a;font-size:14px}
+  .prog .bar{height:7px;border-radius:999px;background:rgba(20,28,54,.9);border:1px solid rgba(120,150,220,.25);overflow:hidden}
+  .prog .bar i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#8b5cf6,#38bdf8,#fbbf24);transition:width .7s cubic-bezier(.25,.9,.3,1)}
+  .home{text-decoration:none;font-size:12.5px;font-weight:700;color:#cfe0ff;border:1px solid rgba(130,160,230,.3);border-radius:999px;padding:9px 16px;background:rgba(16,24,48,.7);transition:border-color .2s,transform .2s;white-space:nowrap}
+  .home:hover{border-color:rgba(160,190,255,.7);transform:translateY(-1px)}
+
+  .banner{display:none;margin-bottom:14px;padding:13px 20px;border-radius:16px;font-size:14px;font-weight:800;letter-spacing:.5px;
+    background:linear-gradient(100deg,rgba(139,92,246,.22),rgba(56,189,248,.2),rgba(251,191,36,.2));
+    border:1px solid rgba(180,200,255,.35);box-shadow:0 0 34px rgba(120,140,255,.25);animation:bannerGlow 2.6s ease-in-out infinite}
+  .banner.show{display:block}
+  @keyframes bannerGlow{0%,100%{box-shadow:0 0 26px rgba(120,140,255,.22)}50%{box-shadow:0 0 44px rgba(160,180,255,.42)}}
+
+  .stage{position:relative;border:1px solid rgba(110,140,220,.22);border-radius:26px;overflow:hidden;
+    background:radial-gradient(900px 520px at 50% 0%,rgba(30,40,80,.55),rgba(10,15,34,.65));
+    box-shadow:0 30px 80px rgba(0,0,0,.5), inset 0 0 60px rgba(60,80,160,.12)}
+  #mapSvg{display:block;width:100%;height:auto}
+
+  /* ============================================================
+     ✦ 星星：光晕 / 星芒 / 呼吸光环 / 渐变核心（由运动系统实时驱动位置）
+     ============================================================ */
+  .node{cursor:pointer;text-decoration:none;transition:opacity .55s ease}
+  .node .pos{will-change:transform}
+  .node .fx{transition:transform .3s cubic-bezier(.3,1.35,.5,1);transform-box:fill-box;transform-origin:center}
+  .node:hover .fx{transform:scale(1.14)}
+  .node .core{transition:filter .3s ease}
+  .node .halo,.node .spike,.node .glow{transform-box:fill-box;transform-origin:center}
+  .node .label{font-size:15px;font-weight:800;fill:#7a86a8;letter-spacing:1px;text-anchor:middle;transition:fill .25s ease,font-size .4s ease;pointer-events:none}
+  .node .ico{font-size:16px;text-anchor:middle;dominant-baseline:central;pointer-events:none;transition:opacity .3s ease}
+  .node .hit{fill:transparent}
+
+  /* —— 未点亮：哑光暗星（不发光）—— */
+  .node:not(.lit) .core{fill:#151b33;stroke:rgba(122,140,200,.4);stroke-width:1.3}
+  .node:not(.lit) .ring{fill:none;stroke:rgba(110,130,190,.32);stroke-width:1;stroke-dasharray:4 6}
+  .node:not(.lit) .ico{opacity:.34;filter:grayscale(1) brightness(.9)}
+  .node:not(.lit):hover .core{stroke:rgba(170,190,255,.8);fill:#1b2240}
+  .node:not(.lit):hover .label{fill:#c6d2f0}
+
+  /* —— 点亮：发光星球 —— */
+  .node.lit .glow{opacity:.9;animation:glowPulse 3.4s ease-in-out infinite;animation-delay:var(--dl,0s)}
+  .node.lit .core{fill:url(#coreGrad);stroke:none}
+  .node.lit .halo{fill:none;stroke:var(--c);stroke-width:1.5;opacity:.8;animation:breathe 3.2s ease-in-out infinite;animation-delay:var(--dl,0s)}
+  .node.lit .spike{fill:var(--c);opacity:.75;animation:spikePulse 3.2s ease-in-out infinite;animation-delay:var(--dl,0s)}
+  .node.lit .label{fill:#eef4ff;text-shadow:0 0 12px rgba(140,170,255,.6)}
+  .node.lit:hover .halo{stroke-width:2.3}
+  @keyframes breathe{0%,100%{opacity:.38;transform:scale(.93)}50%{opacity:1;transform:scale(1.06)}}
+  @keyframes glowPulse{0%,100%{opacity:.55}50%{opacity:1}}
+  @keyframes spikePulse{0%,100%{opacity:.5;transform:scale(.88)}50%{opacity:.95;transform:scale(1.08)}}
+
+  /* —— 悬停冻结中的星：给个柔和的"凝住"微光提示 —— */
+  .node.frozenStar .halo{stroke-dasharray:3 5;animation-play-state:paused}
+  .node.frozenStar .glow{animation-play-state:paused}
+  .node.frozenStar .spike{animation-play-state:paused}
+
+  /* —— 跃迁 / 闪烁 —— */
+  .node.jump .fx{animation:jumpFlash .55s ease;transform-box:fill-box;transform-origin:center}
+  @keyframes jumpFlash{0%{transform:scale(1)}42%{transform:scale(1.45);filter:brightness(2.2)}100%{transform:scale(1)}}
+  .node.jump .halo{opacity:1;stroke-width:3.2}
+
+  /* ============================================================
+     ✦ 动态连接线（78 对，实时演算：靠近显现 / 远离消失）
+     ============================================================ */
+  #dynLinks{transition:opacity .45s ease}
+  .rel-mode #dynLinks{opacity:0}
+  .dlink .dbase{fill:none;stroke-width:1.5}
+  .dlink .dflow{fill:none;stroke-width:1.9;stroke-linecap:round;stroke-dasharray:3 15;animation:flowdash 1.6s linear infinite}
+  @keyframes flowdash{to{stroke-dashoffset:-18}}
+
+  /* 星域光斑与标签 */
+  .zoneGlowText{text-anchor:middle;pointer-events:none;transition:opacity .5s ease}
+  .zname{font-size:20px;font-weight:900;fill:#dfe8ff;letter-spacing:2px}
+  .zsub{font-size:12px;font-weight:700;fill:#8697c4;letter-spacing:1px}
+  .zoneBlob{transition:opacity .6s ease}
+  .watermark{font-size:15px;font-weight:800;fill:rgba(150,170,230,.14);letter-spacing:6px;text-anchor:middle;pointer-events:none;transition:opacity .5s ease}
+  #relLinks{opacity:0;pointer-events:none;transition:opacity .55s ease}
+  .rel-mode #relLinks{opacity:1;transition-delay:.45s}
+  .rel-mode .zoneGlowText,.rel-mode .watermark,.rel-mode .zoneBlob{opacity:0}
+  .rel-lab{font-size:11px;font-weight:700;fill:rgba(255,222,150,.85);text-anchor:middle;letter-spacing:1px}
+  .rel-link{fill:none;stroke:rgba(255,214,130,.55);stroke-width:1.6}
+  .rel-link-g{animation:relFadeIn .5s ease both}
+  @keyframes relFadeIn{from{opacity:0}}
+  .rel-link .rl-flow{fill:none;stroke:#ffd97a;stroke-width:2;stroke-dasharray:2.5 14;animation:flowdash 1.5s linear infinite;stroke-linecap:round}
+  .rel-node-halo{fill:none;stroke:rgba(255,214,130,.5);stroke-width:1.4;stroke-dasharray:3 6;animation:haloSpin 14s linear infinite;transform-box:fill-box;transform-origin:center}
+  @keyframes haloSpin{to{transform:rotate(360deg)}}
+
+  /* —— 关系模式下的节点状态 —— */
+  .node.faded{opacity:.13}
+  .node.faded:hover{opacity:.55}
+  .node.faded .fx{transform:scale(.55)}
+  .node.faded:hover .fx{transform:scale(.8)}
+  .node.center .fx{transform:scale(1.5)}
+  .node.center:hover .fx{transform:scale(1.58)}
+  .node.center .halo{stroke-width:2.6;opacity:1}
+  .node.center .spike{opacity:1;animation-duration:2.2s}
+  .node.center .label{font-size:18px;fill:#fff}
+  .node.center .hit{r:58px}
+
+  /* ============================================================
+     ✦ 工具行 / 关系信息卡
+     ============================================================ */
+  .toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:16px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;font-weight:700;color:#9fb0d8}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .lg-dot{width:12px;height:12px;border-radius:50%;display:inline-block;flex:0 0 auto}
+  .lg-lit{background:radial-gradient(circle at 35% 35%,#fff,#a78bfa 60%,#38bdf8);box-shadow:0 0 10px rgba(139,92,246,.9)}
+  .lg-dim{background:#151b33;border:1.4px dashed rgba(120,140,200,.5)}
+  .lg-line{width:22px;height:0;border-top:2px dashed rgba(140,170,255,.6);display:inline-block}
+  button.rand{
+    margin-left:auto;border:1px solid rgba(140,170,255,.4);border-radius:999px;padding:11px 20px;font-family:inherit;cursor:pointer;
+    font-size:13.5px;font-weight:800;color:#0a0f24;background:linear-gradient(100deg,#ffd97a,#fbbf24);
+    box-shadow:0 6px 0 #8a6a1a,0 14px 30px rgba(251,191,36,.25);transition:transform .15s ease;
+  }
+  button.rand:active{transform:translateY(2px);box-shadow:0 3px 0 #8a6a1a}
+  .tipnote{width:100%;font-size:11.5px;color:#6d7ca8;font-weight:600}
+
+  .relhint{
+    position:absolute;top:14px;left:50%;transform:translateX(-50%) translateY(-8px);opacity:0;pointer-events:none;
+    background:rgba(14,20,40,.92);border:1px solid rgba(255,214,130,.4);border-radius:999px;
+    padding:8px 18px;font-size:12px;font-weight:700;color:#ffe6b0;white-space:nowrap;max-width:92%;
+    overflow:hidden;text-overflow:ellipsis;transition:opacity .4s ease,transform .4s ease;z-index:5;
+  }
+  .relhint.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .relbar{
+    position:absolute;left:50%;bottom:14px;transform:translateX(-50%) translateY(16px);opacity:0;pointer-events:none;
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;
+    background:rgba(13,19,38,.94);border:1px solid rgba(140,170,255,.32);border-radius:20px;
+    padding:13px 18px;box-shadow:0 20px 50px rgba(0,0,0,.55);max-width:94%;z-index:6;
+    transition:opacity .4s ease,transform .45s cubic-bezier(.2,.9,.3,1.1);
+  }
+  .relbar.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;transition-delay:.25s}
+  .relbar .rbinfo{min-width:0}
+  .relbar b{font-size:14.5px;letter-spacing:.5px;display:block}
+  .relbar .rbdesc{font-size:11.5px;color:#9fb0d8;font-weight:600;display:block;margin-top:2px;max-width:420px}
+  .relbar .rbacts{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .relbar a.rbgo{text-decoration:none;border:0;border-radius:999px;padding:11px 20px;font-size:13px;font-weight:800;color:#241a02;
+    background:linear-gradient(100deg,#ffd97a,#fbbf24);box-shadow:0 5px 0 #8a6a1a;cursor:pointer;white-space:nowrap}
+  .relbar a.rbgo:active{transform:translateY(2px);box-shadow:0 2px 0 #8a6a1a}
+  .relbar button.rbbak{border:1px solid rgba(140,170,255,.45);border-radius:999px;padding:10px 18px;font-family:inherit;font-size:13px;
+    font-weight:800;color:#cfe0ff;background:rgba(24,32,60,.8);cursor:pointer;white-space:nowrap}
+  .relbar button.rbbak:hover{border-color:rgba(170,200,255,.8)}
+
+  .tip{position:fixed;z-index:80;pointer-events:none;opacity:0;transform:translateY(6px);transition:opacity .18s ease,transform .18s ease;
+    background:rgba(14,20,40,.96);border:1px solid rgba(130,160,230,.35);border-radius:14px;padding:12px 15px;max-width:272px;
+    box-shadow:0 18px 44px rgba(0,0,0,.55)}
+  .tip.show{opacity:1;transform:none}
+  .tip b{font-size:14px;letter-spacing:.5px}
+  .tip p{margin:5px 0 7px;font-size:12px;line-height:1.75;color:#a9b6da}
+  .tip .st{font-size:11.5px;font-weight:800}
+  .tip .st.ok{color:#8be9b0}
+  .tip .st.no{color:#8a93b8}
+  .tip .hint{display:block;margin-top:6px;font-size:10.5px;color:#6d7ca8;font-weight:700}
+
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(12px);opacity:0;z-index:90;
+    background:rgba(14,20,40,.96);border:1px solid rgba(130,160,255,.4);border-radius:999px;padding:12px 24px;
+    font-size:13px;font-weight:700;transition:all .3s ease;pointer-events:none;max-width:86vw;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+
+  .fall{position:fixed;top:-20px;z-index:9000;pointer-events:none;width:9px;height:14px;border-radius:2px}
+  @keyframes fall{to{transform:translateY(105vh) rotate(540deg)}}
+
+  @media (max-width:760px){
+    .wrap{padding:18px 12px 80px}
+    h1{font-size:20px}
+    .hright{width:100%;margin-left:0;justify-content:space-between}
+    .toolbar{gap:10px}
+    button.rand{margin-left:0;width:100%}
+    .relbar{flex-direction:column;gap:10px;padding:12px 14px;bottom:10px}
+    .relbar .rbacts{width:100%;justify-content:center}
+  }
+  /* 移动端：整体尺寸上调一档（viewBox 更小，统一放大提升可读性） */
+  #mapSvg.mob .node .label{font-size:18px}
+  #mapSvg.mob .node .ico{font-size:19px}
+  #mapSvg.mob .node .core{r:15px}
+  #mapSvg.mob .node .halo{r:30px}
+  #mapSvg.mob .node .ring{r:27px}
+  #mapSvg.mob .node .glow{r:42px}
+  #mapSvg.mob .node .hit{r:47px}
+  #mapSvg.mob .zname{font-size:21px}
+  #mapSvg.mob .zsub{font-size:13px}
+  #mapSvg.mob .rel-lab{font-size:12px}
+  @media (prefers-reduced-motion: reduce){
+    .node .fx,.node .halo,.node .spike,.node .glow{animation:none !important;transition:none}
+    .dlink .dflow,.rel-link .rl-flow,.rel-node-halo{animation:none}
+    .banner{animation:none}
+  }
+
+  /* —— 返回主页（全站统一 · 2026-09-29）—— */
+  .wb-home{position:fixed;left:14px;bottom:14px;z-index:9990;display:inline-flex;align-items:center;gap:5px;
+    padding:8px 13px 8px 10px;border-radius:999px;text-decoration:none;
+    background:rgba(17,24,39,.55);color:#fff;font-size:12.5px;font-weight:600;letter-spacing:.3px;
+    -webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);
+    border:1px solid rgba(255,255,255,.14);box-shadow:0 6px 18px rgba(0,0,0,.18);
+    transition:background .2s,transform .2s,box-shadow .2s}
+  .wb-home:hover{background:rgba(17,24,39,.78);transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.26)}
+  .wb-home:active{transform:translateY(0)}
+  .wb-home svg{width:13px;height:13px;flex:0 0 auto}
+  @media (max-width:620px){ .wb-home{left:10px;bottom:10px;padding:7px 11px 7px 9px;font-size:12px} }
+
+/* ============ 🔮 ARG：第十五颗星 + 星座 ============ */
+#argLayer{pointer-events:none}
+#argStar{pointer-events:auto;cursor:pointer;animation:argTw 2.8s ease-in-out infinite}
+#argStar .argCore{fill:#dfe9ff;filter:drop-shadow(0 0 5px rgba(198,214,240,.8))}
+@keyframes argTw{0%,100%{opacity:.28}50%{opacity:.85}}
+#argStar:hover{opacity:1 !important;animation-play-state:paused}
+#argStar.found{animation:none;opacity:1}
+.argLine{fill:none;stroke:rgba(198,214,240,.5);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:5 6;animation:argDash 40s linear infinite;filter:drop-shadow(0 0 6px rgba(198,214,240,.45))}
+@keyframes argDash{to{stroke-dashoffset:-440}}
+.argDot{fill:#eef4ff;opacity:.85}
+</style>
+</head>
+<body>
+<div class="neb a"></div><div class="neb b"></div><div class="neb c"></div>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="hd-eyebrow">THE STARTIAN UNIVERSE</div>
+      <h1>🗺️ 星恬的宇宙地图</h1>
+      <div class="sub" id="hdSub">14 颗星串起整个小站 · 去过的会亮起来</div>
+    </div>
+    <div class="hright">
+      <div class="prog">
+        <span class="t">已点亮 <b id="litN">0</b> / <span id="litT">14</span></span>
+        <div class="bar"><i id="litBar"></i></div>
+      </div>
+      <a class="home" href="https://startian.top/">← 返回主页</a>
+    </div>
+  </header>
+
+  <div class="banner" id="banner">🎉 宇宙全图鉴达成 —— 14 颗星全部点亮，你就是这个宇宙的常客</div>
+
+  <div class="stage" id="stage">
+    <svg id="mapSvg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="全站作品星图"></svg>
+    <div class="relhint" id="relhint">✦ 星图关系视图 · 点击其他星切换中心 · 点空白 / ESC 返回</div>
+    <div class="relbar" id="relbar">
+      <div class="rbinfo"><b id="rbName">—</b><span class="rbdesc" id="rbDesc"></span></div>
+      <div class="rbacts">
+        <a class="rbgo" id="rbGo" href="#">🚀 前往作品</a>
+        <button class="rbbak" id="rbBack" type="button">↩ 返回星图</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="legend">
+      <span><i class="lg-dot lg-lit"></i>已点亮 · 去过的作品</span>
+      <span><i class="lg-dot lg-dim"></i>暗星 · 还没去过</span>
+      <span><i class="lg-line"></i>星星靠近时自动连线</span>
+    </div>
+    <button class="rand" id="btnRandom" type="button">🎲 带我去一颗暗星</button>
+    <div class="tipnote">星星在自由漂浮，彼此靠近会自动连线 · 悬停任一颗让它停下来 · 点击星星展开「星图关系视图」· Ctrl / 中键点击直接前往</div>
+  </div>
+</div>
+
+<div class="tip" id="tip"></div>
+<div class="toast" id="toast"></div>
+
+<!-- 返回主页（全站统一按钮 · 2026-09-29） -->
+<a class="wb-home" href="https://startian.top/" title="返回星恬的小站主页">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>主页</span>
+</a>
+
+<script>
+/* ==== i18n-kit v1.2 begin ==== */
+/* ══════════════════════════════════════════════════════════
+   🌐 多语言 i18n Kit（startian.top 全站共享 · v1.2 · 2026-10-04）
+   · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
+   · 自动识别：首次访问按 navigator.language（zh 开头 → 中文，其余 → English）
+   · 两种接入模式（可混用）：
+     ① 短语表模式（推荐，低侵入）：I18N.phrase({ '中文原文': 'English', ... })
+        自动扫描文本节点 / title / placeholder / aria-label / alt，动态插入的文本也自动翻译
+     ② 标注模式：data-i18n / data-i18n-html / data-i18n-title / data-i18n-aria / data-i18n-ph / data-i18n-alt
+   · 子树上加 data-i18n-skip 可整体跳过（用户输入内容、ARG 谜题原文等）
+   · API：I18N.t(k[,vars]) · I18N.tOr(k,fb) · I18N.tr(原文) · I18N.set(lang) · I18N.lang()
+          · I18N.phrase(map) · I18N.scan(root) · I18N.apply(root) · I18N.onChange(fn)
+          · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n)
+   · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
+   ══════════════════════════════════════════════════════════ */
+var I18N = (function () {
+  'use strict';
+  var LS = 'st_lang';
+  var FALLBACK = 'zh';
+  var lang = FALLBACK;
+  var dict = { zh: {}, en: {} };
+  var phrase = {};      /* 短语表：中文原文（归一化）→ 译文 */
+  var listeners = [];
+  var bd = {};          /* boot data：原文快照等 */
+
+  /* ---- 基础词典（全站通用词条） ---- */
+  dict.zh['common.home'] = '主页';
+  dict.en['common.home'] = 'Home';
+  dict.zh['common.homeTitle'] = '返回星恬的小站主页';
+  dict.en['common.homeTitle'] = "Back to Startian's homepage";
+  dict.zh['common.close'] = '关闭';
+  dict.en['common.close'] = 'Close';
+  dict.zh['common.cancel'] = '取消';
+  dict.en['common.cancel'] = 'Cancel';
+
+  /* ---- 存储与识别 ---- */
+  function norm(v) {
+    v = String(v || '').toLowerCase();
+    if (v.indexOf('zh') === 0) return 'zh';
+    if (v.indexOf('en') === 0) return 'en';
+    return null;
+  }
+  function readCookie() {
+    try { var m = document.cookie.match(/(?:^|;\s*)st_lang=([^;]*)/); return m ? decodeURIComponent(m[1]) : null; }
+    catch (e) { return null; }
+  }
+  function readLS() { try { return localStorage.getItem(LS); } catch (e) { return null; } }
+  function persist(v) {
+    try { localStorage.setItem(LS, v); } catch (e) {}
+    try { document.cookie = 'st_lang=' + encodeURIComponent(v) + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax'; } catch (e) {}
+  }
+  function detect() {
+    var s = norm(readCookie()) || norm(readLS());
+    if (s) return s;
+    var n = norm(navigator.language || navigator.userLanguage);
+    return n || FALLBACK;
+  }
+
+  /* ---- 文案 ---- */
+  /* tRaw：查词典（当前语言 → zh 兜底），查不到返回 null（= 保持原文） */
+  function tRaw(key) {
+    var v = (dict[lang] && dict[lang][key] != null) ? dict[lang][key] : null;
+    if (v == null) v = (dict[FALLBACK] && dict[FALLBACK][key] != null) ? dict[FALLBACK][key] : null;
+    return v;
+  }
+  function t(key, vars) {
+    var v = tRaw(key);
+    if (v == null) return key;
+    if (vars) v = String(v).replace(/\{(\w+)\}/g, function (m, k) { return (vars[k] != null) ? vars[k] : m; });
+    return v;
+  }
+  /* tOr：查不到时用传入的兜底值（页面 JS 动态文案用这个） */
+  function tOr(key, fallback) {
+    var v = tRaw(key);
+    return (v == null) ? fallback : v;
+  }
+  function add(obj) {
+    if (!obj) return;
+    ['zh', 'en'].forEach(function (k) {
+      if (obj[k]) for (var key in obj[k]) dict[k][key] = obj[k][key];
+    });
+  }
+  /* tr：短语表直译（原文进，译文出；zh 侧原样返回）-JS 动态文案直接用 */
+  function tr(s) {
+    if (lang === 'zh') return s;
+    var v = lookup(normText(s));
+    return (v == null) ? s : v;
+  }
+  function addPhrase(map) {
+    if (!map) return;
+    for (var k in map) { if (map[k] != null) phrase[normText(k)] = String(map[k]); }
+  }
+  /* 规则表：[[/正则/, '替换（可用 $1）'], ...] - 处理「已复习 3」「12 天有记录」这类数字拼接 */
+  var rules = [];
+  function addRules(list) {
+    if (!list) return;
+    for (var i = 0; i < list.length; i++) {
+      try {
+        var re = (list[i][0] instanceof RegExp) ? list[i][0] : new RegExp(list[i][0]);
+        rules.push([re, String(list[i][1])]);
+      } catch (e) {}
+    }
+  }
+  function lookup(t) {
+    var v = phrase[t];
+    if (v != null) return v;
+    for (var i = 0; i < rules.length; i++) {
+      try { if (rules[i][0].test(t)) return t.replace(rules[i][0], rules[i][1]); } catch (e) {}
+    }
+    return null;
+  }
+
+  /* ---- 短语表扫描（静态 + 动态） ---- */
+  function normText(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
+  var PTAGS = ['title', 'placeholder', 'aria-label', 'alt'];
+  function translText(node) {
+    var raw = node.nodeValue;
+    if (!raw) return;
+    var rec = node.__i18nR;
+    if (rec) {
+      if (lang === 'zh') {
+        if (raw === rec.en) { node.nodeValue = rec.orig; delete node.__i18nR; }
+        else if (raw !== rec.orig) { delete node.__i18nR; }
+        return;
+      }
+      if (raw === rec.en) return;
+      if (raw === rec.orig) { node.nodeValue = rec.en; return; }
+      delete node.__i18nR;
+    }
+    var out = lookup(normText(raw));
+    if (out == null) return;
+    if (lang === 'en') { if (raw !== out) { node.__i18nR = { orig: raw, en: out }; node.nodeValue = out; } }
+  }
+  function translAttrs(el) {
+    if (!el.getAttribute) return;
+    for (var i = 0; i < PTAGS.length; i++) {
+      var a = PTAGS[i], v = el.getAttribute(a);
+      if (v == null || v === '') continue;
+      var rec = el.__i18nA && el.__i18nA[a];
+      if (rec) {
+        if (lang === 'zh') {
+          if (v === rec.en) { el.setAttribute(a, rec.orig); delete el.__i18nA[a]; }
+          else if (v !== rec.orig) { delete el.__i18nA[a]; }
+          continue;
+        }
+        if (v === rec.en) continue;
+        if (v === rec.orig) { el.setAttribute(a, rec.en); continue; }
+        delete el.__i18nA[a];
+      }
+      var out = lookup(normText(v));
+      if (out == null) continue;
+      if (lang === 'en') {
+        if (v !== out) { if (!el.__i18nA) el.__i18nA = {}; el.__i18nA[a] = { orig: v, en: out }; el.setAttribute(a, out); }
+      }
+    }
+  }
+  function scanNode(node) {
+    if (!node) return;
+    if (node.nodeType === 9) node = node.documentElement || node.body;   /* 文档节点 → 转元素 */
+    if (!node) return;
+    if (node.nodeType === 3) { translText(node); return; }
+    if (node.nodeType !== 1) return;
+    var tag = node.tagName;
+    if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA' || tag === 'NOSCRIPT') return;
+    if (node.hasAttribute('data-i18n-skip')) return;
+    translAttrs(node);
+    for (var c = node.firstChild; c; c = c.nextSibling) scanNode(c);
+  }
+  function scan(root) { try { scanNode(root || document.body || document.documentElement); } catch (e) {} }
+  /* 动态内容自动翻译（MutationObserver，逐节点增量，无重扫） */
+  var moOn = false;
+  function auto(root) {
+    if (moOn || typeof MutationObserver === 'undefined') return;
+    var target = root || document.body;
+    if (!target) {   /* head 提前注入时 body 还没解析出来，等 DOM ready */
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { auto(root); });
+      return;
+    }
+    moOn = true;
+    try {
+      var mo = new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          var m = muts[i];
+          try {
+            if (m.type === 'characterData') translText(m.target);
+            else if (m.type === 'attributes') translAttrs(m.target);
+            else if (m.type === 'childList') {
+              for (var j = 0; j < m.addedNodes.length; j++) scanNode(m.addedNodes[j]);
+            }
+          } catch (e) {}
+        }
+      });
+      mo.observe(target, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: PTAGS });
+    } catch (e) {}
+  }
+
+  /* ---- 日期 / 数字 ---- */
+  var MN_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var WD_ZH = '日一二三四五六';
+  var WD_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  function fmtDate(d, opt) {
+    if (typeof d === 'string') { var a = d.split('-'); d = new Date(+a[0], (+a[1] || 1) - 1, +a[2] || 1); }
+    if (!(d instanceof Date) || isNaN(d.getTime())) return '';
+    opt = opt || {};
+    var s;
+    if (lang === 'zh') {
+      s = d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日';
+      if (opt.weekday) s += ' · 星期' + WD_ZH.charAt(d.getDay());
+    } else {
+      s = MN_EN[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+      if (opt.weekday) s += ' · ' + WD_EN[d.getDay()];
+    }
+    return s;
+  }
+  function fmtNum(n) {
+    try { return Number(n).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US'); }
+    catch (e) { return String(n); }
+  }
+
+  /* ---- DOM 标注应用（标注模式；词条缺失时恢复原文 - 保证切回中文能还原） ---- */
+  function apply(root) {
+    root = root || document;
+    try {
+      var i, list, v, el;
+      list = root.querySelectorAll('[data-i18n]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrig == null) el.__i18nOrig = el.textContent;
+        v = tRaw(el.getAttribute('data-i18n'));
+        el.textContent = (v != null) ? v : el.__i18nOrig;
+      }
+      list = root.querySelectorAll('[data-i18n-html]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigHTML == null) el.__i18nOrigHTML = el.innerHTML;
+        v = tRaw(el.getAttribute('data-i18n-html'));
+        el.innerHTML = (v != null) ? v : el.__i18nOrigHTML;
+      }
+      list = root.querySelectorAll('[data-i18n-title]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigTitle == null) el.__i18nOrigTitle = el.title;
+        v = tRaw(el.getAttribute('data-i18n-title'));
+        el.title = (v != null) ? v : el.__i18nOrigTitle;
+      }
+      list = root.querySelectorAll('[data-i18n-aria]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAria == null) el.__i18nOrigAria = el.getAttribute('aria-label') || '';
+        v = tRaw(el.getAttribute('data-i18n-aria'));
+        el.setAttribute('aria-label', (v != null) ? v : el.__i18nOrigAria);
+      }
+      list = root.querySelectorAll('[data-i18n-ph]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigPh == null) el.__i18nOrigPh = el.placeholder || '';
+        v = tRaw(el.getAttribute('data-i18n-ph'));
+        el.placeholder = (v != null) ? v : el.__i18nOrigPh;
+      }
+      list = root.querySelectorAll('[data-i18n-alt]');
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.__i18nOrigAlt == null) el.__i18nOrigAlt = el.getAttribute('alt') || '';
+        v = tRaw(el.getAttribute('data-i18n-alt'));
+        el.setAttribute('alt', (v != null) ? v : el.__i18nOrigAlt);
+      }
+      /* 标题（短语表优先，其次 page.title 词条） */
+      if (!bd.__origTitle) bd.__origTitle = document.title;
+      var tv = lookup(normText(bd.__origTitle));
+      if (tv == null) tv = tRaw('page.title');
+      if (tv != null) { document.title = (lang === 'en') ? tv : bd.__origTitle; bd.__titleTouched = true; }
+      else if (bd.__titleTouched) { document.title = bd.__origTitle; }
+      document.documentElement.lang = (lang === 'zh') ? 'zh-CN' : 'en';
+      syncSwitch();
+    } catch (e) {}
+  }
+
+  function applyLang(v) {
+    lang = v;
+    persist(v);
+    apply(document);
+    scan(document);
+    for (var i = 0; i < listeners.length; i++) { try { listeners[i](lang); } catch (e) {} }
+    try {
+      var live = document.getElementById('i18n-live');
+      if (live) live.textContent = (lang === 'zh') ? '已切换到中文' : 'Switched to English';
+    } catch (e) {}
+  }
+  /* 切换转场（仿主页主题转场）：黑幕淡入 → 光晕从切换器扩散 → 幕中换语言 → 揭幕；可打断；尊重 reduced-motion */
+  var tid = 0, stage = null;
+  function ensureStage() {
+    if (stage) return stage;
+    var ov = document.createElement('div'); ov.className = 'i18n-veil';
+    var hl = document.createElement('div'); hl.className = 'i18n-halo';
+    var host = document.body || document.documentElement;
+    host.appendChild(ov); host.appendChild(hl);
+    stage = { ov: ov, hl: hl };
+    return stage;
+  }
+  function set(v) {
+    v = norm(v);
+    if (!v) return;
+    if (v === lang) { apply(document); scan(document); return; }
+    var calm = true;
+    try { calm = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) {}
+    if (!calm || !document.body) { applyLang(v); return; }
+    try {
+      var st = ensureStage(), my = ++tid;
+      var x = (window.innerWidth || 360) - 80, y = (window.innerHeight || 640) - 34;
+      try { if (swEl) { var r = swEl.getBoundingClientRect(); x = r.left + r.width / 2; y = r.top + r.height / 2; } } catch (e) {}
+      st.ov.style.setProperty('--ix', x + 'px'); st.ov.style.setProperty('--iy', y + 'px');
+      st.hl.style.setProperty('--ix', x + 'px'); st.hl.style.setProperty('--iy', y + 'px');
+      st.ov.classList.remove('out'); st.ov.classList.add('on'); st.ov.style.display = 'block';
+      st.hl.classList.remove('go'); void st.hl.offsetWidth; st.hl.classList.add('go');
+      setTimeout(function () {
+        if (my !== tid) return;
+        applyLang(v);
+        st.ov.classList.remove('on'); st.ov.classList.add('out');
+        setTimeout(function () {
+          if (my !== tid) return;
+          st.ov.style.display = 'none'; st.ov.classList.remove('out');
+        }, 520);
+      }, 430);
+    } catch (e) { applyLang(v); }
+  }
+  function onChange(fn) { if (typeof fn === 'function') listeners.push(fn); }
+  function getLang() { return lang; }
+
+  /* ---- 切换入口（右下角胶囊，自动注入） ---- */
+  var SW_CSS = '.i18n-sw{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:9992;display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:rgba(17,24,39,.74);-webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3);border:1px solid rgba(255,255,255,.26);box-shadow:0 6px 20px rgba(0,0,0,.28);font-family:inherit}' +
+    '.i18n-sw:hover{background:rgba(17,24,39,.86);border-color:rgba(255,255,255,.38)}' +
+    '.i18n-gl{font-size:13px;line-height:1;padding:0 5px 0 8px;opacity:.95;pointer-events:none}' +
+    '.i18n-sw button{border:0;background:transparent;color:rgba(255,255,255,.78);font-size:12px;font-weight:700;letter-spacing:.4px;padding:6px 11px;border-radius:999px;cursor:pointer;font-family:inherit;transition:all .18s ease;line-height:1}' +
+    '.i18n-sw button:hover{color:#fff;background:rgba(255,255,255,.12)}' +
+    '.i18n-sw button:focus-visible{outline:2px solid #7dd3fc;outline-offset:1px}' +
+    '.i18n-sw button.on{background:rgba(255,255,255,.92);color:#1f2937;box-shadow:0 2px 8px rgba(0,0,0,.25)}' +
+    '.i18n-sw button:active{transform:translateY(1px)}' +
+    '.i18n-veil{position:fixed;inset:0;z-index:9990;pointer-events:none;display:none;opacity:0;background:#060a16;transition:opacity .42s ease}' +
+    '.i18n-veil.on{opacity:1}' +
+    '.i18n-veil.out{opacity:0;transition:opacity .5s cubic-bezier(.2,.8,.3,1)}' +
+    '.i18n-halo{position:fixed;z-index:9991;left:var(--ix,92%);top:var(--iy,93%);width:14px;height:14px;border-radius:50%;box-sizing:border-box;pointer-events:none;display:none;border:2px solid rgba(198,226,255,.95);box-shadow:0 0 24px 6px rgba(137,194,255,.6),0 0 70px 20px rgba(137,194,255,.3),inset 0 0 20px rgba(198,226,255,.5)}' +
+    '.i18n-halo.go{display:block;animation:i18nHalo .85s cubic-bezier(.16,.7,.3,1) forwards}' +
+    '@keyframes i18nHalo{0%{opacity:0;transform:translate(-50%,-50%) scale(.01)}22%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(58)}}' +
+    '.i18n-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}' +
+    '@media (max-width:620px){.i18n-sw{right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px))}.i18n-sw button{padding:5px 9px;font-size:11.5px}}';
+
+  var swEl = null;
+  function buildSwitch() {
+    try {
+      if (!document.body) return;
+      var exist = document.querySelector('.i18n-sw');
+      if (exist) { swEl = exist; syncSwitch(); return; }
+      var st = document.createElement('style');
+      st.textContent = SW_CSS;
+      (document.head || document.documentElement).appendChild(st);
+      var wrap = document.createElement('div');
+      wrap.className = 'i18n-sw';
+      wrap.setAttribute('role', 'group');
+      wrap.setAttribute('aria-label', '切换语言 / Switch language');
+      wrap.setAttribute('title', '切换语言 / Switch language');
+      var gl = document.createElement('span');
+      gl.className = 'i18n-gl';
+      gl.textContent = '🌐';
+      gl.setAttribute('aria-hidden', 'true');
+      wrap.appendChild(gl);
+      [['zh', '中文'], ['en', 'English']].forEach(function (p) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('data-lang', p[0]);
+        b.textContent = p[1];
+        b.addEventListener('click', function () { set(p[0]); });
+        wrap.appendChild(b);
+      });
+      var live = document.createElement('span');
+      live.id = 'i18n-live';
+      live.className = 'i18n-sr';
+      live.setAttribute('aria-live', 'polite');
+      wrap.appendChild(live);
+      document.body.appendChild(wrap);
+      swEl = wrap;
+      syncSwitch();
+    } catch (e) {}
+  }
+  function syncSwitch() {
+    try {
+      if (!swEl) return;
+      var bs = swEl.querySelectorAll('button[data-lang]');
+      for (var i = 0; i < bs.length; i++) {
+        var on = bs[i].getAttribute('data-lang') === lang;
+        bs[i].classList.toggle('on', on);
+        bs[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    } catch (e) {}
+  }
+
+  /* ---- 启动 ---- */
+  lang = detect();
+  function boot() {
+    buildSwitch();
+    apply(document);
+    scan(document);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+
+  return {
+    t: t, tOr: tOr, tr: tr, set: set, apply: apply, scan: scan, auto: auto,
+    phrase: addPhrase, rules: addRules, add: add, lang: getLang, onChange: onChange,
+    fmtDate: fmtDate, fmtNum: fmtNum
+  };
+})();
+
+/* ---- 短语表（中文原文 → English）---- */
+I18N.phrase({"宇宙地图 · startian.top": "Universe Map · startian.top","🗺️ 星恬的宇宙地图": "🗺️ Startian's Universe Map","14 颗星串起整个小站 · 去过的会亮起来": "14 stars connect the whole site · visited ones light up","已点亮": "Lit","← 返回主页": "← Back to home","🎉 宇宙全图鉴达成 —— 14 颗星全部点亮，你就是这个宇宙的常客": "🎉 Full universe collection complete — all 14 stars lit up, you're a regular of this universe","✦ 星图关系视图 · 点击其他星切换中心 · 点空白 / ESC 返回": "✦ Star map relations view · Click another star to switch the center · Click blank / ESC to return","🚀 前往作品": "🚀 Go to the work","↩ 返回星图": "↩ Back to star map","已点亮 · 去过的作品": "Lit · visited works","暗星 · 还没去过": "Dark star · not visited yet","星星靠近时自动连线": "Stars connect when they get close","🎲 带我去一颗暗星": "🎲 Take me to a dark star","星星在自由漂浮，彼此靠近会自动连线 · 悬停任一颗让它停下来 · 点击星星展开「星图关系视图」· Ctrl / 中键点击直接前往": "Stars drift freely and connect as they get close · Hover any star to pause it · Click a star to open “Star Map Relations view” · Ctrl / middle-click to go straight there","主页": "Home","全站作品星图": "Star map of all works on the site","返回星恬的小站主页": "Back to Startian's Little Site home","🏆 成就解锁：": "🏆 Achievement unlocked: ","星图领航员": "Star Map Navigator","关系名": "Relation name","娱乐星域": "Entertainment Sector","下棋 · 转着玩": "Chess · spin for fun","工具星域": "Tools Sector","学习与效率": "Learning & productivity","整活星域": "Just for Fun Sector","没啥用但挺逗": "Useless but amusing","五子棋": "Gomoku","学习反制版：AI 会记住你的棋风，下一局反制你。": "Adaptive counter edition: the AI remembers your play style and counters you next game.","六边形": "Hexagon Dimension Explorer","无上限展开的六边形几何展示器，转一转挺上头。": "An endlessly expanding hexagon geometry explorer — give it a spin, it's oddly addictive.","星空": "Infinite Starfield","种子生成独一无二的星空，还能下载当壁纸。": "A seed generates a one-of-a-kind starfield you can download as a wallpaper.","生命游戏": "Game of Life","撒一把种子看细胞生长，还能让两个物种对撞。": "Sprinkle some seeds and watch cells grow — you can even crash two species together.","函数音乐": "Function Music","把函数画成声波，图形会跟着一起跳。": "Turn functions into sound waves and watch the graph dance along.","几何工坊": "Geometry Studio","高中数学几何工作台，AI 读题自动出图。": "A high-school math geometry workbench — the AI reads the problem and draws the figure.","打卡日程": "Habit Tracker","给自己定小目标，一键打卡 · 数据只在本地。": "Set small goals for yourself and check in with one tap · data stays on your device.","配色实验室": "Color Lab","选两个颜色，实时生成整套 UI 配色并导出 CSS。": "Pick two colors, generate a full UI palette in real time, and export the CSS.","函数拟合": "Function Fitter","丢一堆散点进去，自动找出最像的那个函数。": "Throw in a pile of scatter points and it finds the function that fits best.","错题本": "Mistake Notebook","按记忆曲线自动排复习，让时间帮你记住。": "Reviews are scheduled along the forgetting curve, letting time do the remembering.","整活": "Just for Fun","假装正经的「隐私协议」，点同意有惊喜。": "A deadpan “Privacy Policy” — agree and you're in for a surprise.","假加载页": "Fake Loading Page","进度条卡在 99%，陪你唠两句才肯承认早就好了。": "The progress bar sticks at 99% and only admits it's done after a little chat.","诊断报告": "Daily Diagnosis","AI 给今天的你开一张体检单，纯玄学仅供参考。": "The AI writes today's you a checkup — pure mysticism, for reference only.","万物沙盒": "Everything Sandbox","星海里的像素沙盘：元素反应、光束棱镜与极光。": "A pixel sandbox in the sea of stars: element reactions, light-beam prisms, and auroras.","同门数学": "Math family","函数玩法": "Function play","学习搭子": "Study buddies","整活担当": "Just-for-fun pair","生成艺术": "Generative art","视觉玩具": "Visual toy","星海同源": "Same star sea","娱乐": "Entertainment","工具": "Tools","同属": "Also in ","骨架线": "Skeleton link","✨ 这颗星已经在你手心亮着了": "✨ This star is already glowing in your hand","✨ 原来第十五颗星，一直在这儿等你": "✨ So the fifteenth star has been waiting here for you all along","颗星串起整个小站 · 去过的会亮起来": " stars connect the whole site · visited ones light up","宇宙全图鉴": "Full Universe Collection","✦ 星图关系视图 ·": "✦ Star map relations view · ","条关系 · 点击其他星切换中心 · 点空白 / ESC 返回": " relations · Click another star to switch the center · Click blank / ESC to return","✨ 已探索": "✨ Explored","🌑 尚未点亮 · 去逛逛就亮了": "🌑 Not lit yet · visit it and it lights up","<span class=\"hint\">✋ 已冻结这颗星 · 点击 → 展开星图关系 · Ctrl/中键 → 直接前往</span>": "<span class=\"hint\">✋ Star frozen · Click → open star map relations · Ctrl/middle-click → go straight there</span>","🎉 没有暗星了，全图鉴达成！": "🎉 No dark stars left, full collection complete!","🚀 目标：": "🚀 Target: ","· 出发": " · Off we go","📜 找到一篇日志（去主页头像连点 7 下看全文）": "📜 Found a log entry (tap the avatar on the homepage 7 times to read it)","✋ 已冻结这颗星 · 点击 → 展开星图关系 · Ctrl/中键 → 直接前往": "✋ Star frozen · Click → open star map relations · Ctrl/middle-click → go straight there"});
+I18N.auto();
+/* ==== i18n-kit v1.2 end ==== */
+</script>
+<script>
+(function () {
+  'use strict';
+
+  /* ============ 🏆 跨站成就 SDK ============ */
+  var STAch = (function () {
+    var KEY = 'st_ach';
+    function readCookie() {
+      var m = document.cookie.match(/(?:^|;\s*)st_ach=([^;]*)/);
+      if (!m) return null;
+      try { return JSON.parse(decodeURIComponent(m[1])) || []; } catch (e) { return null; }
+    }
+    function writeCookie(list) {
+      try {
+        var v = encodeURIComponent(JSON.stringify(list));
+        if (v.length < 3800) document.cookie = 'st_ach=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+      } catch (e) {}
+    }
+    var list = readCookie();
+    if (!list) { try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { list = []; } }
+    if (!Array.isArray(list)) list = [];
+    function save() {
+      try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+      writeCookie(list);
+    }
+    function unlock(id, name, ico) {
+      if (list.indexOf(id) >= 0) return false;
+      list.push(id);
+      save();
+      try {
+        var el = document.createElement('div');
+        el.style.cssText = 'position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9999;background:rgba(20,30,56,.95);color:#fff;border:1px solid rgba(140,170,255,.42);border-radius:999px;padding:12px 22px;font:700 13.5px/1.4 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.42);transition:opacity .4s ease,transform .4s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:86vw';
+        el.textContent = I18N.tr('🏆 成就解锁：') + (ico ? ico + ' ' : '') + I18N.tr(name || id);
+        document.body.appendChild(el);
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        setTimeout(function () {
+          el.style.opacity = '0';
+          el.style.transform = 'translateX(-50%) translateY(16px)';
+          setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500);
+        }, 3200);
+      } catch (e) {}
+      return true;
+    }
+    return { list: function () { return list.slice(); }, has: function (id) { return list.indexOf(id) >= 0; }, unlock: unlock };
+  })();
+  window.STAch = STAch;
+  setTimeout(function () { STAch.unlock('site.map', '星图领航员', '🗺️'); }, 600);
+
+  /* ============================================================
+     📐 布局数据（扩展点！）
+     —— 新增作品：往 SITES 加一行（id=成就id，zone=所属星域）
+     —— 新增关系：同星域自动互相关联；跨星域在 REL_X 加一行 [a, b, '关系名']
+     ============================================================ */
+  var ZONES = [
+    { key: 'fun',  name: '娱乐星域', sub: '下棋 · 转着玩',  c: '#a78bfa', desk: { x: 288, y: 318 }, mob: { x: 210, y: 235 } },
+    { key: 'tool', name: '工具星域', sub: '学习与效率',     c: '#5eb2f6', desk: { x: 634, y: 438 }, mob: { x: 210, y: 568 } },
+    { key: 'fun2', name: '整活星域', sub: '没啥用但挺逗',   c: '#fbbf24', desk: { x: 970, y: 246 }, mob: { x: 210, y: 884 } }
+  ];
+  var SITES = [
+    { id: 'site.gomoku',   name: '五子棋',   ico: '⚫', zone: 'fun',  url: 'https://wuziqi.startian.top/', desc: '学习反制版：AI 会记住你的棋风，下一局反制你。' },
+    { id: 'site.tujie',    name: '六边形',   ico: '⬡', zone: 'fun',  url: 'https://startian.top/tujie/',   desc: '无上限展开的六边形几何展示器，转一转挺上头。' },
+    { id: 'site.star',     name: '星空',     ico: '✨', zone: 'fun',  url: 'https://startian.top/star/',    desc: '种子生成独一无二的星空，还能下载当壁纸。' },
+    { id: 'site.life',     name: '生命游戏', ico: '🦠', zone: 'fun',  url: 'https://startian.top/life/',    desc: '撒一把种子看细胞生长，还能让两个物种对撞。' },
+    { id: 'site.music',    name: '函数音乐', ico: '🎵', zone: 'fun',  url: 'https://startian.top/music/',   desc: '把函数画成声波，图形会跟着一起跳。' },
+    { id: 'site.geometry', name: '几何工坊', ico: '📐', zone: 'tool', url: 'https://geometry.startian.top/', desc: '高中数学几何工作台，AI 读题自动出图。' },
+    { id: 'site.daka',     name: '打卡日程', ico: '🗓️', zone: 'tool', url: 'https://daka.startian.top/',     desc: '给自己定小目标，一键打卡 · 数据只在本地。' },
+    { id: 'site.colorlab', name: '配色实验室', ico: '🎨', zone: 'tool', url: 'https://startian.top/colorlab/', desc: '选两个颜色，实时生成整套 UI 配色并导出 CSS。' },
+    { id: 'site.fit',      name: '函数拟合', ico: '📈', zone: 'tool', url: 'https://startian.top/fit/',      desc: '丢一堆散点进去，自动找出最像的那个函数。' },
+    { id: 'site.cuoti',    name: '错题本',   ico: '📕', zone: 'tool', url: 'https://startian.top/cuoti/',    desc: '按记忆曲线自动排复习，让时间帮你记住。' },
+    { id: 'site.zhenghuo', name: '整活',     ico: '😏', zone: 'fun2', url: 'https://startian.top/zhenghuo/', desc: '假装正经的「隐私协议」，点同意有惊喜。' },
+    { id: 'site.fake',     name: '假加载页', ico: '🎭', zone: 'fun2', url: 'https://startian.top/fake/',     desc: '进度条卡在 99%，陪你唠两句才肯承认早就好了。' },
+    { id: 'site.report',   name: '诊断报告', ico: '🩺', zone: 'fun2', url: 'https://startian.top/report/',   desc: 'AI 给今天的你开一张体检单，纯玄学仅供参考。' },
+    { id: 'site.sandbox',  name: '万物沙盒', ico: '🏖', zone: 'fun2', url: 'https://startian.top/sandbox/',  desc: '星海里的像素沙盘：元素反应、光束棱镜与极光。' }
+  ];
+  var REL_X = [
+    ['site.fit',      'site.geometry', '同门数学'],
+    ['site.music',    'site.geometry', '函数玩法'],
+    ['site.cuoti',    'site.daka',     '学习搭子'],
+    ['site.fake',     'site.report',   '整活担当'],
+    ['site.star',     'site.life',     '生成艺术'],
+    ['site.tujie',    'site.star',     '视觉玩具'],
+    ['site.sandbox',  'site.star',     '星海同源'],
+    ['site.sandbox',  'site.fake',     '整活担当']
+  ];
+
+  function siteById(id) { for (var i = 0; i < SITES.length; i++) if (SITES[i].id === id) return SITES[i]; return null; }
+  function zoneOf(s) { for (var i = 0; i < ZONES.length; i++) if (ZONES[i].key === s.zone) return ZONES[i]; return ZONES[0]; }
+  function zoneShort(s) { return { 'fun': '娱乐', 'tool': '工具', 'fun2': '整活' }[zoneOf(s).key]; }
+  var REL = {};
+  SITES.forEach(function (s) {
+    REL[s.id] = [];
+    SITES.forEach(function (o) {
+      if (o.id !== s.id && o.zone === s.zone) REL[s.id].push({ id: o.id, label: '同属' + zoneShort(s) });
+    });
+  });
+  REL_X.forEach(function (r) {
+    if (!REL[r[0]] || !REL[r[1]]) return;
+    REL[r[0]].push({ id: r[1], label: r[2] });
+    REL[r[1]].push({ id: r[0], label: r[2] });
+  });
+
+  /* ============ 运行时状态 ============ */
+  var mob = false;
+  var confettiRuns = 0;
+  var view = { mode: 'map', center: null };
+  var svg = document.getElementById('mapSvg');
+  var stage = document.getElementById('stage');
+  var MQ = window.matchMedia('(max-width: 760px)');
+  var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  mob = MQ.matches;
+
+  var GEO = {};
+  var nodesIndex = {};
+  var relLayer = null;
+
+  /* ═══════════ 运动系统（实时演算）═══════════
+     每颗星在锚点附近用「三频正弦叠加」做不规则漂移（准周期、不重复），
+     叠加锚点回拉（软弹簧）与星间软排斥（防重叠）；
+     78 对星两两实时测距，靠近时连线显现、变亮，远离时淡出消失。 */
+  var STARS = [], starMap = {}, PAIRS = [];
+  var T = 0, lastT = 0, running = false;
+  var hoverId = null;
+  var PARAMS = {};   /* roamR / linkR / minD / amp 随布局切换 */
+
+  function setParams() {
+    PARAMS = mob
+      ? { roam: 20, linkR: 92, minD: 44, ampK: 0.38 }
+      : { roam: 34, linkR: 124, minD: 64, ampK: 1 };
+  }
+
+  function initMotion() {
+    setParams();
+    starMap = {};
+    STARS = SITES.map(function (s) {
+      var a = GEO.pos[s.id];
+      var st = {
+        id: s.id, site: s,
+        ax: a.x, ay: a.y,          /* 锚点（自由漂移的中心） */
+        x: a.x, y: a.y,            /* 当前位置 */
+        amp: (14 + Math.random() * 10) * PARAMS.ampK,
+        w1: 0.25 + Math.random() * 0.28, w2: 0.8 + Math.random() * 0.6, w3: 2.1 + Math.random() * 1.5,
+        p1: Math.random() * 6.28, p2: Math.random() * 6.28, p3: Math.random() * 6.28,
+        p4: Math.random() * 6.28, p5: Math.random() * 6.28, p6: Math.random() * 6.28,
+        frozen: false, flyTo: null
+      };
+      starMap[s.id] = st;
+      return st;
+    });
+    buildPairs();
+    updateLinks();
+    STARS.forEach(writeStarPos);
+  }
+
+  function buildPairs() {
+    PAIRS = [];
+    /* 邻接表：域内环序相邻（这些对常驻一条弱"骨架线"） */
+    var adj = {};
+    ZONES.forEach(function (z) {
+      var members = SITES.filter(function (s) { return s.zone === z.key; });
+      for (var i = 0; i < members.length; i++) {
+        var a = members[i].id, b = members[(i + 1) % members.length].id;
+        adj[a + '|' + b] = 1; adj[b + '|' + a] = 1;
+      }
+    });
+    var gEls = svg.querySelectorAll('#dynLinks .dlink');
+    var idx = 0;
+    for (var i = 0; i < SITES.length; i++) {
+      for (var j = i + 1; j < SITES.length; j++) {
+        var A = SITES[i], B = SITES[j];
+        var isAdj = !!adj[A.id + '|' + B.id];
+        var both = isLit(A) && isLit(B);
+        var sameZone = A.zone === B.zone;
+        var color = both ? (sameZone ? zoneOf(A).c : '#ffd97a') : '#7f96c8';
+        PAIRS.push({
+          a: A.id, b: B.id, adj: isAdj, both: both,
+          g: gEls[idx], base: gEls[idx].querySelector('.dbase'), flow: gEls[idx].querySelector('.dflow'),
+          vis: -1, shown: false
+        });
+        /* 颜色一次定死（点亮状态在页面生命周期内不变） */
+        gEls[idx].querySelector('.dbase').setAttribute('stroke', color);
+        if (gEls[idx].querySelector('.dflow')) gEls[idx].querySelector('.dflow').setAttribute('stroke', color);
+        idx++;
+      }
+    }
+  }
+
+  function writeStarPos(st) {
+    var n = nodesIndex[st.id];
+    if (n) n.pos.style.transform = 'translate(' + st.x.toFixed(1) + 'px,' + st.y.toFixed(1) + 'px)';
+  }
+
+  function step(dt) {
+    T += dt;
+    var roam = PARAMS.roam, linkR = PARAMS.linkR, minD = PARAMS.minD;
+    var relLock = view.mode === 'rel';
+    var i, st, n;
+
+    /* 1) 运动：飞行动画（优先）/ 自由漂移 */
+    for (i = 0; i < STARS.length; i++) {
+      st = STARS[i];
+      if (st.flyTo) {
+        var f = st.flyTo;
+        var k = REDUCE ? 1 : (1 - Math.exp(-dt / 0.15));
+        st.x += (f.x - st.x) * k;
+        st.y += (f.y - st.y) * k;
+        if (Math.hypot(f.x - st.x, f.y - st.y) < 0.6) { st.x = f.x; st.y = f.y; st.flyTo = null; }
+      } else if (!st.frozen && !st.argLock && !relLock) {
+        /* 不规则漂移：三频正弦（方向缓慢变化、轨迹不循环） + 锚点回拉 */
+        var vx = st.amp * (0.5 * Math.sin(T * st.w1 + st.p1) + 0.32 * Math.sin(T * st.w2 + st.p2) + 0.18 * Math.sin(T * st.w3 + st.p3));
+        var vy = st.amp * (0.5 * Math.cos(T * st.w2 + st.p4) + 0.32 * Math.cos(T * st.w3 + st.p5) + 0.18 * Math.cos(T * st.w1 + st.p6));
+        vx += (st.ax - st.x) * 0.42;
+        vy += (st.ay - st.y) * 0.42;
+        st.x += vx * dt;
+        st.y += vy * dt;
+      }
+    }
+
+    /* 2) 星间软排斥（防重叠，冻结/飞行中的星让位） */
+    for (i = 0; i < PAIRS.length; i++) {
+      var A = starMap[PAIRS[i].a], B = starMap[PAIRS[i].b];
+      var dx = B.x - A.x, dy = B.y - A.y;
+      var d2 = dx * dx + dy * dy;
+      if (d2 < minD * minD && d2 > 0.0001) {
+        var d = Math.sqrt(d2), push = (minD - d) * 0.5, ux = dx / d, uy = dy / d;
+        var aFixed = A.frozen || A.flyTo, bFixed = B.frozen || B.flyTo;
+        if (aFixed && !bFixed) { B.x += ux * push; B.y += uy * push; }
+        else if (bFixed && !aFixed) { A.x -= ux * push; A.y -= uy * push; }
+        else if (!aFixed && !bFixed) {
+          A.x -= ux * push * 0.5; A.y -= uy * push * 0.5;
+          B.x += ux * push * 0.5; B.y += uy * push * 0.5;
+        }
+      }
+    }
+
+    /* 3) 位置回写 + 实时连线 */
+    for (i = 0; i < STARS.length; i++) writeStarPos(STARS[i]);
+    if (!relLock || anyFlying()) updateLinks();
+  }
+
+  function anyFlying() {
+    for (var i = 0; i < STARS.length; i++) if (STARS[i].flyTo) return true;
+    return false;
+  }
+
+  function updateLinks() {
+    var linkR = PARAMS.linkR, R2 = linkR * linkR;
+    for (var i = 0; i < PAIRS.length; i++) {
+      var p = PAIRS[i];
+      var A = starMap[p.a], B = starMap[p.b];
+      var dx = B.x - A.x, dy = B.y - A.y;
+      var d2 = dx * dx + dy * dy;
+      var vis = 0;
+      if (p.adj) vis = 0.2;                                   /* 同域骨架线常驻 */
+      if (d2 < R2) vis = Math.max(vis, (1 - Math.sqrt(d2) / linkR) * 0.92);
+      if (hoverId && vis > 0.02 && (p.a === hoverId || p.b === hoverId)) {
+        vis = Math.min(1, 0.5 + vis * 0.7);                   /* 悬停加成：该星当前连线全部亮起 */
+      }
+      if (vis < 0.025) {
+        if (p.shown) { p.g.style.display = 'none'; p.shown = false; p.vis = 0; }
+        continue;
+      }
+      if (!p.shown) { p.g.style.display = ''; p.shown = true; }
+      if (Math.abs(vis - p.vis) > 0.012 || !p.shown) { p.g.style.opacity = vis.toFixed(3); p.vis = vis; }
+      p.base.setAttribute('x1', A.x.toFixed(1)); p.base.setAttribute('y1', A.y.toFixed(1));
+      p.base.setAttribute('x2', B.x.toFixed(1)); p.base.setAttribute('y2', B.y.toFixed(1));
+      if (p.flow) {
+        p.flow.setAttribute('x1', A.x.toFixed(1)); p.flow.setAttribute('y1', A.y.toFixed(1));
+        p.flow.setAttribute('x2', B.x.toFixed(1)); p.flow.setAttribute('y2', B.y.toFixed(1));
+      }
+    }
+  }
+
+  var loop = function (now) {
+    if (!running) return;
+    requestAnimationFrame(loop);
+    var dt = (now - lastT) / 1000;
+    lastT = now;
+    if (dt <= 0) return;
+    if (dt > 0.05) dt = 0.05;   /* 防切页回来大跳跃 */
+    step(dt);
+  };
+  function startLoop() {
+    if (running || REDUCE) return;
+    running = true;
+    lastT = performance.now();
+    requestAnimationFrame(loop);
+  }
+
+  /* ============ 渲染 ============ */
+  function calcGeo() {
+    mob = MQ.matches;
+    var W = mob ? 420 : 1180;
+    var H = mob ? 1060 : 720;
+    var layouts = {};
+    var pos = {};
+    ZONES.forEach(function (z) {
+      var c = mob ? z.mob : z.desk;
+      var members = SITES.filter(function (s) { return s.zone === z.key; });
+      var n = members.length;
+      var r = mob ? Math.min(128, 74 + n * 8) : Math.min(178, 90 + n * 10);
+      var pts = members.map(function (s, i) {
+        var a = (-90 + i * 360 / n) * Math.PI / 180;
+        var p = { s: s, x: c.x + r * Math.cos(a), y: c.y + r * Math.sin(a) };
+        pos[s.id] = p;
+        return p;
+      });
+      layouts[z.key] = { c: c, r: r, pts: pts };
+    });
+    GEO = { W: W, H: H, center: mob ? { x: 210, y: 507 } : { x: 590, y: 352 }, layouts: layouts, pos: pos };
+  }
+
+  function render() {
+    calcGeo();
+    var W = GEO.W, H = GEO.H;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.classList.toggle('mob', mob);
+    nodesIndex = {};
+
+    var s = '';
+    s += '<defs>';
+    ZONES.forEach(function (z) {
+      s += '<radialGradient id="zg-' + z.key + '"><stop offset="0" stop-color="' + z.c + '" stop-opacity=".16"/><stop offset="1" stop-color="' + z.c + '" stop-opacity="0"/></radialGradient>';
+      s += '<radialGradient id="gl-' + z.key + '"><stop offset="0" stop-color="' + z.c + '" stop-opacity=".5"/><stop offset=".45" stop-color="' + z.c + '" stop-opacity=".18"/><stop offset="1" stop-color="' + z.c + '" stop-opacity="0"/></radialGradient>';
+    });
+    s += '<linearGradient id="coreGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".4" stop-color="#c4b5fd"/><stop offset="1" stop-color="#7dd3fc"/></linearGradient>';
+    s += '</defs>';
+
+    ZONES.forEach(function (z) {
+      var L = GEO.layouts[z.key];
+      var gr = mob ? L.r + 96 : L.r + 118;
+      s += '<circle class="zoneBlob" cx="' + L.c.x + '" cy="' + L.c.y + '" r="' + gr + '" fill="url(#zg-' + z.key + ')"/>';
+    });
+    ZONES.forEach(function (z) {
+      var L = GEO.layouts[z.key];
+      s += '<g class="zoneGlowText" transform="translate(' + L.c.x + ' ' + L.c.y + ')">';
+      s += '<text class="zname" y="-4">' + z.name + '</text>';
+      s += '<text class="zsub" y="20">' + z.sub + '</text>';
+      s += '</g>';
+    });
+    if (!mob) s += '<text class="watermark" x="590" y="648">✦ STARTIAN UNIVERSE ✦</text>';
+
+    var zs = ZONES.map(function (z) { return GEO.layouts[z.key].c; });
+    for (var i = 0; i < zs.length; i++) {
+      var j = (i + 1) % zs.length;
+      s += '<path d="M' + zs[i].x + ' ' + zs[i].y + ' Q' + ((zs[i].x + zs[j].x) / 2 + (mob ? 30 : -40)) + ' ' + ((zs[i].y + zs[j].y) / 2 + (mob ? -18 : 26)) + ' ' + zs[j].x + ' ' + zs[j].y + '" style="stroke:rgba(120,140,210,.13);stroke-width:1;stroke-dasharray:3 9;fill:none"/>';
+    }
+
+    /* 动态连线层：78 对骨架（坐标由运动系统每帧写入） */
+    s += '<g id="dynLinks">';
+    for (var a = 0; a < SITES.length; a++) {
+      for (var b = a + 1; b < SITES.length; b++) {
+        var bothL = isLit(SITES[a]) && isLit(SITES[b]);
+        s += '<g class="dlink" style="display:none;opacity:0">' +
+          '<line class="dbase" x1="0" y1="0" x2="0" y2="0"/>' +
+          (bothL ? '<line class="dflow" x1="0" y1="0" x2="0" y2="0" style="animation-delay:' + (Math.random() * -1.6).toFixed(2) + 's"/>' : '') +
+          '</g>';
+      }
+    }
+    s += '</g>';
+
+    s += '<g id="relLinks"></g>';
+
+    s += '<g id="nodesLayer">';
+    ZONES.forEach(function (z) {
+      GEO.layouts[z.key].pts.forEach(function (p) {
+        var lit = isLit(p.s);
+        var dl = (-Math.random() * 3).toFixed(2) + 's';
+        s += '<a class="node' + (lit ? ' lit' : '') + '" href="' + p.s.url + '" data-id="' + p.s.id + '" style="--c:' + z.c + ';--dl:' + dl + '" aria-label="' + p.s.name + (lit ? '（已点亮）' : '（未点亮）') + '">';
+        s += '<g class="pos" style="transform:translate(' + p.x + 'px,' + p.y + 'px)">';
+        if (lit) {
+          s += '<circle class="glow" r="38" fill="url(#gl-' + z.key + ')"/>';
+          s += '<circle class="halo" r="27"/>';
+        } else {
+          s += '<circle class="ring" r="24"/>';
+        }
+        s += '<g class="fx">';
+        if (lit) s += '<path class="spike" d="M0,-40 L2.6,-16 L0,-12 L-2.6,-16 Z M0,40 L2.6,16 L0,12 L-2.6,16 Z M-40,0 L-16,2.6 L-12,0 L-16,-2.6 Z M40,0 L16,2.6 L12,0 L16,-2.6 Z"/>';
+        s += '<circle class="core" r="' + (lit ? 13 : 12) + '"/>';
+        s += '</g>';
+        s += '<text class="ico" y="0.5">' + p.s.ico + '</text>';
+        s += '<text class="label" y="46">' + p.s.name + '</text>';
+        s += '<circle class="hit" r="42"/>';
+        s += '</g></a>';
+      });
+    });
+    s += '</g>';
+
+    /* 🔮 ARG：第十五颗星层（在所有星之上） */
+    s += '<g id="argLayer"></g>';
+
+    svg.innerHTML = s;
+
+    [].forEach.call(svg.querySelectorAll('.node'), function (el) {
+      var id = el.getAttribute('data-id');
+      nodesIndex[id] = { a: el, pos: el.querySelector('.pos'), fx: el.querySelector('.fx'), site: siteById(id) };
+    });
+    relLayer = document.getElementById('relLinks');
+
+    hoverId = null;
+    initMotion();
+    bindNodes();
+    buildArgLayer();
+    updateHeader();
+
+    if (view.mode === 'rel' && view.center && nodesIndex[view.center]) {
+      applyRelLayout(view.center, true);
+    }
+    refreshInfo();
+  }
+
+  /* ============ 🔮 ARG：第十五颗星 + 星座（2026-10-03） ============ */
+  var ARG_SEQ = ['site.star', '@SELF@', 'site.gomoku', 'site.geometry', 'site.music', 'site.colorlab', 'site.life', 'site.cuoti'];
+  var ARG_LOCK_IDS = ['site.star', 'site.gomoku', 'site.geometry', 'site.music', 'site.colorlab', 'site.life', 'site.cuoti'];
+  function argPos() { return mob ? { x: 52, y: 645 } : { x: 168, y: 592 }; }
+  function argSolved() { try { return !!(window.ARG && ARG.has('log2')); } catch (e) { return false; } }
+  function argFreeze() {
+    STARS.forEach(function (st) { if (ARG_LOCK_IDS.indexOf(st.id) >= 0) st.argLock = true; });
+  }
+  function buildArgLayer() {
+    var layer = document.getElementById('argLayer');
+    if (!layer) return;
+    var P = argPos();
+    var solved = argSolved();
+    var h = '';
+    h += '<defs><radialGradient id="argGlowGrad"><stop offset="0" stop-color="#eef4ff" stop-opacity=".5"/><stop offset=".5" stop-color="#c6d6f0" stop-opacity=".14"/><stop offset="1" stop-color="#c6d6f0" stop-opacity="0"/></radialGradient></defs>';
+    if (solved) {
+      argFreeze();
+      var pts = [];
+      ARG_SEQ.forEach(function (id) {
+        if (id === '@SELF@') { pts.push({ x: P.x, y: P.y }); return; }
+        var st = starMap[id];
+        if (st) pts.push({ x: st.x, y: st.y });
+      });
+      if (pts.length >= 2) {
+        var d = pts.map(function (p, i) { return (i ? 'L' : 'M') + p.x.toFixed(1) + ' ' + p.y.toFixed(1); }).join(' ');
+        h += '<path class="argLine" d="' + d + '"/>';
+        pts.forEach(function (p) { h += '<circle class="argDot" cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="2.2"/>'; });
+      }
+    }
+    h += '<g id="argStar" class="argStar' + (solved ? ' found' : '') + '" transform="translate(' + P.x + ' ' + P.y + ')" role="button" aria-label="一颗没有名字的星">';
+    h += '<circle class="argGlow" r="30" fill="url(#argGlowGrad)"/>';
+    h += '<circle class="argCore" r="3.4"/>';
+    h += '<circle class="argHit" r="40" fill="transparent"/>';
+    h += '</g>';
+    layer.innerHTML = h;
+    var star = document.getElementById('argStar');
+    if (star) star.addEventListener('click', argSolve);
+  }
+  function argSolve(e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    if (argSolved()) { toast('✨ 这颗星已经在你手心亮着了'); return; }
+    var ok = false;
+    try { ok = !!(window.ARG && ARG.collect('log2')); } catch (er) {}
+    if (ok) toast('✨ 原来第十五颗星，一直在这儿等你');
+    buildArgLayer();
+  }
+  window.__mapARG = { solve: argSolve, solved: argSolved, pos: argPos, rebuild: buildArgLayer,
+    seq: ARG_SEQ, locks: function () { return STARS.filter(function (st) { return st.argLock; }).map(function (st) { return st.id; }); } };
+
+  /* ============ 关系视图（飞行目标由运动系统缓动）============ */
+  function applyRelLayout(centerId, immediate) {
+    var W = GEO.W, H = GEO.H, C = GEO.center;
+    var related = REL[centerId] || [];
+    var relIds = related.map(function (r) { return r.id; });
+    var targets = {};
+    var ringN = related.length;
+    var R1 = mob ? (ringN > 5 ? 136 : 118) : (ringN > 5 ? 218 : 192);
+    var sorted = related.slice().sort(function (x, y) {
+      var px = GEO.pos[x.id], py = GEO.pos[y.id];
+      return Math.atan2(px.y - C.y, px.x - C.x) - Math.atan2(py.y - C.y, py.x - C.x);
+    });
+    sorted.forEach(function (r, i) {
+      var a = (-90 + i * 360 / Math.max(1, sorted.length)) * Math.PI / 180;
+      targets[r.id] = { x: C.x + R1 * Math.cos(a), y: C.y + R1 * Math.sin(a) };
+    });
+    targets[centerId] = { x: C.x, y: C.y };
+    var pad = 34;
+    SITES.forEach(function (s) {
+      if (targets[s.id]) return;
+      var p = GEO.pos[s.id];
+      var dx = p.x - C.x, dy = p.y - C.y;
+      var d = Math.hypot(dx, dy) || 1;
+      var push = mob ? 1.32 : 1.42;
+      var tx = C.x + dx * push, ty = C.y + dy * push;
+      tx = Math.max(pad, Math.min(W - pad, tx));
+      ty = Math.max(pad, Math.min(H - pad, ty));
+      targets[s.id] = { x: tx, y: ty };
+    });
+    SITES.forEach(function (s) {
+      var st = starMap[s.id];
+      if (!st) return;
+      var t = targets[s.id];
+      if (immediate || REDUCE) { st.x = t.x; st.y = t.y; st.flyTo = null; }
+      else st.flyTo = { x: t.x, y: t.y };
+      writeStarPos(st);
+    });
+    SITES.forEach(function (s) {
+      var n = nodesIndex[s.id];
+      if (!n) return;
+      n.a.classList.toggle('center', s.id === centerId);
+      n.a.classList.toggle('faded', s.id !== centerId && relIds.indexOf(s.id) < 0);
+    });
+    var lines = '';
+    related.forEach(function (r) {
+      var t1 = targets[centerId], t2 = targets[r.id];
+      if (!t2) return;
+      var mx = (t1.x + t2.x) / 2, my = (t1.y + t2.y) / 2;
+      var lx = (t1.x - t2.x), ly = (t1.y - t2.y);
+      var ll = Math.hypot(lx, ly) || 1;
+      var px = mx - ly / ll * 12, py = my + lx / ll * 12;
+      lines += '<g class="rel-link-g">' +
+        '<line class="rel-link" x1="' + t1.x + '" y1="' + t1.y + '" x2="' + t2.x + '" y2="' + t2.y + '"/>' +
+        '<line class="rl-flow" x1="' + t1.x + '" y1="' + t1.y + '" x2="' + t2.x + '" y2="' + t2.y + '" style="animation-delay:' + (-Math.random() * 1.4).toFixed(2) + 's"/>' +
+        '<circle class="rel-node-halo" cx="' + t2.x + '" cy="' + t2.y + '" r="34"/>' +
+        '<text class="rel-lab" x="' + px + '" y="' + py + '">' + r.label + '</text>' +
+        '</g>';
+    });
+    relLayer.innerHTML = lines;
+  }
+  function enterRel(id) {
+    view.mode = 'rel'; view.center = id;
+    svg.classList.add('rel-mode');
+    hoverId = null;
+    STARS.forEach(function (st) { st.frozen = false; });   /* 防止 hover 残留冻结 */
+    var hn = svg.querySelector('.node.frozenStar');
+    if (hn) hn.classList.remove('frozenStar');
+    applyRelLayout(id);
+    refreshInfo();
+    if (REDUCE) { /* 无动画环境：确保位置直接落位 */ STARS.forEach(writeStarPos); updateLinks(); }
+  }
+  function exitRel() {
+    if (view.mode !== 'rel') return;
+    view.mode = 'map'; view.center = null;
+    svg.classList.remove('rel-mode');
+    SITES.forEach(function (s) {
+      var st = starMap[s.id];
+      var n = nodesIndex[s.id];
+      if (st) {
+        if (REDUCE) { st.x = st.ax; st.y = st.ay; st.flyTo = null; }
+        else st.flyTo = { x: st.ax, y: st.ay };
+        writeStarPos(st);
+      }
+      if (n) n.a.classList.remove('center', 'faded');
+    });
+    refreshInfo();
+  }
+
+  /* ============ 头部进度 / 横幅 / 信息卡 ============ */
+  function updateHeader() {
+    var lit = litCount();
+    document.getElementById('litN').textContent = lit;
+    document.getElementById('litT').textContent = SITES.length;
+    document.getElementById('litBar').style.width = Math.round(lit / SITES.length * 100) + '%';
+    document.getElementById('hdSub').textContent = SITES.length + ' 颗星串起整个小站 · 去过的会亮起来';
+    if (lit >= SITES.length) {
+      document.getElementById('banner').classList.add('show');
+      if (STAch.unlock('map.all', '宇宙全图鉴', '🌌')) { render(); confetti(); }
+    }
+  }
+  function refreshInfo() {
+    var bar = document.getElementById('relbar');
+    var hint = document.getElementById('relhint');
+    if (view.mode === 'rel' && view.center) {
+      var s = siteById(view.center);
+      if (s) {
+        document.getElementById('rbName').textContent = s.ico + ' ' + s.name;
+        document.getElementById('rbDesc').textContent = s.desc;
+        document.getElementById('rbGo').setAttribute('href', s.url);
+        bar.classList.add('show');
+        hint.classList.add('show');
+        hint.textContent = '✦ 星图关系视图 · ' + (REL[view.center] || []).length + ' 条关系 · 点击其他星切换中心 · 点空白 / ESC 返回';
+      }
+    } else {
+      bar.classList.remove('show');
+      hint.classList.remove('show');
+    }
+  }
+
+  /* ============ 节点交互 ============ */
+  var tip = document.getElementById('tip');
+  function bindNodes() {
+    [].forEach.call(svg.querySelectorAll('.node'), function (a) {
+      var id = a.getAttribute('data-id');
+      var site = siteById(id);
+      var lit = a.classList.contains('lit');
+
+      a.addEventListener('mouseenter', function () {
+        /* 悬停 → 这颗星停止运动（其余世界继续流动） */
+        var st = starMap[id];
+        if (st && view.mode === 'map') st.frozen = true;
+        hoverId = id;
+        a.classList.add('frozenStar');
+        tip.innerHTML = '<b>' + site.ico + ' ' + site.name + '</b><p>' + site.desc + '</p>' +
+          '<span class="st ' + (lit ? 'ok' : 'no') + '">' + (lit ? '✨ 已探索' : '🌑 尚未点亮 · 去逛逛就亮了') + '</span>' +
+          '<span class="hint">✋ 已冻结这颗星 · 点击 → 展开星图关系 · Ctrl/中键 → 直接前往</span>';
+        tip.classList.add('show');
+      });
+      a.addEventListener('mousemove', function (e) {
+        var w = tip.offsetWidth, h = tip.offsetHeight;
+        var x = Math.min(e.clientX + 18, window.innerWidth - w - 10);
+        var y = Math.min(e.clientY + 16, window.innerHeight - h - 10);
+        tip.style.left = Math.max(8, x) + 'px';
+        tip.style.top = Math.max(8, y) + 'px';
+      });
+      a.addEventListener('mouseleave', function () {
+        var st = starMap[id];
+        if (st) st.frozen = false;       /* 解除冻结，继续漂移 */
+        if (hoverId === id) hoverId = null;
+        a.classList.remove('frozenStar');
+        tip.classList.remove('show');
+      });
+
+      a.addEventListener('click', function (e) {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || (e.button !== undefined && e.button !== 0)) return;
+        e.preventDefault();
+        if (view.mode === 'map') {
+          enterRel(id);
+        } else if (view.center === id) {
+          jumpTo(site.url, nodesIndex[id] && nodesIndex[id].pos);
+        } else {
+          enterRel(id);
+        }
+      });
+    });
+  }
+  function jumpTo(url, posEl) {
+    if (posEl) {
+      var a = posEl.closest('.node');
+      if (a) a.classList.add('jump');
+    }
+    setTimeout(function () { location.href = url; }, 230);
+  }
+
+  document.getElementById('rbBack').addEventListener('click', function () { exitRel(); });
+  document.getElementById('rbGo').addEventListener('click', function (e) {
+    e.preventDefault();
+    var id = view.center;
+    if (!id) return;
+    var s = siteById(id);
+    var n = nodesIndex[id];
+    if (s) jumpTo(s.url, n && n.pos);
+  });
+  svg.addEventListener('click', function (e) {
+    if (view.mode !== 'rel') return;
+    if (e.target.closest && e.target.closest('.node')) return;
+    exitRel();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && view.mode === 'rel') exitRel();
+  });
+
+  /* ============ 🎲 带我去一颗暗星 ============ */
+  document.getElementById('btnRandom').addEventListener('click', function () {
+    var pool = SITES.filter(function (s) { return !isLit(s); });
+    if (!pool.length) { toast('🎉 没有暗星了，全图鉴达成！'); return; }
+    var pick = pool[Math.floor(Math.random() * pool.length)];
+    var el = svg.querySelector('.node[data-id="' + pick.id + '"]');
+    if (!el) return;
+    try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e2) {}
+    el.classList.add('jump');
+    toast('🚀 目标：' + pick.ico + ' ' + pick.name + ' · 出发');
+    setTimeout(function () { location.href = pick.url; }, 1000);
+  });
+
+  /* ============ 工具 ============ */
+  var toastEl = document.getElementById('toast'), toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2300);
+  }
+  function confetti() {
+    confettiRuns++;
+    var cols = ['#8b5cf6', '#38bdf8', '#fbbf24', '#ec4899', '#34d399'];
+    for (var i = 0; i < 80; i++) {
+      var sp = document.createElement('span');
+      sp.className = 'fall';
+      sp.style.left = (Math.random() * 100) + 'vw';
+      sp.style.background = cols[i % cols.length];
+      sp.style.animation = 'fall ' + (1.8 + Math.random() * 1.8) + 's linear ' + (Math.random() * .6) + 's forwards';
+      document.body.appendChild(sp);
+      setTimeout((function (el) { return function () { if (el.parentNode) el.parentNode.removeChild(el); }; })(sp), 4600);
+    }
+  }
+  function isLit(s) { return STAch.has(s.id); }
+  function litCount() { return SITES.filter(isLit).length; }
+
+  /* ============ 响应式重建（防抖 + 三重保险） ============ */
+  var rt = null;
+  function onOrient() {
+    clearTimeout(rt);
+    rt = setTimeout(function () {
+      if (MQ.matches !== mob) render();
+    }, 160);
+  }
+  window.addEventListener('resize', onOrient);
+  window.addEventListener('orientationchange', onOrient);
+  if (MQ.addEventListener) MQ.addEventListener('change', onOrient);
+  else if (MQ.addListener) MQ.addListener(onOrient);
+  if (window.ResizeObserver) {
+    try { new ResizeObserver(onOrient).observe(stage); } catch (e) {}
+  }
+
+  /* 启动 */
+  render();
+  startLoop();
+
+  /* 测试钩子（不影响页面功能） */
+  window.__mapInfo = function () {
+    return {
+      mob: mob, W: GEO.W, H: GEO.H,
+      mode: view.mode, center: view.center,
+      relCount: view.center ? (REL[view.center] || []).length : 0,
+      nodes: SITES.map(function (s) {
+        var st = starMap[s.id];
+        var n = nodesIndex[s.id];
+        var lb = n ? n.a.querySelector('.label') : null;
+        var b = lb ? lb.getBBox() : { x: 0, y: 0, width: 0, height: 0 };
+        return {
+          id: s.id, lit: !!(n && n.a.classList.contains('lit')),
+          center: !!(n && n.a.classList.contains('center')),
+          faded: !!(n && n.a.classList.contains('faded')),
+          x: st ? +st.x.toFixed(2) : null, y: st ? +st.y.toFixed(2) : null,
+          ax: st ? st.ax : null, ay: st ? st.ay : null,
+          frozen: st ? st.frozen : false,
+          flying: st ? !!st.flyTo : false,
+          labelBBox: { x: b.x, y: b.y, w: b.width, h: b.height }
+        };
+      }),
+      pairs: PAIRS.length,
+      shownLinks: PAIRS.filter(function (p) { return p.shown; }).length,
+      relLinks: document.querySelectorAll('#relLinks .rel-link-g').length
+    };
+  };
+  window.__mapDbg = {
+    render: render,
+    confetti: confetti,
+    enterRel: enterRel,
+    exitRel: exitRel,
+    relOf: function (id) { return (REL[id] || []).slice(); },
+    /* 手动推进运动（hidden 页面 rAF 被冻结时的测试专用） */
+    tick: function (ms) {
+      var n = Math.max(1, Math.round(ms / 16.7));
+      var dt = (ms / 1000) / n;
+      for (var i = 0; i < n; i++) step(dt);
+      return { T: +T.toFixed(2) };
+    },
+    stars: function () {
+      return STARS.map(function (st) {
+        return { id: st.id, x: +st.x.toFixed(2), y: +st.y.toFixed(2), frozen: st.frozen, flying: !!st.flyTo };
+      });
+    },
+    state: function () {
+      return {
+        lit: litCount(), total: SITES.length, mode: view.mode, center: view.center,
+        mapAll: STAch.has('map.all'), confettiRuns: confettiRuns,
+        hoverId: hoverId, T: +T.toFixed(2),
+        shownLinks: PAIRS.filter(function (p) { return p.shown; }).length,
+        frozenStars: STARS.filter(function (st) { return st.frozen; }).length
+      };
+    }
+  };
+})();
+</script>
+
+<script>
+/* 🔮 ARG · 精简进度机（地图站）与主页共用 st_arg */
+(function () {
+  'use strict';
+  var KEY = 'st_arg';
+  if (window.ARG && window.ARG.collect) return;
+  function readState() {
+    var raw = null;
+    try { var m = document.cookie.match(/(?:^|;\s*)st_arg=([^;]*)/); if (m) raw = decodeURIComponent(m[1]); } catch (e) {}
+    if (!raw) { try { raw = localStorage.getItem(KEY); } catch (e) {} }
+    try { var d = JSON.parse(raw || '{}'); if (!d || typeof d !== 'object') d = {}; if (!Array.isArray(d.logs)) d.logs = []; return d; }
+    catch (e) { return { logs: [] }; }
+  }
+  var state = readState();
+  function save() {
+    var raw = JSON.stringify(state);
+    try { localStorage.setItem(KEY, raw); } catch (e) {}
+    try {
+      var v = encodeURIComponent(raw);
+      if (v.length < 3800) document.cookie = 'st_arg=' + v + ';domain=.startian.top;path=/;max-age=31536000;SameSite=Lax';
+    } catch (e) {}
+  }
+  var toastTimer = 0;
+  window.ARG = {
+    has: function (id) { return state.logs.indexOf(id) >= 0; },
+    count: function () { return state.logs.length; },
+    collect: function (id) {
+      if (state.logs.indexOf(id) >= 0) return false;
+      state.logs.push(id); save();
+      this.toast('📜 找到一篇日志（去主页头像连点 7 下看全文）');
+      return true;
+    },
+    reset: function () { state = { logs: [] }; save(); },
+    toast: function (msg) {
+      try {
+        var el = document.getElementById('__arg_toast');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = '__arg_toast';
+          el.style.cssText = 'position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:9994;background:rgba(12,17,32,.96);color:#eef4ff;border:1px solid rgba(198,214,240,.4);border-radius:999px;padding:12px 24px;font:700 13px/1.5 system-ui,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.5);transition:all .45s cubic-bezier(.2,.85,.3,1.1);pointer-events:none;max-width:88vw;text-align:center';
+          document.body.appendChild(el);
+        }
+        el.textContent = msg;
+        requestAnimationFrame(function () { el.style.opacity = '1'; el.style.transform = 'translateX(-50%)'; });
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { el.style.opacity = '0'; el.style.transform = 'translateX(-50%) translateY(16px)'; }, 3000);
+      } catch (e) {}
+    }
+  };
+})();
+</script></body>
+</html>
