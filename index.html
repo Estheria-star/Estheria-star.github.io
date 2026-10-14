@@ -1287,6 +1287,11 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
 .g2048-pad .pd{grid-column:2; grid-row:2}
 .g2048-pad .pr{grid-column:3; grid-row:2}
 .gc-spark{position:fixed; width:9px; height:9px; border-radius:50%; pointer-events:none; z-index:9998; background:radial-gradient(circle, #fff, #ffd76e 55%, transparent 75%); animation:gcSparkFly 1.1s ease-out forwards}
+/* 陀螺仪 & 无上限数（2026-10-15） */
+.g2048-new.on{background:var(--accent); border-color:transparent; color:#0d2a4a}
+.g2048-cell[data-v="16384"],.g2048-cell[data-v="32768"],.g2048-cell[data-v="65536"]{background:linear-gradient(135deg, #ffcf4d, #ff8f3d); color:#4a2b00; box-shadow:0 0 28px rgba(255,160,80,.85)}
+.g2048-cell[data-v="131072"],.g2048-cell[data-v="262144"],.g2048-cell[data-v="524288"]{background:linear-gradient(135deg, #9be7ff, #4a9eff); color:#04263f; box-shadow:0 0 30px rgba(120,200,255,.9)}
+
 @keyframes gcSparkFly{from{transform:translate(0,0) scale(1); opacity:1}to{transform:translate(var(--sx), var(--sy)) scale(.2); opacity:0}}
 @media (max-width:560px){
   .gc-fab{left:10px; bottom:calc(10px + env(safe-area-inset-bottom, 0px)); padding:8px 12px; font-size:12px}
@@ -2321,6 +2326,9 @@ var __I18N_EN = {
  "gc.best": "BEST",
  "gc.hint": "Arrow keys / swipe / pad below",
  "gc.new": "New game",
+ "gc.gyro": "📱 Tilt",
+ "gc.gyroOn": "📱 Tilt: ON",
+ "gc.gyroNo": "📱 Unavailable",
  "marq.0": "Gomoku · Adaptive AI",
  "marq.1": "Rapfi engine",
  "marq.2": "Hexagon dimensions",
@@ -4571,6 +4579,7 @@ window.__checkSecretZone = checkSecretZone;
     <div class="g2048-grid" id="g2048Grid"></div>
     <div class="g2048-foot">
       <span class="gc-hint" data-i18n="gc.hint">方向键 / 滑动 / 下方按钮</span>
+      <button class="g2048-new" id="g2048Gyro" type="button" data-i18n="gc.gyro">📱 陀螺仪</button>
       <button class="g2048-new" id="g2048New" type="button" data-i18n="gc.new">重新开始</button>
     </div>
     <div class="g2048-pad">
@@ -4711,6 +4720,66 @@ window.__checkSecretZone = checkSecretZone;
       }
     } catch (e) {}
   }
+  /* ============ 📱 陀螺仪模式（2026-10-15） ============ */
+  var gyro = { on: false, base: null, armed: true, lastAt: 0 };
+  var gyroBtn = document.getElementById('g2048Gyro');
+  function gyroSetUI(st) {   /* st: 'idle' | 'on' | 'no' */
+    if (!gyroBtn) return;
+    if (st === 'on') { gyroBtn.classList.add('on'); gyroBtn.textContent = '📱 陀螺仪：开'; }
+    else if (st === 'no') { gyroBtn.classList.remove('on'); gyroBtn.textContent = '📱 不可用'; }
+    else { gyroBtn.classList.remove('on'); gyroBtn.textContent = '📱 陀螺仪'; }
+  }
+  function gyroApplySample(beta, gamma) {
+    if (!gyro.on || !board) return null;
+    var now = Date.now();
+    if (!gyro.base) { gyro.base = { beta: beta, gamma: gamma }; return null; }
+    var db = beta - gyro.base.beta, dg = gamma - gyro.base.gamma;
+    var TH = 14, BACK = 7;                 /* 触发阈 / 回正阈（度） */
+    if (!gyro.armed) {                     /* 需回正后才能再次触发（防连发） */
+      if (Math.abs(db) < BACK && Math.abs(dg) < BACK) gyro.armed = true;
+      return null;
+    }
+    if (now - gyro.lastAt < 260) return null;
+    var dir = -1;
+    if (Math.abs(dg) >= Math.abs(db)) {    /* 左右倾优先 */
+      if (dg > TH) dir = 1;                /* 右倾 → 右移 */
+      else if (dg < -TH) dir = 3;          /* 左倾 → 左移 */
+    } else {
+      if (db < -TH) dir = 0;               /* 顶边下压（前倾）→ 上移 */
+      else if (db > TH) dir = 2;           /* 顶边抬起（后仰）→ 下移 */
+    }
+    if (dir >= 0) {
+      gyro.armed = false; gyro.lastAt = now;
+      move(dir);
+      try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) {}
+      return dir;
+    }
+    return null;
+  }
+  function gyroHandle(ev) { gyroApplySample(ev.beta || 0, ev.gamma || 0); }
+  function gyroToggle() {
+    if (gyro.on) { gyroOff(); return; }
+    var DOE = window.DeviceOrientationEvent;
+    if (!DOE) { gyroSetUI('no'); return; }
+    function start() {
+      gyro.base = null; gyro.armed = true;
+      window.addEventListener('deviceorientation', gyroHandle, true);
+      gyro.on = true; gyroSetUI('on');
+    }
+    if (typeof DOE.requestPermission === 'function') {   /* iOS 13+ 需手势内授权 */
+      try {
+        DOE.requestPermission().then(function (st) {
+          if (st === 'granted') start(); else gyroSetUI('no');
+        }).catch(function () { gyroSetUI('no'); });
+      } catch (e) { gyroSetUI('no'); }
+    } else { start(); }
+  }
+  function gyroOff() {
+    gyro.on = false;
+    try { window.removeEventListener('deviceorientation', gyroHandle, true); } catch (e) {}
+    gyroSetUI('idle');
+  }
+  if (gyroBtn) gyroBtn.addEventListener('click', gyroToggle);
   function open() {
     veil.classList.add('open');
     veil.setAttribute('aria-hidden', 'false');
@@ -4721,6 +4790,7 @@ window.__checkSecretZone = checkSecretZone;
     veil.classList.remove('open');
     veil.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    if (gyro.on) gyroOff();
   }
   fab.addEventListener('click', open);
   closeBtn.addEventListener('click', close);
@@ -4755,6 +4825,9 @@ window.__checkSecretZone = checkSecretZone;
   /* 调试钩子（测试用，不影响游戏） */
   window.__g2048 = {
     reset: reset, move: move, open: open, close: close,
+    gyro: { tryOn: gyroToggle, off: gyroOff, sim: gyroApplySample,
+      state: function () { return { on: gyro.on, base: gyro.base, armed: gyro.armed }; },
+      reset: function () { gyro.base = null; gyro.armed = true; } },
     state: function () { return { board: board, score: score, best: best, won: won, over: over }; },
     setBoard: function (b) { board = b; won = false; over = false; score = 0; render(); }
   };
