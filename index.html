@@ -4721,7 +4721,7 @@ window.__checkSecretZone = checkSecretZone;
     } catch (e) {}
   }
   /* ============ 📱 陀螺仪模式（2026-10-15） ============ */
-  var gyro = { on: false, base: null, armed: true, lastAt: 0 };
+  var gyro = { on: false, base: null, armed: true, lastAt: 0, fx: null, fy: null };
   var gyroBtn = document.getElementById('g2048Gyro');
   function gyroSetUI(st) {   /* st: 'idle' | 'on' | 'no' */
     if (!gyroBtn) return;
@@ -4729,24 +4729,34 @@ window.__checkSecretZone = checkSecretZone;
     else if (st === 'no') { gyroBtn.classList.remove('on'); gyroBtn.textContent = '📱 不可用'; }
     else { gyroBtn.classList.remove('on'); gyroBtn.textContent = '📱 陀螺仪'; }
   }
+  function gyroGravity(beta, gamma) {
+    /* v9：重力在设备屏幕平面的投影（W3C ZXY 旋转矩阵推导 · 与 alpha 无关 · 无万向节死角）
+       gx = cos(β)·sin(γ)：右侧下沉为正；gy = -sin(β)：顶边下压（前倾）为正 */
+    var b = (beta || 0) * Math.PI / 180, g = (gamma || 0) * Math.PI / 180;
+    return { gx: Math.cos(b) * Math.sin(g), gy: -Math.sin(b) };
+  }
   function gyroApplySample(beta, gamma) {
     if (!gyro.on || !board) return null;
     var now = Date.now();
-    if (!gyro.base) { gyro.base = { beta: beta, gamma: gamma }; return null; }
-    var db = beta - gyro.base.beta, dg = gamma - gyro.base.gamma;
-    var TH = 14, BACK = 7;                 /* 触发阈 / 回正阈（度） */
+    var gv = gyroGravity(beta, gamma);
+    /* v9：低通滤波（平滑传感器噪声） */
+    if (gyro.fx == null) { gyro.fx = gv.gx; gyro.fy = gv.gy; }
+    else { gyro.fx += 0.28 * (gv.gx - gyro.fx); gyro.fy += 0.28 * (gv.gy - gyro.fy); }
+    if (!gyro.base) { gyro.base = { x: gyro.fx, y: gyro.fy }; return null; }
+    var dx = gyro.fx - gyro.base.x, dy = gyro.fy - gyro.base.y;
+    var TH = 0.24, BACK = 0.12;            /* ≈sin14° / sin7°（重力分量阈值） */
     if (!gyro.armed) {                     /* 需回正后才能再次触发（防连发） */
-      if (Math.abs(db) < BACK && Math.abs(dg) < BACK) gyro.armed = true;
+      if (Math.abs(dx) < BACK && Math.abs(dy) < BACK) gyro.armed = true;
       return null;
     }
     if (now - gyro.lastAt < 260) return null;
     var dir = -1;
-    if (Math.abs(dg) >= Math.abs(db)) {    /* 左右倾优先 */
-      if (dg > TH) dir = 1;                /* 右倾 → 右移 */
-      else if (dg < -TH) dir = 3;          /* 左倾 → 左移 */
+    if (Math.abs(dx) >= Math.abs(dy)) {    /* 左右倾斜优先 */
+      if (dx > TH) dir = 1;                /* 右沉 → 右移 */
+      else if (dx < -TH) dir = 3;          /* 左沉 → 左移 */
     } else {
-      if (db < -TH) dir = 0;               /* 顶边下压（前倾）→ 上移 */
-      else if (db > TH) dir = 2;           /* 顶边抬起（后仰）→ 下移 */
+      if (dy > TH) dir = 0;                /* 顶边下压（前倾）→ 上移 */
+      else if (dy < -TH) dir = 2;          /* 顶边抬起（后仰）→ 下移 */
     }
     if (dir >= 0) {
       gyro.armed = false; gyro.lastAt = now;
@@ -4827,7 +4837,7 @@ window.__checkSecretZone = checkSecretZone;
     reset: reset, move: move, open: open, close: close,
     gyro: { tryOn: gyroToggle, off: gyroOff, sim: gyroApplySample,
       state: function () { return { on: gyro.on, base: gyro.base, armed: gyro.armed }; },
-      reset: function () { gyro.base = null; gyro.armed = true; } },
+      reset: function () { gyro.base = null; gyro.armed = true; gyro.fx = null; gyro.fy = null; } },
     state: function () { return { board: board, score: score, best: best, won: won, over: over }; },
     setBoard: function (b) { board = b; won = false; over = false; score = 0; render(); }
   };
