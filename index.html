@@ -1286,6 +1286,17 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
 .g2048-pad .pl{grid-column:1; grid-row:2}
 .g2048-pad .pd{grid-column:2; grid-row:2}
 .g2048-pad .pr{grid-column:3; grid-row:2}
+/* 📟 倾斜气泡指示器（v10 · 2026-10-15） */
+.g2048-tilt{margin-top:10px; display:flex; flex-direction:column; align-items:center; gap:7px}
+.tilt-dial{position:relative; width:112px; height:112px; border-radius:50%; border:1px solid var(--line); background:radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--tint) 70%, var(--card)), var(--tint)); box-shadow:inset 0 2px 8px rgba(30,60,110,.08); overflow:hidden; transition:box-shadow .2s var(--ease), border-color .2s var(--ease)}
+.tilt-dial::before,.tilt-dial::after{content:''; position:absolute; background:color-mix(in srgb, var(--line) 80%, transparent)}
+.tilt-dial::before{left:50%; top:8%; bottom:8%; width:1px}
+.tilt-dial::after{top:50%; left:8%; right:8%; height:1px}
+.tilt-zone{position:absolute; left:50%; top:50%; width:54px; height:54px; transform:translate(-50%,-50%); border:1.5px dashed var(--ink3); border-radius:12px; opacity:.75}
+.tilt-bubble{position:absolute; left:50%; top:50%; width:20px; height:20px; margin:-10px 0 0 -10px; border-radius:50%; background:radial-gradient(circle at 34% 30%, #fff 0%, var(--accent) 52%, var(--accent-deep) 100%); box-shadow:0 0 12px color-mix(in srgb, var(--accent) 85%, transparent), 0 2px 6px rgba(20,50,100,.25); transition:transform .09s linear; will-change:transform}
+.g2048-tilt.hit .tilt-dial{border-color:var(--accent-deep); box-shadow:0 0 16px color-mix(in srgb, var(--accent) 70%, transparent), inset 0 0 10px color-mix(in srgb, var(--accent) 45%, transparent)}
+.g2048-tilt.hit .tilt-bubble{box-shadow:0 0 20px var(--accent), 0 0 40px color-mix(in srgb, var(--accent) 60%, transparent)}
+.tilt-cap{font-size:11px; color:var(--ink3); letter-spacing:.4px}
 .gc-spark{position:fixed; width:9px; height:9px; border-radius:50%; pointer-events:none; z-index:9998; background:radial-gradient(circle, #fff, #ffd76e 55%, transparent 75%); animation:gcSparkFly 1.1s ease-out forwards}
 /* 陀螺仪 & 无上限数（2026-10-15） */
 .g2048-new.on{background:var(--accent); border-color:transparent; color:#0d2a4a}
@@ -2329,6 +2340,7 @@ var __I18N_EN = {
  "gc.gyro": "📱 Tilt",
  "gc.gyroOn": "📱 Tilt: ON",
  "gc.gyroNo": "📱 Unavailable",
+ "gc.tiltCap": "Bubble out of the box = a move",
  "marq.0": "Gomoku · Adaptive AI",
  "marq.1": "Rapfi engine",
  "marq.2": "Hexagon dimensions",
@@ -4582,6 +4594,13 @@ window.__checkSecretZone = checkSecretZone;
       <button class="g2048-new" id="g2048Gyro" type="button" data-i18n="gc.gyro">📱 陀螺仪</button>
       <button class="g2048-new" id="g2048New" type="button" data-i18n="gc.new">重新开始</button>
     </div>
+    <div class="g2048-tilt" id="g2048Tilt" hidden>
+      <div class="tilt-dial">
+        <span class="tilt-zone"></span>
+        <span class="tilt-bubble" id="g2048Bubble"></span>
+      </div>
+      <div class="tilt-cap" data-i18n="gc.tiltCap">气泡越出方框 = 触发移动</div>
+    </div>
     <div class="g2048-pad">
       <button class="pu" id="g2048PadU" type="button" aria-label="上">↑</button>
       <button class="pl" id="g2048PadL" type="button" aria-label="左">←</button>
@@ -4744,6 +4763,7 @@ window.__checkSecretZone = checkSecretZone;
     else { gyro.fx += 0.28 * (gv.gx - gyro.fx); gyro.fy += 0.28 * (gv.gy - gyro.fy); }
     if (!gyro.base) { gyro.base = { x: gyro.fx, y: gyro.fy }; return null; }
     var dx = gyro.fx - gyro.base.x, dy = gyro.fy - gyro.base.y;
+    gyroUI(dx, dy);
     var TH = 0.24, BACK = 0.12;            /* ≈sin14° / sin7°（重力分量阈值） */
     if (!gyro.armed) {                     /* 需回正后才能再次触发（防连发） */
       if (Math.abs(dx) < BACK && Math.abs(dy) < BACK) gyro.armed = true;
@@ -4761,10 +4781,32 @@ window.__checkSecretZone = checkSecretZone;
     if (dir >= 0) {
       gyro.armed = false; gyro.lastAt = now;
       move(dir);
+      gyroHit();
       try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) {}
       return dir;
     }
     return null;
+  }
+  var tiltWrap = document.getElementById('g2048Tilt');
+  var tiltBubble = document.getElementById('g2048Bubble');
+  var tiltHitT = null;
+  function gyroUI(dx, dy) {   /* 气泡 = (dx,dy) 重力分量 → 圆盘偏移（±0.5 对应 ±56px；触发阈 0.24≈27px 对齐方框） */
+    if (!tiltBubble) return;
+    var px = Math.max(-1, Math.min(1, (dx || 0) / 0.5)) * 56;
+    var py = Math.max(-1, Math.min(1, (dy || 0) / 0.5)) * 56;
+    tiltBubble.style.transform = 'translate(' + px.toFixed(1) + 'px,' + (-py).toFixed(1) + 'px)';
+  }
+  function gyroHit() {
+    if (!tiltWrap) return;
+    try {
+      tiltWrap.classList.add('hit');
+      if (tiltHitT) clearTimeout(tiltHitT);
+      tiltHitT = setTimeout(function () { tiltWrap.classList.remove('hit'); }, 230);
+    } catch (e) {}
+  }
+  function gyroUIReset() {
+    if (tiltBubble) tiltBubble.style.transform = 'translate(0px,0px)';
+    if (tiltWrap) { tiltWrap.classList.remove('hit'); }
   }
   function gyroHandle(ev) { gyroApplySample(ev.beta || 0, ev.gamma || 0); }
   function gyroToggle() {
@@ -4775,6 +4817,7 @@ window.__checkSecretZone = checkSecretZone;
       gyro.base = null; gyro.armed = true;
       window.addEventListener('deviceorientation', gyroHandle, true);
       gyro.on = true; gyroSetUI('on');
+      if (tiltWrap) tiltWrap.hidden = false;
     }
     if (typeof DOE.requestPermission === 'function') {   /* iOS 13+ 需手势内授权 */
       try {
@@ -4788,6 +4831,8 @@ window.__checkSecretZone = checkSecretZone;
     gyro.on = false;
     try { window.removeEventListener('deviceorientation', gyroHandle, true); } catch (e) {}
     gyroSetUI('idle');
+    if (tiltWrap) tiltWrap.hidden = true;
+    gyroUIReset();
   }
   if (gyroBtn) gyroBtn.addEventListener('click', gyroToggle);
   function open() {
