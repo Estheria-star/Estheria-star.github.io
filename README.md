@@ -59,3 +59,20 @@
 - 本仓库代码以 **MIT** 许可开源，欢迎借鉴交流（见 [LICENSE](LICENSE)）
 - 各子作品若有第三方组件，已在其目录的 README 中单独注明（如五子棋内嵌 Rapfi 引擎为 GPL-3）
 - 个人学习娱乐项目，不作商业用途；头像与表情贴纸版权归原作者所有
+
+## 使用与署名
+
+本项目（含 `saolei`、`mood` 等子站）以 **MIT 许可证**开源：欢迎参考、学习、改造，
+也可以商用或闭源发布自己的版本。
+
+**唯一要求**：保留版权声明，并在你的站点可见处注明来源。例如在页脚放一行：
+
+```html
+Based on <a href="https://startian.top">星恬的小站</a> © 2026 Startian · MIT
+```
+
+MIT 原文："The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software." —— 删掉署名再使用，不符合本许可。
+
+> 注：本站 `sources` 分支保留明文源码，是为了方便阅读与学习；
+> 如果你基于它做了自己的站，留个署名就好，不用额外申请。
