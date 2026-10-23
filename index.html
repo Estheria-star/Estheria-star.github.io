@@ -1817,7 +1817,7 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
   <footer class="reveal" style="--d:.1s">
     <div class="theater"><span id="mono"></span></div>
     <span data-i18n="footer.copy">© 2026 星恬 · startian.top</span><br>
-    <span class="credit-line">本站以 <a href="https://github.com/Estheria-star/Estheria-star.github.io/blob/main/LICENSE" target="_blank" rel="noopener">MIT 许可证</a>开放源码 · 复用请保留此行署名</span><br>
+    <span class="credit-line" data-credit="startian-mit">© 星恬的小站 · <a href="https://github.com/Estheria-star/Estheria-star.github.io/blob/main/LICENSE" target="_blank" rel="noopener">MIT 许可证</a> · 复用请保留此行署名</span><br>
     <span data-i18n-html="footer.links">也欢迎来 <a href="https://space.bilibili.com/3494370703575552" target="_blank" rel="noopener">B 站</a> 和 <a href="https://github.com/Estheria-star" target="_blank" rel="noopener">GitHub</a> 找我玩</span>
   </footer>
 
@@ -4940,6 +4940,56 @@ window.__checkSecretZone = checkSecretZone;
     state: function () { return { board: board, score: score, best: best, won: won, over: over }; },
     setBoard: function (b) { board = b; won = false; over = false; score = 0; render(); }
   };
+})();
+</script>
+<script>
+/* ============================================================
+ * credit-guard · 署名守卫（MIT 许可证要求）
+ *   ① 每次加载打印品牌 banner
+ *   ② 页脚署名（.credit-line）缺失/被替换时给出醒目警告
+ * 如需在自己的站点使用本项目，请保留本段代码与页脚署名。
+ * ============================================================ */
+(function () {
+  'use strict';
+  var HOME = 'https://startian.top';
+  var LIC = 'https://github.com/Estheria-star/Estheria-star.github.io/blob/main/LICENSE';
+
+  /* ① 品牌 banner（低调但不含糊） */
+  try {
+    console.log('%c 星恬的小站 %c startian.top ',
+      'background:linear-gradient(135deg,#89C2FF,#5A9FE0);color:#fff;font:800 12px/1.9 system-ui;border-radius:6px 0 0 6px;padding:2px 10px',
+      'background:#EAF4FF;color:#2C4A6B;font:700 12px/1.9 system-ui;border-radius:0 6px 6px 0;padding:2px 10px');
+    console.log('%c© 2026 Startian (星恬 / Estheria-star) · MIT License · ' + HOME,
+      'color:#7A97B2;font:500 11.5px/1.8 system-ui');
+  } catch (e) {}
+
+  /* ② 署名守卫 */
+  function check() {
+    var el = document.querySelector('.credit-line');
+    if (!el) { warnMissing(); return; }
+    /* 结构化标记优先（不受语言切换/文案改写影响），文案校验兜底 */
+    if (el.getAttribute('data-credit') === 'startian-mit') return;
+    var txt = el.textContent || '';
+    if (/MIT/i.test(txt) && /startian|星恬|estheria/i.test(txt)) return;
+    warnMissing();
+  }
+  function warnMissing() {
+    try {
+      console.warn('%c⚠ 署名声明缺失 / CREDIT NOTICE MISSING',
+        'background:#C0392B;color:#fff;font:900 13px/2 system-ui;border-radius:6px;padding:2px 12px');
+      console.warn('%c这个页面基于「星恬的小站」构建（' + HOME + '），以 MIT 许可证发布。\n\n' +
+        'MIT 许可证要求：在分发或部署的任何副本中保留原版权声明，并在你自建的页面可见处注明来源。\n\n' +
+        '请补上一行署名后继续使用：\n' +
+        '    Based on <a href="' + HOME + '">星恬的小站</a> © 2026 Startian · MIT\n\n' +
+        '完整许可：' + LIC,
+        'color:#8A5A00;font:500 12.5px/1.9 system-ui;white-space:pre-wrap');
+    } catch (e) {}
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { setTimeout(check, 400); });
+  } else {
+    setTimeout(check, 400);
+  }
 })();
 </script>
 </body>
