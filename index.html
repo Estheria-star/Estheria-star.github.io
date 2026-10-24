@@ -1348,13 +1348,13 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
     linear-gradient(180deg,rgba(8,20,38,.40) 0%,rgba(8,20,38,.20) 26%,rgba(8,20,38,.46) 100%);
   opacity:0; transition:opacity .85s cubic-bezier(.22,.9,.28,1);
 }
-html.has-bg .st-bg, html.has-bg .st-bg::after{opacity:1}
-html.has-bg body{background:#0d1a2a}
-html.has-bg .blob{opacity:.13}
-html.has-bg ::selection{background:rgba(255,255,255,.32)}
+html.glass .st-bg, html.glass .st-bg::after{opacity:1}
+html.glass body{background:#0d1a2a}
+html.glass .blob{opacity:.13}
+html.glass ::selection{background:rgba(255,255,255,.32)}
 
 /* ── 浅色玻璃（默认） ── */
-html.has-bg{
+html.glass{
   --card:rgba(255,255,255,.56);
   --line:rgba(255,255,255,.66);
   --line2:rgba(255,255,255,.46);
@@ -1363,135 +1363,135 @@ html.has-bg{
   --sh-lg:0 20px 56px rgba(24,56,98,.24), 0 2px 6px rgba(24,56,98,.10);
 }
 /* ── 深色主题玻璃 ── */
-html.has-bg[data-theme="dark"]{
+html.glass[data-theme="dark"]{
   --card:rgba(44,21,30,.56); --line:rgba(255,178,198,.22); --line2:rgba(255,178,198,.14);
   --tint:rgba(62,30,42,.40); --ink:#f9ecf1; --ink2:#ddb8c6; --ink3:#ab8092;
   --sh-sm:0 10px 34px rgba(0,0,0,.34), 0 1px 3px rgba(0,0,0,.22);
   --sh-lg:0 20px 56px rgba(0,0,0,.44), 0 2px 6px rgba(0,0,0,.26);
 }
-html.has-bg[data-theme="purple"]{
+html.glass[data-theme="purple"]{
   --card:rgba(40,31,68,.56); --line:rgba(192,172,255,.24); --line2:rgba(192,172,255,.14);
   --tint:rgba(60,48,96,.40); --ink:#f2edff; --ink2:#c8baf2; --ink3:#9e90cf;
   --sh-sm:0 10px 34px rgba(24,14,52,.34); --sh-lg:0 20px 56px rgba(24,14,52,.44);
 }
-html.has-bg[data-theme="starry"]{
+html.glass[data-theme="starry"]{
   --card:rgba(14,20,44,.58); --line:rgba(152,182,255,.20); --line2:rgba(152,182,255,.12);
   --tint:rgba(20,28,58,.42); --ink:#e9f1ff; --ink2:#aac2ea; --ink3:#7a92ba;
   --sh-sm:0 10px 34px rgba(0,0,0,.36); --sh-lg:0 20px 56px rgba(0,0,0,.46);
 }
-html.has-bg[data-theme="fresh"]{
+html.glass[data-theme="fresh"]{
   --card:rgba(255,255,255,.58); --line:rgba(180,235,205,.62); --ink:#12402c; --ink2:#3d7057; --ink3:#79a892;
 }
-html.has-bg[data-theme="warm"]{
+html.glass[data-theme="warm"]{
   --card:rgba(255,255,255,.58); --line:rgba(255,215,215,.66); --ink:#5a2233; --ink2:#8c5468; --ink3:#bb8a9b;
 }
 
 /* ── 玻璃化：主卡片 ── */
-html.has-bg .zone,
-html.has-bg .tile,
-html.has-bg .ct,
-html.has-bg .fb,
-html.has-bg .ach-app,
-html.has-bg .nav,
-html.has-bg .tk-panel{
+html.glass .zone,
+html.glass .tile,
+html.glass .ct,
+html.glass .fb,
+html.glass .ach-app,
+html.glass .nav,
+html.glass .tk-panel{
   -webkit-backdrop-filter:blur(var(--gl-blur)) saturate(var(--gl-sat));
   backdrop-filter:blur(var(--gl-blur)) saturate(var(--gl-sat));
 }
-html.has-bg .zone,
-html.has-bg .tile,
-html.has-bg .ct,
-html.has-bg .fb,
-html.has-bg .ach-app{
+html.glass .zone,
+html.glass .tile,
+html.glass .ct,
+html.glass .fb,
+html.glass .ach-app{
   background-image:var(--gl-grad);
   box-shadow:var(--sh-sm), var(--gl-hi);
   border-color:var(--line);
 }
-html.has-bg .nav{
+html.glass .nav{
   background:rgba(255,255,255,.14);
   border-bottom-color:rgba(255,255,255,.24);
   box-shadow:0 1px 0 rgba(255,255,255,.10);
 }
-html.has-bg .nav.scrolled{
+html.glass .nav.scrolled{
   background:rgba(255,255,255,.24);
   box-shadow:0 8px 32px rgba(16,40,72,.18);
 }
-html.has-bg[data-theme="dark"] .nav,
-html.has-bg[data-theme="purple"] .nav,
-html.has-bg[data-theme="starry"] .nav{
+html.glass[data-theme="dark"] .nav,
+html.glass[data-theme="purple"] .nav,
+html.glass[data-theme="starry"] .nav{
   background:rgba(18,14,26,.34);
   border-bottom-color:rgba(255,255,255,.12);
 }
-html.has-bg[data-theme="dark"] .nav.scrolled,
-html.has-bg[data-theme="purple"] .nav.scrolled,
-html.has-bg[data-theme="starry"] .nav.scrolled{
+html.glass[data-theme="dark"] .nav.scrolled,
+html.glass[data-theme="purple"] .nav.scrolled,
+html.glass[data-theme="starry"] .nav.scrolled{
   background:rgba(18,14,26,.48);
 }
 
 /* 悬停：抬起 + 高光增强 */
-html.has-bg .tile:hover,
-html.has-bg .ct:hover{
+html.glass .tile:hover,
+html.glass .ct:hover{
   box-shadow:var(--sh-lg), inset 0 1px 0 rgba(255,255,255,.95);
   border-color:rgba(255,255,255,.85);
 }
-html.has-bg[data-theme="dark"] .tile:hover,
-html.has-bg[data-theme="purple"] .tile:hover,
-html.has-bg[data-theme="starry"] .tile:hover{
+html.glass[data-theme="dark"] .tile:hover,
+html.glass[data-theme="purple"] .tile:hover,
+html.glass[data-theme="starry"] .tile:hover{
   border-color:rgba(255,255,255,.30);
 }
 
 /* 文本可读性兜底：背景模式下加深主副文字 */
-html.has-bg{ text-shadow:0 1px 2px rgba(0,0,0,.12) }
-html.has-bg .hero h1,
-html.has-bg .sec-title{ filter:drop-shadow(0 2px 10px rgba(0,0,0,.42)) }
-html.has-bg[data-theme="dark"],
-html.has-bg[data-theme="purple"],
-html.has-bg[data-theme="starry"]{ text-shadow:0 1px 2px rgba(0,0,0,.42) }
+html.glass{ text-shadow:0 1px 2px rgba(0,0,0,.12) }
+html.glass .hero h1,
+html.glass .sec-title{ filter:drop-shadow(0 2px 10px rgba(0,0,0,.42)) }
+html.glass[data-theme="dark"],
+html.glass[data-theme="purple"],
+html.glass[data-theme="starry"]{ text-shadow:0 1px 2px rgba(0,0,0,.42) }
 
 /* ── 深色背景自适应（JS 采样亮度后自动加 .bg-dark） ── */
 /* 卡片外的一切裸文字提亮 */
-html.has-bg.bg-dark .hero h1{
+html.glass.bg-dark .hero h1{
   background-image:linear-gradient(110deg,#ffffff 18%,#a9d2ff 40%,#eaf5ff 52%,#ffffff 74%);
   filter:drop-shadow(0 2px 16px rgba(0,0,0,.62)) drop-shadow(0 1px 2px rgba(0,0,0,.45));
 }
-html.has-bg.bg-dark .hero-tag,
-html.has-bg.bg-dark .hero-eyebrow,
-html.has-bg.bg-dark .sec-eyebrow,
-html.has-bg.bg-dark .sec-sub,
-html.has-bg.bg-dark .foot,
-html.has-bg.bg-dark .foot *,
-html.has-bg.bg-dark .dock span,
-html.has-bg.bg-dark .dock em,
-html.has-bg.bg-dark .marquee span,
-html.has-bg.bg-dark .marquee em{
+html.glass.bg-dark .hero-tag,
+html.glass.bg-dark .hero-eyebrow,
+html.glass.bg-dark .sec-eyebrow,
+html.glass.bg-dark .sec-sub,
+html.glass.bg-dark .foot,
+html.glass.bg-dark .foot *,
+html.glass.bg-dark .dock span,
+html.glass.bg-dark .dock em,
+html.glass.bg-dark .marquee span,
+html.glass.bg-dark .marquee em{
   color:#ddebf9 !important;
   text-shadow:0 1px 8px rgba(0,0,0,.55);
 }
-html.has-bg.bg-dark .hero-tag{ color:#eef6ff !important; font-weight:600; letter-spacing:.2px }
-html.has-bg.bg-dark .nav-links a,
-html.has-bg.bg-dark .brand,
-html.has-bg.bg-dark .brand-sub{ color:#eaf3fd !important; text-shadow:0 1px 6px rgba(0,0,0,.5) }
-html.has-bg.bg-dark .nav-links a:hover{ color:#fff !important; background:rgba(255,255,255,.2) }
-html.has-bg.bg-dark .sec-title,
-html.has-bg.bg-dark .zone-name{ color:#f4f9ff !important; text-shadow:0 2px 12px rgba(0,0,0,.5) }
-html.has-bg.bg-dark .btn-g{
+html.glass.bg-dark .hero-tag{ color:#eef6ff !important; font-weight:600; letter-spacing:.2px }
+html.glass.bg-dark .nav-links a,
+html.glass.bg-dark .brand,
+html.glass.bg-dark .brand-sub{ color:#eaf3fd !important; text-shadow:0 1px 6px rgba(0,0,0,.5) }
+html.glass.bg-dark .nav-links a:hover{ color:#fff !important; background:rgba(255,255,255,.2) }
+html.glass.bg-dark .sec-title,
+html.glass.bg-dark .zone-name{ color:#f4f9ff !important; text-shadow:0 2px 12px rgba(0,0,0,.5) }
+html.glass.bg-dark .btn-g{
   background:rgba(255,255,255,.94) !important; border-color:rgba(255,255,255,.9) !important; color:#1f3c5e !important;
 }
 /* 深背景时卡片提高不透明度，保证卡内深色文字对比度 */
-html.has-bg.bg-dark .zone,
-html.has-bg.bg-dark .tile,
-html.has-bg.bg-dark .ct,
-html.has-bg.bg-dark .fb,
-html.has-bg.bg-dark .gb-wall,
-html.has-bg.bg-dark .ach-app{
+html.glass.bg-dark .zone,
+html.glass.bg-dark .tile,
+html.glass.bg-dark .ct,
+html.glass.bg-dark .fb,
+html.glass.bg-dark .gb-wall,
+html.glass.bg-dark .ach-app{
   background-color:rgba(255,255,255,.84);
 }
-html.has-bg.bg-dark .gb-item{ background:rgba(255,255,255,.80) }
+html.glass.bg-dark .gb-item{ background:rgba(255,255,255,.80) }
 /* 卡片内的次要文字：深背景时改深一档，防止浅灰压浅底 */
-html.has-bg.bg-dark .zone-sub,
-html.has-bg.bg-dark .zone-count,
-html.has-bg.bg-dark .tile-body p,
-html.has-bg.bg-dark .tile-sub,
-html.has-bg.bg-dark .tile-body small{
+html.glass.bg-dark .zone-sub,
+html.glass.bg-dark .zone-count,
+html.glass.bg-dark .tile-body p,
+html.glass.bg-dark .tile-sub,
+html.glass.bg-dark .tile-body small{
   color:#59748f !important;
   text-shadow:none !important;
 }
@@ -1501,37 +1501,37 @@ html.has-bg.bg-dark .tile-body small{
 /* ══ 全站玻璃化：中小控件 ══
    注意：不给小控件加 backdrop-filter —— 每个元素都要采样背景，几十个就会掉帧。
    这里用「半透明白 + 顶部高光渐变 + 内阴影」模拟玻璃，视觉一致、成本接近 0 */
-html.has-bg .btn-g,
-html.has-bg .tk-btn,
-html.has-bg .chip,
-html.has-bg .ptag,
-html.has-bg .fb-type,
-html.has-bg .tk-seg button,
-html.has-bg .fb-input,
-html.has-bg .fb-area,
-html.has-bg .gb-item{
+html.glass .btn-g,
+html.glass .tk-btn,
+html.glass .chip,
+html.glass .ptag,
+html.glass .fb-type,
+html.glass .tk-seg button,
+html.glass .fb-input,
+html.glass .fb-area,
+html.glass .gb-item{
   background-color:rgba(255,255,255,.60);
   background-image:linear-gradient(160deg,rgba(255,255,255,.46),rgba(255,255,255,.06) 60%,rgba(255,255,255,.16));
   border-color:rgba(255,255,255,.74);
   box-shadow:0 2px 10px rgba(24,56,98,.10), inset 0 1px 0 rgba(255,255,255,.92);
 }
-html.has-bg .btn-g{ color:var(--accent-deep) }
-html.has-bg .chip,
-html.has-bg .ptag{ color:var(--ink2) }
-html.has-bg .fb-input::placeholder,
-html.has-bg .fb-area::placeholder{ color:rgba(46,78,116,.5) }
+html.glass .btn-g{ color:var(--accent-deep) }
+html.glass .chip,
+html.glass .ptag{ color:var(--ink2) }
+html.glass .fb-input::placeholder,
+html.glass .fb-area::placeholder{ color:rgba(46,78,116,.5) }
 
 /* 控件交互反馈 */
-html.has-bg .btn-g:hover,
-html.has-bg .chip:hover,
-html.has-bg .fb-type:hover,
-html.has-bg .tk-seg button:hover,
-html.has-bg .tk-btn:hover{
+html.glass .btn-g:hover,
+html.glass .chip:hover,
+html.glass .fb-type:hover,
+html.glass .tk-seg button:hover,
+html.glass .tk-btn:hover{
   background-color:rgba(255,255,255,.84);
   border-color:rgba(255,255,255,.96);
   box-shadow:0 6px 20px rgba(24,56,98,.16), inset 0 1px 0 #fff;
 }
-html.has-bg .fb-type.on{
+html.glass .fb-type.on{
   background-color:rgba(137,194,255,.42);
   border-color:rgba(120,180,245,.9);
   color:#23507e;
@@ -1539,17 +1539,17 @@ html.has-bg .fb-type.on{
 }
 
 /* 主按钮：保留渐变，加内高光与外发光 */
-html.has-bg .btn-p,
-html.has-bg .fb-btn{
+html.glass .btn-p,
+html.glass .fb-btn{
   box-shadow:0 5px 0 #4683c4, 0 14px 26px rgba(110,150,200,.30), inset 0 1px 0 rgba(255,255,255,.5);
 }
-html.has-bg .btn-p:hover,
-html.has-bg .fb-btn:hover{
+html.glass .btn-p:hover,
+html.glass .fb-btn:hover{
   box-shadow:0 6px 0 #4683c4, 0 16px 30px rgba(110,150,200,.34), inset 0 1px 0 rgba(255,255,255,.6);
 }
 
 /* 主题面板：强玻璃 */
-html.has-bg .tk-panel{
+html.glass .tk-panel{
   background:rgba(255,255,255,.70);
   -webkit-backdrop-filter:blur(30px) saturate(1.8);
   backdrop-filter:blur(30px) saturate(1.8);
@@ -1558,71 +1558,134 @@ html.has-bg .tk-panel{
 }
 
 /* 成就卡：保留米黄暖调，叠加玻璃 */
-html.has-bg .ach-app{
+html.glass .ach-app{
   background-image:linear-gradient(160deg,rgba(255,252,240,.80),rgba(255,246,226,.5));
 }
 
 /* 输入框：聚焦时变实，保证输入清晰 */
-html.has-bg .fb-input,
-html.has-bg .fb-area{ background-color:rgba(255,255,255,.54) }
-html.has-bg .fb-input:focus,
-html.has-bg .fb-area:focus{
+html.glass .fb-input,
+html.glass .fb-area{ background-color:rgba(255,255,255,.54) }
+html.glass .fb-input:focus,
+html.glass .fb-area:focus{
   background-color:rgba(255,255,255,.88);
   border-color:var(--accent-deep);
   box-shadow:0 0 0 3px rgba(137,194,255,.30), inset 0 1px 0 #fff;
 }
 
 /* 深色主题下的控件 */
-html.has-bg[data-theme="dark"] .btn-g,
-html.has-bg[data-theme="purple"] .btn-g,
-html.has-bg[data-theme="starry"] .btn-g,
-html.has-bg[data-theme="dark"] .tk-btn,
-html.has-bg[data-theme="purple"] .tk-btn,
-html.has-bg[data-theme="starry"] .tk-btn,
-html.has-bg[data-theme="dark"] .chip,
-html.has-bg[data-theme="purple"] .chip,
-html.has-bg[data-theme="starry"] .chip,
-html.has-bg[data-theme="dark"] .ptag,
-html.has-bg[data-theme="purple"] .ptag,
-html.has-bg[data-theme="starry"] .ptag,
-html.has-bg[data-theme="dark"] .fb-type,
-html.has-bg[data-theme="purple"] .fb-type,
-html.has-bg[data-theme="starry"] .fb-type,
-html.has-bg[data-theme="dark"] .fb-input,
-html.has-bg[data-theme="purple"] .fb-input,
-html.has-bg[data-theme="starry"] .fb-input,
-html.has-bg[data-theme="dark"] .fb-area,
-html.has-bg[data-theme="purple"] .fb-area,
-html.has-bg[data-theme="starry"] .fb-area{
+html.glass[data-theme="dark"] .btn-g,
+html.glass[data-theme="purple"] .btn-g,
+html.glass[data-theme="starry"] .btn-g,
+html.glass[data-theme="dark"] .tk-btn,
+html.glass[data-theme="purple"] .tk-btn,
+html.glass[data-theme="starry"] .tk-btn,
+html.glass[data-theme="dark"] .chip,
+html.glass[data-theme="purple"] .chip,
+html.glass[data-theme="starry"] .chip,
+html.glass[data-theme="dark"] .ptag,
+html.glass[data-theme="purple"] .ptag,
+html.glass[data-theme="starry"] .ptag,
+html.glass[data-theme="dark"] .fb-type,
+html.glass[data-theme="purple"] .fb-type,
+html.glass[data-theme="starry"] .fb-type,
+html.glass[data-theme="dark"] .fb-input,
+html.glass[data-theme="purple"] .fb-input,
+html.glass[data-theme="starry"] .fb-input,
+html.glass[data-theme="dark"] .fb-area,
+html.glass[data-theme="purple"] .fb-area,
+html.glass[data-theme="starry"] .fb-area{
   background-color:rgba(255,255,255,.09);
   background-image:linear-gradient(160deg,rgba(255,255,255,.14),rgba(255,255,255,.02) 60%,rgba(255,255,255,.06));
   border-color:rgba(255,255,255,.18);
   color:rgba(255,255,255,.92);
   box-shadow:0 2px 10px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.14);
 }
-html.has-bg[data-theme="dark"] .fb-input::placeholder,
-html.has-bg[data-theme="purple"] .fb-input::placeholder,
-html.has-bg[data-theme="starry"] .fb-input::placeholder{ color:rgba(255,255,255,.42) }
+html.glass[data-theme="dark"] .fb-input::placeholder,
+html.glass[data-theme="purple"] .fb-input::placeholder,
+html.glass[data-theme="starry"] .fb-input::placeholder{ color:rgba(255,255,255,.42) }
 
 /* 深背景（亮色主题压在暗图上）：控件整体提亮，保证对比 */
-html.has-bg.bg-dark .btn-g,
-html.has-bg.bg-dark .chip,
-html.has-bg.bg-dark .ptag,
-html.has-bg.bg-dark .fb-type,
-html.has-bg.bg-dark .fb-input,
-html.has-bg.bg-dark .fb-area,
-html.has-bg.bg-dark .tk-btn,
-html.has-bg.bg-dark .tk-seg button{
+html.glass.bg-dark .btn-g,
+html.glass.bg-dark .chip,
+html.glass.bg-dark .ptag,
+html.glass.bg-dark .fb-type,
+html.glass.bg-dark .fb-input,
+html.glass.bg-dark .fb-area,
+html.glass.bg-dark .tk-btn,
+html.glass.bg-dark .tk-seg button{
   background-color:rgba(255,255,255,.90) !important;
   border-color:rgba(255,255,255,.94) !important;
   color:#2c4a68 !important;
 }
-html.has-bg.bg-dark .fb-type.on{
+html.glass.bg-dark .fb-type.on{
   background-color:rgba(137,194,255,.85) !important;
   color:#1b3f66 !important;
 }
 
+/* ══ 风格开关：玻璃视觉由 .glass 驱动，背景图由 .has-bg 驱动，两者独立 ══ */
+
+/* 玻璃模式 + 无自定义背景图：给一层内置氛围渐变，让玻璃有东西可透 */
+html.glass:not(.has-bg) .st-bg{
+  opacity:1;
+  background-image:
+    radial-gradient(900px 620px at 12% -6%, rgba(120,180,255,.78), transparent 62%),
+    radial-gradient(820px 700px at 88% 16%, rgba(172,142,255,.62), transparent 60%),
+    radial-gradient(1000px 640px at 55% 106%, rgba(92,212,202,.52), transparent 64%),
+    linear-gradient(165deg,#ebf7ff 0%,#dcefff 55%,#e8f5ff 100%);
+}
+html.glass:not(.has-bg)[data-theme="dark"] .st-bg{
+  background-image:
+    radial-gradient(900px 620px at 12% -6%, rgba(130,44,74,.72), transparent 62%),
+    radial-gradient(820px 700px at 88% 16%, rgba(96,32,58,.62), transparent 60%),
+    radial-gradient(1000px 640px at 55% 106%, rgba(66,22,44,.72), transparent 64%),
+    linear-gradient(165deg,#1b0e16 0%,#26111c 55%,#170a12 100%);
+}
+html.glass:not(.has-bg)[data-theme="purple"] .st-bg{
+  background-image:
+    radial-gradient(900px 620px at 12% -6%, rgba(124,92,214,.62), transparent 62%),
+    radial-gradient(820px 700px at 88% 16%, rgba(160,120,240,.5), transparent 60%),
+    radial-gradient(1000px 640px at 55% 106%, rgba(90,62,170,.55), transparent 64%),
+    linear-gradient(165deg,#1a1230 0%,#241a42 55%,#150f28 100%);
+}
+html.glass:not(.has-bg)[data-theme="fresh"] .st-bg{
+  background-image:
+    radial-gradient(900px 620px at 12% -6%, rgba(140,225,170,.62), transparent 62%),
+    radial-gradient(820px 700px at 88% 16%, rgba(180,240,200,.5), transparent 60%),
+    radial-gradient(1000px 640px at 55% 106%, rgba(120,220,160,.5), transparent 64%),
+    linear-gradient(165deg,#f2fdf6 0%,#e6f9ec 100%);
+}
+html.glass:not(.has-bg)[data-theme="warm"] .st-bg{
+  background-image:
+    radial-gradient(900px 620px at 12% -6%, rgba(255,182,193,.6), transparent 62%),
+    radial-gradient(820px 700px at 88% 16%, rgba(255,205,215,.5), transparent 60%),
+    radial-gradient(1000px 640px at 55% 106%, rgba(255,170,190,.45), transparent 64%),
+    linear-gradient(165deg,#fff6f8 0%,#ffeef3 100%);
+}
+html.glass:not(.has-bg)[data-theme="colorful"] .st-bg{
+  background-image:
+    radial-gradient(900px 620px at 10% -6%, rgba(255,138,128,.42), transparent 62%),
+    radial-gradient(820px 700px at 86% 14%, rgba(77,208,225,.42), transparent 60%),
+    radial-gradient(1000px 640px at 55% 106%, rgba(179,157,219,.46), transparent 64%),
+    linear-gradient(165deg,#fffdf8 0%,#f6f3ff 100%);
+}
+/* 玻璃模式且无图时，光斑保持鲜活（有图时才压暗，避免盖住照片） */
+html.glass:not(.has-bg) .blob{ opacity:.62 }
+html.glass:not(.has-bg) .st-bg::after{ opacity:0 !important }
+
+/* 真正有自定义背景图时：显示图片层 + 暗化遮罩 + 压暗光斑 */
+html.has-bg .st-bg,
+html.has-bg .st-bg::after{ opacity:1 }
+html.has-bg body{ background:#0d1a2a }
+html.has-bg .blob{ opacity:.13 }
+html.has-bg ::selection{ background:rgba(255,255,255,.32) }
+
+/* ══ 风格切换按钮 ══ */
+#tkStyle{margin-top:8px}
+#tkStyle button{display:flex;align-items:center;justify-content:center;gap:5px}
+html.glass #tkStyle button[data-style="glass"]{font-weight:800}
+
 /* ── 背景设置按钮与面板 ── */
+
 .st-bg-btn{
   position:fixed; right:18px; bottom:88px; z-index:72;
   width:44px; height:44px; border-radius:50%; display:grid; place-items:center;
@@ -1764,7 +1827,7 @@ html.has-bg[data-theme="starry"] .gb-text{color:#e6dcea}
 }
 
 </style>
-</head>
+<script>try{if((localStorage.getItem("startian_style_v1")||"glass")!=="classic"){document.documentElement.classList.add("glass")}}catch(e){}</script></head>
 <body>
 <canvas id="starField" aria-hidden="true"></canvas>
 <div class="loadbar"></div>
@@ -1796,7 +1859,12 @@ html.has-bg[data-theme="starry"] .gb-text{color:#e6dcea}
       <button type="button" data-mode="custom" data-i18n="theme.custom">自定义</button>
       <button type="button" data-mode="starry" id="tkStarryBtn" data-i18n="theme.starry" style="display:none">星夜</button>
     </div>
-    <div class="tk-p-sub" data-i18n="theme.sub">自动组合（跟随时间切换的配色方案）</div>
+        <div class="tk-p-sub">外观风格</div>
+    <div class="tk-seg tk-seg-2" id="tkStyle">
+      <button type="button" data-style="classic">原版</button>
+      <button type="button" data-style="glass" class="on">液态玻璃</button>
+    </div>
+<div class="tk-p-sub" data-i18n="theme.sub">自动组合（跟随时间切换的配色方案）</div>
     <div class="tk-seg tk-seg-2" id="tkPair">
       <button type="button" data-pair="classic" data-i18n="theme.pair1">蓝白 ⇄ 暗红</button>
       <button type="button" data-pair="dreamy" data-i18n="theme.pair2">清新绿 ⇄ 梦幻紫</button>
@@ -5447,9 +5515,50 @@ window.__checkSecretZone = checkSecretZone;
 (function () {
   'use strict';
 
+  /* ───────── 0. 外观风格：原版 / 液态玻璃 ───────── */
+  var STYLE_KEY = 'startian_style_v1';
+  var html = document.documentElement;
+  var styleBox = document.getElementById('tkStyle');
+
+  function glyph(on) {
+    return '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" '
+      + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto">'
+      + (on
+        ? '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 10h18M10 3v18"/>'
+        : '<rect x="4" y="4" width="16" height="16" rx="2"/>')
+      + '</svg>';
+  }
+
+  function applyStyle(v, save) {
+    var glass = v !== 'classic';
+    html.classList.toggle('glass', glass);
+    if (styleBox) {
+      var bts = styleBox.querySelectorAll('button[data-style]');
+      for (var i = 0; i < bts.length; i++) {
+        var on = bts[i].getAttribute('data-style') === (glass ? 'glass' : 'classic');
+        bts[i].classList.toggle('on', on);
+        bts[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    }
+    if (save) { try { localStorage.setItem(STYLE_KEY, glass ? 'glass' : 'classic'); } catch (e) {} }
+  }
+
+  if (styleBox) {
+    styleBox.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('button[data-style]') : null;
+      if (!b) return;
+      applyStyle(b.getAttribute('data-style'), true);
+      // 切到原版时，如果开着背景图，保留图片但玻璃效果关闭 —— 由 CSS 自动处理
+    });
+  }
+
+  // 初始化（head 里已提前加过 class，这里只同步按钮状态）
+  var initStyle = 'glass';
+  try { initStyle = localStorage.getItem(STYLE_KEY) || 'glass'; } catch (e) {}
+  applyStyle(initStyle, false);
+
   /* ───────── 1. 背景图：IndexedDB 存储 + canvas 压缩 ───────── */
   var DB_NAME = 'startian_bg', STORE = 'img', KEY = 'bg1';
-  var html = document.documentElement;
   var bgEl = document.getElementById('stBg');
   var btn = document.getElementById('stBgBtn');
   var panel = document.getElementById('stBgPanel');
