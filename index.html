@@ -419,7 +419,7 @@ footer a:hover{text-decoration:underline}
 .zones{display:flex;gap:16px;align-items:flex-start}
 .zone{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:22px;background:var(--card);overflow:hidden;box-shadow:var(--sh-sm);transition:flex-grow .55s cubic-bezier(.25,.9,.3,1),border-color .3s ease,box-shadow .3s ease}
 .zone.open{flex-grow:4}
-.zone:hover{box-shadow:var(--sh-lg);border-color:var(--line-2)}
+.zone:hover{box-shadow:var(--sh-lg);border-color:var(--line2)}
 .zone-head{width:100%;display:flex;align-items:center;gap:15px;padding:17px 20px;border:0;background:transparent;cursor:pointer;font-family:inherit;text-align:left;color:var(--ink);transition:background .25s ease}
 .zone-head:hover{background:var(--tint)}
 .zone-head:active{background:var(--tint)}
@@ -2037,6 +2037,49 @@ html.has-bg.lg-on .dw-key-btn{
 html.has-bg.lg-on .dw-key-row{ border-bottom-color: rgba(255,255,255,.12) !important }
 
 </style>
+<style>
+
+/* ═══════════════════ 缺陷修复 v1 ═══════════════════ */
+
+/* 秘密分区图标：之前漏了配色，白色 stroke 在浅色主题下几乎看不见 */
+.zone-ico.zc-secret{background:linear-gradient(145deg,#7c3aed,#312e81)}
+
+/* 头像 hover：bob 动画持续占用 transform，animation 优先级高于 transition，
+   直接写 scale 会被下一帧的 translateY 覆盖、表现为"抽一下"。
+   暂停动画即可让过渡正常接管 */
+.hero .avatar:hover{
+  animation-play-state: paused;
+  transform: scale(1.05) rotate(-2deg);
+}
+
+/* 不支持 backdrop-filter:url() 的浏览器（Safari）：
+   整条属性会失效，卡片只剩 rgba(255,255,255,.06) 几乎全透明、白字压壁纸。
+   这里给更实的底色兜底，保证可读 */
+html.no-url-filter.lg-on .zone,
+html.no-url-filter.lg-on .about,
+html.no-url-filter.lg-on .ach-app,
+html.no-url-filter.lg-on .fb,
+html.no-url-filter.lg-on .ct,
+html.no-url-filter.lg-on .dw{
+  background: rgba(255,255,255,.46) !important;
+}
+html.no-url-filter.lg-on .tile{ background: rgba(255,255,255,.34) !important }
+html.no-url-filter.lg-on .nav{ background: rgba(251,253,255,.92) !important }
+html.no-url-filter.lg-on .brand,
+html.no-url-filter.lg-on .nav-links a{ color: #1f3c5e !important; text-shadow: none !important }
+html.no-url-filter.lg-on .zone-name,
+html.no-url-filter.lg-on .about p,
+html.no-url-filter.lg-on .tile-body h3,
+html.no-url-filter.lg-on .ct .cl,
+html.no-url-filter.lg-on .fb-title{ color: #1f3c5e !important; text-shadow: none !important }
+html.no-url-filter.lg-on .ct .cv,
+html.no-url-filter.lg-on .fb-sub{ color: #4a6a8a !important }
+html.no-url-filter.lg-on .dw{ background: rgba(250,253,255,.95) !important }
+html.no-url-filter.lg-on .dw-title,
+html.no-url-filter.lg-on .dw-tab,
+html.no-url-filter.lg-on .dw-sec-h{ color: #1f3c5e !important }
+
+</style>
 </head>
 <body>
 <canvas id="starField" aria-hidden="true"></canvas>
@@ -2545,71 +2588,11 @@ html.has-bg.lg-on .dw-key-row{ border-bottom-color: rgba(255,255,255,.12) !impor
 <div class="toast" id="toast"></div>
 
 <script>
-/* ══════════════════════════════════════════════════════════
-   🌐 多语言 i18n Kit（startian.top 全站共享 · v1 · 2026-10-04）
-   · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
-   · 自动识别：首次访问按 navigator.language（zh 开头 → 中文，其余 → English）
-   · DOM 标注：data-i18n（文本）/ data-i18n-title / data-i18n-aria / data-i18n-ph（placeholder）
-   · API：I18N.t(k[,vars]) · I18N.set(lang) · I18N.apply(root) · I18N.onChange(fn)
-          · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n) · I18N.lang()
-   · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
-   ══════════════════════════════════════════════════════════ */
-/* ══════════════════════════════════════════════════════════
-   🌐 多语言 i18n Kit（startian.top 全站共享 · v1.1 · 2026-10-04）
-   · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
-   · 自动识别：首次访问按 navigator.language（zh 开头 → 中文，其余 → English）
-   · 两种接入模式（可混用）：
-     ① 短语表模式（推荐，低侵入）：I18N.phrase({ '中文原文': 'English', ... })
-        自动扫描文本节点 / title / placeholder / aria-label / alt，动态插入的文本也自动翻译
-     ② 标注模式：data-i18n / data-i18n-html / data-i18n-title / data-i18n-aria / data-i18n-ph / data-i18n-alt
-   · 子树上加 data-i18n-skip 可整体跳过（用户输入内容、ARG 谜题原文等）
-   · API：I18N.t(k[,vars]) · I18N.tOr(k,fb) · I18N.tr(原文) · I18N.set(lang) · I18N.lang()
-          · I18N.phrase(map) · I18N.scan(root) · I18N.apply(root) · I18N.onChange(fn)
-          · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n)
-   · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
-   ══════════════════════════════════════════════════════════ */
-/* ══════════════════════════════════════════════════════════
-   🌐 多语言 i18n Kit（startian.top 全站共享 · v1.2 · 2026-10-04）
-   · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
-   · 自动识别：首次访问按 navigator.language（zh 开头 → 中文，其余 → English）
-   · 两种接入模式（可混用）：
-     ① 短语表模式（推荐，低侵入）：I18N.phrase({ '中文原文': 'English', ... })
-        自动扫描文本节点 / title / placeholder / aria-label / alt，动态插入的文本也自动翻译
-     ② 标注模式：data-i18n / data-i18n-html / data-i18n-title / data-i18n-aria / data-i18n-ph / data-i18n-alt
-   · 子树上加 data-i18n-skip 可整体跳过（用户输入内容、ARG 谜题原文等）
-   · API：I18N.t(k[,vars]) · I18N.tOr(k,fb) · I18N.tr(原文) · I18N.set(lang) · I18N.lang()
-          · I18N.phrase(map) · I18N.scan(root) · I18N.apply(root) · I18N.onChange(fn)
-          · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n)
-   · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
-   ══════════════════════════════════════════════════════════ */
-/* ══════════════════════════════════════════════════════════
-   🌐 多语言 i18n Kit（startian.top 全站共享 · v1.2 · 2026-10-04）
-   · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
-   · 自动识别：首次访问按 navigator.language（zh 开头 → 中文，其余 → English）
-   · 两种接入模式（可混用）：
-     ① 短语表模式（推荐，低侵入）：I18N.phrase({ '中文原文': 'English', ... })
-        自动扫描文本节点 / title / placeholder / aria-label / alt，动态插入的文本也自动翻译
-     ② 标注模式：data-i18n / data-i18n-html / data-i18n-title / data-i18n-aria / data-i18n-ph / data-i18n-alt
-   · 子树上加 data-i18n-skip 可整体跳过（用户输入内容、ARG 谜题原文等）
-   · API：I18N.t(k[,vars]) · I18N.tOr(k,fb) · I18N.tr(原文) · I18N.set(lang) · I18N.lang()
-          · I18N.phrase(map) · I18N.scan(root) · I18N.apply(root) · I18N.onChange(fn)
-          · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n)
-   · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
-   ══════════════════════════════════════════════════════════ */
-/* ══════════════════════════════════════════════════════════
-   🌐 多语言 i18n Kit（startian.top 全站共享 · v1.2 · 2026-10-04）
-   · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
-   · 自动识别：首次访问按 navigator.language（zh 开头 → 中文，其余 → English）
-   · 两种接入模式（可混用）：
-     ① 短语表模式（推荐，低侵入）：I18N.phrase({ '中文原文': 'English', ... })
-        自动扫描文本节点 / title / placeholder / aria-label / alt，动态插入的文本也自动翻译
-     ② 标注模式：data-i18n / data-i18n-html / data-i18n-title / data-i18n-aria / data-i18n-ph / data-i18n-alt
-   · 子树上加 data-i18n-skip 可整体跳过（用户输入内容、ARG 谜题原文等）
-   · API：I18N.t(k[,vars]) · I18N.tOr(k,fb) · I18N.tr(原文) · I18N.set(lang) · I18N.lang()
-          · I18N.phrase(map) · I18N.scan(root) · I18N.apply(root) · I18N.onChange(fn)
-          · I18N.fmtDate(date[,{weekday:true}]) · I18N.fmtNum(n)
-   · 切换入口：固定右下角胶囊（本 Kit 自动注入，无需页面代码）
-   ══════════════════════════════════════════════════════════ */
+
+
+
+
+
 /* ══════════════════════════════════════════════════════════
    🌐 多语言 i18n Kit（startian.top 全站共享 · v1.2 · 2026-10-04）
    · 语言：zh（默认）/ en；跨站同步 cookie st_lang(.startian.top) + localStorage 兜底
@@ -7633,6 +7616,63 @@ window.__checkSecretZone = checkSecretZone;
     keys: function () { return Object.assign({}, keys); },
     setKey: function (mode, k) { keys[mode] = k; saveKeys(); renderKeys(); },
     apply: applyMode
+  };
+})();
+</script>
+<!-- st-fixes-v1 -->
+<script>
+/* ═══════════ 缺陷修复 v1 ═══════════ */
+(function () {
+  'use strict';
+  var html = document.documentElement;
+
+  /* ---------- Safari 兜底：backdrop-filter 是否支持 url() 引用 ---------- */
+  var CAN_URL_FILTER = (function () {
+    try {
+      if (!window.CSS || !CSS.supports) return false;
+      return CSS.supports('backdrop-filter', 'url(#f)') ||
+             CSS.supports('-webkit-backdrop-filter', 'url(#f)');
+    } catch (e) { return false; }
+  })();
+  if (!CAN_URL_FILTER) html.classList.add('no-url-filter');
+
+  /* ---------- 让玻璃层在 Safari 下退化为纯模糊 ---------- */
+  function patchGlassForSafari() {
+    if (CAN_URL_FILTER) return;
+    if (!html.classList.contains('has-bg') || !html.classList.contains('lg-on')) return;
+    var els = document.querySelectorAll('.zone, .about, .ach-app, .fb, .ct, .dw, .nav, .btn-p, .btn-g');
+    for (var i = 0; i < els.length; i++) {
+      var cur = els[i].style.backdropFilter || '';
+      if (cur.indexOf('url(') < 0) continue;      // 已经是纯模糊，不用管
+      // 从原值里把 blur 半径捞出来，url() 那段直接丢掉
+      var m = cur.match(/blur\(([\d.]+)px\)/);
+      var r = m ? Math.max(parseFloat(m[1]), 8) : 10;
+      var sat = (cur.match(/saturate\(([\d.]+)\)/) || [])[1] || 1.5;
+      var out = 'blur(' + r + 'px) saturate(' + sat + ')';
+      els[i].style.backdropFilter = out;
+      els[i].style.webkitBackdropFilter = out;
+    }
+  }
+
+  /* glass2 每次重算都会写回 url()，所以这里持续纠偏（节流） */
+  if (!CAN_URL_FILTER) {
+    var t = null;
+    function scheduleFix() {
+      clearTimeout(t);
+      t = setTimeout(patchGlassForSafari, 300);
+    }
+    new MutationObserver(scheduleFix).observe(html, { attributes: true, attributeFilter: ['class'] });
+    window.addEventListener('resize', scheduleFix);
+    var lastScan = 0;
+    setInterval(function () {
+      if (!html.classList.contains('lg-on')) return;
+      patchGlassForSafari();
+    }, 1500);
+  }
+
+  window.ST_FIX = {
+    canUrlFilter: CAN_URL_FILTER,
+    isSafariFallback: html.classList.contains('no-url-filter')
   };
 })();
 </script>
