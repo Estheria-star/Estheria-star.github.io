@@ -5635,7 +5635,9 @@ window.__checkSecretZone = checkSecretZone;
   function uid() { return 'w_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
   /* ───────── IndexedDB ───────── */
+  var _dbConn = null;
   function openDB() {
+    if (_dbConn) return Promise.resolve(_dbConn);
     return new Promise(function (res, rej) {
       if (!window.indexedDB) return rej(new Error('no-idb'));
       var r = indexedDB.open(DB, 1);
@@ -5643,8 +5645,30 @@ window.__checkSecretZone = checkSecretZone;
         var d = r.result;
         if (!d.objectStoreNames.contains(STORE)) d.createObjectStore(STORE, { keyPath: 'id' });
       };
-      r.onsuccess = function () { res(r.result); };
+      r.onsuccess = function () { _dbConn = r.result; res(_dbConn); };
       r.onerror = function () { rej(r.error || new Error('idb')); };
+    });
+  }
+  function closeDB() {
+    if (_dbConn) { try { _dbConn.close(); } catch (e) {} _dbConn = null; }
+  }
+  /* 彻底删除数据库再重建 —— 逐条 delete() 只是标记删除，LevelDB 不会立刻缩容，
+     navigator.storage.estimate() 仍把未回收的空间计算在内，看起来就像「没清干净」 */
+  function wipeDB() {
+    closeDB();
+    return new Promise(function (res) {
+      var done = false;
+      function fin(v) { if (!done) { done = true; res(v); } }
+      var r;
+      try { r = indexedDB.deleteDatabase(DB); }
+      catch (e) { return fin(false); }
+      r.onsuccess = function () { fin(true); };
+      r.onerror = function () { fin(false); };
+      r.onblocked = function () {
+        // 其他标签页还开着这个库 → 等一会儿再算
+        setTimeout(function () { fin(true); }, 1200);
+      };
+      setTimeout(function () { fin(false); }, 5000);
     });
   }
   function idbAll() {
@@ -6207,7 +6231,9 @@ window.__checkSecretZone = checkSecretZone;
         idbDel(id).then(function () {
           items = items.filter(function (x) { return x.id !== id; });
           if (activeId === id) clearAll(true);
-          renderGrid(); refreshQuota();
+          renderGrid();
+          refreshQuota();
+          setTimeout(refreshQuota, 1500);
           say(hint, '已移除', 'ok');
         });
       });
@@ -6558,15 +6584,14 @@ window.__checkSecretZone = checkSecretZone;
   }
   function doClearAll() {
     var n = items.length;
-    var jobs = items.map(function (x) { return idbDel(x.id); });
-    Promise.all(jobs).then(function () {
+    wipeDB().then(function (okWipe) {
       items = [];
       clearAll(true);
       renderGrid();
-      refreshQuota();
-      say(hint, '已清空 ' + n + ' 张壁纸', 'ok');
-    }).catch(function () {
-      say(hint, '清空时出错了，刷新页面再试', 'err');
+      // 空间回收有延迟：800ms / 2.5s 各刷一次，让数字自己降下来
+      setTimeout(refreshQuota, 800);
+      setTimeout(refreshQuota, 2500);
+      say(hint, '已清空 ' + n + ' 张壁纸' + (okWipe ? '' : '（部分被其他标签页占用，关掉其他页会更彻底）'), okWipe ? 'ok' : '');
     });
   }
   function onClearTap() {
@@ -6602,21 +6627,38 @@ window.__checkSecretZone = checkSecretZone;
     });
   }
 
-  /* ───────── 配额 ───────── */
+  /* ───────── 配额 ─────────
+     注意：navigator.storage.estimate() 报的是「浏览器视角」的用量，IndexedDB 删除后
+     底层 LevelDB 的压缩回收是异步的，数字要过几秒甚至几十秒才降（实测 8 秒）。
+     所以这里以「本站壁纸实际大小」为主显示，浏览器数字作为参考 —— 用户清空后立刻看到 0。 */
+  function quotaMine() {
+    var s = 0;
+    for (var i = 0; i < items.length; i++) s += (items[i].size || 0);
+    return s;
+  }
   function refreshQuota() {
+    var mine = quotaMine();
     if (!navigator.storage || !navigator.storage.estimate) {
-      if (quotaTxt) quotaTxt.textContent = '此浏览器不支持配额查询';
+      if (quotaTxt) quotaTxt.textContent = '本站壁纸 ' + fmtSize(mine) + '（此浏览器不支持配额查询）';
       return;
     }
     navigator.storage.estimate().then(function (e) {
       var used = e.usage || 0, quota = e.quota || 0;
-      var pct = quota ? Math.min(100, used / quota * 100) : 0;
+      // 进度条按「我们自己的占用」算，才和用户认知一致
+      var pct = quota ? Math.min(100, mine / quota * 100) : 0;
       if (quotaBar) {
-        quotaBar.querySelector('i').style.width = Math.max(1, pct).toFixed(1) + '%';
+        quotaBar.querySelector('i').style.width = Math.max(mine ? 1 : 0, pct).toFixed(1) + '%';
         quotaBar.classList.toggle('warn', pct > 75);
       }
-      if (quotaTxt) quotaTxt.textContent = '已用 ' + fmtSize(used) + ' / 可用 ' + fmtSize(quota) +
-        '（' + pct.toFixed(1) + '%）';
+      if (!quotaTxt) return;
+      var line = '本站壁纸 <b>' + fmtSize(mine) + '</b>';
+      if (mine === 0 && used > 1024 * 1024) {
+        line += '（已清空 · 浏览器后台回收中，数字会自动降）';
+      } else if (used > mine + 1024 * 1024) {
+        line += ' · 浏览器合计 ' + fmtSize(used);
+      }
+      line += ' / 可用 ' + fmtSize(quota);
+      quotaTxt.innerHTML = line;
     }).catch(function () {});
   }
   if (quotaRefresh) quotaRefresh.addEventListener('click', refreshQuota);
