@@ -1788,6 +1788,181 @@ html.perf-low .st-bg-wrap{ will-change: auto !important }
 }
 
 </style>
+<style>
+
+/* ═══════════════════ 液态玻璃（仅在有自定义壁纸时） ═══════════════════ */
+
+/* 壁纸模式下给「卡片外的裸文字」统一加暗投影 ——
+   浅色壁纸用白字会糊、深色壁纸用深字也会糊，投影是唯一通用的兜底 */
+html.has-bg .hero h1{
+  filter: drop-shadow(0 2px 14px rgba(0,0,0,.55)) drop-shadow(0 1px 3px rgba(0,0,0,.4));
+}
+html.has-bg .hero-tag,
+html.has-bg .hero-eyebrow,
+html.has-bg .sec-title,
+html.has-bg .sec-eyebrow,
+html.has-bg .sec-sub,
+html.has-bg .nav-links a,
+html.has-bg .brand,
+html.has-bg .brand-sub,
+html.has-bg .dock span,
+html.has-bg .dock em,
+html.has-bg .marquee span,
+html.has-bg .marquee em,
+html.has-bg .foot,
+html.has-bg .foot *{
+  text-shadow: 0 1px 8px rgba(0,0,0,.55), 0 0 2px rgba(0,0,0,.35);
+}
+/* 卡片上的文字同样给投影（玻璃是透明的，底下可能是亮壁纸） */
+html.has-bg.lg-on .tile-body h3,
+html.has-bg.lg-on .zone-name,
+html.has-bg.lg-on .fb-title,
+html.has-bg.lg-on .ct .cl,
+html.has-bg.lg-on .ct .cv{
+  text-shadow: 0 1px 10px rgba(0,0,0,.6), 0 0 2px rgba(0,0,0,.45);
+}
+
+/* .zone 是 .tile 的外层容器：它必须一起透明，否则 tile 透出来还是白色。
+   zone 本身不加 backdrop-filter（嵌套 filter 又贵又容易失真），只做透明容器 */
+html.has-bg.lg-on .zone{
+  background: transparent !important;
+  border-color: rgba(255,255,255,.26) !important;
+  box-shadow: none !important;
+}
+html.has-bg.lg-on .zone-head{
+  background: rgba(255,255,255,.10) !important;
+  border-bottom-color: rgba(255,255,255,.18) !important;
+}
+
+/* 卡片半透明 + 玻璃高光边。不透明度必须够低，否则看不出背后的折射 */
+html.has-bg.lg-on .fb,
+html.has-bg.lg-on .ct,
+html.has-bg.lg-on .tile,
+html.has-bg.lg-on .dw{
+  background: rgba(255,255,255,.10) !important;
+  border-color: rgba(255,255,255,.30) !important;
+  box-shadow:
+    inset 0 0 4px 0 rgba(250,250,250,.55),
+    0 16px 48px rgba(0,0,0,.30) !important;
+}
+
+/* 项目卡片：标题、标签、按钮一并转白 */
+html.has-bg.lg-on .tile-body h3,
+html.has-bg.lg-on .zone-name{
+  color: #fff !important;
+  text-shadow: 0 1px 10px rgba(0,0,0,.5);
+}
+html.has-bg.lg-on .ptag{
+  background: rgba(255,255,255,.18) !important;
+  border-color: rgba(255,255,255,.36) !important;
+  color: #fff !important;
+}
+html.has-bg.lg-on .cta{
+  color: #b6dcff !important;
+  text-shadow: 0 1px 8px rgba(0,0,0,.45);
+}
+html.has-bg.lg-on .tile-media{
+  box-shadow: 0 8px 28px rgba(0,0,0,.35);
+}
+
+/* 玻璃上的文字转白，保证可读 */
+html.has-bg.lg-on .fb-title,
+html.has-bg.lg-on .fb-sub,
+html.has-bg.lg-on .ct .cl,
+html.has-bg.lg-on .ct .cv{
+  color: rgba(255,255,255,.94) !important;
+  text-shadow: 0 1px 10px rgba(0,0,0,.55);
+}
+html.has-bg.lg-on .fb-type{
+  color: rgba(255,255,255,.9) !important;
+  border-color: rgba(255,255,255,.34) !important;
+  background: rgba(255,255,255,.10) !important;
+}
+html.has-bg.lg-on .fb-type.on{
+  background: rgba(137,194,255,.42) !important;
+  border-color: rgba(160,205,255,.9) !important;
+  color: #fff !important;
+}
+html.has-bg.lg-on .fb-input,
+html.has-bg.lg-on .fb-area{
+  background: rgba(255,255,255,.14) !important;
+  border-color: rgba(255,255,255,.30) !important;
+  color: #fff !important;
+}
+html.has-bg.lg-on .fb-input::placeholder,
+html.has-bg.lg-on .fb-area::placeholder{ color: rgba(255,255,255,.5) !important }
+html.has-bg.lg-on .fb-input:focus,
+html.has-bg.lg-on .fb-area:focus{
+  background: rgba(255,255,255,.22) !important;
+  border-color: rgba(180,215,255,.9) !important;
+  box-shadow: 0 0 0 3px rgba(137,194,255,.25) !important;
+}
+html.has-bg.lg-on .ct-ico svg{ filter: drop-shadow(0 1px 6px rgba(0,0,0,.45)) }
+
+/* 抽屉里的玻璃：内容区保持可读，只让外框透 */
+html.has-bg.lg-on .dw{ background: rgba(20,28,44,.42) !important }
+html.has-bg.lg-on .dw-title,
+html.has-bg.lg-on .dw-tab{ color: rgba(255,255,255,.92) !important }
+html.has-bg.lg-on .dw-tab.on{ color:#fff !important; background: rgba(255,255,255,.16) !important }
+html.has-bg.lg-on .dw-close{
+  background: rgba(255,255,255,.14) !important;
+  border-color: rgba(255,255,255,.3) !important;
+  color:#fff !important;
+}
+html.has-bg.lg-on .dw-sec-h{ color: rgba(255,255,255,.62) !important }
+html.has-bg.lg-on .dw-sec-h::after{ background: linear-gradient(90deg,rgba(255,255,255,.24),transparent) !important }
+html.has-bg.lg-on .dw-btn,
+html.has-bg.lg-on .dw-mini{
+  background: rgba(255,255,255,.12) !important;
+  border-color: rgba(255,255,255,.26) !important;
+  color: rgba(255,255,255,.92) !important;
+}
+html.has-bg.lg-on .dw-hint{ color: rgba(255,255,255,.6) !important }
+html.has-bg.lg-on .dw-lib-empty{
+  background: rgba(255,255,255,.06) !important;
+  border-color: rgba(255,255,255,.18) !important;
+  color: rgba(255,255,255,.62) !important;
+}
+html.has-bg.lg-on .dw-prev{ background: rgba(255,255,255,.08) !important; border-color: rgba(255,255,255,.2) !important }
+
+/* 液态玻璃开关行 */
+.dw-lg-row{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:10px 12px; margin-top:10px; border-radius:12px;
+  background: rgba(137,194,255,.10); border:1px solid rgba(140,185,225,.35);
+}
+.dw-lg-row .t{ font-size:12px; font-weight:700; color:var(--ink2) }
+.dw-lg-row .s{ font-size:10px; color:var(--ink3); margin-top:2px }
+
+/* 快捷键设置 */
+.dw-keys{ margin-top:8px }
+.dw-key-row{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:7px 0; border-bottom:1px solid rgba(213,233,251,.6);
+}
+.dw-key-row:last-child{ border-bottom:0 }
+.dw-key-name{ font-size:11.5px; color:var(--ink2); font-weight:600 }
+.dw-key-btn{
+  min-width:40px; padding:5px 9px; border-radius:8px; cursor:pointer;
+  font:800 11px/1 inherit; font-family:inherit;
+  border:1.5px solid var(--line); background:#fff; color:var(--accent-deep);
+  transition:all .18s ease;
+}
+.dw-key-btn:hover{ border-color:#5aa3ee }
+.dw-key-btn.capturing{
+  border-color:#e0566d; background:#fdecec; color:#c0392b;
+  animation: keyBlink .9s ease infinite;
+}
+@keyframes keyBlink{ 50%{ opacity:.5 } }
+html.has-bg.lg-on .dw-key-name{ color: rgba(255,255,255,.82) !important }
+html.has-bg.lg-on .dw-key-btn{
+  background: rgba(255,255,255,.14) !important;
+  border-color: rgba(255,255,255,.3) !important;
+  color:#fff !important;
+}
+html.has-bg.lg-on .dw-key-row{ border-bottom-color: rgba(255,255,255,.12) !important }
+
+</style>
 </head>
 <body>
 <canvas id="starField" aria-hidden="true"></canvas>
@@ -6903,6 +7078,293 @@ window.__checkSecretZone = checkSecretZone;
     info: function () {
       return { cores: cores, mem: mem, degraded: degraded, perfLow: html.classList.contains('perf-low') };
     }
+  };
+})();
+</script>
+<!-- st-glass2 -->
+<script>
+/* ═══════════ 液态玻璃 + 配色快捷键 ═══════════ */
+(function () {
+  'use strict';
+  var html = document.documentElement;
+  var LS_LG = 'startian_lg_v1';
+  var LS_KEYS = 'startian_keys_v2';
+
+  /* ---------- 开关状态 ---------- */
+  var lgOn = true;
+  try { if (localStorage.getItem(LS_LG) === '0') lgOn = false; } catch (e) {}
+
+  /* ============================================================
+     液态玻璃：算法移植自 nikdelvin/liquid-glass (MIT)
+     1) 生成一张「位移贴图」SVG：中间纯灰=无位移，边缘用 R/G 通道梯度产生折射方向
+     2) 生成 filter：feImage 载入贴图 → feDisplacementMap(R→X, G→Y) → 三通道分别位移 → screen 混合出色差
+     3) 通过 backdrop-filter: url(dataURL#displace) 应用到元素背后的内容
+     ============================================================ */
+  function dispMap(w, h, r, depth) {
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(
+      '<svg height="' + h + '" width="' + w + '" viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg">' +
+      '<style>.mix{mix-blend-mode:screen}</style>' +
+      '<defs>' +
+      '<linearGradient id="Y" x1="0" x2="0" y1="' + Math.ceil((r / h) * 15) + '%" y2="' + Math.floor(100 - (r / h) * 15) + '%">' +
+      '<stop offset="0%" stop-color="#0F0"/><stop offset="100%" stop-color="#000"/></linearGradient>' +
+      '<linearGradient id="X" x1="' + Math.ceil((r / w) * 15) + '%" x2="' + Math.floor(100 - (r / w) * 15) + '%" y1="0" y2="0">' +
+      '<stop offset="0%" stop-color="#F00"/><stop offset="100%" stop-color="#000"/></linearGradient>' +
+      '</defs>' +
+      '<rect x="0" y="0" height="' + h + '" width="' + w + '" fill="#808080"/>' +
+      '<g filter="blur(2px)">' +
+      '<rect x="0" y="0" height="' + h + '" width="' + w + '" fill="#000080"/>' +
+      '<rect x="0" y="0" height="' + h + '" width="' + w + '" fill="url(#Y)" class="mix"/>' +
+      '<rect x="0" y="0" height="' + h + '" width="' + w + '" fill="url(#X)" class="mix"/>' +
+      '<rect x="' + depth + '" y="' + depth + '" height="' + (h - 2 * depth) + '" width="' + (w - 2 * depth) +
+      '" fill="#808080" rx="' + r + '" ry="' + r + '" filter="blur(' + depth + 'px)"/>' +
+      '</g></svg>');
+  }
+
+  function dispFilter(w, h, r, depth, strength, cab) {
+    var map = dispMap(w, h, r, depth);
+    var CM_R = '1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0';
+    var CM_G = '0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0';
+    var CM_B = '0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0';
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(
+      '<svg height="' + h + '" width="' + w + '" viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg">' +
+      '<defs><filter id="displace" color-interpolation-filters="sRGB">' +
+      '<feImage x="0" y="0" height="' + h + '" width="' + w + '" href="' + map + '" result="displacementMap"/>' +
+      '<feDisplacementMap transform-origin="center" in="SourceGraphic" in2="displacementMap" scale="' +
+        (strength + cab * 2) + '" xChannelSelector="R" yChannelSelector="G"/>' +
+      '<feColorMatrix type="matrix" values="' + CM_R + '" result="displacedR"/>' +
+      '<feDisplacementMap in="SourceGraphic" in2="displacementMap" scale="' + (strength + cab) +
+        '" xChannelSelector="R" yChannelSelector="G"/>' +
+      '<feColorMatrix type="matrix" values="' + CM_G + '" result="displacedG"/>' +
+      '<feDisplacementMap in="SourceGraphic" in2="displacementMap" scale="' + strength +
+        '" xChannelSelector="R" yChannelSelector="G"/>' +
+      '<feColorMatrix type="matrix" values="' + CM_B + '" result="displacedB"/>' +
+      '<feBlend in="displacedR" in2="displacedG" mode="screen"/>' +
+      '<feBlend in2="displacedB" mode="screen"/>' +
+      '</filter></defs></svg>') + '#displace';
+  }
+
+  /* 哪些元素用液态玻璃 —— 只挑单层、文字少的容器，避免一页几十个 filter 拖垮性能 */
+  var SEL = '.fb, .ct, .tile, .dw';
+  var rafId = null, lastHasBg = html.classList.contains('has-bg');
+
+  function clearGlass() {
+    var els = document.querySelectorAll(SEL);
+    for (var i = 0; i < els.length; i++) {
+      els[i].style.backdropFilter = '';
+      els[i].style.webkitBackdropFilter = '';
+    }
+    html.classList.remove('lg-on');
+  }
+
+  function applyGlass() {
+    // 三个条件缺一不可：开关开、有壁纸、非低端降级
+    if (!lgOn || !html.classList.contains('has-bg') || html.classList.contains('perf-low')) {
+      clearGlass();
+      return;
+    }
+    html.classList.add('lg-on');
+    var els = document.querySelectorAll(SEL);
+    var vh = window.innerHeight || 800;
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      // 抽屉关闭时不浪费算力
+      if (el.classList.contains('dw') && !el.classList.contains('on')) {
+        el.style.backdropFilter = '';
+        el.style.webkitBackdropFilter = '';
+        continue;
+      }
+      var rect = el.getBoundingClientRect();
+      // 视口外（上下各留 250px 余量）不生成 filter —— SVG 位移滤镜很贵，不能全页铺
+      if (rect.bottom < -250 || rect.top > vh + 250) {
+        el.style.backdropFilter = '';
+        el.style.webkitBackdropFilter = '';
+        continue;
+      }
+      var w = Math.round(rect.width), h = Math.round(rect.height);
+      if (w < 60 || h < 40) continue;
+      var cs = getComputedStyle(el);
+      var rad = parseFloat(cs.borderTopLeftRadius) || 16;
+      var depth = Math.max(6, Math.min(18, Math.round(rad * 0.55)));
+      var url = dispFilter(w, h, rad, depth, 100, 2);
+      var css = 'url("' + url + '") blur(2px) saturate(1.5)';
+      el.style.backdropFilter = css;
+      el.style.webkitBackdropFilter = css;
+    }
+  }
+
+  function schedule() {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(function () { rafId = null; applyGlass(); });
+  }
+
+  /* 只在 has-bg 真正变化时才重算，避免自己加 lg-on 触发循环 */
+  new MutationObserver(function () {
+    var cur = html.classList.contains('has-bg');
+    if (cur !== lastHasBg) { lastHasBg = cur; schedule(); }
+  }).observe(html, { attributes: true, attributeFilter: ['class'] });
+
+  var rzT = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(rzT);
+    rzT = setTimeout(schedule, 260);
+  });
+
+  // 滚动时按新视口重新分配（debounce 350ms，避免滚动过程中反复生成滤镜）
+  var scT = null;
+  window.addEventListener('scroll', function () {
+    if (!html.classList.contains('lg-on')) return;
+    clearTimeout(scT);
+    scT = setTimeout(schedule, 350);
+  }, { passive: true });
+
+  /* ---------- 配色快捷键 ---------- */
+  var KEYDEF = [
+    { mode: 'auto',     name: '自动切换' },
+    { mode: 'light',    name: '蓝白' },
+    { mode: 'dark',     name: '暗红' },
+    { mode: 'purple',   name: '梦幻紫' },
+    { mode: 'fresh',    name: '清新绿' },
+    { mode: 'warm',     name: '温馨粉' },
+    { mode: 'colorful', name: '缤纷彩' },
+    { mode: 'custom',   name: '自定义' }
+  ];
+  var keys = {};
+  KEYDEF.forEach(function (k, i) { keys[k.mode] = String(i); });
+  // 若页面有「星夜」隐藏主题，绑到 8
+  if (document.getElementById('tkStarryBtn')) keys.starry = '8';
+
+  function loadKeys() {
+    try {
+      var v = JSON.parse(localStorage.getItem(LS_KEYS) || 'null');
+      if (v && typeof v === 'object') {
+        for (var m in v) if (m in keys && /^[0-9a-zA-Z]$/.test(v[m])) keys[m] = v[m];
+      }
+    } catch (e) {}
+  }
+  function saveKeys() { try { localStorage.setItem(LS_KEYS, JSON.stringify(keys)); } catch (e) {} }
+
+  function applyMode(mode) {
+    var btn = document.querySelector('#tkSeg button[data-mode="' + mode + '"]');
+    if (btn) { btn.click(); return true; }
+    return false;
+  }
+
+  var capturing = null;   // 正在等待用户按键的 mode
+
+  function renderKeys() {
+    var box = document.getElementById('dwKeys');
+    if (!box) return;
+    var h = '';
+    KEYDEF.forEach(function (k) {
+      h += '<div class="dw-key-row">' +
+        '<span class="dw-key-name">' + k.name + '</span>' +
+        '<button class="dw-key-btn" type="button" data-km="' + k.mode + '">' +
+          (capturing === k.mode ? '按下…' : (keys[k.mode] || '—')) +
+        '</button></div>';
+    });
+    box.innerHTML = h;
+    box.querySelectorAll('[data-km]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var m = b.getAttribute('data-km');
+        capturing = (capturing === m) ? null : m;
+        b.classList.toggle('capturing', capturing === m);
+        renderKeys();
+      });
+    });
+  }
+
+  document.addEventListener('keydown', function (e) {
+    // 输入框里打字不劫持
+    var t = e.target;
+    if (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    // 正在捕获新按键
+    if (capturing) {
+      if (e.key === 'Escape') { capturing = null; renderKeys(); return; }
+      if (!/^[0-9a-zA-Z]$/.test(e.key)) return;
+      var cur = capturing;
+      // 如果这个键已被别的模式占用，先解绑
+      for (var m in keys) { if (keys[m] === e.key && m !== cur) delete keys[m]; }
+      keys[cur] = e.key;
+      capturing = null;
+      saveKeys(); renderKeys();
+      e.preventDefault();
+      return;
+    }
+
+    // 正常切换
+    for (var mode in keys) {
+      if (keys[mode] === e.key) {
+        if (applyMode(mode)) {
+          e.preventDefault();
+          // 给个轻提示
+          var b = document.querySelector('.dw-tab[data-tab="theme"]');
+          if (b && !document.getElementById('dw').classList.contains('on')) {
+            var hintEl = document.getElementById('dwHint');
+            if (hintEl) { hintEl.textContent = '已切换到「' + mode + '」'; hintEl.className = 'dw-hint ok'; }
+          }
+        }
+        return;
+      }
+    }
+  });
+
+  /* ---------- 开关 UI ---------- */
+  function mountUI() {
+    var pane = document.getElementById('dwTheme');
+    if (!pane || document.getElementById('dwKeysSec')) return;
+    var wrapEl = document.createElement('div');
+    wrapEl.innerHTML = "\n      <div class=\"dw-sec\" id=\"dwKeysSec\" style=\"margin-top:18px\">\n        <div class=\"dw-sec-h\">液态玻璃</div>\n        <div class=\"dw-lg-row\">\n          <div>\n            <div class=\"t\">自定义壁纸时启用</div>\n            <div class=\"s\">用折射玻璃代替模糊，透出壁纸而不是挡住它</div>\n          </div>\n          <button class=\"dw-sw\" type=\"button\" id=\"dwLgSw\" aria-label=\"液态玻璃开关\"></button>\n        </div>\n        <div class=\"dw-sec-h\" style=\"margin-top:16px\">配色快捷键</div>\n        <div class=\"dw-keys\" id=\"dwKeys\"></div>\n        <div class=\"dw-hint\">按下对应数字键即可切换配色 · 点右边的按钮可重绑</div>\n      </div>\n";
+    pane.appendChild(wrapEl);
+
+    var sw = document.getElementById('dwLgSw');
+    if (sw) {
+      sw.classList.toggle('on', lgOn);
+      sw.addEventListener('click', function () {
+        lgOn = !lgOn;
+        sw.classList.toggle('on', lgOn);
+        try { localStorage.setItem(LS_LG, lgOn ? '1' : '0'); } catch (e) {}
+        schedule();
+      });
+    }
+    renderKeys();
+  }
+
+  /* ---------- 启动 ---------- */
+  loadKeys();
+  // 抽屉内容可能稍后才挂载（drawer 补丁会搬 tkPanel），轮询几次
+  var tries = 0;
+  (function waitMount() {
+    mountUI();
+    if (!document.getElementById('dwKeysSec') && tries++ < 20) setTimeout(waitMount, 300);
+  })();
+  setTimeout(schedule, 900);
+
+  /* 兜底：壁纸可能在 observer 建立前就已恢复（IndexedDB 自动加载），
+     用轻量轮询保证状态变化一定能被捕捉到 */
+  var lastState = '';
+  setInterval(function () {
+    var s = (lgOn ? 1 : 0) + '|' +
+            (html.classList.contains('has-bg') ? 1 : 0) + '|' +
+            (html.classList.contains('perf-low') ? 1 : 0) + '|' +
+            (html.classList.contains('lg-on') ? 1 : 0);
+    if (s !== lastState) { lastState = s; schedule(); }
+  }, 1500);
+
+  window.LG = {
+    isOn: function () { return lgOn; },
+    setOn: function (v) {
+      lgOn = !!v;
+      try { localStorage.setItem(LS_LG, lgOn ? '1' : '0'); } catch (e) {}
+      var sw = document.getElementById('dwLgSw');
+      if (sw) sw.classList.toggle('on', lgOn);
+      schedule();
+    },
+    refresh: schedule,
+    keys: function () { return Object.assign({}, keys); },
+    setKey: function (mode, k) { keys[mode] = k; saveKeys(); renderKeys(); },
+    apply: applyMode
   };
 })();
 </script>
