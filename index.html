@@ -1329,9 +1329,9 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
 </style>
 <style>
 
-/* ═══════════════════ 外观抽屉 P1 ═══════════════════ */
+/* ═══════════════════ 外观抽屉 P1+P2 ═══════════════════ */
 
-/* 背景渲染层（抽屉控制） */
+/* 背景渲染层 */
 .st-bg-wrap{
   position:fixed; inset:0; z-index:-2; pointer-events:none; overflow:hidden;
   background-size:cover; background-position:center; background-repeat:no-repeat;
@@ -1345,7 +1345,6 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
 }
 .st-bg-wrap.is-video video{ display:block }
 .st-bg-wrap.is-video{ background-image:none !important }
-/* 暗化遮罩：强度由 --dw-dim 控制 */
 .st-bg-wrap::after{
   content:''; position:absolute; inset:0; pointer-events:none;
   background:linear-gradient(180deg,rgba(6,16,30,.62) 0%,rgba(6,16,30,.42) 28%,rgba(6,16,30,.72) 100%);
@@ -1355,7 +1354,7 @@ html.has-bg body{ background:#0d1a2a }
 html.has-bg .blob{ opacity:.10 }
 html.has-bg ::selection{ background:rgba(255,255,255,.3) }
 
-/* 文字自适应（深底时提亮「卡片外」裸文字；卡片内一律不碰） */
+/* 文字自适应：只提亮卡片外的裸文字 */
 html.has-bg.bg-dark .hero h1{
   background-image:linear-gradient(110deg,#ffffff 18%,#a9d2ff 40%,#eaf5ff 52%,#ffffff 74%);
   filter:drop-shadow(0 2px 16px rgba(0,0,0,.6)) drop-shadow(0 1px 2px rgba(0,0,0,.42));
@@ -1383,7 +1382,7 @@ html.has-bg.bg-dark .btn-g{
   background:rgba(255,255,255,.94) !important; border-color:rgba(255,255,255,.9) !important; color:#1f3c5e !important;
 }
 
-/* ── 抽屉遮罩 ── */
+/* 抽屉遮罩 */
 .dw-mask{
   position:fixed; inset:0; z-index:88; background:rgba(10,22,38,.34);
   -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
@@ -1391,7 +1390,7 @@ html.has-bg.bg-dark .btn-g{
 }
 .dw-mask.on{ opacity:1; pointer-events:auto }
 
-/* ── 抽屉本体 ── */
+/* 抽屉 */
 .dw{
   position:fixed; top:0; right:0; bottom:0; z-index:90; width:404px; max-width:100vw;
   display:flex; flex-direction:column;
@@ -1435,7 +1434,6 @@ html.has-bg.bg-dark .btn-g{
 .dw-pane.on{ display:block }
 @keyframes dwIn{ from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
 
-/* 抽屉里的分组 */
 .dw-sec{ margin-bottom:22px }
 .dw-sec:last-child{ margin-bottom:4px }
 .dw-sec-h{
@@ -1443,8 +1441,9 @@ html.has-bg.bg-dark .btn-g{
   margin-bottom:10px; display:flex; align-items:center; gap:7px;
 }
 .dw-sec-h::after{ content:''; flex:1; height:1px; background:linear-gradient(90deg,var(--line),transparent) }
+.dw-sec-h .dw-mini{ margin-left:auto; flex:0 0 auto }
 
-/* 当前壁纸预览 */
+/* 预览 */
 .dw-prev{
   position:relative; width:100%; aspect-ratio:16/9; border-radius:14px; overflow:hidden;
   background:linear-gradient(135deg,#eaf6ff,#d8ecff); border:1px solid var(--line);
@@ -1517,25 +1516,79 @@ input[type=range].dwp-r::-moz-range-thumb{
 .dw-sw.on{ background:var(--accent-deep) }
 .dw-sw.on::after{ transform:translateX(18px) }
 
-/* 壁纸库（P1 简化） */
+/* 壁纸库网格 */
+.dw-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px }
+.dw-card{
+  position:relative; border-radius:13px; overflow:hidden; background:#fff;
+  border:1.5px solid var(--line); cursor:pointer; transition:all .22s var(--ease);
+}
+.dw-card:hover{ transform:translateY(-2px); border-color:#a6d1f8; box-shadow:0 8px 22px rgba(60,120,190,.16) }
+.dw-card.on{ border-color:var(--accent-deep); box-shadow:0 0 0 2.5px rgba(63,134,209,.22) }
+.dw-card-thumb{ position:relative; width:100%; aspect-ratio:16/10; background:linear-gradient(135deg,#eaf6ff,#d8ecff) }
+.dw-card-thumb img,.dw-card-thumb video{ width:100%; height:100%; object-fit:cover; display:block }
+.dw-card-thumb .tag{
+  position:absolute; left:7px; top:7px; padding:2px 7px; border-radius:999px;
+  font-size:9.5px; font-weight:800; color:#fff; letter-spacing:.3px;
+  background:rgba(20,50,90,.6); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+}
+.dw-card-thumb .hdl{
+  position:absolute; right:7px; top:7px; padding:2px 6px; border-radius:999px;
+  font-size:9px; font-weight:800; color:#2f6ba8; background:rgba(255,255,255,.86);
+}
+.dw-card-body{ padding:7px 9px 8px }
+.dw-card-name{
+  font-size:11.5px; font-weight:700; color:var(--ink);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.dw-card-sub{ font-size:9.5px; color:var(--ink3); margin-top:2px }
+.dw-card-del{
+  position:absolute; right:6px; bottom:6px; width:22px; height:22px; border-radius:50%;
+  border:0; background:rgba(255,255,255,.9); color:#c0392b; font-size:13px; line-height:1;
+  cursor:pointer; display:grid; place-items:center; opacity:0; transition:opacity .2s ease;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+.dw-card:hover .dw-card-del{ opacity:1 }
+.dw-card.current::before{
+  content:'使用中'; position:absolute; z-index:3; right:6px; bottom:6px;
+  padding:2px 8px; border-radius:999px; font-size:9.5px; font-weight:800;
+  color:#fff; background:var(--accent-deep);
+}
+.dw-card.current .dw-card-del{ display:none }
+
+/* 配额条 */
+.dw-quota{ margin-bottom:12px }
+.dw-quota-bar{
+  height:5px; border-radius:3px; background:rgba(190,215,240,.5); overflow:hidden; margin-bottom:5px;
+}
+.dw-quota-bar i{
+  display:block; height:100%; border-radius:3px; background:linear-gradient(90deg,#89c2ff,#5aa3ee);
+  transition:width .4s ease;
+}
+.dw-quota-bar.warn i{ background:linear-gradient(90deg,#ffb347,#ff8c42) }
+.dw-quota-txt{ font-size:10.5px; color:var(--ink3); font-variant-numeric:tabular-nums }
+
+/* 定时切换设置 */
+.dw-set{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:11px }
+.dw-set-l{ font-size:12px; font-weight:700; color:var(--ink2) }
+.dw-sel{
+  padding:7px 10px; border-radius:9px; font:700 11.5px/1 inherit; font-family:inherit;
+  border:1px solid var(--line); background:#fff; color:var(--ink2); cursor:pointer;
+}
+.dw-time-row{ display:grid; grid-template-columns:1fr 1fr; gap:8px }
+.dw-time-row label{ font-size:10.5px; color:var(--ink3); display:flex; flex-direction:column; gap:4px }
+.dw-time-row input[type=time]{
+  padding:7px 9px; border-radius:9px; border:1px solid var(--line); background:#fff;
+  font:700 12px/1 inherit; font-family:inherit; color:var(--ink2);
+}
+
+/* 空态 */
 .dw-lib-empty{
-  padding:34px 20px; text-align:center; border-radius:14px;
+  padding:30px 20px; text-align:center; border-radius:14px;
   background:rgba(240,249,255,.7); border:1px dashed var(--line); color:var(--ink3);
   font-size:12.5px; line-height:1.9;
 }
-.dw-lib-card{
-  display:flex; gap:11px; align-items:center; padding:11px; border-radius:13px;
-  background:#fff; border:1px solid var(--line); margin-bottom:9px;
-}
-.dw-lib-thumb{
-  width:78px; height:46px; border-radius:8px; overflow:hidden; flex:0 0 auto;
-  background:linear-gradient(135deg,#eaf6ff,#d8ecff); position:relative;
-}
-.dw-lib-thumb img,.dw-lib-thumb video{ width:100%; height:100%; object-fit:cover; display:block }
-.dw-lib-meta{ flex:1; min-width:0 }
-.dw-lib-name{ font-size:12.5px; font-weight:800; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-.dw-lib-sub{ font-size:10.5px; color:var(--ink3); margin-top:3px }
-.dw-lib-act{ display:flex; flex-direction:column; gap:5px }
+
+/* 小按钮 */
 .dw-mini{
   padding:5px 9px; border-radius:8px; font:700 10.5px/1 inherit; font-family:inherit; cursor:pointer;
   border:1px solid var(--line); background:#f8fcff; color:var(--ink2); transition:all .18s ease;
@@ -1543,7 +1596,7 @@ input[type=range].dwp-r::-moz-range-thumb{
 .dw-mini:hover{ background:#eef7ff; border-color:#a6d1f8; color:var(--accent-deep) }
 .dw-mini.danger:hover{ background:#fdecec; border-color:#f0b8b8; color:#c0392b }
 
-/* 配色 Tab：把原 tk-panel 摆平成普通内容 */
+/* 配色 Tab：把原 tk-panel 摆平 */
 .dw-pane[data-pane="theme"] .tk-panel{
   position:static !important; width:auto !important; max-width:none !important;
   opacity:1 !important; transform:none !important; pointer-events:auto !important;
@@ -1557,14 +1610,11 @@ input[type=range].dwp-r::-moz-range-thumb{
   content:''; display:block; height:1px; margin-top:8px;
   background:linear-gradient(90deg,var(--line),transparent);
 }
-
-/* 主题面板按钮样式在抽屉里的补充 */
 .dw-pane[data-pane="theme"] .tk-custom{ margin-top:12px }
 
-/* 顶栏主题按钮 ---- 保持原样，只是改为打开抽屉 */
 html.dw-open{ overflow:hidden }
 
-/* 深色主题下的抽屉 */
+/* 深色主题 */
 html[data-theme="dark"] .dw,
 html[data-theme="purple"] .dw,
 html[data-theme="starry"] .dw{
@@ -1595,27 +1645,38 @@ html[data-theme="starry"] .dw-sec-h{ color:#9c8fa9 }
 html[data-theme="dark"] .dw-btn,
 html[data-theme="purple"] .dw-btn,
 html[data-theme="starry"] .dw-btn{ background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.14); color:#d8cfe4 }
-html[data-theme="dark"] .dw-lib-card,
-html[data-theme="purple"] .dw-lib-card,
-html[data-theme="starry"] .dw-lib-card{ background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.09) }
-html[data-theme="dark"] .dw-lib-name,
-html[data-theme="purple"] .dw-lib-name,
-html[data-theme="starry"] .dw-lib-name{ color:#eee6f5 }
+html[data-theme="dark"] .dw-card,
+html[data-theme="purple"] .dw-card,
+html[data-theme="starry"] .dw-card{ background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.09) }
+html[data-theme="dark"] .dw-card-name,
+html[data-theme="purple"] .dw-card-name,
+html[data-theme="starry"] .dw-card-name{ color:#eee6f5 }
 html[data-theme="dark"] .dw-mini,
 html[data-theme="purple"] .dw-mini,
 html[data-theme="starry"] .dw-mini{ background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.12); color:#cfc5db }
+html[data-theme="dark"] .dw-sel,
+html[data-theme="purple"] .dw-sel,
+html[data-theme="starry"] .dw-sel,
+html[data-theme="dark"] .dw-time-row input,
+html[data-theme="purple"] .dw-time-row input,
+html[data-theme="starry"] .dw-time-row input{ background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.14); color:#d8cfe4 }
 html[data-theme="dark"] .dw-prev,
 html[data-theme="purple"] .dw-prev,
 html[data-theme="starry"] .dw-prev{ background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.1) }
+html[data-theme="dark"] .dw-set-l,
+html[data-theme="purple"] .dw-set-l,
+html[data-theme="starry"] .dw-set-l{ color:#c3b9d0 }
+html[data-theme="dark"] .dw-quota-txt,
+html[data-theme="purple"] .dw-quota-txt,
+html[data-theme="starry"] .dw-quota-txt{ color:#9c8fa9 }
 
-/* 窄屏：抽屉全屏 */
 @media (max-width:640px){
   .dw{ width:100%; border-left:0 }
   .dw-body{ padding:14px 16px 30px }
   .dwp-l{ width:56px }
 }
 @media (prefers-reduced-motion:reduce){
-  .dw, .dw-mask, .st-bg-wrap, .dw-pane{ transition:none !important; animation:none !important }
+  .dw, .dw-mask, .st-bg-wrap, .dw-pane, .dw-card{ transition:none !important; animation:none !important }
 }
 
 </style>
@@ -5285,7 +5346,7 @@ window.__checkSecretZone = checkSecretZone;
 })();
 </script>
 
-<!-- st-drawer-p1 -->
+<!-- st-drawer-p2 -->
 <div class="st-bg-wrap" id="stBg" aria-hidden="true"><video id="stBgVideo" muted loop playsinline preload="auto"></video></div>
 
 <div class="dw-mask" id="dwMask"></div>
@@ -5327,20 +5388,63 @@ window.__checkSecretZone = checkSecretZone;
           <label class="dw-btn" for="dwIn">导入 JSON</label>
           <input type="file" id="dwIn" accept=".json,application/json" hidden>
         </div>
-        <div class="dw-hint" id="dwPresetHint">调好后可以把参数存成预设，换壁纸时一键套用</div>
+        <div class="dw-hint" id="dwPresetHint">与壁纸引擎的 properties 同构，换壁纸时一键套用</div>
       </div>
     </div>
 
     <div class="dw-pane" data-pane="lib">
       <div class="dw-sec">
-        <div class="dw-sec-h">壁纸库</div>
-        <div id="dwLib"></div>
+        <div class="dw-sec-h">存储<span class="dw-mini" id="dwQuotaRefresh" style="margin-left:auto">刷新</span></div>
+        <div class="dw-quota">
+          <div class="dw-quota-bar" id="dwQuotaBar"><i style="width:0%"></i></div>
+          <div class="dw-quota-txt" id="dwQuotaTxt">计算中…</div>
+        </div>
       </div>
+
+      <div class="dw-sec">
+        <div class="dw-sec-h">壁纸库<span class="dw-mini" id="dwCount" style="margin-left:auto">0 张</span></div>
+        <div class="dw-grid" id="dwGrid"></div>
+      </div>
+
+      <div class="dw-sec">
+        <div class="dw-sec-h">定时切换</div>
+        <div class="dw-set">
+          <span class="dw-set-l">启用</span>
+          <button class="dw-sw" type="button" id="dwRotOn" aria-label="启用定时切换"></button>
+        </div>
+        <div class="dw-set">
+          <span class="dw-set-l">间隔</span>
+          <select class="dw-sel" id="dwRotEvery">
+            <option value="30">30 分钟</option>
+            <option value="60" selected>1 小时</option>
+            <option value="180">3 小时</option>
+            <option value="360">6 小时</option>
+            <option value="1440">每天</option>
+          </select>
+        </div>
+        <div class="dw-set">
+          <span class="dw-set-l">顺序</span>
+          <select class="dw-sel" id="dwRotOrder">
+            <option value="seq" selected>按添加顺序</option>
+            <option value="rand">随机</option>
+          </select>
+        </div>
+        <div class="dw-set">
+          <span class="dw-set-l">只在此时段</span>
+          <button class="dw-sw" type="button" id="dwRotRange" aria-label="只在指定时段切换"></button>
+        </div>
+        <div class="dw-time-row" id="dwRotTimes" style="display:none">
+          <label>开始<input type="time" id="dwRotFrom" value="08:00"></label>
+          <label>结束<input type="time" id="dwRotTo" value="22:00"></label>
+        </div>
+        <div class="dw-hint" id="dwRotHint">页面关闭时不会触发切换，这是浏览器的限制</div>
+      </div>
+
       <div class="dw-sec">
         <div class="dw-sec-h">导入</div>
         <div class="dw-lib-empty">
-          一键导入壁纸引擎（Wallpaper Engine）壁纸<br>
-          <span style="font-size:11px;opacity:.75">P3 阶段开放，届时可扫描你的 Steam 壁纸目录</span>
+          一键导入壁纸引擎（Wallpaper Engine）<br>
+          <span style="font-size:11px;opacity:.75">P3 阶段开放，可扫描你的 Steam 壁纸目录</span>
         </div>
       </div>
     </div>
@@ -5348,11 +5452,10 @@ window.__checkSecretZone = checkSecretZone;
 </aside>
 
 <script>
-/* ═══════════ 外观抽屉 P1 ═══════════ */
+/* ═══════════ 外观抽屉 P1+P2 ═══════════ */
 (function () {
   'use strict';
 
-  /* ---------- 配置模型（与 WE project.json 的 properties 同构） ---------- */
   var DEFAULT = {
     scale: 1, posX: 50, posY: 50, speed: 1,
     brightness: 1, contrast: 1, saturate: 1, blur: 0,
@@ -5370,100 +5473,109 @@ window.__checkSecretZone = checkSecretZone;
     { k: 'dim',        t: '暗化遮罩', min: 0,    max: 0.8, step: 0.02, unit: '' },
     { k: 'volume',     t: '音量',     min: 0,    max: 1,   step: 0.05, unit: '' }
   ];
+  var LS_ACTIVE = 'startian_wall_active_v1';
   var LS_CFG = 'startian_wall_cfg_v1';
-  var LS_CUR = 'startian_wall_cur_v1';
-  var DB = 'startian_wall_p1', STORE = 'media', KEY = 'cur';
+  var LS_ROT = 'startian_wall_rot_v1';
+  var DB = 'startian_wall_v2', STORE = 'items';
+  var MAX_BLOB = 120 * 1024 * 1024;   // 单文件上限
 
+  var $ = function (id) { return document.getElementById(id); };
   var html = document.documentElement;
-  var dw = document.getElementById('dw');
-  var mask = document.getElementById('dwMask');
-  var closeBtn = document.getElementById('dwClose');
-  var body = document.getElementById('dwBody');
+  var dw = $('dw'), mask = $('dwMask'), closeBtn = $('dwClose'), dwBody = $('dwBody');
   var tabs = document.querySelectorAll('.dw-tab');
   var panes = document.querySelectorAll('.dw-pane');
-  var wrap = document.getElementById('stBg');
-  var video = document.getElementById('stBgVideo');
-  var prev = document.getElementById('dwPrev');
-  var fileIn = document.getElementById('dwFile');
-  var hint = document.getElementById('dwHint');
-  var presetHint = document.getElementById('dwPresetHint');
-  var pauseBtn = document.getElementById('dwPause');
-  var clearBtn = document.getElementById('dwClear');
-  var propsBox = document.getElementById('dwProps');
-  var libBox = document.getElementById('dwLib');
-  var outBtn = document.getElementById('dwOut');
-  var inBtn = document.getElementById('dwIn');
+  var wrap = $('stBg'), video = $('stBgVideo');
+  var prev = $('dwPrev'), fileIn = $('dwFile'), hint = $('dwHint'), presetHint = $('dwPresetHint');
+  var pauseBtn = $('dwPause'), clearBtn = $('dwClear');
+  var propsBox = $('dwProps'), outBtn = $('dwOut'), inBtn = $('dwIn');
+  var grid = $('dwGrid'), countEl = $('dwCount');
+  var quotaBar = $('dwQuotaBar'), quotaTxt = $('dwQuotaTxt'), quotaRefresh = $('dwQuotaRefresh');
+  var rotOn = $('dwRotOn'), rotEvery = $('dwRotEvery'), rotOrder = $('dwRotOrder');
+  var rotRange = $('dwRotRange'), rotTimes = $('dwRotTimes');
+  var rotFrom = $('dwRotFrom'), rotTo = $('dwRotTo'), rotHint = $('dwRotHint');
 
   if (!dw || !wrap) return;
 
   var cfg = Object.assign({}, DEFAULT);
-  var curMedia = null;   // { type:'image'|'video', name, w, h, size }
+  var items = [];          // 壁纸库
+  var activeId = null;
   var curURL = null;
+  var curItem = null;
+  var rot = { on: false, every: 60, order: 'seq', range: false, from: '08:00', to: '22:00', last: 0 };
 
-  /* ---------- 工具 ---------- */
+  /* ───────── 工具 ───────── */
   function say(el, msg, kind) {
     if (!el) return;
     el.textContent = msg || '';
-    el.className = (el === presetHint ? 'dw-hint' : 'dw-hint') + (kind ? ' ' + kind : '');
+    el.className = 'dw-hint' + (kind ? ' ' + kind : '');
   }
   function fmtSize(b) {
-    if (b < 1024 * 1024) return Math.round(b / 1024) + ' KB';
-    return (b / 1024 / 1024).toFixed(1) + ' MB';
+    if (!b && b !== 0) return '-';
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(0) + ' KB';
+    if (b < 1024 * 1024 * 1024) return (b / 1024 / 1024).toFixed(1) + ' MB';
+    return (b / 1024 / 1024 / 1024).toFixed(2) + ' GB';
   }
+  function uid() { return 'w_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
-  /* ---------- IndexedDB（P1：只存当前壁纸） ---------- */
+  /* ───────── IndexedDB ───────── */
   function openDB() {
     return new Promise(function (res, rej) {
       if (!window.indexedDB) return rej(new Error('no-idb'));
       var r = indexedDB.open(DB, 1);
       r.onupgradeneeded = function () {
         var d = r.result;
-        if (!d.objectStoreNames.contains(STORE)) d.createObjectStore(STORE);
+        if (!d.objectStoreNames.contains(STORE)) d.createObjectStore(STORE, { keyPath: 'id' });
       };
       r.onsuccess = function () { res(r.result); };
       r.onerror = function () { rej(r.error || new Error('idb')); };
     });
   }
-  function idbGet() {
+  function idbAll() {
     return openDB().then(function (d) {
       return new Promise(function (res, rej) {
-        var q = d.transaction(STORE, 'readonly').objectStore(STORE).get(KEY);
+        var q = d.transaction(STORE, 'readonly').objectStore(STORE).getAll();
+        q.onsuccess = function () { res(q.result || []); };
+        q.onerror = function () { rej(q.error); };
+      });
+    });
+  }
+  function idbGet(id) {
+    return openDB().then(function (d) {
+      return new Promise(function (res, rej) {
+        var q = d.transaction(STORE, 'readonly').objectStore(STORE).get(id);
         q.onsuccess = function () { res(q.result); };
         q.onerror = function () { rej(q.error); };
       });
     });
   }
-  function idbPut(v) {
+  function idbPut(it) {
     return openDB().then(function (d) {
       return new Promise(function (res, rej) {
-        var q = d.transaction(STORE, 'readwrite').objectStore(STORE).put(v, KEY);
+        var q = d.transaction(STORE, 'readwrite').objectStore(STORE).put(it);
         q.onsuccess = function () { res(true); };
         q.onerror = function () { rej(q.error); };
       });
     });
   }
-  function idbDel() {
+  function idbDel(id) {
     return openDB().then(function (d) {
       return new Promise(function (res) {
-        var q = d.transaction(STORE, 'readwrite').objectStore(STORE).delete(KEY);
+        var q = d.transaction(STORE, 'readwrite').objectStore(STORE).delete(id);
         q.onsuccess = function () { res(true); };
         q.onerror = function () { res(false); };
       });
     });
   }
 
-  /* ---------- 抽屉开合 ---------- */
+  /* ───────── 抽屉 ───────── */
   function openDw(tab) {
-    dw.classList.add('on');
-    mask.classList.add('on');
-    html.classList.add('dw-open');
+    dw.classList.add('on'); mask.classList.add('on'); html.classList.add('dw-open');
     if (tab) switchTab(tab);
-    setTimeout(function () { body.focus && body.focus(); }, 60);
+    refreshQuota();
   }
   function closeDw() {
-    dw.classList.remove('on');
-    mask.classList.remove('on');
-    html.classList.remove('dw-open');
+    dw.classList.remove('on'); mask.classList.remove('on'); html.classList.remove('dw-open');
   }
   function switchTab(name) {
     for (var i = 0; i < tabs.length; i++) {
@@ -5471,10 +5583,8 @@ window.__checkSecretZone = checkSecretZone;
       tabs[i].classList.toggle('on', on);
       tabs[i].setAttribute('aria-selected', on ? 'true' : 'false');
     }
-    for (var j = 0; j < panes.length; j++) {
-      panes[j].classList.toggle('on', panes[j].getAttribute('data-pane') === name);
-    }
-    if (body) body.scrollTop = 0;
+    for (var j = 0; j < panes.length; j++) panes[j].classList.toggle('on', panes[j].getAttribute('data-pane') === name);
+    if (dwBody) dwBody.scrollTop = 0;
   }
   for (var i = 0; i < tabs.length; i++) {
     tabs[i].addEventListener('click', function () { switchTab(this.getAttribute('data-tab')); });
@@ -5485,29 +5595,25 @@ window.__checkSecretZone = checkSecretZone;
     if (e.key === 'Escape' && dw.classList.contains('on')) closeDw();
   });
 
-  /* ---------- 顶栏主题按钮 → 打开抽屉 ---------- */
-  var tkBtn = document.getElementById('tkBtn');
+  /* 顶栏主题按钮 → 抽屉 */
+  var tkBtn = $('tkBtn');
   if (tkBtn) {
     tkBtn.addEventListener('click', function (e) {
-      e.stopImmediatePropagation();
-      e.preventDefault();
+      e.stopImmediatePropagation(); e.preventDefault();
       openDw(dw.classList.contains('on') ? null : 'theme');
     }, true);
   }
-  /* 页面里若有别的入口触发 tkPanel，也可以从控制台调 window.DW.open() */
 
-  /* ---------- 配色 Tab：把原主题面板搬进来 ---------- */
-  (function mountTheme() {
-    var pane = document.getElementById('dwTheme');
-    var panel = document.getElementById('tkPanel');
+  /* 配色 Tab：搬家主题面板 */
+  (function () {
+    var pane = $('dwTheme'), panel = $('tkPanel');
     if (!pane || !panel) return;
     pane.appendChild(panel);
-    // 原面板靠 .open 控制显隐，搬进抽屉后强制可见
     panel.classList.add('open');
     panel.style.display = 'block';
   })();
 
-  /* ---------- 亮度采样 ---------- */
+  /* ───────── 亮度 / 配置 ───────── */
   function lumaOf(target, w, h) {
     try {
       var c = document.createElement('canvas');
@@ -5516,10 +5622,7 @@ window.__checkSecretZone = checkSecretZone;
       x.drawImage(target, 0, 0, 24, 24);
       var d = x.getImageData(0, 0, 24, 24).data;
       var s = 0, n = 0;
-      for (var i = 0; i < d.length; i += 4) {
-        s += (0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]) / 255;
-        n++;
-      }
+      for (var i = 0; i < d.length; i += 4) { s += (0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]) / 255; n++; }
       return n ? s / n : 0.5;
     } catch (e) { return 0.5; }
   }
@@ -5528,16 +5631,18 @@ window.__checkSecretZone = checkSecretZone;
     html.style.setProperty('--bg-luma', (v || 0).toFixed(2));
   }
 
-  /* ---------- 应用配置到渲染层 ---------- */
   function applyCfg() {
-    var f = 'brightness(' + cfg.brightness + ') contrast(' + cfg.contrast +
-            ') saturate(' + cfg.saturate + ')';
+    var f = 'brightness(' + cfg.brightness + ') contrast(' + cfg.contrast + ') saturate(' + cfg.saturate + ')';
     if (cfg.blur > 0) f += ' blur(' + cfg.blur + 'px)';
     wrap.style.filter = f;
-    wrap.style.transform = cfg.scale !== 1 ? 'scale(' + cfg.scale + ')' : '';
     wrap.style.backgroundPosition = cfg.posX + '% ' + cfg.posY + '%';
     wrap.style.setProperty('--dw-dim', cfg.dim);
-    if (curMedia && curMedia.type === 'video') {
+    var dx = (50 - cfg.posX) * 0.5, dy = (50 - cfg.posY) * 0.5;
+    var tf = '';
+    if (cfg.scale !== 1) tf += 'scale(' + cfg.scale + ') ';
+    if (dx || dy) tf += 'translate(' + dx.toFixed(2) + '%, ' + dy.toFixed(2) + '%)';
+    wrap.style.transform = tf.trim();
+    if (curItem && curItem.type === 'video') {
       video.style.objectPosition = cfg.posX + '% ' + cfg.posY + '%';
       try {
         video.playbackRate = cfg.speed;
@@ -5545,62 +5650,42 @@ window.__checkSecretZone = checkSecretZone;
         video.volume = cfg.volume;
       } catch (e) {}
     }
-    // 位置偏移（scale 之后裁切）
-    var dx = (50 - cfg.posX) * 0.5, dy = (50 - cfg.posY) * 0.5;
-    if (dx || dy) {
-      wrap.style.transform = (cfg.scale !== 1 ? 'scale(' + cfg.scale + ') ' : '') +
-        'translate(' + dx.toFixed(2) + '%, ' + dy.toFixed(2) + '%)';
-    }
   }
-
-  function saveCfg() {
-    try { localStorage.setItem(LS_CFG, JSON.stringify(cfg)); } catch (e) {}
-  }
+  function saveCfg() { try { localStorage.setItem(LS_CFG, JSON.stringify(cfg)); } catch (e) {} }
   function loadCfg() {
     try {
       var v = JSON.parse(localStorage.getItem(LS_CFG) || 'null');
-      if (v && typeof v === 'object') {
-        for (var k in DEFAULT) if (k in v && typeof v[k] === typeof DEFAULT[k]) cfg[k] = v[k];
-      }
+      if (v && typeof v === 'object') for (var k in DEFAULT) if (k in v && typeof v[k] === typeof DEFAULT[k]) cfg[k] = v[k];
     } catch (e) {}
   }
 
-  /* ---------- 微调滑块 ---------- */
+  /* ───────── 微调滑块 ───────── */
   function buildProps() {
     if (!propsBox) return;
     var h = '';
     SCHEMA.forEach(function (s) {
-      h += '<div class="dwp">' +
-        '<span class="dwp-l">' + s.t + '</span>' +
+      h += '<div class="dwp"><span class="dwp-l">' + s.t + '</span>' +
         '<span class="dwp-i"><input class="dwp-r" type="range" data-k="' + s.k + '" min="' + s.min +
         '" max="' + s.max + '" step="' + s.step + '"></span>' +
         '<span class="dwp-v" data-v="' + s.k + '"></span></div>';
     });
-    h += '<div class="dwp-sw"><span class="dwp-l">静音</span>' +
-      '<button class="dw-sw" type="button" id="dwMute" aria-label="静音"></button></div>';
+    h += '<div class="dwp-sw"><span class="dwp-l">静音</span><button class="dw-sw" type="button" id="dwMute" aria-label="静音"></button></div>';
     propsBox.innerHTML = h;
 
     propsBox.querySelectorAll('input[type=range]').forEach(function (el) {
       el.addEventListener('input', function () {
-        var k = el.getAttribute('data-k');
-        cfg[k] = parseFloat(el.value);
-        syncProps();
-        applyCfg();
-        saveCfg();
+        cfg[el.getAttribute('data-k')] = parseFloat(el.value);
+        syncProps(); applyCfg(); saveCfg();
+        if (curItem) { curItem.cfg = Object.assign({}, cfg); idbPut(curItem); }
       });
     });
-    var mute = document.getElementById('dwMute');
-    if (mute) {
-      mute.addEventListener('click', function () {
-        cfg.muted = !cfg.muted;
-        syncProps();
-        applyCfg();
-        saveCfg();
-      });
-    }
+    var mute = $('dwMute');
+    if (mute) mute.addEventListener('click', function () {
+      cfg.muted = !cfg.muted; syncProps(); applyCfg(); saveCfg();
+      if (curItem) { curItem.cfg = Object.assign({}, cfg); idbPut(curItem); }
+    });
     syncProps();
   }
-
   function syncProps() {
     if (!propsBox) return;
     SCHEMA.forEach(function (s) {
@@ -5608,35 +5693,28 @@ window.__checkSecretZone = checkSecretZone;
       var lab = propsBox.querySelector('[data-v="' + s.k + '"]');
       if (!el) return;
       el.value = cfg[s.k];
-      var pct = (cfg[s.k] - s.min) / (s.max - s.min) * 100;
-      el.style.setProperty('--p', pct.toFixed(1) + '%');
-      if (lab) {
-        var v = cfg[s.k];
-        lab.textContent = (s.step < 1 ? v.toFixed(2) : Math.round(v)) + s.unit;
-      }
+      el.style.setProperty('--p', ((cfg[s.k] - s.min) / (s.max - s.min) * 100).toFixed(1) + '%');
+      if (lab) lab.textContent = (s.step < 1 ? cfg[s.k].toFixed(2) : Math.round(cfg[s.k])) + s.unit;
     });
-    var mute = document.getElementById('dwMute');
+    var mute = $('dwMute');
     if (mute) mute.classList.toggle('on', !!cfg.muted);
   }
 
-  /* ---------- 预览区 ---------- */
+  /* ───────── 预览 ───────── */
   function renderPrev() {
     if (!prev) return;
-    if (!curMedia) {
+    if (!curItem || !curURL) {
       prev.innerHTML = '<span class="ph">还没有设置背景<br>选一张图或一段视频试试</span>';
       return;
     }
-    var badge = curMedia.type === 'video' ? '动态壁纸' : '图片';
-    var inner = '';
-    if (curMedia.type === 'video') {
-      inner = '<video src="' + curURL + '" muted loop playsinline autoplay></video>';
-    } else {
-      inner = '<img src="' + curURL + '" alt="">';
-    }
+    var badge = curItem.type === 'video' ? '动态壁纸' : '图片';
+    var inner = curItem.type === 'video'
+      ? '<video src="' + curURL + '" muted loop playsinline autoplay></video>'
+      : '<img src="' + curURL + '" alt="">';
     prev.innerHTML = '<span class="badge">' + badge + '</span>' + inner;
   }
 
-  /* ---------- 图片压缩 ---------- */
+  /* ───────── 处理文件 ───────── */
   function compressImage(file) {
     return new Promise(function (res, rej) {
       var url = URL.createObjectURL(file);
@@ -5651,14 +5729,19 @@ window.__checkSecretZone = checkSecretZone;
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, cw, ch);
         var luma = lumaOf(img, w, h);
+        // 缩略图
+        var tc = document.createElement('canvas');
+        var tsc = Math.min(1, 320 / Math.max(w, h));
+        tc.width = Math.max(1, Math.round(w * tsc)); tc.height = Math.max(1, Math.round(h * tsc));
+        tc.getContext('2d').drawImage(img, 0, 0, tc.width, tc.height);
+        var thumbURL = tc.toDataURL('image/jpeg', 0.75);
         URL.revokeObjectURL(url);
-        // GIF 保留原始（压缩会丢动画）
         if (/gif$/i.test(file.type) || /\.gif$/i.test(file.name)) {
-          return res({ blob: file, w: w, h: h, luma: luma });
+          return res({ blob: file, w: w, h: h, luma: luma, thumb: thumbURL });
         }
         cv.toBlob(function (b) {
           if (!b) return rej(new Error('blob'));
-          res({ blob: b, w: cw, h: ch, luma: luma });
+          res({ blob: b, w: cw, h: ch, luma: luma, thumb: thumbURL });
         }, 'image/jpeg', 0.86);
       };
       img.onerror = function () { URL.revokeObjectURL(url); rej(new Error('decode')); };
@@ -5666,7 +5749,6 @@ window.__checkSecretZone = checkSecretZone;
     });
   }
 
-  /* ---------- 视频探测 ---------- */
   function probeVideo(file) {
     return new Promise(function (res, rej) {
       var url = URL.createObjectURL(file);
@@ -5674,131 +5756,180 @@ window.__checkSecretZone = checkSecretZone;
       v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = url;
       var done = false;
       function fin(ok, err) {
-        if (done) return; done = true;
-        clearTimeout(timer);
+        if (done) return; done = true; clearTimeout(timer);
         if (!ok) { URL.revokeObjectURL(url); return rej(err || new Error('video')); }
-        res({ blob: file, w: v.videoWidth, h: v.videoHeight, luma: lumaOf(v, v.videoWidth, v.videoHeight) });
+        var luma = lumaOf(v, v.videoWidth, v.videoHeight);
+        // 视频缩略图：再截一帧
+        var thumb = '';
+        try {
+          var tc = document.createElement('canvas');
+          var tsc = Math.min(1, 320 / Math.max(v.videoWidth, v.videoHeight));
+          tc.width = Math.max(1, Math.round(v.videoWidth * tsc));
+          tc.height = Math.max(1, Math.round(v.videoHeight * tsc));
+          tc.getContext('2d').drawImage(v, 0, 0, tc.width, tc.height);
+          thumb = tc.toDataURL('image/jpeg', 0.75);
+        } catch (e) {}
+        res({ blob: file, w: v.videoWidth, h: v.videoHeight, luma: luma, thumb: thumb });
       }
       var timer = setTimeout(function () { fin(false, new Error('timeout')); }, 15000);
       v.onloadeddata = function () {
         try { v.currentTime = Math.min(1, (v.duration || 2) * 0.25); } catch (e) {}
-        setTimeout(function () { fin(true); }, 480);
+        setTimeout(function () { fin(true); }, 520);
       };
       v.onerror = function () { fin(false, new Error('decode')); };
     });
   }
 
-  /* ---------- 应用壁纸 ---------- */
-  function applyMedia(rec, silent) {
-    if (curURL) { URL.revokeObjectURL(curURL); curURL = null; }
-    curURL = URL.createObjectURL(rec.blob);
+  /* ───────── 激活壁纸 ───────── */
+  function readItemBlob(it) {
+    if (it.blob) return Promise.resolve(it.blob);
+    if (!it.handle) return Promise.reject(new Error('无文件'));
+    var h = it.handle;
+    return Promise.resolve()
+      .then(function () {
+        if (h.queryPermission) return h.queryPermission({ mode: 'read' });
+        return 'granted';
+      })
+      .then(function (st) {
+        if (st === 'granted') return;
+        if (h.requestPermission) return h.requestPermission({ mode: 'read' });
+      })
+      .then(function (st) {
+        if (st && st !== 'granted') throw new Error('需要授权才能读取本地文件');
+        return h.getFile();
+      });
+  }
 
-    if (rec.type === 'video') {
-      video.src = curURL;
-      wrap.classList.add('is-video');
-      wrap.style.backgroundImage = '';
-      video.play().catch(function () {});
-      video.muted = !!cfg.muted;
-      video.volume = cfg.volume;
-      try { video.playbackRate = cfg.speed; } catch (e) {}
-      pauseBtn.disabled = false;
-      pauseBtn.textContent = '暂停动态';
-    } else {
-      video.pause();
-      video.removeAttribute('src');
-      wrap.classList.remove('is-video');
-      wrap.style.backgroundImage = 'url("' + curURL + '")';
-      pauseBtn.disabled = true;
-      pauseBtn.textContent = '暂停动态';
-    }
+  function activate(id, silent) {
+    return idbGet(id).then(function (it) {
+      if (!it) throw new Error('壁纸不存在');
+      return readItemBlob(it).then(function (blob) {
+        if (curURL) { URL.revokeObjectURL(curURL); curURL = null; }
+        curURL = URL.createObjectURL(blob);
+        curItem = it;
+        activeId = id;
+        try { localStorage.setItem(LS_ACTIVE, id); } catch (e) {}
 
-    curMedia = { type: rec.type, name: rec.name || '未命名', w: rec.w, h: rec.h, size: rec.blob.size };
-    wrap.classList.add('is-on');
-    html.classList.add('has-bg');
-    setLuma(typeof rec.luma === 'number' ? rec.luma : 0.5);
-    applyCfg();
-    renderPrev();
-    renderLib();
-    if (!silent) say(hint, '已应用 ✓', 'ok');
+        if (it.type === 'video') {
+          video.src = curURL;
+          wrap.classList.add('is-video');
+          wrap.style.backgroundImage = '';
+          video.muted = !!cfg.muted;
+          video.volume = cfg.volume;
+          video.play().catch(function () {});
+          pauseBtn.disabled = false;
+          pauseBtn.textContent = '暂停动态';
+        } else {
+          video.pause(); video.removeAttribute('src');
+          wrap.classList.remove('is-video');
+          wrap.style.backgroundImage = 'url("' + curURL + '")';
+          pauseBtn.disabled = true;
+        }
+        wrap.classList.add('is-on');
+        html.classList.add('has-bg');
+        if (typeof it.luma === 'number') setLuma(it.luma);
+
+        if (it.cfg && typeof it.cfg === 'object') {
+          for (var k in DEFAULT) if (k in it.cfg) cfg[k] = it.cfg[k];
+          syncProps();
+        }
+        applyCfg();
+        renderPrev();
+        renderGrid();
+        if (!silent) say(hint, '已切换 ✓', 'ok');
+      });
+    }).catch(function (e) {
+      say(hint, e.message || '切换失败', 'err');
+    });
   }
 
   function clearAll(silent) {
     if (curURL) { URL.revokeObjectURL(curURL); curURL = null; }
-    video.pause();
-    video.removeAttribute('src');
+    video.pause(); video.removeAttribute('src');
     wrap.classList.remove('is-video', 'is-on');
-    wrap.style.backgroundImage = '';
-    wrap.style.filter = '';
-    wrap.style.transform = '';
+    wrap.style.backgroundImage = ''; wrap.style.filter = ''; wrap.style.transform = '';
     html.classList.remove('has-bg', 'bg-dark');
-    curMedia = null;
+    curItem = null; activeId = null;
+    try { localStorage.removeItem(LS_ACTIVE); } catch (e) {}
     pauseBtn.disabled = true;
-    renderPrev();
-    renderLib();
+    renderPrev(); renderGrid();
     if (!silent) say(hint, '已恢复默认背景', 'ok');
   }
 
-  /* ---------- 选文件 ---------- */
-  fileIn.addEventListener('change', function () {
-    var f = fileIn.files && fileIn.files[0];
-    if (!f) return;
-    var isVideo = /^video\//.test(f.type);
-    var isImage = /^image\//.test(f.type);
+  /* ───────── 添加壁纸 ───────── */
+  function addFromFile(file) {
+    var isVideo = /^video\//.test(file.type);
+    var isImage = /^image\//.test(file.type);
     if (!isVideo && !isImage) { say(hint, '只支持图片或 MP4 / WebM', 'err'); return; }
-    if (isVideo && f.size > 120 * 1024 * 1024) { say(hint, '视频太大了（上限 120MB）', 'err'); return; }
-    if (isImage && f.size > 20 * 1024 * 1024) { say(hint, '图片太大了（上限 20MB）', 'err'); return; }
 
     say(hint, isVideo ? '正在读取视频…' : '正在处理图片…', '');
-    var job = isVideo ? probeVideo(f) : compressImage(f);
+
+    // 大文件 + 支持句柄 → 存句柄，不占配额
+    var useHandle = false;
+    if (isVideo && file.size > 30 * 1024 * 1024 && window.showOpenFilePicker) useHandle = true;
+
+    var job = isVideo ? probeVideo(file) : compressImage(file);
     job.then(function (r) {
-      var rec = { type: isVideo ? 'video' : 'image', name: f.name, blob: r.blob, w: r.w, h: r.h, luma: r.luma, at: Date.now() };
-      return idbPut(rec).then(function () {
-        applyMedia(rec, true);
-        say(hint, (isVideo ? '动态壁纸' : '背景图') + '已生效 ✓', 'ok');
-        fileIn.value = '';
+      var it = {
+        id: uid(), name: file.name, type: isVideo ? 'video' : 'image',
+        w: r.w, h: r.h, size: file.size, luma: r.luma, thumb: r.thumb,
+        cfg: Object.assign({}, cfg), addedAt: Date.now(), mode: 'blob'
+      };
+      if (useHandle) {
+        it.mode = 'handle'; it.handle = null;   // 句柄需重新选，这里降级提示
+        say(hint, '文件较大，已按普通方式保存（会占浏览器空间）', '');
+      }
+      if (r.blob) it.blob = r.blob;
+      return idbPut(it).then(function () { return it; });
+    }).then(function (it) {
+      return idbAll().then(function (list) {
+        items = list.sort(function (a, b) { return (a.addedAt || 0) - (b.addedAt || 0); });
+        return activate(it.id, true);
       });
+    }).then(function () {
+      say(hint, '已添加并应用 ✓', 'ok');
+      fileIn.value = '';
+      refreshQuota();
     }).catch(function (e) {
       say(hint, e && e.message === 'timeout' ? '视频读取超时，换个小一点的' : '这个文件读不出来，换一个试试', 'err');
     });
+  }
+
+  fileIn.addEventListener('change', function () {
+    var f = fileIn.files && fileIn.files[0];
+    if (f) addFromFile(f);
   });
 
-  /* ---------- 暂停 / 清除 ---------- */
+  /* ───────── 暂停 / 清除 ───────── */
   pauseBtn.addEventListener('click', function () {
-    if (!curMedia || curMedia.type !== 'video') return;
+    if (!curItem || curItem.type !== 'video') return;
     if (video.paused) { video.play().catch(function () {}); pauseBtn.textContent = '暂停动态'; }
     else { video.pause(); pauseBtn.textContent = '继续播放'; }
   });
-  clearBtn.addEventListener('click', function () {
-    idbDel().then(function () { clearAll(); });
-  });
+  clearBtn.addEventListener('click', function () { clearAll(); });
 
-  /* ---------- 预设导出 / 导入 ---------- */
+  /* ───────── 预设 ───────── */
   outBtn.addEventListener('click', function () {
     var props = {};
     SCHEMA.forEach(function (s) {
-      props[s.k] = {
-        type: 'slider', text: s.t, value: cfg[s.k],
-        min: s.min, max: s.max, step: s.step
-      };
+      props[s.k] = { type: 'slider', text: s.t, value: cfg[s.k], min: s.min, max: s.max, step: s.step };
     });
     props.muted = { type: 'bool', text: '静音', value: !!cfg.muted };
     var out = {
       version: 1,
-      title: curMedia ? curMedia.name : '我的壁纸',
-      type: curMedia ? curMedia.type : 'none',
+      title: curItem ? curItem.name : '我的壁纸',
+      type: curItem ? curItem.type : 'none',
       properties: props
     };
     var txt = JSON.stringify(out, null, 2);
     try {
-      var blob = new Blob([txt], { type: 'application/json' });
+      var b = new Blob([txt], { type: 'application/json' });
       var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'wallpaper-preset.json';
+      a.href = URL.createObjectURL(b); a.download = 'wallpaper-preset.json';
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
       say(presetHint, '预设已导出 ✓', 'ok');
     } catch (e) {
-      // 退化为复制到剪贴板
       if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () {
         say(presetHint, '预设已复制到剪贴板 ✓', 'ok');
       }).catch(function () { say(presetHint, '导出失败', 'err'); });
@@ -5822,6 +5953,7 @@ window.__checkSecretZone = checkSecretZone;
         }
         if (!n) throw new Error('empty');
         syncProps(); applyCfg(); saveCfg();
+        if (curItem) { curItem.cfg = Object.assign({}, cfg); idbPut(curItem); }
         say(presetHint, '已套用 ' + n + ' 项参数 ✓', 'ok');
       } catch (e) {
         say(presetHint, '这个 JSON 读不出来，检查一下格式', 'err');
@@ -5831,38 +5963,148 @@ window.__checkSecretZone = checkSecretZone;
     rd.readAsText(f);
   });
 
-  /* ---------- 壁纸库（P1：只有当前这一张） ---------- */
-  function renderLib() {
-    if (!libBox) return;
-    if (!curMedia) {
-      libBox.innerHTML = '<div class="dw-lib-empty">还没有壁纸<br>' +
-        '<span style="font-size:11px;opacity:.75">上传后会出现在这里</span></div>';
-      return;
+  /* ───────── 壁纸库网格 ───────── */
+  function renderGrid() {
+    if (!grid) return;
+    if (!items.length) {
+      grid.innerHTML = '<div class="dw-lib-empty" style="grid-column:1/-1">还没有壁纸<br>' +
+        '<span style="font-size:11px;opacity:.75">在「壁纸」标签上传，或以后从壁纸引擎导入</span></div>';
+    } else {
+      var h = '';
+      items.forEach(function (it) {
+        var isCur = it.id === activeId;
+        var thumb = it.thumb
+          ? '<img src="' + it.thumb + '" alt="">'
+          : '<div style="width:100%;height:100%;display:grid;place-items:center;font-size:10px;color:#93b4d4">无预览</div>';
+        h += '<div class="dw-card' + (isCur ? ' on current' : '') + '" data-id="' + it.id + '">' +
+          '<div class="dw-card-thumb">' + thumb +
+            '<span class="tag">' + (it.type === 'video' ? '动态' : '图片') + '</span>' +
+          '</div>' +
+          '<div class="dw-card-body">' +
+            '<div class="dw-card-name">' + (it.name || '未命名') + '</div>' +
+            '<div class="dw-card-sub">' + it.w + '×' + it.h + ' · ' + fmtSize(it.size) + '</div>' +
+          '</div>' +
+          '<button class="dw-card-del" type="button" data-del="' + it.id + '" title="移除">×</button>' +
+        '</div>';
+      });
+      grid.innerHTML = h;
     }
-    var thumb = curMedia.type === 'video'
-      ? '<video src="' + curURL + '" muted loop playsinline autoplay></video>'
-      : '<img src="' + curURL + '" alt="">';
-    libBox.innerHTML =
-      '<div class="dw-lib-card">' +
-        '<div class="dw-lib-thumb">' + thumb + '</div>' +
-        '<div class="dw-lib-meta">' +
-          '<div class="dw-lib-name">' + (curMedia.name || '未命名') + '</div>' +
-          '<div class="dw-lib-sub">' + (curMedia.type === 'video' ? '动态壁纸' : '图片') +
-            ' · ' + curMedia.w + '×' + curMedia.h + ' · ' + fmtSize(curMedia.size) + '</div>' +
-        '</div>' +
-        '<div class="dw-lib-act">' +
-          '<button class="dw-mini danger" type="button" id="dwLibDel">移除</button>' +
-        '</div>' +
-      '</div>';
-    var del = document.getElementById('dwLibDel');
-    if (del) del.addEventListener('click', function () {
-      idbDel().then(function () { clearAll(); say(hint, '已移除', 'ok'); });
+    if (countEl) countEl.textContent = items.length + ' 张';
+
+    grid.querySelectorAll('.dw-card').forEach(function (card) {
+      card.addEventListener('click', function (e) {
+        if (e.target.closest('[data-del]')) return;
+        activate(card.getAttribute('data-id'));
+      });
+    });
+    grid.querySelectorAll('[data-del]').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var id = btn.getAttribute('data-del');
+        if (!confirm('移除这张壁纸？')) return;
+        idbDel(id).then(function () {
+          items = items.filter(function (x) { return x.id !== id; });
+          if (activeId === id) clearAll(true);
+          renderGrid(); refreshQuota();
+          say(hint, '已移除', 'ok');
+        });
+      });
     });
   }
 
-  /* ---------- 性能保护 ---------- */
+  /* ───────── 配额 ───────── */
+  function refreshQuota() {
+    if (!navigator.storage || !navigator.storage.estimate) {
+      if (quotaTxt) quotaTxt.textContent = '此浏览器不支持配额查询';
+      return;
+    }
+    navigator.storage.estimate().then(function (e) {
+      var used = e.usage || 0, quota = e.quota || 0;
+      var pct = quota ? Math.min(100, used / quota * 100) : 0;
+      if (quotaBar) {
+        quotaBar.querySelector('i').style.width = Math.max(1, pct).toFixed(1) + '%';
+        quotaBar.classList.toggle('warn', pct > 75);
+      }
+      if (quotaTxt) quotaTxt.textContent = '已用 ' + fmtSize(used) + ' / 可用 ' + fmtSize(quota) +
+        '（' + pct.toFixed(1) + '%）';
+    }).catch(function () {});
+  }
+  if (quotaRefresh) quotaRefresh.addEventListener('click', refreshQuota);
+
+  /* ───────── 定时切换 ───────── */
+  function loadRot() {
+    try {
+      var v = JSON.parse(localStorage.getItem(LS_ROT) || 'null');
+      if (v && typeof v === 'object') for (var k in rot) if (k in v) rot[k] = v[k];
+    } catch (e) {}
+    if (rotOn) rotOn.classList.toggle('on', !!rot.on);
+    if (rotEvery) rotEvery.value = String(rot.every);
+    if (rotOrder) rotOrder.value = rot.order;
+    if (rotRange) rotRange.classList.toggle('on', !!rot.range);
+    if (rotTimes) rotTimes.style.display = rot.range ? '' : 'none';
+    if (rotFrom) rotFrom.value = rot.from;
+    if (rotTo) rotTo.value = rot.to;
+  }
+  function saveRot() { try { localStorage.setItem(LS_ROT, JSON.stringify(rot)); } catch (e) {} }
+
+  if (rotOn) rotOn.addEventListener('click', function () {
+    rot.on = !rot.on; rotOn.classList.toggle('on', rot.on);
+    rot.last = Date.now(); saveRot();
+    say(rotHint, rot.on ? '定时切换已开启（' + rot.every + ' 分钟）' : '定时切换已关闭', rot.on ? 'ok' : '');
+  });
+  if (rotEvery) rotEvery.addEventListener('change', function () {
+    rot.every = parseInt(rotEvery.value, 10) || 60; rot.last = Date.now(); saveRot();
+  });
+  if (rotOrder) rotOrder.addEventListener('change', function () {
+    rot.order = rotOrder.value; saveRot();
+  });
+  if (rotRange) rotRange.addEventListener('click', function () {
+    rot.range = !rot.range;
+    rotRange.classList.toggle('on', rot.range);
+    rotTimes.style.display = rot.range ? '' : 'none';
+    saveRot();
+  });
+  if (rotFrom) rotFrom.addEventListener('change', function () { rot.from = rotFrom.value; saveRot(); });
+  if (rotTo) rotTo.addEventListener('change', function () { rot.to = rotTo.value; saveRot(); });
+
+  function inRange() {
+    if (!rot.range) return true;
+    var now = new Date();
+    var m = now.getHours() * 60 + now.getMinutes();
+    function toMin(s) {
+      var p = String(s || '0:0').split(':');
+      return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0);
+    }
+    var a = toMin(rot.from), b = toMin(rot.to);
+    return a <= b ? (m >= a && m < b) : (m >= a || m < b);  // 支持跨夜
+  }
+
+  function nextWallpaper() {
+    if (items.length < 2) return;
+    var idx = items.findIndex(function (x) { return x.id === activeId; });
+    var next;
+    if (rot.order === 'rand') {
+      do { next = Math.floor(Math.random() * items.length); } while (next === idx && items.length > 1);
+    } else {
+      next = (idx + 1) % items.length;
+    }
+    activate(items[next].id, true).then(function () {
+      say(rotHint, '已自动切换到「' + (items[next].name || '未命名') + '」', 'ok');
+    });
+  }
+
+  setInterval(function () {
+    if (!rot.on || items.length < 2) return;
+    if (!inRange()) return;
+    var now = Date.now();
+    if (now - (rot.last || 0) < rot.every * 60000) return;
+    rot.last = now; saveRot();
+    nextWallpaper();
+  }, 30000);   // 每 30 秒检查一次
+
+  /* ───────── 性能保护 ───────── */
   document.addEventListener('visibilitychange', function () {
-    if (!curMedia || curMedia.type !== 'video') return;
+    if (!curItem || curItem.type !== 'video') return;
     if (document.hidden) {
       if (!video.paused) { video.dataset.autoPaused = '1'; video.pause(); }
     } else if (video.dataset.autoPaused === '1') {
@@ -5871,29 +6113,35 @@ window.__checkSecretZone = checkSecretZone;
     }
   });
 
-  /* ---------- 启动 ---------- */
-  loadCfg();
-  buildProps();
-  renderLib();
-  idbGet().then(function (rec) {
-    if (rec && rec.blob) {
-      applyMedia({ type: rec.type, name: rec.name, blob: rec.blob, w: rec.w, h: rec.h, luma: rec.luma }, true);
-      renderLib();
-    }
-  }).catch(function () {});
+  /* ───────── 启动 ───────── */
+  loadCfg(); loadRot(); buildProps();
 
-  /* ---------- 对外接口（方便控制台调试 / 后续 P2 扩展） ---------- */
+  idbAll().then(function (list) {
+    items = list.sort(function (a, b) { return (a.addedAt || 0) - (b.addedAt || 0); });
+    renderGrid();
+    refreshQuota();
+    var act = null;
+    try { act = localStorage.getItem(LS_ACTIVE); } catch (e) {}
+    if (act && items.some(function (x) { return x.id === act; })) {
+      activate(act, true);
+    } else if (items.length) {
+      activate(items[items.length - 1].id, true);
+    } else {
+      renderPrev();
+    }
+  }).catch(function () { renderGrid(); });
+
+  /* 对外接口 */
   window.DW = {
-    open: openDw,
-    close: closeDw,
-    tab: switchTab,
+    open: openDw, close: closeDw, tab: switchTab,
     getCfg: function () { return Object.assign({}, cfg); },
-    setCfg: function (o) {
-      for (var k in o) if (k in DEFAULT) cfg[k] = o[k];
-      syncProps(); applyCfg(); saveCfg();
-    },
-    apply: applyMedia,
-    clear: clearAll
+    setCfg: function (o) { for (var k in o) if (k in DEFAULT) cfg[k] = o[k]; syncProps(); applyCfg(); saveCfg(); },
+    list: function () { return items.map(function (x) { return { id: x.id, name: x.name, type: x.type, size: x.size }; }); },
+    activate: activate,
+    add: addFromFile,
+    clear: clearAll,
+    rotate: function () { return Object.assign({}, rot); },
+    setRotate: function (o) { for (var k in o) if (k in rot) rot[k] = o[k]; saveRot(); loadRot(); }
   };
 })();
 </script>
