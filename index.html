@@ -2080,6 +2080,41 @@ html.no-url-filter.lg-on .dw-tab,
 html.no-url-filter.lg-on .dw-sec-h{ color: #1f3c5e !important }
 
 </style>
+<style>
+
+/* ═══════════════════ Service Worker 更新提示 ═══════════════════ */
+#swUpdateBar{
+  position:fixed; left:50%; bottom:84px; transform:translateX(-50%) translateY(0);
+  z-index:200; display:flex; align-items:center; gap:10px;
+  padding:10px 14px 10px 16px; border-radius:14px;
+  background:rgba(28,44,68,.94); color:#fff;
+  font:600 13px/1.4 system-ui,sans-serif;
+  box-shadow:0 14px 40px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.14);
+  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+  max-width:calc(100vw - 32px);
+  animation:swBarIn .32s cubic-bezier(.22,.9,.28,1) both;
+}
+@keyframes swBarIn{ from{opacity:0; transform:translateX(-50%) translateY(12px)} to{opacity:1; transform:translateX(-50%) translateY(0)} }
+#swUpdateBar span{ white-space:nowrap }
+#swUpdateBar button{
+  padding:6px 12px; border-radius:9px; cursor:pointer;
+  font:700 12px/1 inherit; font-family:inherit;
+  border:1px solid rgba(255,255,255,.24); background:rgba(255,255,255,.12); color:#fff;
+  transition:all .18s ease;
+}
+#swUpdateBar button:hover{ background:rgba(255,255,255,.22) }
+#swUpdateBar #swReload{
+  background:linear-gradient(180deg,#6fb3f5,#4a90d9);
+  border-color:rgba(255,255,255,.34);
+  box-shadow:0 2px 8px rgba(0,0,0,.2);
+}
+#swUpdateBar #swReload:hover{ background:linear-gradient(180deg,#7fc0fa,#5a9ee6) }
+@media (max-width:520px){
+  #swUpdateBar{ bottom:76px; font-size:12px; padding:9px 10px 9px 13px; gap:7px }
+  #swUpdateBar button{ padding:5px 9px; font-size:11px }
+}
+
+</style>
 </head>
 <body>
 <canvas id="starField" aria-hidden="true"></canvas>
@@ -7673,6 +7708,139 @@ window.__checkSecretZone = checkSecretZone;
   window.ST_FIX = {
     canUrlFilter: CAN_URL_FILTER,
     isSafariFallback: html.classList.contains('no-url-filter')
+  };
+})();
+</script>
+<!-- st-sw-v1 -->
+<script>
+/* ═══════════ Service Worker 离线缓存 ═══════════ */
+(function () {
+  'use strict';
+
+  var LS = window.location;
+
+  // 逃生口：?nosw=1 → 注销所有 SW 并跳过注册（排查缓存问题时用）
+  if (LS.search.indexOf('nosw=1') >= 0) {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function (rs) {
+        rs.forEach(function (r) { r.unregister(); });
+      }).catch(function () {});
+    }
+    return;
+  }
+
+  if (!('serviceWorker' in navigator)) return;
+  // SW 只在安全上下文可用（https 或 localhost）
+  var isSecure = LS.protocol === 'https:' || LS.hostname === 'localhost' || LS.hostname === '127.0.0.1';
+  if (!isSecure) return;
+
+  var refreshing = false;
+
+  function showUpdateBar() {
+    if (document.getElementById('swUpdateBar')) return;
+    var bar = document.createElement('div');
+    bar.id = 'swUpdateBar';
+    bar.innerHTML = '<span>有新版本可用</span>' +
+      '<button id="swReload" type="button">立即刷新</button>' +
+      '<button id="swLater" type="button">稍后</button>';
+    document.body.appendChild(bar);
+
+    var reloadBtn = document.getElementById('swReload');
+    var laterBtn = document.getElementById('swLater');
+
+    if (reloadBtn) reloadBtn.addEventListener('click', function () {
+      navigator.serviceWorker.getRegistration().then(function (reg) {
+        if (reg && reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        else window.location.reload();
+      }).catch(function () { window.location.reload(); });
+    });
+
+    if (laterBtn) laterBtn.addEventListener('click', function () {
+      bar.remove();
+    });
+  }
+
+  function register() {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).then(function (reg) {
+      // 首次注册时可能已有 waiting 的 SW（之前打开过）
+      if (reg.waiting && navigator.serviceWorker.controller) showUpdateBar();
+
+      reg.addEventListener('updatefound', function () {
+        var nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', function () {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            showUpdateBar();
+          }
+        });
+      });
+
+      // 偶尔主动查更新（页面回到前台时）
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) reg.update().catch(function () {});
+      });
+
+    }).catch(function () {
+      // 注册失败不影响页面，静默
+    });
+  }
+
+  // 新 SW 接管 → 自动刷新一次（用 refreshing 防死循环）
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
+
+  if (document.readyState === 'complete') {
+    setTimeout(register, 1200);      // 别和首屏抢资源
+  } else {
+    window.addEventListener('load', function () { setTimeout(register, 1200); });
+  }
+
+  /* ---------- 调试 / 维护接口 ---------- */
+  window.SW_CTL = {
+    status: function () {
+      if (!navigator.serviceWorker) return 'unsupported';
+      return navigator.serviceWorker.controller ? 'active' : 'registering';
+    },
+    // 清掉本站所有 SW 缓存（不注销注册）
+    clear: function () {
+      if (!window.caches) return Promise.resolve(false);
+      return caches.keys().then(function (ks) {
+        return Promise.all(ks.filter(function (k) {
+          return k.indexOf('startian-') === 0;
+        }).map(function (k) { return caches.delete(k); }));
+      }).then(function () {
+        window.location.reload();
+        return true;
+      });
+    },
+    // 彻底注销（下次访问重新来）
+    unregister: function () {
+      return navigator.serviceWorker.getRegistrations().then(function (rs) {
+        return Promise.all(rs.map(function (r) { return r.unregister(); }));
+      }).then(function () {
+        if (window.caches) {
+          return caches.keys().then(function (ks) {
+            return Promise.all(ks.filter(function (k) {
+              return k.indexOf('startian-') === 0;
+            }).map(function (k) { return caches.delete(k); }));
+          });
+        }
+      }).then(function () { window.location.reload(); });
+    },
+    // 缓存占用情况
+    usage: function () {
+      if (!window.caches) return Promise.resolve(null);
+      return caches.keys().then(function (ks) {
+        var mine = ks.filter(function (k) { return k.indexOf('startian-') === 0; });
+        return Promise.all(mine.map(function (name) {
+          return caches.open(name).then(function (c) { return c.keys(); })
+            .then(function (reqs) { return { name: name, count: reqs.length }; });
+        }));
+      });
+    }
   };
 })();
 </script>
