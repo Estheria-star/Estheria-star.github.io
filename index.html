@@ -5399,10 +5399,14 @@ window.__checkSecretZone = checkSecretZone;
           <div class="dw-quota-bar" id="dwQuotaBar"><i style="width:0%"></i></div>
           <div class="dw-quota-txt" id="dwQuotaTxt">计算中…</div>
         </div>
+        <div class="dw-hint" style="margin-top:6px">壁纸文件保存在<b>你自己的设备</b>上（浏览器的 IndexedDB），不会上传到任何服务器。换设备或清除浏览器数据会丢失。</div>
       </div>
 
       <div class="dw-sec">
-        <div class="dw-sec-h">壁纸库<span class="dw-mini" id="dwCount" style="margin-left:auto">0 张</span></div>
+        <div class="dw-sec-h">壁纸库
+          <span class="dw-mini danger" id="dwClearAll" style="margin-left:auto">清空全部</span>
+          <span class="dw-mini" id="dwCount">0 张</span>
+        </div>
         <div class="dw-grid" id="dwGrid"></div>
       </div>
 
@@ -5651,35 +5655,35 @@ window.__checkSecretZone = checkSecretZone;
       } catch (e) {}
     }
   }
-  /* 音轨探测：Chrome 看 webkitAudioDecodedByteCount，Firefox 看 mozHasAudio */
+  /* 音轨提示：以添加时解析容器头得到的 hasAudio 为准
+     （不再用 webkitAudioDecodedByteCount 做主要判据 —— 静音时它恒为 0，会误杀有声视频） */
   var curHasAudio = null;
   function probeAudio() {
     if (!curItem || curItem.type !== 'video') return;
-    var has = null;
-    try {
-      if (typeof video.mozHasAudio === 'boolean') has = video.mozHasAudio;
-      else if (typeof video.webkitAudioDecodedByteCount === 'number') has = video.webkitAudioDecodedByteCount > 0;
-      else if (video.audioTracks && typeof video.audioTracks.length === 'number') has = video.audioTracks.length > 0;
-    } catch (e) {}
-    try {
-      console.log('[DW audio]', JSON.stringify({
-        moz: video.mozHasAudio,
-        bytes: video.webkitAudioDecodedByteCount,
-        tracks: video.audioTracks ? video.audioTracks.length : 'n/a',
-        decided: has
-      }));
-    } catch (e) {}
-    if (has === null) return;
+    var has = curItem.hasAudio;
+    if (typeof has === 'undefined') has = null;
     curHasAudio = has;
+
     var mute = $('dwMute');
     if (mute) {
-      mute.disabled = !has;
-      mute.title = has ? '' : '这个视频没有音轨';
-      mute.style.opacity = has ? '' : '.42';
-      mute.style.cursor = has ? '' : 'not-allowed';
+      mute.title = has === false ? '这个视频没有音轨' : '';
+      mute.style.opacity = has === false ? '.55' : '';
     }
-    if (!has) say(hint, '这个视频没有音轨，静音和音量对它不起作用', '');
-    else if (!cfg.muted) say(hint, '声音已开启 🔊', 'ok');
+    if (has === false) {
+      say(hint, '这个视频没有音轨，静音和音量对它不起作用', '');
+    } else if (has === true) {
+      if (!cfg.muted) say(hint, '声音已开启 🔊', 'ok');
+    } else if (!cfg.muted && typeof video.webkitAudioDecodedByteCount === 'number') {
+      // 容器头判断不了时，开声音后靠解码计数兜底（此时已非静音，计数才有意义）
+      setTimeout(function () {
+        if (!curItem) return;
+        if (video.webkitAudioDecodedByteCount > 0) {
+          curItem.hasAudio = true;
+          idbPut(curItem);
+          say(hint, '声音已开启 🔊', 'ok');
+        }
+      }, 3000);
+    }
   }
 
   function saveCfg() { try { localStorage.setItem(LS_CFG, JSON.stringify(cfg)); } catch (e) {} }
@@ -5754,6 +5758,38 @@ window.__checkSecretZone = checkSecretZone;
       ? '<video src="' + curURL + '" muted loop playsinline autoplay></video>'
       : '<img src="' + curURL + '" alt="">';
     prev.innerHTML = '<span class="badge">' + badge + '</span>' + inner;
+  }
+
+  /* ───────── 音轨检测：直接读容器头，不依赖解码计数 ─────────
+     为什么不用 webkitAudioDecodedByteCount：视频处于 muted 时 Chrome 根本不解码音频轨，
+     该计数恒为 0，会把有声音的视频误判成"无音轨"（实测 E:\视频\虎杖vs宿傩.mp4 就是这种情况） */
+  function detectAudioInFile(file) {
+    if (!/^video\//.test(file.type)) return Promise.resolve(null);
+    var CH = 2 * 1024 * 1024;
+    function slice(a, b) {
+      return file.slice(a, b).arrayBuffer().then(function (buf) { return new Uint8Array(buf); });
+    }
+    var jobs = [slice(0, Math.min(file.size, CH))];
+    if (file.size > CH) jobs.push(slice(Math.max(0, file.size - CH), file.size));
+    return Promise.all(jobs).then(function (arrs) {
+      var dec = new TextDecoder('latin1');
+      var s = '';
+      for (var i = 0; i < arrs.length; i++) {
+        // 分块解码避免超大字符串爆内存
+        var chunk = arrs[i];
+        for (var p = 0; p < chunk.length; p += 65536) {
+          s += dec.decode(chunk.subarray(p, p + 65536));
+        }
+        s += '\n';
+      }
+      var hasSoun = s.indexOf('soun') >= 0;
+      var hasVide = s.indexOf('vide') >= 0;
+      // WebM/Matroska 的音频 CodecID
+      if (/A_OPUS|A_VORBIS|A_AAC|A_MPEG|A_FLAC/.test(s)) return true;
+      if (hasSoun) return true;
+      if (hasVide && !hasSoun) return false;
+      return null;   // 判断不了
+    }).catch(function () { return null; });
   }
 
   /* ───────── 处理文件 ───────── */
@@ -5912,10 +5948,13 @@ window.__checkSecretZone = checkSecretZone;
     if (isVideo && file.size > 30 * 1024 * 1024 && window.showOpenFilePicker) useHandle = true;
 
     var job = isVideo ? probeVideo(file) : compressImage(file);
-    job.then(function (r) {
+    var audioJob = isVideo ? detectAudioInFile(file) : Promise.resolve(null);
+    Promise.all([job, audioJob]).then(function (res) {
+      var r = res[0], hasAudio = res[1];
       var it = {
         id: uid(), name: file.name, type: isVideo ? 'video' : 'image',
         w: r.w, h: r.h, size: file.size, luma: r.luma, thumb: r.thumb,
+        hasAudio: hasAudio,
         cfg: Object.assign({}, cfg), addedAt: Date.now(), mode: 'blob'
       };
       if (useHandle) {
@@ -6021,7 +6060,9 @@ window.__checkSecretZone = checkSecretZone;
           : '<div style="width:100%;height:100%;display:grid;place-items:center;font-size:10px;color:#93b4d4">无预览</div>';
         h += '<div class="dw-card' + (isCur ? ' on current' : '') + '" data-id="' + it.id + '">' +
           '<div class="dw-card-thumb">' + thumb +
-            '<span class="tag">' + (it.type === 'video' ? '动态' : '图片') + '</span>' +
+            '<span class="tag">' +
+              (it.type === 'video' ? (it.hasAudio === false ? '动态·无声' : '动态') : '图片') +
+            '</span>' +
           '</div>' +
           '<div class="dw-card-body">' +
             '<div class="dw-card-name">' + (it.name || '未命名') + '</div>' +
@@ -6052,6 +6093,65 @@ window.__checkSecretZone = checkSecretZone;
           say(hint, '已移除', 'ok');
         });
       });
+    });
+  }
+
+  /* ───────── 一键清空壁纸库（事件委托 + 点两次确认） ───────── */
+  var clearAllBtn = $('dwClearAll');
+  var clearArmedAt = 0, clearTimer = null;
+  function resetClearBtn() {
+    clearArmedAt = 0;
+    var b = $('dwClearAll');
+    if (!b) return;
+    b.textContent = '清空全部';
+    b.style.background = '';
+    b.style.borderColor = '';
+    b.style.color = '';
+    b.style.fontWeight = '';
+  }
+  function doClearAll() {
+    var n = items.length;
+    var jobs = items.map(function (x) { return idbDel(x.id); });
+    Promise.all(jobs).then(function () {
+      items = [];
+      clearAll(true);
+      renderGrid();
+      refreshQuota();
+      say(hint, '已清空 ' + n + ' 张壁纸', 'ok');
+    }).catch(function () {
+      say(hint, '清空时出错了，刷新页面再试', 'err');
+    });
+  }
+  function onClearTap() {
+    var b = $('dwClearAll');
+    if (!items.length) { say(hint, '壁纸库已经是空的', ''); return; }
+    var now = Date.now();
+    if (!clearArmedAt || now - clearArmedAt > 3000) {
+      clearArmedAt = now;
+      if (b) {
+        b.textContent = '再点一次确认';
+        b.style.background = '#fdecec';
+        b.style.borderColor = '#f0b8b8';
+        b.style.color = '#c0392b';
+        b.style.fontWeight = '800';
+      }
+      clearTimeout(clearTimer);
+      clearTimer = setTimeout(resetClearBtn, 3200);
+      say(hint, '再点一次就会删除全部 ' + items.length + ' 张壁纸', 'err');
+      return;
+    }
+    clearTimeout(clearTimer);
+    resetClearBtn();
+    doClearAll();
+  }
+  // 事件委托：绑在抽屉容器上，元素重建也不受影响
+  if (dwBody) {
+    dwBody.addEventListener('click', function (e) {
+      var t = e.target;
+      for (var d = 0; d < 4 && t && t !== dwBody; d++) {
+        if (t.id === 'dwClearAll') { onClearTap(); return; }
+        t = t.parentNode;
+      }
     });
   }
 
@@ -6184,7 +6284,16 @@ window.__checkSecretZone = checkSecretZone;
     add: addFromFile,
     clear: clearAll,
     rotate: function () { return Object.assign({}, rot); },
-    setRotate: function (o) { for (var k in o) if (k in rot) rot[k] = o[k]; saveRot(); loadRot(); }
+    setRotate: function (o) { for (var k in o) if (k in rot) rot[k] = o[k]; saveRot(); loadRot(); },
+    clearAllItems: function () { if (clearAllBtn) clearAllBtn.click(); },
+    _debug: function () {
+      return {
+        clearBtnFound: !!clearAllBtn,
+        clearBtnInDom: !!document.getElementById('dwClearAll'),
+        items: items.length,
+        curHasAudio: curItem ? curItem.hasAudio : 'no-cur'
+      };
+    }
   };
 })();
 </script>
