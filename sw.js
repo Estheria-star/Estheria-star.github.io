@@ -10,11 +10,11 @@
  * 为什么 HTML 不用 Network-First：主页混淆版 3.2MB，每次都拉要等 7 秒，
  * 那样 SW 就失去意义了。SWR 是「速度」与「时效」的折中。
  *
- * 版本号由发布脚本注入（占位 20261025-2047），每次发布换新值 → 触发更新。
+ * 版本号由发布脚本注入（占位 20261025-2102），每次发布换新值 → 触发更新。
  */
 'use strict';
 
-var VER = '20261025-2047';
+var VER = '20261025-2102';
 var CACHE = 'startian-' + VER;
 var CACHE_PREFIX = 'startian-';
 
@@ -69,9 +69,15 @@ self.addEventListener('fetch', function (e) {
   e.respondWith(isDoc ? handleDoc(e, req) : handleAsset(e, req));
 });
 
-/* 页面导航：有缓存先给，同时后台更新 */
+/* 页面导航：有缓存先给，同时后台更新
+   ⚠ 必须按 pathname 分开存 —— 这个 SW 的 scope 是 /，同时服务主页和十几个子站，
+   如果都用 '/index.html' 当 key，访问 /wuziqi/ 就会把主页缓存覆盖掉 */
 function handleDoc(e, req) {
   var KEY = '/index.html';
+  try {
+    var p = new URL(req.url).pathname;
+    if (p && p !== '/') KEY = p;
+  } catch (err) {}
   return caches.open(CACHE).then(function (cache) {
     return cache.match(KEY).then(function (cached) {
       var network = fetch(req).then(function (res) {
@@ -103,7 +109,9 @@ function handleAsset(e, req) {
         return cached;
       }
       return fetch(req).then(function (res) {
-        if (res && res.ok && res.type === 'basic') {
+        // 只缓存同源 basic 响应；CF 注入的 /cdn-cgi/* 这类不缓存
+        if (res && res.ok && res.type === 'basic' &&
+            new URL(req.url).pathname.indexOf('/cdn-cgi/') !== 0) {
           cache.put(req, res.clone()).catch(function () {});
         }
         return res;
