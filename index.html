@@ -1680,6 +1680,79 @@ html[data-theme="starry"] .dw-quota-txt{ color:#9c8fa9 }
 }
 
 </style>
+<style>
+
+/* ═══════════════════ 性能优化 v1 ═══════════════════ */
+
+/* ── 1. 首屏外懒渲染 ──
+   contain-intrinsic-size 用 auto + 估计高度：首屏不渲染，滚到附近才渲染，
+   之后浏览器记住真实高度，锚点跳转第二次就准了 */
+#about,
+#achievements,
+#contact,
+.foot{
+  content-visibility: auto;
+  contain-intrinsic-size: auto 640px;
+}
+/* 区块标题保持可见（避免滚到附近时标题突然出现再排版） */
+.sec-head, section > .section{ content-visibility: visible }
+
+/* ── 2. 转场冻结：幕布盖住时，底下的动画没必要继续跑 ── */
+html.tk-switching .blob,
+html.tk-switching .hero .avatar,
+html.tk-switching .marquee-track,
+html.tk-switching .credit-line{
+  animation-play-state: paused !important;
+}
+html.tk-switching .st-bg-wrap video{ visibility: hidden }
+html.tk-switching .st-bg-wrap{ will-change: auto }
+
+/* ── 3. will-change 治理 ──
+   19 个 .g2048-cell 常驻 will-change:transform 会各建一个合成层，
+   而这些格子大部分时间根本不在视口里 */
+.g2048-cell{ will-change: auto !important }
+.g2048-board:hover .g2048-cell{ will-change: transform }
+
+/* 背景层也不要常驻 will-change（只在有微调时才需要） */
+.st-bg-wrap{ will-change: auto }
+html.bg-fx .st-bg-wrap{ will-change: filter, transform }
+
+/* ── 4. 自适应降级（JS 检测到掉帧或低配设备时加 .perf-low） ── */
+html.perf-low .nav,
+html.perf-low .dw,
+html.perf-low .dw-mask,
+html.perf-low .tk-panel,
+html.perf-low .gc-panel,
+html.perf-low .i18n-sw{
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+html.perf-low .nav{ background:rgba(251,253,255,.97) }
+html.perf-low .dw{ background:rgba(250,253,255,.98) }
+html.perf-low .tk-panel{ background:rgba(255,255,255,.98) }
+html.perf-low[data-theme="dark"] .nav,
+html.perf-low[data-theme="purple"] .nav,
+html.perf-low[data-theme="starry"] .nav{ background:rgba(22,16,28,.97) }
+html.perf-low[data-theme="dark"] .dw,
+html.perf-low[data-theme="purple"] .dw,
+html.perf-low[data-theme="starry"] .dw{ background:rgba(26,20,32,.98) }
+html.perf-low[data-theme="dark"] .tk-panel,
+html.perf-low[data-theme="purple"] .tk-panel,
+html.perf-low[data-theme="starry"] .tk-panel{ background:rgba(30,24,38,.98) }
+
+html.perf-low .blob{ animation: none !important }
+html.perf-low .blob{ filter: blur(48px) }
+html.perf-low .dw-card,
+html.perf-low .tile,
+html.perf-low .ct{ transition: none !important }
+html.perf-low .st-bg-wrap{ will-change: auto !important }
+
+/* 尊重系统「减少动态效果」时也给一份等价降级 */
+@media (prefers-reduced-motion:reduce){
+  .blob{ animation: none !important }
+}
+
+</style>
 </head>
 <body>
 <canvas id="starField" aria-hidden="true"></canvas>
@@ -5636,9 +5709,15 @@ window.__checkSecretZone = checkSecretZone;
   }
 
   function applyCfg() {
-    var f = 'brightness(' + cfg.brightness + ') contrast(' + cfg.contrast + ') saturate(' + cfg.saturate + ')';
-    if (cfg.blur > 0) f += ' blur(' + cfg.blur + 'px)';
-    wrap.style.filter = f;
+    // 全部为默认值时清空 filter —— 全屏滤镜即使「无效」也会让浏览器多建一个合成层
+    var isDefault = (cfg.brightness === 1 && cfg.contrast === 1 && cfg.saturate === 1 && cfg.blur === 0);
+    if (isDefault) {
+      wrap.style.filter = '';
+    } else {
+      var f = 'brightness(' + cfg.brightness + ') contrast(' + cfg.contrast + ') saturate(' + cfg.saturate + ')';
+      if (cfg.blur > 0) f += ' blur(' + cfg.blur + 'px)';
+      wrap.style.filter = f;
+    }
     wrap.style.backgroundPosition = cfg.posX + '% ' + cfg.posY + '%';
     wrap.style.setProperty('--dw-dim', cfg.dim);
     var dx = (50 - cfg.posX) * 0.5, dy = (50 - cfg.posY) * 0.5;
@@ -6293,6 +6372,85 @@ window.__checkSecretZone = checkSecretZone;
         items: items.length,
         curHasAudio: curItem ? curItem.hasAudio : 'no-cur'
       };
+    }
+  };
+})();
+</script>
+<!-- st-perf-v1 -->
+<script>
+/* ═══════════ 性能优化 v1 ═══════════ */
+(function () {
+  'use strict';
+  var html = document.documentElement;
+
+  /* ---------- 1. 转场期间暂停视频（省解码，幕布盖着看不到） ---------- */
+  var video = document.getElementById('stBgVideo');
+  var wasPlaying = false;
+  if (video && window.MutationObserver) {
+    new MutationObserver(function () {
+      var frozen = html.classList.contains('tk-switching');
+      if (frozen) {
+        if (!video.paused) { wasPlaying = true; video.pause(); }
+      } else if (wasPlaying) {
+        wasPlaying = false;
+        video.play().catch(function () {});
+      }
+    }).observe(html, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  /* ---------- 2. 设备能力预判 ---------- */
+  var cores = navigator.hardwareConcurrency || 4;
+  var mem = navigator.deviceMemory || 4;
+  var degraded = false;
+  if (cores <= 4 && mem <= 4) {
+    html.classList.add('perf-low');
+    degraded = true;
+  }
+
+  /* ---------- 3. 运行时 FPS 监测：连续掉帧则一次性降级 ---------- */
+  function startGuard() {
+    if (degraded) return;
+    var drops = 0, last = performance.now(), frames = 0;
+    function tick(t) {
+      // 启动前几秒的波动不计（首屏资源在加载）
+      frames++;
+      var dt = t - last;
+      last = t;
+      if (frames > 90) {                       // 约 1.5 秒后才开始统计
+        if (dt > 28) drops++;                  // 单帧超过 28ms ≈ 掉到 35fps 以下
+        else drops = Math.max(0, drops - 1);   // 好帧抵扣
+        if (drops > 45) {
+          degraded = true;
+          html.classList.add('perf-low');
+          try { console.log('[perf] 持续掉帧，已自动降级为轻量模式'); } catch (e) {}
+          return;
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  try {
+    if (!window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      if ('requestAnimationFrame' in window) setTimeout(startGuard, 1200);
+    }
+  } catch (e) {}
+
+  /* ---------- 4. 背景微调时才给 .bg-fx（让 will-change 按需生效） ---------- */
+  var wrap = document.getElementById('stBg');
+  if (wrap && window.MutationObserver) {
+    new MutationObserver(function () {
+      var hasFx = !!wrap.style.filter || !!wrap.style.transform;
+      html.classList.toggle('bg-fx', hasFx);
+    }).observe(wrap, { attributes: true, attributeFilter: ['style'] });
+  }
+
+  /* ---------- 5. 调试入口 ---------- */
+  window.ST_PERF = {
+    isLow: function () { return html.classList.contains('perf-low'); },
+    forceLow: function (on) { html.classList.toggle('perf-low', on !== false); },
+    info: function () {
+      return { cores: cores, mem: mem, degraded: degraded, perfLow: html.classList.contains('perf-low') };
     }
   };
 })();
