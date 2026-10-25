@@ -1427,7 +1427,7 @@ html.has-bg.bg-dark .btn-g{
   border-radius:2px; background:var(--accent-deep);
 }
 
-.dw-body{ flex:1; overflow-y:auto; overflow-x:hidden; padding:16px 20px 30px; scroll-behavior:smooth }
+.dw-body{ flex:1; overflow-y:auto; overflow-x:hidden; padding:16px 20px 76px; scroll-behavior:smooth }
 .dw-body::-webkit-scrollbar{ width:6px }
 .dw-body::-webkit-scrollbar-thumb{ background:rgba(140,180,215,.4); border-radius:3px }
 .dw-pane{ display:none; animation:dwIn .3s ease both }
@@ -1580,6 +1580,41 @@ input[type=range].dwp-r::-moz-range-thumb{
   padding:7px 9px; border-radius:9px; border:1px solid var(--line); background:#fff;
   font:700 12px/1 inherit; font-family:inherit; color:var(--ink2);
 }
+
+/* 壁纸引擎导入列表 */
+.dw-we-item{
+  display:flex; gap:10px; align-items:center; padding:9px; margin-top:8px;
+  border-radius:11px; border:1px solid var(--line); background:#fff;
+}
+.dw-we-thumb{
+  width:66px; height:38px; border-radius:7px; overflow:hidden; flex:0 0 auto;
+  background:linear-gradient(135deg,#eaf6ff,#d8ecff);
+}
+.dw-we-thumb img{ width:100%; height:100%; object-fit:cover; display:block }
+.dw-we-meta{ flex:1; min-width:0 }
+.dw-we-name{
+  font-size:11.5px; font-weight:700; color:var(--ink);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.dw-we-sub{ font-size:10px; color:var(--ink3); margin-top:2px }
+.dw-we-sel{
+  flex:0 0 auto; width:19px; height:19px; border-radius:5px; cursor:pointer;
+  border:1.5px solid var(--line); background:#fff; padding:0; position:relative;
+}
+.dw-we-sel.on{ background:var(--accent-deep); border-color:var(--accent-deep) }
+.dw-we-sel.on::after{
+  content:''; position:absolute; left:5px; top:2px; width:5px; height:9px;
+  border:2px solid #fff; border-top:0; border-left:0; transform:rotate(42deg);
+}
+html[data-theme="dark"] .dw-we-item,
+html[data-theme="purple"] .dw-we-item,
+html[data-theme="starry"] .dw-we-item{ background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.09) }
+html[data-theme="dark"] .dw-we-name,
+html[data-theme="purple"] .dw-we-name,
+html[data-theme="starry"] .dw-we-name{ color:#eee6f5 }
+html[data-theme="dark"] .dw-we-sel,
+html[data-theme="purple"] .dw-we-sel,
+html[data-theme="starry"] .dw-we-sel{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.16) }
 
 /* 空态 */
 .dw-lib-empty{
@@ -5518,10 +5553,13 @@ window.__checkSecretZone = checkSecretZone;
       </div>
 
       <div class="dw-sec">
-        <div class="dw-sec-h">导入</div>
-        <div class="dw-lib-empty">
-          一键导入壁纸引擎（Wallpaper Engine）<br>
-          <span style="font-size:11px;opacity:.75">P3 阶段开放，可扫描你的 Steam 壁纸目录</span>
+        <div class="dw-sec-h">从壁纸引擎导入</div>
+        <button class="dw-btn" type="button" id="dwWePick" style="width:100%">选择壁纸文件夹…</button>
+        <div class="dw-hint" id="dwWeHint">在 Chrome / Edge 可用。选 <b>steamapps\\workshop\\content\\431960</b> 或单个壁纸目录</div>
+        <div id="dwWeList"></div>
+        <div class="dw-row" id="dwWeActions" style="display:none">
+          <button class="dw-btn" type="button" id="dwWeAll">全选</button>
+          <button class="dw-btn" type="button" id="dwWeGo">导入选中</button>
         </div>
       </div>
     </div>
@@ -6174,6 +6212,253 @@ window.__checkSecretZone = checkSecretZone;
       });
     });
   }
+
+  /* ───────── 壁纸引擎（Wallpaper Engine）导入 ─────────
+     目录结构：431960/<壁纸id>/project.json + 视频/资源
+     分类：video → 直接读 mp4/webm（存句柄，不占配额）
+           scene → 读 preview.gif（动态）或 preview.jpg（静态），体积小直接存 Blob
+           web   → 暂不支持，明确提示 */
+  var weItems = [], wePicked = {};
+  var wePickBtn = $('dwWePick'), weHintEl = $('dwWeHint'), weListEl = $('dwWeList');
+  var weActionsEl = $('dwWeActions'), weAllBtn = $('dwWeAll'), weGoBtn = $('dwWeGo');
+
+  function escHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function weSay(msg, kind) { say(weHintEl, msg, kind); }
+  function weSupported() { return typeof window.showDirectoryPicker === 'function'; }
+
+  function weImageSize(file) {
+    return new Promise(function (res) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () { res({ w: img.naturalWidth, h: img.naturalHeight }); URL.revokeObjectURL(url); };
+      img.onerror = function () { res({ w: 0, h: 0 }); URL.revokeObjectURL(url); };
+      img.src = url;
+    });
+  }
+  function weMakeThumb(file, max) {
+    return new Promise(function (res) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        try {
+          var sc = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+          var c = document.createElement('canvas');
+          c.width = Math.max(1, Math.round(img.naturalWidth * sc));
+          c.height = Math.max(1, Math.round(img.naturalHeight * sc));
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          res(c.toDataURL('image/jpeg', 0.72));
+        } catch (e) { res(''); }
+        URL.revokeObjectURL(url);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); res(''); };
+      img.src = url;
+    });
+  }
+
+  async function weReadProject(dirH) {
+    try {
+      var fh = await dirH.getFileHandle('project.json');
+      var f = await fh.getFile();
+      var j = JSON.parse(await f.text());
+      return { dir: dirH, pj: j };
+    } catch (e) { return null; }
+  }
+
+  async function weScan(root) {
+    var out = [];
+    var self = await weReadProject(root);
+    if (self) { out.push(self); return out; }
+    try {
+      for await (var ent of root.entries()) {
+        var h = ent[1];
+        if (!h || h.kind !== 'directory') continue;
+        var p = await weReadProject(h);
+        if (p) out.push(p);
+      }
+    } catch (e) {}
+    return out;
+  }
+
+  function weKind(pj) {
+    var t = String(pj.type || '').toLowerCase();
+    var file = String(pj.file || '');
+    if (t === 'video') return 'video';
+    if (t === 'scene') return 'scene';
+    if (t === 'web') return 'web';
+    if (/\.(mp4|webm)$/i.test(file)) return 'video';
+    if (/\.html?$/i.test(file)) return 'web';
+    if (/\.pkg$/i.test(file)) return 'scene';
+    return 'unknown';
+  }
+
+  async function weFindFile(dirH, names) {
+    for (var i = 0; i < names.length; i++) {
+      if (!names[i]) continue;
+      try {
+        var fh = await dirH.getFileHandle(names[i]);
+        var f = await fh.getFile();
+        return { handle: fh, file: f, name: names[i] };
+      } catch (e) {}
+    }
+    return null;
+  }
+
+  async function wePrepare(found) {
+    weItems = []; wePicked = {};
+    for (var i = 0; i < found.length; i++) {
+      var src = found[i];
+      var title = String(src.pj.title || src.dir.name || '未命名').slice(0, 44);
+      var kind = weKind(src.pj);
+      var e = {
+        name: title, kind: kind, dir: src.dir, pj: src.pj,
+        size: 0, thumb: '', sceneMode: 'gif', vfile: null, sceneGif: null, sceneStill: null
+      };
+
+      // 通用预览图
+      var prev = await weFindFile(src.dir, ['preview.jpg', 'preview.jpeg', 'preview.png', 'preview.gif']);
+      if (prev) {
+        e.size = prev.file.size;
+        try { e.thumb = await weMakeThumb(prev.file, 140); } catch (er) {}
+      }
+
+      if (kind === 'video') {
+        var vf = await weFindFile(src.dir, [src.pj.file, 'video.mp4', 'video.webm', 'video.mov']);
+        if (vf) { e.vfile = vf; e.size = vf.file.size; }
+        else { e.kind = 'broken'; }
+      } else if (kind === 'scene') {
+        e.sceneGif = await weFindFile(src.dir, ['preview.gif']);
+        e.sceneStill = await weFindFile(src.dir, ['preview.jpg', 'preview.png', 'preview.jpeg']);
+        if (!e.sceneGif && !e.sceneStill) { e.kind = 'broken'; }
+        else {
+          e.sceneMode = e.sceneGif ? 'gif' : 'still';
+          e.size = e.sceneGif ? e.sceneGif.file.size : e.sceneStill.file.size;
+        }
+      }
+      weItems.push(e);
+      if (e.kind === 'video' || e.kind === 'scene') wePicked[i] = true;
+    }
+    weRenderList();
+    var n = weItems.filter(function (x) { return x.kind === 'video' || x.kind === 'scene'; }).length;
+    weSay('找到 ' + weItems.length + ' 个，其中可导入 ' + n + ' 个', n ? 'ok' : 'err');
+  }
+
+  function weRenderList() {
+    if (!weListEl) return;
+    if (!weItems.length) {
+      weListEl.innerHTML = '';
+      if (weActionsEl) weActionsEl.style.display = 'none';
+      return;
+    }
+    var h = '';
+    weItems.forEach(function (it, i) {
+      var label = it.kind === 'video' ? '视频 · 原文件'
+        : it.kind === 'scene' ? ('场景 · ' + (it.sceneMode === 'gif' ? '用预览动图' : '用预览静图'))
+        : it.kind === 'web' ? '网页壁纸 · 暂不支持'
+        : '无法识别';
+      var thumb = it.thumb ? '<img src="' + it.thumb + '" alt="">' : '';
+      var canPick = (it.kind === 'video' || it.kind === 'scene');
+      h += '<div class="dw-we-item">' +
+        '<div class="dw-we-thumb">' + thumb + '</div>' +
+        '<div class="dw-we-meta">' +
+          '<div class="dw-we-name">' + escHtml(it.name) + '</div>' +
+          '<div class="dw-we-sub">' + label + (it.size ? ' · ' + fmtSize(it.size) : '') + '</div>' +
+        '</div>' +
+        (canPick
+          ? '<button class="dw-we-sel' + (wePicked[i] ? ' on' : '') + '" type="button" data-pick="' + i + '" aria-label="选择"></button>'
+          : '') +
+      '</div>';
+    });
+    weListEl.innerHTML = h;
+    if (weActionsEl) weActionsEl.style.display = '';
+    weListEl.querySelectorAll('[data-pick]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var i = +b.getAttribute('data-pick');
+        wePicked[i] = !wePicked[i];
+        b.classList.toggle('on', !!wePicked[i]);
+      });
+    });
+  }
+
+  async function weDoImport() {
+    var picked = Object.keys(wePicked).filter(function (k) { return wePicked[k]; }).map(Number);
+    if (!picked.length) { weSay('先勾选要导入的壁纸', 'err'); return; }
+
+    weSay('正在导入 ' + picked.length + ' 个…');
+    var ok = 0, fail = 0;
+    for (var n = 0; n < picked.length; n++) {
+      var it = weItems[picked[n]];
+      try {
+        if (it.kind === 'video') {
+          var probe = await probeVideo(it.vfile.file);
+          var rec = {
+            id: uid(), name: it.name, type: 'video',
+            w: probe.w, h: probe.h, size: it.vfile.file.size,
+            luma: probe.luma, thumb: it.thumb || probe.thumb,
+            hasAudio: null,
+            cfg: Object.assign({}, cfg), addedAt: Date.now(),
+            mode: 'handle', handle: it.vfile.handle   // 存句柄，不占浏览器空间
+          };
+          rec.hasAudio = await detectAudioInFile(it.vfile.file);
+          await idbPut(rec);
+          ok++;
+        } else if (it.kind === 'scene') {
+          var pick = (it.sceneMode === 'gif' && it.sceneGif) ? it.sceneGif : (it.sceneStill || it.sceneGif);
+          if (!pick) throw new Error('no-preview');
+          var isGif = /\.gif$/i.test(pick.name);
+          var dim = await weImageSize(pick.file);
+          var rec2 = {
+            id: uid(),
+            name: it.name + (isGif ? ' · 动图' : ' · 静图'),
+            type: 'image',
+            blob: pick.file, w: dim.w, h: dim.h, size: pick.file.size,
+            luma: 0.45, thumb: it.thumb,
+            hasAudio: null,
+            cfg: Object.assign({}, cfg), addedAt: Date.now(),
+            mode: 'blob'
+          };
+          await idbPut(rec2);
+          ok++;
+        }
+      } catch (e) { fail++; }
+    }
+
+    try {
+      var list = await idbAll();
+      items = list.sort(function (a, b) { return (a.addedAt || 0) - (b.addedAt || 0); });
+      renderGrid(); refreshQuota();
+    } catch (e) {}
+    weItems = []; wePicked = []; weRenderList();
+    weSay('导入完成：成功 ' + ok + (fail ? ' · 失败 ' + fail : ''), fail ? 'err' : 'ok');
+  }
+
+  if (wePickBtn) wePickBtn.addEventListener('click', async function () {
+    if (!weSupported()) {
+      weSay('这个浏览器不支持选择文件夹，请用 Chrome 或 Edge', 'err');
+      return;
+    }
+    var dir;
+    try { dir = await window.showDirectoryPicker({ mode: 'read' }); }
+    catch (e) { return; }   // 用户取消
+    weSay('正在扫描…');
+    var found = [];
+    try { found = await weScan(dir); } catch (e) { found = []; }
+    if (!found.length) { weSay('没找到壁纸 —— 选中的目录里需要有 project.json', 'err'); return; }
+    await wePrepare(found);
+  });
+
+  if (weAllBtn) weAllBtn.addEventListener('click', function () {
+    var pickable = weItems.map(function (x, i) { return (x.kind === 'video' || x.kind === 'scene') ? i : -1; })
+      .filter(function (i) { return i >= 0; });
+    var allOn = pickable.every(function (i) { return wePicked[i]; });
+    pickable.forEach(function (i) { wePicked[i] = !allOn; });
+    weRenderList();
+  });
+
+  if (weGoBtn) weGoBtn.addEventListener('click', weDoImport);
 
   /* ───────── 一键清空壁纸库（事件委托 + 点两次确认） ───────── */
   var clearAllBtn = $('dwClearAll');
