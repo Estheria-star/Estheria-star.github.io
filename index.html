@@ -5557,6 +5557,7 @@ window.__checkSecretZone = checkSecretZone;
         <button class="dw-btn" type="button" id="dwWePick" style="width:100%">选择壁纸文件夹…</button>
         <div class="dw-hint" id="dwWeHint">在 Chrome / Edge 可用。选 <b>steamapps\\workshop\\content\\431960</b> 或单个壁纸目录</div>
         <div id="dwWeList"></div>
+        <input type="file" id="dwWeDir" webkitdirectory directory multiple hidden>
         <div class="dw-row" id="dwWeActions" style="display:none">
           <button class="dw-btn" type="button" id="dwWeAll">全选</button>
           <button class="dw-btn" type="button" id="dwWeGo">导入选中</button>
@@ -6394,13 +6395,17 @@ window.__checkSecretZone = checkSecretZone;
       try {
         if (it.kind === 'video') {
           var probe = await probeVideo(it.vfile.file);
+          var fakeHandle = !!(it.vfile.handle && it.vfile.handle.__fake);
           var rec = {
             id: uid(), name: it.name, type: 'video',
             w: probe.w, h: probe.h, size: it.vfile.file.size,
             luma: probe.luma, thumb: it.thumb || probe.thumb,
             hasAudio: null,
             cfg: Object.assign({}, cfg), addedAt: Date.now(),
-            mode: 'handle', handle: it.vfile.handle   // 存句柄，不占浏览器空间
+            // 真句柄 → 不占配额；兼容模式拿到的是假句柄 → 只能存文件本体
+            mode: fakeHandle ? 'blob' : 'handle',
+            handle: fakeHandle ? null : it.vfile.handle,
+            blob: fakeHandle ? it.vfile.file : null
           };
           rec.hasAudio = await detectAudioInFile(it.vfile.file);
           await idbPut(rec);
@@ -6435,17 +6440,95 @@ window.__checkSecretZone = checkSecretZone;
     weSay('导入完成：成功 ' + ok + (fail ? ' · 失败 ' + fail : ''), fail ? 'err' : 'ok');
   }
 
+  /* 兜底通道：webkitdirectory 传统目录选择
+     为什么需要：Chrome 拒绝网页通过 showDirectoryPicker 打开「系统目录」
+     （C:/Program Files、C:/Windows 等），而 Steam 常装在 Program Files 里。
+     webkitdirectory 走的是旧的文件选择器，不受这个限制，代价是拿不到文件句柄 ——
+     视频只能以 Blob 存进 IndexedDB（占配额）。 */
+  var weDirInput = $('dwWeDir');
+  var weSource = 'picker';       // picker = 句柄模式；input = Blob 模式
+
+  function wrapFileDir(name, filesMap) {
+    return {
+      kind: 'directory', name: name, __fake: true,
+      async getFileHandle(n) {
+        var f = filesMap[n];
+        if (!f) throw new Error('not found');
+        return {
+          kind: 'file', name: n, __fake: true,
+          async getFile() { return f; }
+        };
+      },
+      async *entries() {}
+    };
+  }
+
+  async function weScanFromFiles(fileList) {
+    var byDir = {}, i;
+    for (i = 0; i < fileList.length; i++) {
+      var f = fileList[i];
+      var rel = f.webkitRelativePath || f.name || '';
+      var idx = rel.lastIndexOf('/');
+      if (idx < 0) continue;
+      var dir = rel.slice(0, idx);
+      if (!byDir[dir]) byDir[dir] = {};
+      byDir[dir][f.name] = f;
+    }
+    var found = [];
+    var keys = Object.keys(byDir);
+    for (i = 0; i < keys.length; i++) {
+      var d = keys[i], kids = byDir[d];
+      if (!kids['project.json']) continue;
+      try {
+        var txt = await kids['project.json'].text();
+        var pj = JSON.parse(txt);
+        found.push({ dir: wrapFileDir(d.split('/').pop() || d, kids), pj: pj });
+      } catch (e) {}
+    }
+    return found;
+  }
+
+  if (weDirInput) weDirInput.addEventListener('change', async function () {
+    var fl = weDirInput.files;
+    if (!fl || !fl.length) return;
+    weSource = 'input';
+    weSay('正在扫描 ' + fl.length + ' 个文件…');
+    var found = [];
+    try { found = await weScanFromFiles(fl); } catch (e) { found = []; }
+    try { weDirInput.value = ''; } catch (e) {}
+    if (!found.length) {
+      weSay('没找到壁纸 —— 目录里需要有含 project.json 的壁纸文件夹', 'err');
+      return;
+    }
+    await wePrepare(found);
+    weSay('找到 ' + found.length + ' 个（兼容模式：视频将以文件形式保存，占浏览器空间）', 'ok');
+  });
+
   if (wePickBtn) wePickBtn.addEventListener('click', async function () {
     if (!weSupported()) {
-      weSay('这个浏览器不支持选择文件夹，请用 Chrome 或 Edge', 'err');
+      // 连 showDirectoryPicker 都没有（Safari/Firefox）→ 直接走兼容模式
+      if (weDirInput) { weSource = 'input'; weDirInput.click(); }
+      else weSay('这个浏览器不支持选择文件夹，请用 Chrome 或 Edge', 'err');
       return;
     }
     var dir;
-    try { dir = await window.showDirectoryPicker({ mode: 'read' }); }
-    catch (e) { return; }   // 用户取消
+    try {
+      dir = await window.showDirectoryPicker({ mode: 'read' });
+    } catch (e) {
+      // AbortError = 用户主动取消，别骚扰
+      if (e && e.name === 'AbortError') return;
+      // SecurityError 等 = 系统目录被拦 / 不支持 → 自动切兼容模式
+      weSay('这个目录被浏览器拦住（系统目录），已切换兼容方式…');
+      if (weDirInput) {
+        weSource = 'input';
+        setTimeout(function () { weDirInput.click(); }, 300);
+      }
+      return;
+    }
+    weSource = 'picker';
     weSay('正在扫描…');
     var found = [];
-    try { found = await weScan(dir); } catch (e) { found = []; }
+    try { found = await weScan(dir); } catch (e2) { found = []; }
     if (!found.length) { weSay('没找到壁纸 —— 选中的目录里需要有 project.json', 'err'); return; }
     await wePrepare(found);
   });
