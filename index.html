@@ -6042,8 +6042,9 @@ window.__checkSecretZone = checkSecretZone;
       video.style.objectPosition = cfg.posX + '% ' + cfg.posY + '%';
       try {
         video.playbackRate = cfg.speed;
-        video.muted = !!cfg.muted;
         video.volume = cfg.volume;
+        // muted 不在这里改 —— 自动播放必须静音才不会被浏览器拦，
+        // 声音由 armUnmute() 在用户第一次交互后恢复（见 activate）
       } catch (e) {}
     }
   }
@@ -6109,18 +6110,19 @@ window.__checkSecretZone = checkSecretZone;
     var mute = $('dwMute');
     if (mute) mute.addEventListener('click', function () {
       cfg.muted = !cfg.muted;
-      syncProps(); applyCfg(); saveCfg();
-      if (curItem) { curItem.cfg = Object.assign({}, cfg); idbPut(curItem); }
-      // 关键：Chrome 在「取消静音」时会暂停原本 muted 自动播放的视频，
-      // 必须在这里显式重新 play()，否则用户会觉得"开了声音但没声音"
+      // 这里必须显式同步到 video —— applyCfg 不再管 muted（自动播放要静音），
+      // 否则用户点了开关却没反应
       if (curItem && curItem.type === 'video') {
-        if (video.paused) {
+        video.muted = !!cfg.muted;
+        if (!cfg.muted && video.paused) {
           video.play().catch(function () {
             say(hint, '浏览器拦截了带声音的自动播放 —— 点一下页面任意位置再试', 'err');
           });
         }
         if (!cfg.muted) setTimeout(probeAudio, 900);
       }
+      syncProps(); applyCfg(); saveCfg();
+      if (curItem) { curItem.cfg = Object.assign({}, cfg); idbPut(curItem); }
     });
     syncProps();
   }
@@ -6270,6 +6272,27 @@ window.__checkSecretZone = checkSecretZone;
       });
   }
 
+  /* 浏览器规定：带声音的视频必须由用户手势触发才能 play()。
+     所以自动恢复壁纸时先静音播起来，等用户第一次点屏幕/按键再把声音接上 */
+  var unmuteArmed = false;
+  function armUnmute() {
+    if (unmuteArmed) return;
+    unmuteArmed = true;
+    function doUnmute() {
+      document.removeEventListener('pointerdown', doUnmute, true);
+      document.removeEventListener('keydown', doUnmute, true);
+      unmuteArmed = false;
+      if (!curItem || curItem.type !== 'video') return;
+      cfg.muted = false;
+      syncProps(); saveCfg();
+      video.muted = false;
+      if (video.paused) video.play().catch(function () {});
+      say(hint, '声音已开启 🔊', 'ok');
+    }
+    document.addEventListener('pointerdown', doUnmute, true);
+    document.addEventListener('keydown', doUnmute, true);
+  }
+
   function activate(id, silent) {
     return idbGet(id).then(function (it) {
       if (!it) throw new Error('壁纸不存在');
@@ -6284,9 +6307,11 @@ window.__checkSecretZone = checkSecretZone;
           video.src = curURL;
           wrap.classList.add('is-video');
           wrap.style.backgroundImage = '';
-          video.muted = !!cfg.muted;
+          var wantSound = !cfg.muted;
+          video.muted = true;               // 必须先静音，否则 play() 被浏览器拒绝
           video.volume = cfg.volume;
           video.play().catch(function () {});
+          if (wantSound) armUnmute();       // 用户一交互就接上声音
           pauseBtn.disabled = false;
           pauseBtn.textContent = '暂停动态';
           setTimeout(probeAudio, 1500);     // 播一会儿再判断有没有音轨
