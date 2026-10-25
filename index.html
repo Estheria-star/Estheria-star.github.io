@@ -1327,6 +1327,158 @@ html.tk-switching .tk-halo{transition:opacity .25s ease !important}
   .credit-line{font-size:.82em;opacity:.62;letter-spacing:.02em}
   .credit-line a{color:inherit;text-decoration:underline;text-underline-offset:2px}
 </style>
+<style>
+
+/* ═══════════════════ 自定义背景（图片 / 动态壁纸）v2 ═══════════════════ */
+.st-bg-wrap{
+  position:fixed; inset:0; z-index:-2; pointer-events:none; overflow:hidden;
+  background-size:cover; background-position:50% 50%; background-repeat:no-repeat;
+  opacity:0; transition:opacity .9s cubic-bezier(.22,.9,.28,1);
+}
+.st-bg-wrap.is-on{ opacity:1 }
+.st-bg-wrap video{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  display:none; background:#000;
+}
+.st-bg-wrap.is-video video{ display:block }
+.st-bg-wrap.is-video{ background-image:none !important }
+/* 暗化遮罩：保证前景可读，同时保留壁纸的观感 */
+.st-bg-wrap::after{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(180deg,rgba(6,16,30,.34) 0%,rgba(6,16,30,.12) 28%,rgba(6,16,30,.44) 100%);
+}
+/* 有背景时：body 底色压暗，光斑让位 */
+html.has-bg body{ background:#0d1a2a }
+html.has-bg .blob{ opacity:.10 }
+html.has-bg ::selection{ background:rgba(255,255,255,.3) }
+
+/* 文字自适应（默认按深底处理，JS 测到浅底会移除 .bg-dark） */
+html.has-bg.bg-dark .hero h1{
+  background-image:linear-gradient(110deg,#ffffff 18%,#a9d2ff 40%,#eaf5ff 52%,#ffffff 74%);
+  filter:drop-shadow(0 2px 16px rgba(0,0,0,.6)) drop-shadow(0 1px 2px rgba(0,0,0,.42));
+}
+html.has-bg.bg-dark .hero-tag,
+html.has-bg.bg-dark .hero-eyebrow,
+html.has-bg.bg-dark .sec-eyebrow,
+html.has-bg.bg-dark .sec-sub,
+html.has-bg.bg-dark .foot,
+html.has-bg.bg-dark .foot *,
+html.has-bg.bg-dark .dock span,
+html.has-bg.bg-dark .dock em,
+html.has-bg.bg-dark .marquee span,
+html.has-bg.bg-dark .marquee em{
+  color:#ddebf9 !important;
+  text-shadow:0 1px 8px rgba(0,0,0,.55);
+}
+html.has-bg.bg-dark .hero-tag{ color:#eef6ff !important; font-weight:600 }
+html.has-bg.bg-dark .nav-links a,
+html.has-bg.bg-dark .brand,
+html.has-bg.bg-dark .brand-sub{ color:#eaf3fd !important; text-shadow:0 1px 6px rgba(0,0,0,.5) }
+html.has-bg.bg-dark .nav-links a:hover{ color:#fff !important; background:rgba(255,255,255,.2) }
+/* 注意：只提亮「卡片外」的裸文字。
+   .zone-name / .zone-sub 在手风琴卡片内部，卡片是白底，提亮反而看不见 —— 不碰 */
+html.has-bg.bg-dark .sec-title{ color:#f4f9ff !important; text-shadow:0 2px 12px rgba(0,0,0,.5) }
+html.has-bg.bg-dark .btn-g{
+  background:rgba(255,255,255,.94) !important; border-color:rgba(255,255,255,.9) !important; color:#1f3c5e !important;
+}
+/* 深色主题本身已是浅色文字，叠加背景时给一点投影即可 */
+html.has-bg[data-theme="dark"] .hero-tag,
+html.has-bg[data-theme="purple"] .hero-tag,
+html.has-bg[data-theme="starry"] .hero-tag{ text-shadow:0 1px 8px rgba(0,0,0,.5) }
+
+/* ── 背景设置按钮 ── */
+.st-bg-btn{
+  position:fixed; right:18px; bottom:88px; z-index:72;
+  width:44px; height:44px; border-radius:50%; display:grid; place-items:center;
+  cursor:pointer; font-size:19px; line-height:1; padding:0;
+  border:1px solid rgba(255,255,255,.62);
+  background:rgba(255,255,255,.74);
+  -webkit-backdrop-filter:blur(18px) saturate(1.6); backdrop-filter:blur(18px) saturate(1.6);
+  box-shadow:0 8px 26px rgba(40,80,130,.18);
+  transition:transform .26s var(--ease), box-shadow .26s ease, background .26s ease;
+}
+.st-bg-btn:hover{ transform:translateY(-3px) scale(1.06); box-shadow:0 14px 34px rgba(40,80,130,.28) }
+.st-bg-btn:active{ transform:translateY(0) scale(.98) }
+.st-bg-btn.on{ border-color:#89c2ff; box-shadow:0 0 0 3px rgba(137,194,255,.24), 0 8px 26px rgba(40,80,130,.18) }
+
+/* ── 背景面板 ── */
+.st-bg-panel{
+  position:fixed; right:18px; bottom:144px; z-index:72; width:286px; padding:17px;
+  border-radius:20px; text-align:left;
+  background:rgba(255,255,255,.9);
+  -webkit-backdrop-filter:blur(26px) saturate(1.75); backdrop-filter:blur(26px) saturate(1.75);
+  border:1px solid rgba(255,255,255,.74);
+  box-shadow:0 20px 52px rgba(40,80,130,.24), inset 0 1px 0 rgba(255,255,255,.9);
+  opacity:0; transform:translateY(10px) scale(.97); pointer-events:none;
+  transition:opacity .28s var(--ease), transform .28s var(--ease);
+}
+.st-bg-panel.open{ opacity:1; transform:none; pointer-events:auto }
+.stp-title{ font-size:14px; font-weight:800; color:#1f3c5e; letter-spacing:.3px }
+.stp-sub{ font-size:11.5px; color:#6b87a6; line-height:1.7; margin-top:5px }
+.stp-upload{
+  display:block; margin-top:13px; padding:12px; border-radius:12px; text-align:center;
+  font-size:13px; font-weight:700; color:#2f6ba8; cursor:pointer;
+  background:linear-gradient(180deg,rgba(137,194,255,.26),rgba(137,194,255,.14));
+  border:1px dashed rgba(100,160,220,.55);
+  transition:background .22s ease, border-color .22s ease, transform .22s ease;
+}
+.stp-upload:hover{ background:rgba(137,194,255,.34); border-color:#5aa3ee; transform:translateY(-1px) }
+.stp-upload b{ font-weight:800 }
+.stp-type{ margin-top:10px; font-size:11px; color:#7d97b3; letter-spacing:.3px }
+.stp-row{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:9px }
+.stp-btn{
+  padding:9px; border-radius:11px; font-size:12.5px; font-weight:700; cursor:pointer;
+  border:1px solid rgba(140,185,225,.5); background:rgba(255,255,255,.7); color:#2f6ba8;
+  transition:all .2s ease; font-family:inherit;
+}
+.stp-btn:hover{ background:#fff; border-color:#5aa3ee; transform:translateY(-1px) }
+.stp-btn:active{ transform:translateY(0) }
+.stp-btn[disabled]{ opacity:.45; cursor:not-allowed; transform:none }
+.stp-ghost{ color:#6b87a6 }
+.stp-hint{ margin-top:9px; font-size:11px; color:#7d97b3; line-height:1.65; min-height:15px }
+.stp-hint.err{ color:#c0392b }
+.stp-hint.ok{ color:#2e7d4f }
+
+/* 深色主题面板 */
+html[data-theme="dark"] .st-bg-panel,
+html[data-theme="purple"] .st-bg-panel,
+html[data-theme="starry"] .st-bg-panel{
+  background:rgba(26,22,34,.9); border-color:rgba(255,255,255,.14);
+  box-shadow:0 20px 52px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.1);
+}
+html[data-theme="dark"] .stp-title,
+html[data-theme="purple"] .stp-title,
+html[data-theme="starry"] .stp-title{ color:#f0eaf5 }
+html[data-theme="dark"] .stp-sub,
+html[data-theme="purple"] .stp-sub,
+html[data-theme="starry"] .stp-sub,
+html[data-theme="dark"] .stp-type,
+html[data-theme="purple"] .stp-type,
+html[data-theme="starry"] .stp-type{ color:#a99cb8 }
+html[data-theme="dark"] .stp-btn,
+html[data-theme="purple"] .stp-btn,
+html[data-theme="starry"] .stp-btn{
+  background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.16); color:#dcd2ea;
+}
+html[data-theme="dark"] .stp-btn:hover,
+html[data-theme="purple"] .stp-btn:hover,
+html[data-theme="starry"] .stp-btn:hover{ background:rgba(255,255,255,.14) }
+html[data-theme="dark"] .st-bg-btn,
+html[data-theme="purple"] .st-bg-btn,
+html[data-theme="starry"] .st-bg-btn{
+  background:rgba(30,24,40,.72); border-color:rgba(255,255,255,.18);
+}
+
+/* 窄屏 */
+@media (max-width:760px){
+  .st-bg-btn{ right:12px; bottom:94px; width:40px; height:40px; font-size:17px }
+  .st-bg-panel{ right:12px; left:12px; width:auto; bottom:144px }
+}
+@media (prefers-reduced-motion:reduce){
+  .st-bg-wrap, .st-bg-panel, .st-bg-btn{ transition:none !important }
+}
+
+</style>
 </head>
 <body>
 <canvas id="starField" aria-hidden="true"></canvas>
@@ -4990,6 +5142,317 @@ window.__checkSecretZone = checkSecretZone;
   } else {
     setTimeout(check, 400);
   }
+})();
+</script>
+
+<!-- st-bg-v2 -->
+<div class="st-bg-wrap" id="stBg" aria-hidden="true"><video id="stBgVideo" muted loop playsinline preload="auto"></video></div>
+<button class="st-bg-btn" id="stBgBtn" type="button" aria-label="自定义背景" title="自定义背景 / 动态壁纸">🖼️</button>
+<div class="st-bg-panel" id="stBgPanel" role="dialog" aria-label="背景设置">
+  <div class="stp-title">页面背景</div>
+  <div class="stp-sub">可以选图片，也可以选一段视频当动态壁纸。文件只存在你自己的浏览器里，不会上传到任何服务器。</div>
+  <label class="stp-upload" for="stBgFile"><b>选择图片或视频…</b></label>
+  <input type="file" id="stBgFile" accept="image/*,video/mp4,video/webm" hidden>
+  <div class="stp-type" id="stBgType">当前：默认背景</div>
+  <div class="stp-row">
+    <button type="button" class="stp-btn" id="stBgPause" disabled>暂停动态壁纸</button>
+    <button type="button" class="stp-btn stp-ghost" id="stBgReset">恢复默认</button>
+  </div>
+  <div class="stp-hint" id="stBgHint"></div>
+</div>
+
+<script>
+/* ═══════════ 自定义背景 v2（图片 + 动态壁纸）═══════════ */
+(function () {
+  'use strict';
+
+  var DB = 'startian_bg_v2', STORE = 'media', KEY = 'bg';
+  var MAX_IMG = 20 * 1024 * 1024;      // 图片上限 20MB
+  var MAX_VIDEO = 120 * 1024 * 1024;   // 视频上限 120MB
+
+  var html = document.documentElement;
+  var wrap = document.getElementById('stBg');
+  var video = document.getElementById('stBgVideo');
+  var btn = document.getElementById('stBgBtn');
+  var panel = document.getElementById('stBgPanel');
+  var fileInput = document.getElementById('stBgFile');
+  var hint = document.getElementById('stBgHint');
+  var typeEl = document.getElementById('stBgType');
+  var pauseBtn = document.getElementById('stBgPause');
+  var resetBtn = document.getElementById('stBgReset');
+
+  if (!wrap || !btn) return;
+
+  /* ---------- IndexedDB ---------- */
+  function openDB() {
+    return new Promise(function (res, rej) {
+      if (!window.indexedDB) return rej(new Error('no-idb'));
+      var r = indexedDB.open(DB, 1);
+      r.onupgradeneeded = function () {
+        var db = r.result;
+        if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
+      };
+      r.onsuccess = function () { res(r.result); };
+      r.onerror = function () { rej(r.error || new Error('idb')); };
+    });
+  }
+  function idbGet() {
+    return openDB().then(function (db) {
+      return new Promise(function (res, rej) {
+        var q = db.transaction(STORE, 'readonly').objectStore(STORE).get(KEY);
+        q.onsuccess = function () { res(q.result); };
+        q.onerror = function () { rej(q.error); };
+      });
+    });
+  }
+  function idbPut(v) {
+    return openDB().then(function (db) {
+      return new Promise(function (res, rej) {
+        var q = db.transaction(STORE, 'readwrite').objectStore(STORE).put(v, KEY);
+        q.onsuccess = function () { res(true); };
+        q.onerror = function () { rej(q.error); };
+      });
+    });
+  }
+  function idbDel() {
+    return openDB().then(function (db) {
+      return new Promise(function (res) {
+        var q = db.transaction(STORE, 'readwrite').objectStore(STORE).delete(KEY);
+        q.onsuccess = function () { res(true); };
+        q.onerror = function () { res(false); };
+      });
+    });
+  }
+
+  /* ---------- 亮度采样 ---------- */
+  function lumaFromImage(imgOrVideo, w, h) {
+    try {
+      var c = document.createElement('canvas');
+      c.width = 24; c.height = 24;
+      var x = c.getContext('2d');
+      x.drawImage(imgOrVideo, 0, 0, 24, 24);
+      var d = x.getImageData(0, 0, 24, 24).data;
+      var s = 0, n = 0;
+      for (var i = 0; i < d.length; i += 4) {
+        s += (0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]) / 255;
+        n++;
+      }
+      return n ? s / n : 0.5;
+    } catch (e) { return 0.5; }   // 跨域/解码失败按中等处理
+  }
+
+  function setLuma(v) {
+    html.classList.toggle('bg-dark', v < 0.46);
+    html.style.setProperty('--bg-luma', (v || 0).toFixed(2));
+  }
+
+  /* ---------- 图片压缩 ---------- */
+  function compressImage(file) {
+    return new Promise(function (res, rej) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        var w = img.naturalWidth, h = img.naturalHeight;
+        var max = 1920;
+        var sc = Math.min(1, max / Math.max(w, h));
+        var cw = Math.max(1, Math.round(w * sc)), ch = Math.max(1, Math.round(h * sc));
+        var cv = document.createElement('canvas');
+        cv.width = cw; cv.height = ch;
+        var ctx = cv.getContext('2d');
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, cw, ch);
+        var luma = lumaFromImage(img, w, h);
+        URL.revokeObjectURL(url);
+        cv.toBlob(function (blob) {
+          if (!blob) return rej(new Error('blob'));
+          res({ type: 'image', blob: blob, w: cw, h: ch, luma: luma });
+        }, 'image/jpeg', 0.86);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); rej(new Error('decode')); };
+      img.src = url;
+    });
+  }
+
+  /* ---------- 视频：不转码，只读取尺寸与首帧亮度 ---------- */
+  function probeVideo(file) {
+    return new Promise(function (res, rej) {
+      var url = URL.createObjectURL(file);
+      var v = document.createElement('video');
+      v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = url;
+      var done = false;
+      function finish(ok, err) {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        if (!ok) { URL.revokeObjectURL(url); return rej(err || new Error('video')); }
+        var luma = lumaFromImage(v, v.videoWidth, v.videoHeight);
+        res({ type: 'video', blob: file, w: v.videoWidth, h: v.videoHeight, luma: luma, url: url });
+      }
+      var timer = setTimeout(function () { finish(false, new Error('timeout')); }, 15000);
+      v.onloadeddata = function () {
+        // 跳到一个有画面的位置再采样，避免黑场首帧
+        try { v.currentTime = Math.min(1, (v.duration || 2) * 0.25); } catch (e) {}
+        setTimeout(function () { finish(true); }, 500);
+      };
+      v.onerror = function () { finish(false, new Error('decode')); };
+    });
+  }
+
+  /* ---------- 应用 / 清除 ---------- */
+  var curURL = null;
+  var curType = '';
+
+  function applyRecord(rec, opts) {
+    opts = opts || {};
+    if (curURL) { URL.revokeObjectURL(curURL); curURL = null; }
+
+    if (rec.type === 'video') {
+      curURL = URL.createObjectURL(rec.blob);
+      video.src = curURL;
+      wrap.classList.add('is-video');
+      wrap.style.backgroundImage = '';
+      video.play().catch(function () {});
+      curType = 'video';
+      pauseBtn.disabled = false;
+      pauseBtn.textContent = '暂停动态壁纸';
+      typeEl.textContent = '当前：动态壁纸 · ' + rec.w + '×' + rec.h +
+        ' · ' + (rec.blob.size / 1024 / 1024).toFixed(1) + ' MB';
+    } else {
+      curURL = URL.createObjectURL(rec.blob);
+      video.pause();
+      video.removeAttribute('src');
+      wrap.classList.remove('is-video');
+      wrap.style.backgroundImage = 'url("' + curURL + '")';
+      curType = 'image';
+      pauseBtn.disabled = true;
+      pauseBtn.textContent = '暂停动态壁纸';
+      typeEl.textContent = '当前：图片 · ' + rec.w + '×' + rec.h +
+        ' · ' + Math.round(rec.blob.size / 1024) + ' KB';
+    }
+
+    wrap.classList.add('is-on');
+    html.classList.add('has-bg');
+    btn.classList.add('on');
+
+    if (typeof rec.luma === 'number') setLuma(rec.luma);
+    else if (rec.type === 'image') {
+      var im = new Image();
+      im.onload = function () { setLuma(lumaFromImage(im, im.naturalWidth, im.naturalHeight)); };
+      im.src = curURL;
+    }
+
+    if (!opts.silent) say('已应用 ✓', 'ok');
+  }
+
+  function clearBg(silent) {
+    if (curURL) { URL.revokeObjectURL(curURL); curURL = null; }
+    video.pause();
+    video.removeAttribute('src');
+    wrap.classList.remove('is-video', 'is-on');
+    wrap.style.backgroundImage = '';
+    html.classList.remove('has-bg', 'bg-dark');
+    btn.classList.remove('on');
+    curType = '';
+    pauseBtn.disabled = true;
+    typeEl.textContent = '当前：默认背景';
+    if (!silent) say('已恢复默认背景', 'ok');
+  }
+
+  function say(msg, kind) {
+    hint.textContent = msg || '';
+    hint.className = 'stp-hint' + (kind ? ' ' + kind : '');
+  }
+
+  /* ---------- 启动恢复 ---------- */
+  idbGet().then(function (rec) {
+    if (rec && rec.blob) {
+      var copy = { type: rec.type, blob: rec.blob, w: rec.w, h: rec.h, luma: rec.luma };
+      applyRecord(copy, { silent: true });
+      say('已恢复上次的背景', '');
+    }
+  }).catch(function () {});
+
+  /* ---------- 选文件 ---------- */
+  fileInput.addEventListener('change', function () {
+    var f = fileInput.files && fileInput.files[0];
+    if (!f) return;
+    var isVideo = /^video\//.test(f.type);
+    var isImage = /^image\//.test(f.type);
+    if (!isVideo && !isImage) { say('只支持图片或 MP4 / WebM 视频', 'err'); return; }
+
+    if (isVideo) {
+      if (f.size > MAX_VIDEO) { say('视频太大了（上限 120MB）', 'err'); return; }
+      // WebM 与部分容器在 Safari 上不认，给个温和提示
+      say('正在读取视频…');
+      probeVideo(f).then(function (rec) {
+        return idbPut({ type: 'video', blob: rec.blob, w: rec.w, h: rec.h, luma: rec.luma, at: Date.now() })
+          .then(function () {
+            if (rec.url) URL.revokeObjectURL(rec.url);
+            applyRecord({ type: 'video', blob: rec.blob, w: rec.w, h: rec.h, luma: rec.luma }, { silent: true });
+            say('动态壁纸已生效 ✓', 'ok');
+            fileInput.value = '';
+          });
+      }).catch(function (e) {
+        say(e && e.message === 'timeout' ? '视频读取超时，换个小一点的试试' : '这个视频浏览器解不开，试试 MP4（H.264）', 'err');
+      });
+    } else {
+      if (f.size > MAX_IMG) { say('图片太大了（上限 20MB）', 'err'); return; }
+      say('正在处理图片…');
+      compressImage(f).then(function (rec) {
+        return idbPut({ type: 'image', blob: rec.blob, w: rec.w, h: rec.h, luma: rec.luma, at: Date.now() })
+          .then(function () {
+            applyRecord(rec, { silent: true });
+            say('背景已生效 ✓', 'ok');
+            fileInput.value = '';
+          });
+      }).catch(function () { say('这张图片读不出来，换一张试试', 'err'); });
+    }
+  });
+
+  /* ---------- 动态壁纸暂停 / 播放 ---------- */
+  pauseBtn.addEventListener('click', function () {
+    if (curType !== 'video') return;
+    if (video.paused) { video.play().catch(function () {}); pauseBtn.textContent = '暂停动态壁纸'; say('已继续播放'); }
+    else { video.pause(); pauseBtn.textContent = '继续播放'; say('已暂停（省电）'); }
+  });
+
+  resetBtn.addEventListener('click', function () {
+    idbDel().then(function () { clearBg(); });
+  });
+
+  /* ---------- 面板开合 ---------- */
+  function toggle(force) {
+    var open = typeof force === 'boolean' ? force : !panel.classList.contains('open');
+    panel.classList.toggle('open', open);
+  }
+  btn.addEventListener('click', function (e) { e.stopPropagation(); toggle(); });
+  document.addEventListener('click', function (e) {
+    if (!panel.classList.contains('open')) return;
+    if (panel.contains(e.target) || e.target === btn) return;
+    toggle(false);
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') toggle(false); });
+
+  /* ---------- 性能保护 ---------- */
+  // 页面隐藏时暂停视频，回来再继续（省电、省 GPU）
+  document.addEventListener('visibilitychange', function () {
+    if (curType !== 'video') return;
+    if (document.hidden) { if (!video.paused) { video.dataset.autoPaused = '1'; video.pause(); } }
+    else if (video.dataset.autoPaused === '1' && !video.paused === false) {
+      delete video.dataset.autoPaused;
+      if (pauseBtn.textContent === '暂停动态壁纸') video.play().catch(function () {});
+    }
+  });
+
+  // 尊重「减少动效」偏好：默认不自动播放
+  try {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      video.addEventListener('loadeddata', function () { video.pause(); pauseBtn.textContent = '继续播放'; }, { once: true });
+    }
+  } catch (e) {}
+
+  /* 调试入口 */
+  window.ST_BG = { clear: clearBg, element: wrap, video: video };
 })();
 </script>
 </body>
