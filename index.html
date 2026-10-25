@@ -5651,6 +5651,37 @@ window.__checkSecretZone = checkSecretZone;
       } catch (e) {}
     }
   }
+  /* 音轨探测：Chrome 看 webkitAudioDecodedByteCount，Firefox 看 mozHasAudio */
+  var curHasAudio = null;
+  function probeAudio() {
+    if (!curItem || curItem.type !== 'video') return;
+    var has = null;
+    try {
+      if (typeof video.mozHasAudio === 'boolean') has = video.mozHasAudio;
+      else if (typeof video.webkitAudioDecodedByteCount === 'number') has = video.webkitAudioDecodedByteCount > 0;
+      else if (video.audioTracks && typeof video.audioTracks.length === 'number') has = video.audioTracks.length > 0;
+    } catch (e) {}
+    try {
+      console.log('[DW audio]', JSON.stringify({
+        moz: video.mozHasAudio,
+        bytes: video.webkitAudioDecodedByteCount,
+        tracks: video.audioTracks ? video.audioTracks.length : 'n/a',
+        decided: has
+      }));
+    } catch (e) {}
+    if (has === null) return;
+    curHasAudio = has;
+    var mute = $('dwMute');
+    if (mute) {
+      mute.disabled = !has;
+      mute.title = has ? '' : '这个视频没有音轨';
+      mute.style.opacity = has ? '' : '.42';
+      mute.style.cursor = has ? '' : 'not-allowed';
+    }
+    if (!has) say(hint, '这个视频没有音轨，静音和音量对它不起作用', '');
+    else if (!cfg.muted) say(hint, '声音已开启 🔊', 'ok');
+  }
+
   function saveCfg() { try { localStorage.setItem(LS_CFG, JSON.stringify(cfg)); } catch (e) {} }
   function loadCfg() {
     try {
@@ -5681,8 +5712,19 @@ window.__checkSecretZone = checkSecretZone;
     });
     var mute = $('dwMute');
     if (mute) mute.addEventListener('click', function () {
-      cfg.muted = !cfg.muted; syncProps(); applyCfg(); saveCfg();
+      cfg.muted = !cfg.muted;
+      syncProps(); applyCfg(); saveCfg();
       if (curItem) { curItem.cfg = Object.assign({}, cfg); idbPut(curItem); }
+      // 关键：Chrome 在「取消静音」时会暂停原本 muted 自动播放的视频，
+      // 必须在这里显式重新 play()，否则用户会觉得"开了声音但没声音"
+      if (curItem && curItem.type === 'video') {
+        if (video.paused) {
+          video.play().catch(function () {
+            say(hint, '浏览器拦截了带声音的自动播放 —— 点一下页面任意位置再试', 'err');
+          });
+        }
+        if (!cfg.muted) setTimeout(probeAudio, 900);
+      }
     });
     syncProps();
   }
@@ -5819,6 +5861,7 @@ window.__checkSecretZone = checkSecretZone;
           video.play().catch(function () {});
           pauseBtn.disabled = false;
           pauseBtn.textContent = '暂停动态';
+          setTimeout(probeAudio, 1500);     // 播一会儿再判断有没有音轨
         } else {
           video.pause(); video.removeAttribute('src');
           wrap.classList.remove('is-video');
