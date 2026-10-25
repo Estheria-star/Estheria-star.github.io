@@ -7082,6 +7082,20 @@ window.__checkSecretZone = checkSecretZone;
 })();
 </script>
 <!-- st-glass2 -->
+      <div class="dw-sec" id="dwKeysSec" style="margin-top:18px;display:none">
+        <div class="dw-sec-h">液态玻璃</div>
+        <div class="dw-lg-row">
+          <div>
+            <div class="t">自定义壁纸时启用</div>
+            <div class="s">用折射玻璃代替模糊，透出壁纸而不是挡住它</div>
+          </div>
+          <button class="dw-sw" type="button" id="dwLgSw" aria-label="液态玻璃开关"></button>
+        </div>
+        <div class="dw-sec-h" style="margin-top:16px">配色快捷键</div>
+        <div class="dw-keys" id="dwKeys"></div>
+        <div class="dw-hint">按下对应数字键即可切换配色 · 点右边的按钮可重绑</div>
+      </div>
+
 <script>
 /* ═══════════ 液态玻璃 + 配色快捷键 ═══════════ */
 (function () {
@@ -7313,10 +7327,11 @@ window.__checkSecretZone = checkSecretZone;
   /* ---------- 开关 UI ---------- */
   function mountUI() {
     var pane = document.getElementById('dwTheme');
-    if (!pane || document.getElementById('dwKeysSec')) return;
-    var wrapEl = document.createElement('div');
-    wrapEl.innerHTML = "\n      <div class=\"dw-sec\" id=\"dwKeysSec\" style=\"margin-top:18px\">\n        <div class=\"dw-sec-h\">液态玻璃</div>\n        <div class=\"dw-lg-row\">\n          <div>\n            <div class=\"t\">自定义壁纸时启用</div>\n            <div class=\"s\">用折射玻璃代替模糊，透出壁纸而不是挡住它</div>\n          </div>\n          <button class=\"dw-sw\" type=\"button\" id=\"dwLgSw\" aria-label=\"液态玻璃开关\"></button>\n        </div>\n        <div class=\"dw-sec-h\" style=\"margin-top:16px\">配色快捷键</div>\n        <div class=\"dw-keys\" id=\"dwKeys\"></div>\n        <div class=\"dw-hint\">按下对应数字键即可切换配色 · 点右边的按钮可重绑</div>\n      </div>\n";
-    pane.appendChild(wrapEl);
+    var sec = document.getElementById('dwKeysSec');
+    // UI 由 HTML 直出（避免超长字符串经混淆后损坏），这里只负责搬进配色页
+    if (!pane || !sec) return;
+    if (sec.parentNode !== pane) pane.appendChild(sec);
+    sec.style.display = '';
 
     var sw = document.getElementById('dwLgSw');
     if (sw) {
