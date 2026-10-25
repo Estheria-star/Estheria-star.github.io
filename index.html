@@ -5593,7 +5593,8 @@ window.__checkSecretZone = checkSecretZone;
   var LS_CFG = 'startian_wall_cfg_v1';
   var LS_ROT = 'startian_wall_rot_v1';
   var DB = 'startian_wall_v2', STORE = 'items';
-  var MAX_BLOB = 120 * 1024 * 1024;   // 单文件上限
+  var MAX_IMG = 20 * 1024 * 1024;      // 图片上限（压缩后入库存）
+  var MAX_VIDEO = 500 * 1024 * 1024;   // 视频上限（原文件入库）
 
   var $ = function (id) { return document.getElementById(id); };
   var html = document.documentElement;
@@ -5991,7 +5992,7 @@ window.__checkSecretZone = checkSecretZone;
         } catch (e) {}
         res({ blob: file, w: v.videoWidth, h: v.videoHeight, luma: luma, thumb: thumb });
       }
-      var timer = setTimeout(function () { fin(false, new Error('timeout')); }, 15000);
+      var timer = setTimeout(function () { fin(false, new Error('timeout')); }, 30000);
       v.onloadeddata = function () {
         try { v.currentTime = Math.min(1, (v.duration || 2) * 0.25); } catch (e) {}
         setTimeout(function () { fin(true); }, 520);
@@ -6078,16 +6079,45 @@ window.__checkSecretZone = checkSecretZone;
   }
 
   /* ───────── 添加壁纸 ───────── */
+  /* 配额预检：大文件写入前先看浏览器还有多少空间，避免写到一半失败 */
+  function checkQuota(need) {
+    return new Promise(function (res) {
+      if (!navigator.storage || !navigator.storage.estimate) return res(true);
+      navigator.storage.estimate().then(function (e) {
+        var free = (e.quota || 0) - (e.usage || 0);
+        if (!free) return res(true);
+        res(need * 1.15 < free);      // 留 15% 余量
+      }).catch(function () { res(true); });
+    });
+  }
+
   function addFromFile(file) {
     var isVideo = /^video\//.test(file.type);
     var isImage = /^image\//.test(file.type);
     if (!isVideo && !isImage) { say(hint, '只支持图片或 MP4 / WebM', 'err'); return; }
 
-    say(hint, isVideo ? '正在读取视频…' : '正在处理图片…', '');
+    var limit = isVideo ? MAX_VIDEO : MAX_IMG;
+    if (file.size > limit) {
+      say(hint, (isVideo ? '视频太大' : '图片太大') +
+        '（上限 ' + Math.round(limit / 1024 / 1024) + 'MB，当前 ' +
+        (file.size / 1024 / 1024).toFixed(0) + 'MB）', 'err');
+      return;
+    }
 
-    // 大文件 + 支持句柄 → 存句柄，不占配额
-    var useHandle = false;
-    if (isVideo && file.size > 30 * 1024 * 1024 && window.showOpenFilePicker) useHandle = true;
+    checkQuota(file.size).then(function (ok) {
+      if (!ok) {
+        say(hint, '浏览器可用空间不足，先清掉一些壁纸再试', 'err');
+        return;
+      }
+      doAddFile(file, isVideo);
+    });
+  }
+
+  function doAddFile(file, isVideo) {
+    var big = file.size > 30 * 1024 * 1024;
+    say(hint, isVideo
+      ? (big ? '正在读取视频（' + (file.size / 1024 / 1024).toFixed(0) + 'MB，大文件需要几秒）…' : '正在读取视频…')
+      : '正在处理图片…', '');
 
     var job = isVideo ? probeVideo(file) : compressImage(file);
     var audioJob = isVideo ? detectAudioInFile(file) : Promise.resolve(null);
@@ -6097,13 +6127,10 @@ window.__checkSecretZone = checkSecretZone;
         id: uid(), name: file.name, type: isVideo ? 'video' : 'image',
         w: r.w, h: r.h, size: file.size, luma: r.luma, thumb: r.thumb,
         hasAudio: hasAudio,
-        cfg: Object.assign({}, cfg), addedAt: Date.now(), mode: 'blob'
+        cfg: Object.assign({}, cfg), addedAt: Date.now(),
+        mode: 'blob',           // input 选的文件拿不到句柄，只能存本体
+        blob: r.blob
       };
-      if (useHandle) {
-        it.mode = 'handle'; it.handle = null;   // 句柄需重新选，这里降级提示
-        say(hint, '文件较大，已按普通方式保存（会占浏览器空间）', '');
-      }
-      if (r.blob) it.blob = r.blob;
       return idbPut(it).then(function () { return it; });
     }).then(function (it) {
       return idbAll().then(function (list) {
@@ -6115,7 +6142,9 @@ window.__checkSecretZone = checkSecretZone;
       fileIn.value = '';
       refreshQuota();
     }).catch(function (e) {
-      say(hint, e && e.message === 'timeout' ? '视频读取超时，换个小一点的' : '这个文件读不出来，换一个试试', 'err');
+      say(hint, e && e.message === 'timeout'
+        ? '视频读取超时 —— 文件可能过大或编码不支持，试试 MP4（H.264）'
+        : '这个文件读不出来，换一个试试', 'err');
     });
   }
 
@@ -6413,6 +6442,18 @@ window.__checkSecretZone = checkSecretZone;
   async function weDoImport() {
     var picked = Object.keys(wePicked).filter(function (k) { return wePicked[k]; }).map(Number);
     if (!picked.length) { weSay('先勾选要导入的壁纸', 'err'); return; }
+
+    // 预估要占多少空间（句柄模式不计），超配额就先拦下
+    var needBytes = 0;
+    for (var pi = 0; pi < picked.length; pi++) {
+      var pv = weItems[picked[pi]];
+      if (pv.kind === 'video' && pv.vfile && pv.vfile.handle && !pv.vfile.handle.__fake) continue;
+      needBytes += (pv.size || 0);
+    }
+    if (needBytes > 0) {
+      var qOk = await checkQuota(needBytes);
+      if (!qOk) { weSay('可用空间不足（约需 ' + fmtSize(needBytes) + '），先清掉一些壁纸', 'err'); return; }
+    }
 
     weSay('正在导入 ' + picked.length + ' 个…');
     var ok = 0, fail = 0;
