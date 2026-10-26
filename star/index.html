@@ -1563,5 +1563,27 @@ I18N.auto();
   else window.addEventListener('load', function () { setTimeout(reg, 800); });
 })();
 </script>
+
+<style>
+/* 跨站导航胶囊（左下角，不影响原布局） */
+.stn-float{position:fixed;left:14px;bottom:14px;z-index:80;display:flex;flex-direction:column;gap:7px}
+.stn-float a{
+  width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
+  font-size:17px;line-height:1;text-decoration:none;
+  background:rgba(255,255,255,.9);border:1px solid rgba(140,185,225,.55);
+  box-shadow:0 6px 20px rgba(40,80,130,.16);
+  transition:transform .2s ease,box-shadow .2s ease,background .2s ease;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+}
+.stn-float a:hover{transform:translateY(-2px) scale(1.06);background:#fff;box-shadow:0 10px 26px rgba(40,80,130,.24)}
+@media (max-width:520px){.stn-float{left:10px;bottom:10px;gap:6px}.stn-float a{width:36px;height:36px;font-size:15px}}
+@media (prefers-reduced-motion:reduce){.stn-float a{transition:none}}
+</style>
+
+<!-- stn-cross -->
+<div class="stn-float" role="navigation" aria-label="跨站导航">
+<a href="/map/" title="宇宙地图 · 看所有作品" aria-label="宇宙地图">🌌</a>
+  <a href="/#projects" title="回到主页看更多作品" aria-label="更多作品">✨</a>
+</div>
 </body>
 </html>

@@ -20,20 +20,20 @@
 <script>document.documentElement.classList.add('js');(function(){try{var p=JSON.parse(localStorage.getItem('startian_theme_v1')||'{}');var m=p.mode||'auto',t=m;if(m==='auto'){var n=new Date(),x=n.getHours()*60+n.getMinutes();var l=((p.lightAt||'07:00')+'').split(':'),d=((p.darkAt||'19:00')+'').split(':');var lm=(+l[0])*60+(+l[1]||0),dm=(+d[0])*60+(+d[1]||0);t=(lm<dm)?((x>=lm&&x<dm)?'light':'dark'):((x>=lm||x<dm)?'light':'dark');var pr=p.autoPair||'classic';if(pr==='dreamy'){t=(t==='light')?'fresh':'purple';}else if(pr==='pink'){t=(t==='light')?'warm':'colorful';}}document.documentElement.setAttribute('data-theme',t);if(t==='custom'){try{var rc=JSON.parse(localStorage.getItem('startian_custom_resolved_v1')||'null');if(rc){for(var ck in rc){if(ck!=='__dark'&&typeof rc[ck]==='string')document.documentElement.style.setProperty(ck,rc[ck]);}}}catch(e){}}var avm={dark:'avatar-dark.jpg',purple:'avatar-purple.jpg',fresh:'avatar-fresh.jpg',warm:'avatar-warm.jpg',colorful:'avatar-colorful.jpg',custom:''};var avp=avm[t]||'';window.__initAvatar=avp||'avatar.png';if(avp){var ln=document.createElement('link');ln.rel='preload';ln.as='image';ln.href=avp;document.head.appendChild(ln);}}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>星恬的小站 · 五子棋 几何工坊 宇宙地图 · startian.top</title>
-<meta name="description" content="星恬的个人作品小站：在线五子棋（AI 学习反制）、高中数学几何工坊、宇宙地图、无限星空生成器、生命游戏、函数音乐、错题本等 17 个免费网页小作品，打开即用无需安装。">
+<meta name="description" content="星恬的个人作品小站：在线五子棋（AI 学习反制）、高中数学几何工坊、宇宙地图、无限星空生成器、生命游戏、函数音乐、错题本等 18 个免费网页小作品，打开即用无需安装。">
 <meta name="keywords" content="星恬,startian,五子棋在线,几何工坊,高中数学几何,宇宙地图,无限星空,星空生成器,生命游戏,函数音乐,错题本,配色实验室,心情日历">
 <meta name="author" content="星恬">
 <meta name="theme-color" content="#E6F7FF">
 <link rel="canonical" href="https://startian.top/">
 <meta property="og:site_name" content="星恬的小站">
-<meta property="og:title" content="星恬的小站 · 17 个免费网页小作品">
-<meta property="og:description" content="下棋、画几何、捣鼓 AI 小玩意 —— 五子棋、几何工坊、万物沙盒等 17 个作品，欢迎来逛逛～">
+<meta property="og:title" content="星恬的小站 · 18 个免费网页小作品">
+<meta property="og:description" content="下棋、画几何、捣鼓 AI 小玩意 —— 五子棋、几何工坊、万物沙盒等 18 个作品，欢迎来逛逛～">
 <meta property="og:image" content="https://startian.top/avatar.png">
 <meta property="og:url" content="https://startian.top/">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="星恬的小站">
-<meta name="twitter:description" content="五子棋、几何工坊、宇宙地图等 13 个免费网页小作品">
+<meta name="twitter:description" content="五子棋、几何工坊、宇宙地图等 18 个免费网页小作品">
 <meta name="twitter:image" content="https://startian.top/avatar.png">
 <script type="application/ld+json">
 {
@@ -41,7 +41,7 @@
   "@type": "WebSite",
   "name": "星恬的小站",
   "url": "https://startian.top/",
-  "description": "星恬的个人作品小站：五子棋、几何工坊、宇宙地图等 13 个免费网页工具",
+  "description": "星恬的个人作品小站：五子棋、几何工坊、宇宙地图等 18 个免费网页工具",
   "inLanguage": "zh-CN",
   "author": {
     "@type": "Person",
@@ -2446,7 +2446,7 @@ html{ --ink3:#5f7f9e; --accent-deep:#2f6fb8 }
         <div class="tile-body">
           <span class="ptag" data-i18n="tile.fit.tag">数学 · 工具</span>
           <h3 data-i18n="tile.fit.title">函数拟合器</h3>
-          <p data-i18n="tile.fit.desc">丢进一堆散点，自动找出最像的函数：线性 / 二次 / 三次 / 指数 / 幂 / 对数六种模型实时比拼 R²，画布点一点数据就重算。</p>
+          <p data-i18n="tile.fit.desc">丢进一堆散点，自动找出最像的函数：线性 / 二次 / 三次 / 指数 / 幂 / 对数十一种模型实时比拼 R²，画布点一点数据就重算。</p>
           <span class="cta" data-i18n="tile.fit.cta">去拟合 <i>→</i></span>
         </div>
       </a>
@@ -3672,7 +3672,7 @@ I18N.auto();
     fit: {
       img: 'demos/fit.jpg',
       title: '函数拟合器',
-      desc: '丢一堆散点进去，自动找出最像的那个函数：线性 / 二次 / 三次 / 指数 / 幂 / 对数六种模型实时比拼 R²，最像的用金色高亮画出来；画布点一点加点、右键删点，数据也能直接粘贴导入。'
+      desc: '丢一堆散点进去，自动找出最像的那个函数：线性 / 二次 / 三次 / 指数 / 幂 / 对数十一种模型实时比拼 R²，最像的用金色高亮画出来；画布点一点加点、右键删点，数据也能直接粘贴导入。'
     },
     cuoti: {
       img: 'demos/cuoti.jpg',
