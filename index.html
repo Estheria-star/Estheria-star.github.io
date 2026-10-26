@@ -62,8 +62,8 @@
   --bg1:#eef8ff; --bg2:#d9edff;
   --card:#ffffff; --tint:#f4faff;
   --line:#d5e9fb; --line2:#e3f2fd;
-  --ink:#1f3c5e; --ink2:#54759a; --ink3:#93b4d4;
-  --accent:#89c2ff; --accent-deep:#3f86d1;
+  --ink:#1f3c5e; --ink2:#54759a; --ink3:#5f7f9e;
+  --accent:#89c2ff; --accent-deep:#2f6fb8;
   --sh-sm:0 1px 2px rgba(76,116,164,.06), 0 10px 28px rgba(120,160,210,.12);
   --sh-lg:0 2px 4px rgba(76,116,164,.08), 0 24px 50px rgba(110,155,210,.24);
   --ease:cubic-bezier(.22,.9,.28,1);
@@ -482,7 +482,7 @@ footer a:hover{text-decoration:underline}
 }
 
 /* ================= 🎨 THEMEKIT：主题样式（可复用模块）================= */
-.brand-sub{color:#9dbedd;font-weight:700}
+.brand-sub{color:#7fa3c4;font-weight:700}
 .tk-btn{
   border:1px solid var(--line);background:#fff;border-radius:999px;width:34px;height:34px;
   display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;
@@ -2113,6 +2113,96 @@ html.no-url-filter.lg-on .dw-sec-h{ color: #1f3c5e !important }
   #swUpdateBar{ bottom:76px; font-size:12px; padding:9px 10px 9px 13px; gap:7px }
   #swUpdateBar button{ padding:5px 9px; font-size:11px }
 }
+
+</style>
+<style>
+
+/* ═══════════════════ 可用性修复 P0/P1 ═══════════════════ */
+
+/* ── P0 · 汉堡按钮（桌面隐藏） ── */
+.nav-burger{
+  display:none; width:38px; height:38px; border-radius:11px; flex:0 0 auto;
+  border:1px solid var(--line); background:var(--card); cursor:pointer; padding:0;
+  place-items:center; transition:background .2s ease, border-color .2s ease;
+}
+.nav-burger:hover{ background:var(--card-2, #f4fbff); border-color:var(--line2) }
+.nav-burger i{
+  display:block; width:17px; height:2px; border-radius:2px;
+  background:var(--ink2); position:relative; transition:background .2s ease;
+}
+.nav-burger i::before,
+.nav-burger i::after{
+  content:''; position:absolute; left:0; width:17px; height:2px;
+  border-radius:2px; background:inherit; transition:transform .25s var(--ease);
+}
+.nav-burger i::before{ top:-6px }
+.nav-burger i::after{ top:6px }
+.nav-mask{
+  position:fixed; inset:0; z-index:94; background:rgba(10,22,38,.42);
+  opacity:0; pointer-events:none; transition:opacity .3s ease;
+}
+.nav-mask.on{ opacity:1; pointer-events:auto }
+
+/* ── P1 · 手风琴展开不占半屏 ──
+   .zones 原本 flex 单行，展开的 zone 只是 flex-grow 变大，
+   其余两个仍在一行 → 右侧留出大片空白。改成换行 + 展开占满 */
+@media (min-width:861px){
+  .zones{ flex-wrap:wrap }
+  .zone.open{ flex:1 1 100% !important; flex-grow:1 !important }
+}
+
+/* ── P0 · 手机导航（≤720px 切抽屉） ── */
+@media (max-width:720px){
+  .nav-in{ padding:0 14px; gap:10px }
+  .nav-burger{ display:grid }
+  .brand{
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    min-width:0; flex:1 1 auto; max-width:none;
+  }
+  .brand-sub{ display:none }
+  .nav-drawer{
+    position:fixed; top:0; right:0; bottom:0; width:min(78vw, 300px); z-index:95;
+    display:flex !important; flex-direction:column; gap:6px;
+    padding:74px 18px 26px; margin:0;
+    background:var(--card); border-left:1px solid var(--line);
+    box-shadow:-24px 0 64px rgba(20,50,90,.22);
+    transform:translateX(103%); transition:transform .32s cubic-bezier(.22,.9,.28,1);
+    overflow-y:auto;
+  }
+  .nav-drawer.open{ transform:none }
+  .nav-drawer a{
+    padding:13px 15px; border-radius:12px; font-size:15px; font-weight:700;
+    background:rgba(137,194,255,.10); color:var(--ink);
+    border:1px solid transparent;
+  }
+  .nav-drawer a:hover,
+  .nav-drawer a:active{ background:rgba(137,194,255,.22); border-color:var(--line2) }
+  .nav-drawer .tk-btn{
+    margin-top:10px; width:100%; height:44px; justify-content:center;
+    border-radius:12px;
+  }
+  /* 抽屉打开时锁滚动 */
+  html.nav-open{ overflow:hidden }
+  /* 深色主题下的抽屉 */
+  html[data-theme="dark"] .nav-drawer,
+  html[data-theme="purple"] .nav-drawer,
+  html[data-theme="starry"] .nav-drawer{
+    background:rgba(26,20,32,.98); border-left-color:rgba(255,255,255,.12);
+  }
+  html[data-theme="dark"] .nav-drawer a,
+  html[data-theme="purple"] .nav-drawer a,
+  html[data-theme="starry"] .nav-drawer a{
+    color:#e8e0f2; background:rgba(255,255,255,.07);
+  }
+}
+
+/* ── P1 · 对比度与小字号（≥12px 说明文字） ── */
+html{ --ink3:#5f7f9e; --accent-deep:#2f6fb8 }
+.brand-sub{ color:#7fa3c4 }
+/* 11px 级说明文字抬到 12px（不放大到夸张，只到可读下限） */
+.hero-eyebrow, .sec-eyebrow, .ptag, .dw-hint, .stp-sub, .dw-card-sub,
+.dw-lib-sub, .dw-we-sub, .dock em, .marquee em{ font-size:12px }
+.sec-sub{ font-size:12.5px }
 
 </style>
 </head>
@@ -7842,6 +7932,86 @@ window.__checkSecretZone = checkSecretZone;
       });
     }
   };
+})();
+</script>
+<!-- st-audit-v1 -->
+<script>
+/* ═══════════ 可用性修复 P0：手机导航抽屉 ═══════════ */
+(function () {
+  'use strict';
+  var nav = document.getElementById('nav');
+  var navIn = nav && nav.querySelector('.nav-in');
+  var links = nav && nav.querySelector('.nav-links');
+  if (!nav || !navIn || !links || navIn.querySelector('.nav-burger')) return;
+
+  // 汉堡按钮
+  var burger = document.createElement('button');
+  burger.className = 'nav-burger';
+  burger.type = 'button';
+  burger.setAttribute('aria-label', '打开菜单');
+  burger.setAttribute('aria-expanded', 'false');
+  burger.innerHTML = '<i></i>';
+  navIn.appendChild(burger);
+
+  // 遮罩
+  var mask = document.createElement('div');
+  mask.className = 'nav-mask';
+  document.body.appendChild(mask);
+
+  function setOpen(on) {
+    links.classList.toggle('open', on);
+    mask.classList.toggle('on', on);
+    document.documentElement.classList.toggle('nav-open', on);
+    burger.setAttribute('aria-expanded', on ? 'true' : 'false');
+    burger.setAttribute('aria-label', on ? '关闭菜单' : '打开菜单');
+  }
+
+  /* ⚠ .nav 有 backdrop-filter，会创建包含块 —— 里面的 position:fixed 会被 nav 的高度裁切。
+     所以移动端把 .nav-links 整个搬到 body 下（加 .nav-drawer 类），桌面端再搬回去 */
+  var originalParent = links.parentNode;
+  var originalNext = links.nextSibling;
+  function mountDrawer() {
+    var isMobile = window.innerWidth <= 720;
+    if (isMobile) {
+      if (links.parentNode !== document.body) {
+        document.body.appendChild(links);
+        links.classList.add('nav-drawer');
+      }
+    } else {
+      if (links.parentNode === document.body) {
+        if (originalNext && originalNext.parentNode === originalParent) {
+          originalParent.insertBefore(links, originalNext);
+        } else {
+          originalParent.appendChild(links);
+        }
+        links.classList.remove('nav-drawer', 'open');
+      }
+    }
+  }
+  mountDrawer();
+  window.addEventListener('resize', mountDrawer);
+
+  burger.addEventListener('click', function () {
+    setOpen(!links.classList.contains('open'));
+  });
+  mask.addEventListener('click', function () { setOpen(false); });
+
+  // 点链接后自动收起（含主题按钮之外的锚点）
+  links.addEventListener('click', function (e) {
+    var el = e.target;
+    if (el && (el.tagName === 'A' || el.closest('a'))) setOpen(false);
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && links.classList.contains('open')) setOpen(false);
+  });
+
+  // 放大回桌面尺寸时自动复原
+  window.addEventListener('resize', function () {
+    if (window.innerWidth > 720 && links.classList.contains('open')) setOpen(false);
+  });
+
+  window.NAV_DRAWER = { open: function () { setOpen(true); }, close: function () { setOpen(false); } };
 })();
 </script>
 </body>
