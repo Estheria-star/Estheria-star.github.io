@@ -1,0 +1,156 @@
+{
+  "_comment": "星恬的小站 · 全站唯一作品数据源。改动这里，然后运行 python sync_works.py 同步到首页/README/sitemap",
+  "updated": "2026-10-27",
+  "achievements": 86,
+  "zones": {
+    "fun": { "name": "娱乐", "emoji": "🎮" },
+    "tool": { "name": "工具", "emoji": "🛠" },
+    "fun2": { "name": "整活", "emoji": "✨" }
+  },
+  "works": [
+    {
+      "id": "wuziqi",
+      "name": "五子棋 · 学习反制版",
+      "url": "https://wuziqi.startian.top/",
+      "zone": "fun",
+      "emoji": "♟",
+      "desc": "会学习的 AI，7 档对手，从简单到灵拙"
+    },
+    {
+      "id": "life",
+      "name": "康威生命游戏花园",
+      "url": "https://startian.top/life/",
+      "zone": "fun",
+      "emoji": "🌱",
+      "desc": "涂几笔就能长出会爬会炸的细胞"
+    },
+    {
+      "id": "saolei",
+      "name": "扫雷",
+      "url": "https://startian.top/saolei/",
+      "zone": "fun",
+      "emoji": "💣",
+      "desc": "自定义档位 + 种子分享 + 魔法特效"
+    },
+    {
+      "id": "star",
+      "name": "无限星空生成器",
+      "url": "https://startian.top/star/",
+      "zone": "fun",
+      "emoji": "✨",
+      "desc": "随手生成一片专属于你的星空"
+    },
+    {
+      "id": "music",
+      "name": "函数音乐",
+      "url": "https://startian.top/music/",
+      "zone": "fun",
+      "emoji": "🎵",
+      "desc": "把数学函数写成旋律"
+    },
+    {
+      "id": "map",
+      "name": "宇宙地图 · 全站导航",
+      "url": "https://startian.top/map/",
+      "zone": "fun",
+      "emoji": "🌌",
+      "desc": "全站所有作品串成一片宇宙，去过的会亮起来"
+    },
+    {
+      "id": "geometry",
+      "name": "几何工坊 · 数学工作台",
+      "url": "https://geometry.startian.top/",
+      "zone": "tool",
+      "emoji": "📐",
+      "desc": "高中数学几何教学用，随手画随手量"
+    },
+    {
+      "id": "fit",
+      "name": "函数拟合器",
+      "url": "https://startian.top/fit/",
+      "zone": "tool",
+      "emoji": "📈",
+      "desc": "扔一堆散点进去，十一种模型实时比拼 R²"
+    },
+    {
+      "id": "cuoti",
+      "name": "错题本",
+      "url": "https://startian.top/cuoti/",
+      "zone": "tool",
+      "emoji": "📕",
+      "desc": "间隔重复，记不住的会自己回来找你"
+    },
+    {
+      "id": "colorlab",
+      "name": "配色实验室",
+      "url": "https://startian.top/colorlab/",
+      "zone": "tool",
+      "emoji": "🎨",
+      "desc": "调色、比对比度、导出方案"
+    },
+    {
+      "id": "daka",
+      "name": "打卡日程表",
+      "url": "https://daka.startian.top/",
+      "zone": "tool",
+      "emoji": "📅",
+      "desc": "每天勾一下，攒满一整年的格"
+    },
+    {
+      "id": "tujie",
+      "name": "六边形图解",
+      "url": "https://startian.top/tujie/",
+      "zone": "tool",
+      "emoji": "⬡",
+      "desc": "用六边形把知识串成一张网"
+    },
+    {
+      "id": "zhenghuo",
+      "name": "整活 · 隐私协议",
+      "url": "https://startian.top/zhenghuo/",
+      "zone": "fun2",
+      "emoji": "📜",
+      "desc": "一份没人会读完的协议"
+    },
+    {
+      "id": "report",
+      "name": "今日份诊断报告",
+      "url": "https://startian.top/report/",
+      "zone": "fun2",
+      "emoji": "🩺",
+      "desc": "随机给你开一张今天的精神状态"
+    },
+    {
+      "id": "sigil",
+      "name": "超位魔法阵",
+      "url": "https://startian.top/sigil/",
+      "zone": "fun2",
+      "emoji": "🔮",
+      "desc": "六阶段式展开，最后来一发无量空处"
+    },
+    {
+      "id": "fake",
+      "name": "假加载页",
+      "url": "https://startian.top/fake/",
+      "zone": "fun2",
+      "emoji": "⏳",
+      "desc": "永远停在 99% 的那种"
+    },
+    {
+      "id": "sandbox",
+      "name": "万物沙盒",
+      "url": "https://startian.top/sandbox/",
+      "zone": "fun2",
+      "emoji": "🏖",
+      "desc": "沙水火的粒子世界，隐藏真 3D 入口"
+    },
+    {
+      "id": "mood",
+      "name": "心情",
+      "url": "https://startian.top/mood/",
+      "zone": "fun2",
+      "emoji": "🫧",
+      "desc": "记录今天的心情涟漪"
+    }
+  ]
+}
