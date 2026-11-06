@@ -1,11 +1,20 @@
 {
   "_comment": "星恬的小站 · 全站唯一作品数据源。改动这里，然后运行 python sync_works.py 同步到首页/README/sitemap",
-  "updated": "2026-10-27",
+  "updated": "2026-11-06",
   "achievements": 86,
   "zones": {
-    "fun": { "name": "娱乐", "emoji": "🎮" },
-    "tool": { "name": "工具", "emoji": "🛠" },
-    "fun2": { "name": "整活", "emoji": "✨" }
+    "fun": {
+      "name": "娱乐",
+      "emoji": "🎮"
+    },
+    "tool": {
+      "name": "工具",
+      "emoji": "🛠"
+    },
+    "fun2": {
+      "name": "整活",
+      "emoji": "✨"
+    }
   },
   "works": [
     {
